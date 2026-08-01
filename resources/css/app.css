@@ -527,13 +527,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-tabs {
   display: inline-flex;
-  flex-wrap: wrap;
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--hairline);
   border-radius: var(--r);
   background: var(--cream);
+
+  /* Hug the tabs. Inside a flex column the default stretch pulled the frame
+     to the full width, leaving a long empty run of border after the last
+     tab — which read as something unfinished rather than as a control. */
+  align-self: flex-start;
+  max-width: 100%;
+
+  /* Seven settings groups do not fit on a 375px screen. Scroll the group
+     rather than wrapping it: a control that reflows into two rows stops
+     looking like one control. */
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+.rv-tabs::-webkit-scrollbar { display: none; }
 
 .rv-tab {
   min-height: 48px;
@@ -583,6 +596,19 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-variant-numeric: tabular-nums;
 }
 .rv-tab.is-active .rv-tab__count { background: var(--brass); color: var(--oxblood-deep); }
+
+/* Nothing outstanding. Same badge, same footprint — so the row of tabs keeps
+   one rhythm whether a group needs attention or not. */
+.rv-tab__count--done {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--brass-ink);
+}
+.rv-tab.is-active .rv-tab__count--done {
+  background: transparent;
+  border-color: var(--brass-bright);
+  color: var(--brass-bright);
+}
 
 /* ==========================================================================
    Flash messages & action rows — shared, for the same reason as above

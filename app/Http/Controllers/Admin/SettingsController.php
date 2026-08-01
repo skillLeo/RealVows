@@ -37,9 +37,22 @@ class SettingsController extends Controller
     {
         abort_unless(array_key_exists($group, self::GROUPS), 404);
 
+        // How many settings in each group still have no value. The tab badge
+        // then means something — it tells the client where his attention is
+        // still needed, rather than just counting fields at him.
+        $outstanding = Setting::query()
+            ->whereNull('value')
+            ->selectRaw('`group`, count(*) as total')
+            ->groupBy('group')
+            ->pluck('total', 'group');
+
         return Inertia::render('Admin/Settings', [
             'groups' => collect(self::GROUPS)
-                ->map(fn ($label, $key) => ['key' => $key, 'label' => $label])
+                ->map(fn ($label, $key) => [
+                    'key' => $key,
+                    'label' => $label,
+                    'outstanding' => (int) ($outstanding[$key] ?? 0),
+                ])
                 ->values(),
             'activeGroup' => $group,
             'activeLabel' => self::GROUPS[$group],

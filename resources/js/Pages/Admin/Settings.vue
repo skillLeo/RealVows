@@ -7,6 +7,7 @@ import BaseCard from '@/Components/BaseCard.vue';
 import BaseField from '@/Components/BaseField.vue';
 import SegmentedControl from '@/Components/SegmentedControl.vue';
 import BaseCheckbox from '@/Components/BaseCheckbox.vue';
+import RvIcon from '@/Components/RvIcon.vue';
 
 const props = defineProps({
     groups: { type: Array, required: true },
@@ -85,7 +86,21 @@ const asOptions = (options) =>
                     :class="{ 'is-active': group.key === activeGroup }"
                     :aria-current="group.key === activeGroup ? 'page' : undefined"
                 >
-                    {{ group.label }}
+                    <span>{{ group.label }}</span>
+
+                    <!-- Same badge as the verification queue. A number means
+                         "this many still need a value"; the mark means the
+                         group is fully set. -->
+                    <span
+                        v-if="group.outstanding > 0"
+                        class="rv-tab__count"
+                        :title="`${group.outstanding} still to fill in`"
+                    >
+                        {{ group.outstanding }}
+                    </span>
+                    <span v-else class="rv-tab__count rv-tab__count--done" title="All set">
+                        <RvIcon name="check" :size="12" :stroke-width="2" />
+                    </span>
                 </Link>
             </nav>
 

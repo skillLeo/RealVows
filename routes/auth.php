@@ -7,6 +7,10 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\MatchController;
+use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PackagesController;
 use App\Http\Controllers\PhotoController;
@@ -89,5 +93,44 @@ Route::middleware('auth')->group(function () {
             ->name('verification.selfie.show');
         Route::post('/verification/code', [PhotoController::class, 'regenerateCode'])
             ->name('verification.code');
+
+        /*
+        |--------------------------------------------------------------------
+        | Introductions
+        |--------------------------------------------------------------------
+        | There is no index route here and there never will be. A member only
+        | ever sees the people the engine put in front of them, reached from
+        | their own dashboard — there is nothing to browse and no id to
+        | enumerate, because every route below checks ownership.
+        */
+        Route::get('/matches/{match}', [MatchController::class, 'show'])->name('matches.show');
+
+        Route::post('/matches/{match}/unlock', [MatchController::class, 'unlock'])
+            ->middleware('throttle:unlock')
+            ->name('matches.unlock');
+
+        /*
+        |--------------------------------------------------------------------
+        | Checkout
+        |--------------------------------------------------------------------
+        */
+        Route::get('/checkout/{package}', [CheckoutController::class, 'show'])->name('checkout.show');
+
+        Route::post('/checkout/{package}', [CheckoutController::class, 'start'])
+            ->middleware('throttle:checkout')
+            ->name('checkout.start');
+
+        Route::get('/checkout/{order}/processing', [CheckoutController::class, 'processing'])
+            ->name('checkout.processing');
+
+        Route::get('/checkout/result/{order}', [CheckoutController::class, 'result'])
+            ->name('checkout.result');
+
+        // The landing back inside the session after a stateless callback.
+        Route::get('/checkout/return/{order}', [PaymentCallbackController::class, 'return'])
+            ->middleware('signed')
+            ->name('checkout.return');
+
+        Route::get('/purchases', [PurchasesController::class, 'index'])->name('purchases');
     });
 });

@@ -55,5 +55,22 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(5)->by('email:'.mb_strtolower($email)),
             ];
         });
+
+        /*
+         * Starting a checkout creates a row and talks to a payment gateway.
+         * Somebody holding down the button should not be able to open fifty
+         * transactions, and a gateway that sees a burst from one merchant
+         * starts asking questions.
+         */
+        RateLimiter::for('checkout', fn (Request $request) => Limit::perMinute(5)
+            ->by('user:'.$request->user()?->id));
+
+        /*
+         * Unlocking spends money. The unique index already makes a double
+         * charge impossible, so this is not the guarantee — it is here so a
+         * stuck button cannot generate a hundred caught exceptions a second.
+         */
+        RateLimiter::for('unlock', fn (Request $request) => Limit::perMinute(10)
+            ->by('user:'.$request->user()?->id));
     }
 }

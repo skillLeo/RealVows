@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,5 +75,33 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->middleware('admin:settings.view')
         ->name('settings');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Payment callback — DELIBERATELY OUTSIDE EVERY SESSION MIDDLEWARE
+|--------------------------------------------------------------------------
+|
+| ⚠️ DO NOT MOVE THIS INTO THE AUTHENTICATED GROUP. It will appear to work
+| on localhost and fail on the live domain.
+|
+| The 3DS return is a cross-site POST from the issuing bank. With
+| SESSION_SAME_SITE=lax — Laravel's default, and the right default — the
+| browser does not send the session cookie on it, so the member arrives
+| looking signed out at the exact moment their money is in flight.
+|
+| The wrong fix is SameSite=none, which weakens every cookie on the platform
+| to solve one route. The right fix is this: no session, no CSRF, identify
+| the purchase from our own order_identifier, and bounce to a signed URL on
+| the session-bearing side afterwards.
+|
+| The signature on this route is what proves the request concerns this
+| purchase, since there is no session to ask. The body is never trusted —
+| the gateway is always re-queried before a credit is granted.
+|
+*/
+Route::match(['get', 'post'], '/payments/callback/{order}', PaymentCallbackController::class)
+    ->middleware('signed')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('checkout.callback');
 
 require __DIR__.'/auth.php';

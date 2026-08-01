@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The money suite, run against a real MariaDB rather than SQLite.
+
+  ⚠️ WHY THIS FILE EXISTS.
+
+  The fast suite runs on SQLite in memory, where lockForUpdate() is a silent
+  no-op. That is useful — it forces the correctness guarantees into the unique
+  indexes, where they belong, and a green concurrency test there means the
+  constraint is genuinely doing the work.
+
+  But it also means the fast suite can never tell us whether the locking is
+  right on the engine that actually runs in production. Row-level locking,
+  transaction isolation, enum handling and integer overflow all behave
+  differently on MariaDB, and "it passed on SQLite" is not evidence about any
+  of them.
+
+  So: SQLite for every save, MariaDB for the money, before every deploy.
+
+  Run it with the integration configuration file:
+
+      composer test:money
+
+  which is a script alias, so nobody has to remember the flag.
+
+  It needs a database it is allowed to wipe. Create one first:
+      CREATE DATABASE realvows_integration;
+
+  Override the connection details with env vars if yours differ:
+      INTEGRATION_DB_HOST, INTEGRATION_DB_PORT, INTEGRATION_DB_DATABASE,
+      INTEGRATION_DB_USERNAME, INTEGRATION_DB_PASSWORD
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+
+        <!-- The whole point of this file. -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_DATABASE" value="realvows_integration"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value=""/>
+        <env name="DB_URL" value=""/>
+
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+    </php>
+</phpunit>

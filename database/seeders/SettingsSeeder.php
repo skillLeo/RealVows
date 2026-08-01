@@ -87,9 +87,32 @@ class SettingsSeeder extends Seeder
                 ['key' => 'api_key', 'label' => 'API key', 'type' => 'password', 'is_secret' => true],
                 ['key' => 'environment', 'label' => 'Environment', 'type' => 'select', 'options' => ['sandbox' => 'Sandbox', 'live' => 'Live'], 'description' => 'Stays on sandbox until the merchant account clears.'],
             ],
+            /*
+             * Prices and credit counts are editable, which is safe because
+             * every purchase snapshots both onto its own row — changing a
+             * price never rewrites a receipt. The package KEYS are not
+             * editable: they are in the database enum and in checkout URLs.
+             */
+            'packages' => [
+                ['key' => 'single_label', 'label' => 'Single — name', 'type' => 'text'],
+                ['key' => 'single_credits', 'label' => 'Single — introductions', 'type' => 'text'],
+                ['key' => 'single_price_cents', 'label' => 'Single — price in cents', 'type' => 'text', 'description' => 'US cents. 2000 is $20.'],
+                ['key' => 'single_badge', 'label' => 'Single — badge', 'type' => 'text', 'description' => 'Leave empty for no badge.'],
+
+                ['key' => 'triple_label', 'label' => 'Triple — name', 'type' => 'text'],
+                ['key' => 'triple_credits', 'label' => 'Triple — introductions', 'type' => 'text'],
+                ['key' => 'triple_price_cents', 'label' => 'Triple — price in cents', 'type' => 'text'],
+                ['key' => 'triple_badge', 'label' => 'Triple — badge', 'type' => 'text'],
+
+                ['key' => 'octet_label', 'label' => 'Octet — name', 'type' => 'text'],
+                ['key' => 'octet_credits', 'label' => 'Octet — introductions', 'type' => 'text'],
+                ['key' => 'octet_price_cents', 'label' => 'Octet — price in cents', 'type' => 'text'],
+                ['key' => 'octet_badge', 'label' => 'Octet — badge', 'type' => 'text'],
+            ],
+
             'matching' => [
-                ['key' => 'minimum_score_threshold', 'label' => 'Minimum score', 'type' => 'text', 'description' => 'Below this, two members are never introduced.'],
-                ['key' => 'matches_per_batch', 'label' => 'Matches per batch', 'type' => 'text'],
+                ['key' => 'minimum_score_threshold', 'label' => 'Minimum score', 'type' => 'text', 'description' => 'Below this, two members are never introduced. Between 50 and 85.'],
+                ['key' => 'matches_per_batch', 'label' => 'Matches per batch', 'type' => 'text', 'description' => 'How many introductions each verified member is shown. Between 3 and 12.'],
             ],
             'verification' => [
                 ['key' => 'auto_approve', 'label' => 'Approve automatically', 'type' => 'toggle', 'description' => 'Off. Every profile is checked by a person — that is the promise.'],
@@ -116,6 +139,19 @@ class SettingsSeeder extends Seeder
             'payments.gateway' => 'powertranz',
             'payments.environment' => 'sandbox',
             'whatsapp.provider' => 'meta',
+
+            'packages.single_label' => 'One introduction',
+            'packages.single_credits' => '1',
+            'packages.single_price_cents' => '2000',
+            'packages.single_badge' => '',
+            'packages.triple_label' => 'Three introductions',
+            'packages.triple_credits' => '3',
+            'packages.triple_price_cents' => '5000',
+            'packages.triple_badge' => 'Most chosen',
+            'packages.octet_label' => 'Eight introductions',
+            'packages.octet_credits' => '8',
+            'packages.octet_price_cents' => '10000',
+            'packages.octet_badge' => 'Best value',
         ];
 
         $flat = [];

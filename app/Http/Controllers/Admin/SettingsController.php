@@ -25,6 +25,7 @@ class SettingsController extends Controller
         'storage' => 'Photo storage',
         'verification' => 'Verification',
         'matching' => 'Matching',
+        'packages' => 'Packages',
         'payments' => 'Payments',
         'whatsapp' => 'WhatsApp',
     ];

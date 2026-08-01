@@ -40,6 +40,8 @@ class Profile extends Model
             'interests' => 'array',
             'personality_scales' => 'array',
             'submitted_at' => 'datetime',
+            'body_type_is_dealbreaker' => 'boolean',
+            'last_matched_at' => 'datetime',
         ];
     }
 
@@ -61,6 +63,18 @@ class Profile extends Model
     public function verification(): HasOne
     {
         return $this->hasOne(Verification::class)->latestOfMany();
+    }
+
+    /** Introductions the engine chose FOR this person. Never a browse surface. */
+    public function matchesAsSeeker(): HasMany
+    {
+        return $this->hasMany(MatchRecord::class, 'seeker_profile_id');
+    }
+
+    /** Introductions where this person was the one chosen. Used for "no prior pass". */
+    public function matchesAsCandidate(): HasMany
+    {
+        return $this->hasMany(MatchRecord::class, 'matched_profile_id');
     }
 
     public function age(): ?int

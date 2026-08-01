@@ -23,6 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
+    env:
+      # Hostinger's default CLI php is 8.2; Laravel 13 needs 8.4.1+.
+      # Naming the binary is not optional.
+      PHP: /opt/alt/php84/usr/bin/php
+
     steps:
       # Through env, never interpolated straight into the shell. Workflow
       # inputs are attacker-controlled text as far as the runner is concerned,
@@ -71,7 +76,7 @@ jobs:
       - name: Put the site into maintenance
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "cd ${{ secrets.DEPLOY_PATH }} && php artisan down --retry=30 || true"
+            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan down --retry=30 || true"
 
       # .env, storage and the public uploads are the server's own state and
       # are never overwritten by a deploy. Losing storage would lose every
@@ -92,19 +97,19 @@ jobs:
       - name: Migrate and warm the caches
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "cd ${{ secrets.DEPLOY_PATH }} && \
-             php artisan migrate --force && \
-             php artisan db:seed --class=RolesAndPermissionsSeeder --force && \
-             php artisan db:seed --class=SettingsSeeder --force && \
-             php artisan config:cache && \
-             php artisan route:cache && \
-             php artisan view:cache"
+            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && \
+             $PHP artisan migrate --force && \
+             $PHP artisan db:seed --class=RolesAndPermissionsSeeder --force && \
+             $PHP artisan db:seed --class=SettingsSeeder --force && \
+             $PHP artisan config:cache && \
+             $PHP artisan route:cache && \
+             $PHP artisan view:cache"
 
       - name: Bring the site back
         if: always()
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "cd ${{ secrets.DEPLOY_PATH }} && php artisan up"
+            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan up"
 
       - name: Confirm it is serving
         run: |

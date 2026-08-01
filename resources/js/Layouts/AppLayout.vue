@@ -24,24 +24,12 @@ const user = computed(() => page.props.auth?.user);
 const current = computed(() => page.url.split('?')[0]);
 
 /**
- * Staff get their own bar. Sending an administrator to the member tabs was
- * how the Profile link ended up 404ing for them — they have no profile row,
- * and a link that cannot work should not be shown in the first place.
+ * Navigation comes from the server, already filtered to what this person can
+ * actually open. The browser does not decide who sees what — it cannot, since
+ * permissions live in the database and a role name never told the whole
+ * story. See App\Support\Navigation.
  */
-const links = computed(() =>
-    user.value?.is_admin
-        ? [
-              { label: 'Queue', href: '/admin/verifications' },
-              { label: 'Settings', href: '/admin/settings' },
-              { label: 'Matches', href: '/dashboard' },
-          ]
-        : [
-              { label: 'Matches', href: '/dashboard' },
-              { label: 'Profile', href: '/profile' },
-              { label: 'Packages', href: '/packages' },
-              { label: 'Account', href: '/account' },
-          ]
-);
+const links = computed(() => page.props.nav ?? []);
 </script>
 
 <template>
@@ -62,7 +50,7 @@ const links = computed(() =>
                 <nav class="rv-app__nav" aria-label="Sections">
                     <Link
                         v-for="link in links"
-                        :key="link.href"
+                        :key="link.key"
                         :href="link.href"
                         class="rv-app__nav-link"
                         :class="{ 'is-active': current === link.href || current.startsWith(`${link.href}/`) }"

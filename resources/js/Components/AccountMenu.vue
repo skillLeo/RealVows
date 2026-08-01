@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import RvIcon from './RvIcon.vue';
 
 /**
@@ -9,10 +9,17 @@ import RvIcon from './RvIcon.vue';
  * Closes on outside click, on Escape, and on navigation. Log out is a POST
  * through the router rather than a link, so it carries the CSRF token and
  * cannot be triggered by someone else's page linking at it.
+ *
+ * Its destinations are the same server-built list the bars render, so the
+ * menu cannot offer a door the tab bar knows is shut.
  */
 const props = defineProps({
     user: { type: Object, required: true },
 });
+
+const page = usePage();
+
+const links = computed(() => page.props.nav ?? []);
 
 const open = ref(false);
 const root = ref(null);
@@ -75,29 +82,16 @@ function logout() {
 
                 <span class="rv-menu__rule" />
 
-                <button type="button" class="rv-menu__item" role="menuitem" @click="go('/dashboard')">
-                    Your matches
+                <button
+                    v-for="link in links"
+                    :key="link.key"
+                    type="button"
+                    class="rv-menu__item"
+                    role="menuitem"
+                    @click="go(link.href)"
+                >
+                    {{ link.label }}
                 </button>
-                <button type="button" class="rv-menu__item" role="menuitem" @click="go('/profile')">
-                    Your profile
-                </button>
-                <button type="button" class="rv-menu__item" role="menuitem" @click="go('/packages')">
-                    Match packages
-                </button>
-                <button type="button" class="rv-menu__item" role="menuitem" @click="go('/account')">
-                    Account settings
-                </button>
-
-                <template v-if="user.is_admin">
-                    <span class="rv-menu__rule" />
-                    <span class="rv-menu__label">Administration</span>
-                    <button type="button" class="rv-menu__item" role="menuitem" @click="go('/admin/verifications')">
-                        Verification queue
-                    </button>
-                    <button type="button" class="rv-menu__item" role="menuitem" @click="go('/admin/settings')">
-                        Settings
-                    </button>
-                </template>
 
                 <span class="rv-menu__rule" />
 

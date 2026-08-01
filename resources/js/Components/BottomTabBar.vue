@@ -8,27 +8,16 @@ import RvIcon from './RvIcon.vue';
  * clearing the iPhone home indicator via env(safe-area-inset-bottom).
  * Hidden at 768px and above, where the top bar takes over.
  *
- * Four tabs, fixed. "Matches" is the member's own delivered matches — it is
- * never a directory, never a browse surface.
+ * "Matches" is the member's own delivered matches — never a directory,
+ * never a browse surface.
+ *
+ * The tabs are the same server-built list the desktop bar renders, so the
+ * two views of the product can never offer different destinations. See
+ * App\Support\Navigation.
  */
 const page = usePage();
 
-// Staff get the tabs that exist for them. An administrator has no profile
-// row, so showing them a Profile tab is showing them a dead end.
-const tabs = computed(() =>
-    page.props.auth?.user?.is_admin
-        ? [
-              { label: 'Queue', icon: 'check', href: '/admin/verifications' },
-              { label: 'Settings', icon: 'account', href: '/admin/settings' },
-              { label: 'Matches', icon: 'matches', href: '/dashboard' },
-          ]
-        : [
-              { label: 'Matches', icon: 'matches', href: '/dashboard' },
-              { label: 'Profile', icon: 'profile', href: '/profile' },
-              { label: 'Packages', icon: 'packages', href: '/packages' },
-              { label: 'Account', icon: 'account', href: '/account' },
-          ]
-);
+const tabs = computed(() => page.props.nav ?? []);
 
 const current = computed(() => page.url.split('?')[0]);
 
@@ -39,7 +28,7 @@ const isActive = (href) => current.value === href || current.value.startsWith(`$
     <nav class="rv-tabbar" aria-label="Main">
         <Link
             v-for="tab in tabs"
-            :key="tab.href"
+            :key="tab.key"
             :href="tab.href"
             class="rv-tabbar__item"
             :class="{ 'is-active': isActive(tab.href) }"

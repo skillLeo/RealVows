@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordLink;
+use App\Notifications\VerifyEmailAddress;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -86,5 +88,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->hasAnyRole(['admin', 'super_admin']);
+    }
+
+    /** Branded in the RealVows frame rather than Laravel's generic default. */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailAddress());
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordLink($token));
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PublicPageController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,23 @@ Route::controller(LegalController::class)->group(function () {
 */
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('admin:verifications.view')->group(function () {
+        Route::get('/verifications', [VerificationController::class, 'index'])->name('verifications');
+        Route::get('/verifications/{verification}', [VerificationController::class, 'show'])->name('verifications.show');
+
+        Route::get('/verifications/{verification}/photo/{photo}', [VerificationController::class, 'photo'])
+            ->middleware('signed')
+            ->name('verifications.photo');
+
+        Route::get('/verifications/{verification}/selfie', [VerificationController::class, 'selfie'])
+            ->middleware('signed')
+            ->name('verifications.selfie');
+    });
+
+    Route::post('/verifications/{verification}/review', [VerificationController::class, 'review'])
+        ->middleware('admin:verifications.review')
+        ->name('verifications.review');
+
     Route::post('/settings/test', [SettingsController::class, 'test'])
         ->middleware('admin:settings.update')
         ->name('settings.test');

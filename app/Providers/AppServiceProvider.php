@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\Settings\SettingsService;
+use App\Services\Verification\ManualVerificationService;
+use App\Services\Verification\VerificationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,6 +17,11 @@ class AppServiceProvider extends ServiceProvider
         // One instance per request, so the per-request memoisation inside the
         // service is actually shared rather than rebuilt by every consumer.
         $this->app->singleton(SettingsService::class);
+
+        // Verification is manual today. Binding the contract rather than the
+        // class is what lets an automated provider replace it later without
+        // the controller, the queue, or the UI changing at all.
+        $this->app->bind(VerificationService::class, ManualVerificationService::class);
     }
 
     public function boot(): void

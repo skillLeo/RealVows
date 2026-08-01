@@ -112,7 +112,7 @@ function onKeydown(event) {
     border: 0;
     border-radius: var(--r);
     background: transparent;
-    color: var(--brass);
+    color: var(--brass-ink);
     cursor: pointer;
     transition: color var(--dur-tap) var(--ease);
 }

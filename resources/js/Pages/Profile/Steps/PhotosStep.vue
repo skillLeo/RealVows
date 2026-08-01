@@ -168,6 +168,7 @@ const newCode = () => router.post('/verification/code', {}, { preserveScroll: tr
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         class="rv-visually-hidden"
+                        aria-label="Upload your verification photo"
                         @change="uploadSelfie"
                     />
 

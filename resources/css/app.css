@@ -21,6 +21,21 @@
   --hairline:      rgba(185, 145, 84, .4);
   --hairline-soft: rgba(185, 145, 84, .2);
 
+  /*
+   * Brass for TEXT AND ICONS ON LIGHT SURFACES ONLY.
+   *
+   * --brass reads beautifully on oxblood panels but only reaches 2.69:1 on
+   * cream and 2.42:1 inside a brass-tinted pill — below AA for both normal
+   * text (4.5) and UI components (3.0). The approved HTML carries that
+   * problem; the brief's accessibility gate overrides it.
+   *
+   * This is the same hue darkened until it passes: 5.44:1 on card, 5.11:1
+   * on cream, 4.90:1 on a pill. It is used for brass-coloured lettering and
+   * icons on light backgrounds and NOWHERE else — every border, hairline,
+   * rule, and anything sitting on an oxblood panel still uses --brass.
+   */
+  --brass-ink: #7F5F2E;
+
   /* Cream at partial strength, for text on oxblood panels */
   --on-dark:      rgba(242, 239, 233, .74);
   --on-dark-soft: rgba(242, 239, 233, .60);
@@ -137,7 +152,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.rv-label--brass { color: var(--brass); letter-spacing: .18em; }
+.rv-label--brass { color: var(--brass-ink); letter-spacing: .18em; }
 
 /* On oxblood panels */
 .rv-on-dark { color: var(--cream); }
@@ -149,6 +164,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-on-dark .rv-small { color: var(--on-dark-soft); }
 .rv-on-dark a { color: var(--brass-bright); text-decoration-color: var(--hairline); }
 .rv-on-dark a:hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
+
+/* On an oxblood panel the undarkened brass is correct and passes at 5.18:1 */
+.rv-on-dark .rv-label--brass,
+.rv-panel .rv-label--brass,
+.rv-mark--dark .rv-mark__rule-label { color: var(--brass); }
 
 /* ==========================================================================
    Layout helpers
@@ -371,7 +391,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-radius: var(--r);
   border: 1px solid var(--hairline);
   background: transparent;
-  color: var(--brass);
+  color: var(--brass-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -504,7 +524,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-radius: var(--r);
   border: 1px solid var(--hairline);
   background: color-mix(in oklab, var(--brass) 12%, var(--card));
-  color: var(--brass);
+  color: var(--brass-ink);
   font-size: var(--fs-body-3);
   font-weight: 500;
   letter-spacing: .06em;
@@ -563,7 +583,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brass);
+  color: var(--brass-ink);
 }
 
 /* ==========================================================================
@@ -793,7 +813,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-weight: 500;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--brass-ink);
   white-space: nowrap;
 }
 
@@ -882,7 +902,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 .rv-trust__item { padding-top: 24px; border-top: 1px solid var(--hairline); }
 
-.rv-step__number { font-size: var(--fs-display-2); color: var(--brass); }
+.rv-step__number { font-size: var(--fs-display-2); color: var(--brass-ink); }
 
 .rv-compat { padding-block: clamp(56px, 9vw, 104px); }
 .rv-compat__panel {

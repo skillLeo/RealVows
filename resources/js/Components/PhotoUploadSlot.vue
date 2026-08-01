@@ -102,7 +102,7 @@ function choose(event) {
     font-family: var(--display);
     font-size: var(--fs-body-1);
     line-height: 1;
-    color: var(--brass);
+    color: var(--brass-ink);
 }
 
 .rv-slot__frame {

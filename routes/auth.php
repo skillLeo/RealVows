@@ -5,7 +5,9 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PackagesController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileBuilderController;
 use Illuminate\Support\Facades\Route;
@@ -45,7 +47,13 @@ Route::middleware('auth')->group(function () {
         ->middleware('verified')
         ->name('dashboard');
 
+    Route::get('/account', [AccountController::class, 'index'])->name('account');
+    Route::post('/account/contact', [AccountController::class, 'updateContact'])->name('account.contact');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
+
     Route::middleware('verified')->group(function () {
+        Route::get('/packages', [PackagesController::class, 'index'])->name('packages');
+
         Route::get('/profile', [ProfileBuilderController::class, 'show'])->name('profile');
 
         Route::get('/profile/{step}', [ProfileBuilderController::class, 'show'])->name('profile.step');

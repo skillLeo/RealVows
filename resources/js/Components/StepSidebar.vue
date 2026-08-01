@@ -116,7 +116,7 @@ defineEmits(['select']);
 .rv-steps__row.is-done .rv-steps__mark {
     border-color: var(--brass);
     background: color-mix(in oklab, var(--brass) 12%, var(--card));
-    color: var(--brass);
+    color: var(--brass-ink);
 }
 
 .rv-steps__row.is-current .rv-steps__mark {

@@ -114,7 +114,7 @@ function toggleIn(field, value, on) {
                 v-model="model.preferred_qualities"
                 label="Qualities you hope for"
                 placeholder="Patient, then press enter"
-                :max="8"
+                :max="5"
                 help="A few words, not a list of demands."
             />
         </BaseCard>

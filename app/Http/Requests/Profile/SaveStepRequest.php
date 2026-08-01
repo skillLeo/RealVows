@@ -141,7 +141,7 @@ class SaveStepRequest extends FormRequest
             'distance_preference' => ['nullable', Rule::in(array_keys(ProfileOptions::DISTANCE_PREFERENCE))],
             'deal_breakers' => ['nullable', 'array'],
             'deal_breakers.*' => ['distinct', Rule::in(array_keys(ProfileOptions::DEAL_BREAKERS))],
-            'preferred_qualities' => ['nullable', 'array', 'max:8'],
+            'preferred_qualities' => ['nullable', 'array', 'max:5'],
             'preferred_qualities.*' => ['string', 'max:40'],
         ];
     }
@@ -155,6 +155,7 @@ class SaveStepRequest extends FormRequest
             'height_max_cm.gte' => 'The tallest height needs to be the same as or above the shortest.',
             'core_values.max' => 'Choose up to five values.',
             'love_languages.max' => 'Choose up to three.',
+            'preferred_qualities.max' => 'Choose up to five.',
         ];
     }
 }

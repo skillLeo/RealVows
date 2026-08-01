@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@400;500;600&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --oxblood-deep:#4A1220;
+  --oxblood:#6B1834;
+  --rose:#A64452;
+  --brass:#B99154;
+  --brass-bright:#D4AF6A;
+  --cream:#F2EFE9;
+  --card:#F8F6F2;
+  --ink:#1F1518;
+  --ink-soft:#6B5F62;
+  --hairline:rgba(185,145,84,.4);
+  --hairline-soft:rgba(185,145,84,.2);
+  --display:'Fraunces',Georgia,'Times New Roman',serif;
+  --ui:'Inter',system-ui,-apple-system,sans-serif;
+  --glyph:'Noto Sans Symbols 2','Segoe UI Symbol','Apple Symbols',var(--ui);
+  --u:8px;
+  --gap-section:96px;
+  --pad-card:32px;
+  --r:8px;
+  --control:56px;
+  --fs-display-1:56px;
+  --fs-display-2:40px;
+  --fs-display-3:28px;
+  --fs-body-1:20px;
+  --fs-body-2:16px;
+  --fs-body-3:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--ui);-webkit-font-smoothing:antialiased;text-wrap:pretty}
+a{color:var(--oxblood);text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--hairline)}
+a:hover{color:var(--rose);text-decoration-color:var(--brass-bright)}
+button,input{font:inherit;color:inherit}
+input::placeholder{color:var(--ink-soft);opacity:1}
+</style>
+</helmet>
+
+<header data-screen-label="Masthead" style="background:var(--oxblood-deep);color:var(--cream);padding:clamp(56px,9vw,112px) clamp(20px,5vw,64px)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="width:44px;height:44px;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass-bright);letter-spacing:.02em">RV</span>
+      <span style="font-family:var(--ui);font-size:var(--fs-body-3);font-weight:500;letter-spacing:.28em;text-transform:uppercase;color:var(--brass-bright)">RealVows</span>
+    </div>
+    <h1 style="margin:0;font-family:var(--display);font-size:clamp(40px,8.5vw,var(--fs-display-1));font-weight:400;line-height:1.08;letter-spacing:-0.015em;max-width:22ch">A vocabulary for people who arrive with intent.</h1>
+    <p style="margin:0;max-width:54ch;font-size:var(--fs-body-1);line-height:1.65;color:rgba(242,239,233,.74)">Cream, oxblood and brass. Hairline borders, never shadows. One idea to an area of screen, and headlines that carry their own weight. Everything below is drawn from the locked token set.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px 32px;padding-top:8px;border-top:1px solid rgba(185,145,84,.35);font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)">
+      <span>Marriage-first</span>
+      <span>18+</span>
+      <span>Ceremonial register</span>
+      <span>Version 1.0</span>
+    </div>
+  </div>
+</header>
+
+<section data-screen-label="01 Palette" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">01</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Palette</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">Nine values, no others. Cream and card are the only light surfaces — never pure white, never grey.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--oxblood-deep)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Oxblood deep</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--oxblood-deep · #4A1220</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Full-bleed panels, page backgrounds</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--oxblood)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Oxblood</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--oxblood · #6B1834</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Primary buttons, headings on cream</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--rose)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Rose</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--rose · #A64452</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Secondary, less-committal actions</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--brass)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Brass</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--brass · #B99154</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Logo, hairlines, accents, active states</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--brass-bright)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Brass bright</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--brass-bright · #D4AF6A</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Hover, focus rings, small highlights</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--cream)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Cream</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--cream · #F2EFE9</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Main light surface</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Card</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--card · #F8F6F2</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Raised surfaces on cream</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--ink)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Ink</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--ink · #1F1518</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Body text</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:132px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--ink-soft)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:var(--fs-body-2);font-weight:500">Ink soft</span>
+        <span style="font-size:var(--fs-body-3);letter-spacing:.06em;color:var(--ink-soft)">--ink-soft · #6B5F62</span>
+        <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Labels, helper text</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="02 Type" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">02</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Type</h2>
+  </div>
+  <p style="margin:0 0 56px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">Two faces, locked. Fraunces sets 56, 40 and 28 — display only. Inter sets 20 and below. There is never a third face.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">56</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Display · Fraunces</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Page titles, hero numbers. Line-height 1.08, tracking −0.015em.</span>
+    </div>
+    <p style="flex:1 1 320px;margin:0;font-family:var(--display);font-size:var(--fs-display-1);font-weight:400;line-height:1.08;letter-spacing:-0.015em">Two lives, one vow</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline-soft)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">40</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Display · Fraunces</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Section headings.</span>
+    </div>
+    <p style="flex:1 1 320px;margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.15;letter-spacing:-0.01em">Matches chosen with care</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline-soft)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">28</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Display · Fraunces</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Names, card titles, mid-size numerals.</span>
+    </div>
+    <p style="flex:1 1 320px;margin:0;font-family:var(--display);font-size:var(--fs-display-3);font-weight:400;line-height:1.25">Ayesha Siddiqui, 28</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline-soft)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">20</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Body · Inter</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Lead paragraphs, intros.</span>
+    </div>
+    <p style="flex:1 1 320px;margin:0;font-size:var(--fs-body-1);line-height:1.65;max-width:46ch">We ask more questions than other platforms, and we ask them once. Everything after that is a considered introduction.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline-soft)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">16</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Body · Inter</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Default body, fields, buttons.</span>
+    </div>
+    <p style="flex:1 1 320px;margin:0;font-size:var(--fs-body-2);line-height:1.6;max-width:52ch">Your profile is visible only to members whose intentions match yours. Family details stay private until you choose to share them.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:24px 40px;align-items:baseline;padding:32px 0;border-top:1px solid var(--hairline-soft);border-bottom:1px solid var(--hairline)">
+    <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:var(--display);font-size:var(--fs-display-3);color:var(--brass)">14</span>
+      <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Body · Inter</span>
+      <span style="font-size:var(--fs-body-3);line-height:1.5;color:var(--ink-soft)">Labels, helper text. Tracked +0.14em when set in caps.</span>
+    </div>
+    <div style="flex:1 1 320px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:var(--fs-body-3);line-height:1.55;color:var(--ink-soft)">Helper text sits below the field and never repeats the label.</span>
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Marital status</span>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="03 Space and shape" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">03</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Space &amp; shape</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:20px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">8px base unit</span>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:8px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">8 · icon gaps</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:16px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">16 · field padding</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:24px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">24 · grid gutter</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:32px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">32 · card padding</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:56px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">56 · control height</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:96px;height:10px;background:var(--brass);border-radius:2px"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">96 · between sections</span></div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:20px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Radius 8, no exceptions</span>
+      <div style="display:flex;flex-wrap:wrap;gap:16px">
+        <span style="width:88px;height:88px;border-radius:var(--r);background:var(--oxblood)"></span>
+        <span style="width:88px;height:88px;border-radius:var(--r);border:1px solid var(--brass)"></span>
+        <span style="width:44px;height:44px;border-radius:var(--r);border:1px solid var(--brass);display:flex;align-items:center;justify-content:center;font-size:var(--fs-body-1);color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♓︎</span>
+      </div>
+      <p style="margin:0;font-size:var(--fs-body-3);line-height:1.55;color:var(--ink-soft)">Including choice controls — radios are rounded squares with an inset mark, not circles.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:20px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Hairlines, never shadows</span>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="height:1px;background:var(--hairline)"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">1px brass at 40% — borders, dividers</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="height:1px;background:var(--hairline-soft)"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">1px brass at 20% — internal rules</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="height:1px;background:var(--brass-bright)"></span><span style="font-size:var(--fs-body-3);color:var(--ink-soft)">1px brass bright — active, focused</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="04 Compatibility mark" style="margin-top:var(--gap-section);background:var(--oxblood-deep);color:var(--cream);padding:clamp(56px,9vw,104px) clamp(20px,5vw,64px)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:64px">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:baseline;gap:16px">
+        <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">04</span>
+        <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">The compatibility mark</h2>
+      </div>
+      <p style="margin:0;max-width:54ch;font-size:var(--fs-body-1);line-height:1.65;color:rgba(242,239,233,.74)">Two signs in brass, joined by a rule, with the synastry score in the display face. Zodiac is 40% of the matching score, so the mark appears wherever a match does — profile headers, cards, list rows.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px;padding:clamp(28px,5vw,48px);border:1px solid var(--brass);border-radius:var(--r)">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--brass)">Large · profile header</span>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px 24px">
+        <span style="width:96px;height:96px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♌︎</span>
+        <div style="flex:1 1 200px;display:flex;flex-direction:column;align-items:center;gap:14px;min-width:180px">
+          <span style="font-family:var(--display);font-size:var(--fs-display-1);font-weight:400;line-height:1;color:var(--brass-bright)">{{ score }}</span>
+          <span style="align-self:stretch;display:flex;align-items:center;gap:14px">
+            <span style="flex:1 1 auto;height:1px;background:var(--brass)"></span>
+            <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--brass);white-space:nowrap">Synastry</span>
+            <span style="flex:1 1 auto;height:1px;background:var(--brass)"></span>
+          </span>
+        </div>
+        <span style="width:96px;height:96px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♎︎</span>
+      </div>
+      <p style="margin:0;text-align:center;font-size:var(--fs-body-2);color:rgba(242,239,233,.66)">Leo &amp; Libra · air lifts fire</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+      <div style="display:flex;flex-direction:column;gap:24px;padding:var(--pad-card);border:1px solid var(--hairline);border-radius:var(--r)">
+        <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--brass)">Medium · match card</span>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="width:56px;height:56px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♒︎</span>
+          <div style="flex:1 1 auto;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:64px">
+            <span style="font-family:var(--display);font-size:var(--fs-display-3);font-weight:400;line-height:1;color:var(--brass-bright)">92</span>
+            <span style="align-self:stretch;height:1px;background:var(--brass)"></span>
+          </div>
+          <span style="width:56px;height:56px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♊︎</span>
+        </div>
+        <p style="margin:0;font-size:var(--fs-body-3);line-height:1.55;color:rgba(242,239,233,.6)">Label drops away; the rule alone carries the join.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px;padding:var(--pad-card);border:1px solid var(--hairline);border-radius:var(--r)">
+        <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--brass)">Small · list row</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♉︎</span>
+          <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:16px"></span>
+          <span style="font-family:var(--display);font-size:var(--fs-body-1);font-weight:400;line-height:1;color:var(--brass-bright)">74</span>
+          <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:16px"></span>
+          <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass-bright);font-family:var(--glyph);font-variant-emoji:text">♏︎</span>
+        </div>
+        <p style="margin:0;font-size:var(--fs-body-3);line-height:1.55;color:rgba(242,239,233,.6)">Single line, 32px lozenges. Minimum permitted size.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="05 Buttons" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">05</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Buttons</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">56px tall, 8px radius, 32px of side padding. Focus is a 2px brass-bright ring, offset 2px — never a shadow. The first row in each column is live.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:28px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Primary</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Default</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--oxblood);background:var(--oxblood);color:var(--cream);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;transition:background .18s ease,border-color .18s ease" style-hover="background:var(--oxblood-deep);border-color:var(--brass)" style-focus="outline:2px solid var(--brass-bright);outline-offset:2px">Express interest</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Hover</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--brass);background:var(--oxblood-deep);color:var(--cream);font-size:var(--fs-body-2);font-weight:500;cursor:pointer">Express interest</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Focus</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--oxblood);background:var(--oxblood);color:var(--cream);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;outline:2px solid var(--brass-bright);outline-offset:2px">Express interest</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Disabled</span>
+        <button type="button" disabled="disabled" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid transparent;background:color-mix(in oklab,var(--oxblood) 20%,var(--cream));color:color-mix(in oklab,var(--ink-soft) 55%,var(--cream));font-size:var(--fs-body-2);font-weight:500;cursor:not-allowed">Express interest</button>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:28px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Secondary</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Default</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card);color:var(--oxblood);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;transition:background .18s ease,border-color .18s ease" style-hover="border-color:var(--brass-bright);background:color-mix(in oklab,var(--brass) 8%,var(--card))" style-focus="outline:2px solid var(--brass-bright);outline-offset:2px">Save profile</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Hover</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--brass-bright);background:color-mix(in oklab,var(--brass) 8%,var(--card));color:var(--oxblood);font-size:var(--fs-body-2);font-weight:500;cursor:pointer">Save profile</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Focus</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card);color:var(--oxblood);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;outline:2px solid var(--brass-bright);outline-offset:2px">Save profile</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Disabled</span>
+        <button type="button" disabled="disabled" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--hairline-soft);background:var(--card);color:color-mix(in oklab,var(--ink-soft) 55%,var(--cream));font-size:var(--fs-body-2);font-weight:500;cursor:not-allowed">Save profile</button>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:28px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Ghost</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Default</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--rose);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;transition:background .18s ease,color .18s ease" style-hover="background:color-mix(in oklab,var(--rose) 9%,var(--card));color:var(--oxblood)" style-focus="outline:2px solid var(--brass-bright);outline-offset:2px">Not now</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Hover</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid transparent;background:color-mix(in oklab,var(--rose) 9%,var(--card));color:var(--oxblood);font-size:var(--fs-body-2);font-weight:500;cursor:pointer">Not now</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Focus</span>
+        <button type="button" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--rose);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;outline:2px solid var(--brass-bright);outline-offset:2px">Not now</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Disabled</span>
+        <button type="button" disabled="disabled" style="height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:color-mix(in oklab,var(--ink-soft) 55%,var(--cream));font-size:var(--fs-body-2);font-weight:500;cursor:not-allowed">Not now</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="06 Form fields" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">06</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Form fields</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">56px tall on the card surface. Label above in tracked 14, helper text below in 14 — one line, never a repeat of the label.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px 24px">
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Empty</span>
+      <input type="text" placeholder="Your full name" style="height:var(--control);padding:0 16px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card);font-size:var(--fs-body-2);outline:none;transition:border-color .18s ease" style-focus="border-color:var(--brass-bright);outline:2px solid color-mix(in oklab,var(--brass-bright) 45%,transparent);outline-offset:1px" />
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">As it appears on your ID.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Filled</span>
+      <input type="text" defaultValue="Ayesha Siddiqui" style="height:var(--control);padding:0 16px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card);font-size:var(--fs-body-2);color:var(--ink);outline:none;transition:border-color .18s ease" style-focus="border-color:var(--brass-bright);outline:2px solid color-mix(in oklab,var(--brass-bright) 45%,transparent);outline-offset:1px" />
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">As it appears on your ID.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Focused</span>
+      <input type="text" defaultValue="Lahore" style="height:var(--control);padding:0 16px;border-radius:var(--r);border:1px solid var(--brass-bright);background:var(--card);font-size:var(--fs-body-2);color:var(--ink);outline:2px solid color-mix(in oklab,var(--brass-bright) 45%,transparent);outline-offset:1px" />
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">City where you currently live.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Error</span>
+      <input type="text" defaultValue="17" style="height:var(--control);padding:0 16px;border-radius:var(--r);border:1px solid var(--rose);background:color-mix(in oklab,var(--rose) 5%,var(--card));font-size:var(--fs-body-2);color:var(--ink);outline:none" />
+      <span style="font-size:var(--fs-body-3);color:var(--rose)">RealVows is for members aged 18 and over.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Disabled</span>
+      <input type="text" defaultValue="ayesha@realvows.com" disabled="disabled" style="height:var(--control);padding:0 16px;border-radius:var(--r);border:1px solid var(--hairline-soft);background:color-mix(in oklab,var(--brass) 4%,var(--cream));font-size:var(--fs-body-2);color:color-mix(in oklab,var(--ink-soft) 70%,var(--cream));cursor:not-allowed" />
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Verified — contact us to change this.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">With trailing mark</span>
+      <div style="height:var(--control);display:flex;align-items:center;gap:12px;padding:0 16px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--card)">
+        <input type="text" defaultValue="14 August 1997" style="flex:1 1 auto;min-width:0;height:100%;border:none;background:transparent;font-size:var(--fs-body-2);outline:none" />
+        <span style="flex:0 0 auto;width:32px;height:32px;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♌︎</span>
+      </div>
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Your sign is read from your birth date.</span>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="07 Segmented controls" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">07</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Segmented controls</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">Four or fewer options is always a segmented group, never a dropdown. Active segment fills oxblood and takes a brass-bright hairline. Both examples are live.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px">
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:16px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Two options</span>
+      <div style="display:flex;gap:4px;padding:4px;border:1px solid var(--hairline);border-radius:var(--r);background:var(--cream)">
+        <button type="button" onClick="{{ pickA0 }}" style="{{ segA0 }}">Seeking a bride</button>
+        <button type="button" onClick="{{ pickA1 }}" style="{{ segA1 }}">Seeking a groom</button>
+      </div>
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Asked once, at registration.</span>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:16px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Three options</span>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--hairline);border-radius:var(--r);background:var(--cream)">
+        <button type="button" onClick="{{ pickB0 }}" style="{{ segB0 }}">Never married</button>
+        <button type="button" onClick="{{ pickB1 }}" style="{{ segB1 }}">Divorced</button>
+        <button type="button" onClick="{{ pickB2 }}" style="{{ segB2 }}">Widowed</button>
+      </div>
+      <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">Wraps to two rows below 375px; segments stay 48px tall.</span>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="08 Checkboxes and radios" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) 0">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">08</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Choice controls</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">24px marks with a 44px tappable row. Radios keep the 8px radius and carry an inset brass square rather than a dot.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:24px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Checkbox</span>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:pointer;font-size:var(--fs-body-2)">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--cream)"></span>
+          <span>Family details private</span>
+        </label>
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:pointer;font-size:var(--fs-body-2)">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--brass);background:var(--oxblood);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:var(--fs-body-3);line-height:1">✓</span>
+          <span>Share my synastry score</span>
+        </label>
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:not-allowed;font-size:var(--fs-body-2);color:color-mix(in oklab,var(--ink-soft) 70%,var(--cream))">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--hairline-soft);background:color-mix(in oklab,var(--brass) 4%,var(--cream))"></span>
+          <span>Photo visible to all members</span>
+        </label>
+      </div>
+      <span style="font-size:var(--fs-body-3);line-height:1.55;color:var(--ink-soft)">Unchecked · checked · disabled</span>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:24px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Radio</span>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:pointer;font-size:var(--fs-body-2)">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--hairline);background:var(--cream)"></span>
+          <span>Within one year</span>
+        </label>
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:pointer;font-size:var(--fs-body-2)">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--brass);background:var(--cream);display:flex;align-items:center;justify-content:center">
+            <span style="width:10px;height:10px;border-radius:2px;background:var(--oxblood)"></span>
+          </span>
+          <span>Within two years</span>
+        </label>
+        <label style="min-height:44px;display:flex;align-items:center;gap:16px;cursor:not-allowed;font-size:var(--fs-body-2);color:color-mix(in oklab,var(--ink-soft) 70%,var(--cream))">
+          <span style="flex:0 0 auto;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--hairline-soft);background:color-mix(in oklab,var(--brass) 4%,var(--cream))"></span>
+          <span>No fixed timeline</span>
+        </label>
+      </div>
+      <span style="font-size:var(--fs-body-3);line-height:1.55;color:var(--ink-soft)">Unselected · selected · disabled</span>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:24px">
+      <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Verified badge</span>
+      <div style="display:flex;flex-direction:column;gap:20px;align-items:flex-start">
+        <span style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:var(--r);border:1px solid var(--hairline);background:color-mix(in oklab,var(--brass) 12%,var(--card));color:var(--brass);font-size:var(--fs-body-3);font-weight:500;letter-spacing:.06em">
+          <span style="line-height:1">✓</span>
+          <span>Verified</span>
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 16px;border-radius:var(--r);border:1px solid var(--brass);background:color-mix(in oklab,var(--brass) 12%,var(--card));color:var(--brass);font-size:var(--fs-body-2);font-weight:500">
+          <span style="line-height:1">✓</span>
+          <span>ID &amp; family verified</span>
+        </span>
+        <span style="width:32px;height:32px;border-radius:var(--r);border:1px solid var(--brass);background:color-mix(in oklab,var(--brass) 12%,var(--card));color:var(--brass);display:flex;align-items:center;justify-content:center;font-size:var(--fs-body-2);line-height:1">✓</span>
+      </div>
+      <span style="font-size:var(--fs-body-3);line-height:1.55;color:var(--ink-soft)">Brass only. Never green, never a seal.</span>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="09 Card in use" style="max-width:1200px;margin:0 auto;padding:var(--gap-section) clamp(20px,5vw,64px) var(--gap-section)">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:40px">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);color:var(--brass)">09</span>
+    <h2 style="margin:0;font-family:var(--display);font-size:var(--fs-display-2);font-weight:400;line-height:1.1;letter-spacing:-0.01em">Card in use</h2>
+  </div>
+  <p style="margin:0 0 48px;max-width:52ch;font-size:var(--fs-body-1);line-height:1.65;color:var(--ink-soft)">One idea to a card: who this is, how compatible you are, and a single committing action. Hairline brass border, 32px padding, no shadow.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;align-items:start">
+
+    <article style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:24px">
+      <div style="aspect-ratio:4/5;border-radius:var(--r);border:1px solid var(--hairline-soft);background:repeating-linear-gradient(135deg,color-mix(in oklab,var(--brass) 14%,var(--card)) 0 8px,var(--card) 8px 16px);display:flex;align-items:flex-end;justify-content:center;padding:16px">
+        <span style="font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Portrait · 4:5</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+          <h3 style="margin:0;font-family:var(--display);font-size:var(--fs-display-3);font-weight:400;line-height:1.2">Ayesha Siddiqui</h3>
+          <span style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:var(--r);border:1px solid var(--hairline);background:color-mix(in oklab,var(--brass) 12%,var(--card));color:var(--brass);font-size:var(--fs-body-3);font-weight:500;letter-spacing:.06em">
+            <span style="line-height:1">✓</span>
+            <span>Verified</span>
+          </span>
+        </div>
+        <p style="margin:0;font-size:var(--fs-body-2);line-height:1.6;color:var(--ink-soft)">28 · Lahore · Architect · Seeking marriage within one year</p>
+      </div>
+      <div style="height:1px;background:var(--hairline-soft)"></div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="width:56px;height:56px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♌︎</span>
+        <div style="flex:1 1 auto;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:64px">
+          <span style="font-family:var(--display);font-size:var(--fs-display-3);font-weight:400;line-height:1;color:var(--oxblood)">87</span>
+          <span style="align-self:stretch;height:1px;background:var(--brass)"></span>
+        </div>
+        <span style="width:56px;height:56px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♎︎</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px">
+        <button type="button" style="flex:1 1 160px;height:var(--control);padding:0 32px;border-radius:var(--r);border:1px solid var(--oxblood);background:var(--oxblood);color:var(--cream);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;transition:background .18s ease,border-color .18s ease" style-hover="background:var(--oxblood-deep);border-color:var(--brass)" style-focus="outline:2px solid var(--brass-bright);outline-offset:2px">Express interest</button>
+        <button type="button" style="flex:0 1 120px;height:var(--control);padding:0 24px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--rose);font-size:var(--fs-body-2);font-weight:500;cursor:pointer;transition:background .18s ease,color .18s ease" style-hover="background:color-mix(in oklab,var(--rose) 9%,var(--card));color:var(--oxblood)" style-focus="outline:2px solid var(--brass-bright);outline-offset:2px">Not now</button>
+      </div>
+    </article>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <article style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:20px">
+        <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">List row · small mark</span>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px;padding:16px 0;border-top:1px solid var(--hairline-soft)">
+          <div style="flex:1 1 160px;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:var(--fs-body-2);font-weight:500">Hamza Raza</span>
+            <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">31 · Karachi</span>
+          </div>
+          <div style="flex:0 1 180px;display:flex;align-items:center;gap:12px">
+            <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♉︎</span>
+            <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:12px"></span>
+            <span style="font-family:var(--display);font-size:var(--fs-body-1);font-weight:400;line-height:1;color:var(--oxblood)">74</span>
+            <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:12px"></span>
+            <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♏︎</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px;padding:16px 0;border-top:1px solid var(--hairline-soft)">
+          <div style="flex:1 1 160px;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:var(--fs-body-2);font-weight:500">Zoya Khan</span>
+            <span style="font-size:var(--fs-body-3);color:var(--ink-soft)">26 · Islamabad</span>
+          </div>
+          <div style="flex:0 1 180px;display:flex;align-items:center;gap:12px">
+            <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♒︎</span>
+            <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:12px"></span>
+            <span style="font-family:var(--display);font-size:var(--fs-body-1);font-weight:400;line-height:1;color:var(--oxblood)">92</span>
+            <span style="flex:1 1 auto;height:1px;background:var(--brass);min-width:12px"></span>
+            <span style="width:32px;height:32px;flex:0 0 auto;border:1px solid var(--brass);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:var(--brass);font-family:var(--glyph);font-variant-emoji:text">♊︎</span>
+          </div>
+        </div>
+      </article>
+
+      <article style="background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:16px">
+        <span style="font-size:var(--fs-body-3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Density rule</span>
+        <p style="margin:0;font-family:var(--display);font-size:var(--fs-display-3);font-weight:400;line-height:1.25">One idea to an area of screen.</p>
+        <p style="margin:0;font-size:var(--fs-body-2);line-height:1.6;color:var(--ink-soft)">If a card needs two headings, it is two cards. Sections stay 96px apart so the eye rests between them.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<footer style="background:var(--oxblood-deep);color:rgba(242,239,233,.7);padding:56px clamp(20px,5vw,64px)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:16px 40px;align-items:baseline;font-size:var(--fs-body-3);letter-spacing:.14em;text-transform:uppercase">
+    <span style="font-family:var(--display);font-size:var(--fs-body-1);letter-spacing:.02em;text-transform:none;color:var(--brass-bright)">RealVows</span>
+    <span>Design system v1.0</span>
+    <span>Fraunces &amp; Inter</span>
+    <span>Radius 8 · hairlines only</span>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;displayFace&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Fraunces&quot;, &quot;Cormorant Garamond&quot;], &quot;default&quot;: &quot;Fraunces&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Type&quot;},
+  &quot;sectionSpacing&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;min&quot;: 64, &quot;max&quot;: 160, &quot;step&quot;: 8, &quot;unit&quot;: &quot;px&quot;, &quot;default&quot;: 96, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Space&quot;},
+  &quot;sampleScore&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;min&quot;: 0, &quot;max&quot;: 100, &quot;default&quot;: 87, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Compatibility mark&quot;}
+}">
+class Component extends DCLogic {
+  state = { a: 0, b: 0 };
+
+  componentDidMount() { this.sync(); }
+  componentDidUpdate() { this.sync(); }
+
+  sync() {
+    const s = document.documentElement.style;
+    const face = this.props.displayFace ?? 'Fraunces';
+    s.setProperty('--display', "'" + face + "', Georgia, 'Times New Roman', serif");
+    s.setProperty('--gap-section', (this.props.sectionSpacing ?? 96) + 'px');
+  }
+
+  seg(on) {
+    return {
+      flex: '1 1 0',
+      minWidth: '0',
+      minHeight: '48px',
+      padding: '0 16px',
+      borderRadius: 'var(--r)',
+      border: '1px solid ' + (on ? 'var(--brass-bright)' : 'transparent'),
+      background: on ? 'var(--oxblood)' : 'transparent',
+      color: on ? 'var(--cream)' : 'var(--ink-soft)',
+      fontSize: 'var(--fs-body-2)',
+      fontWeight: on ? 500 : 400,
+      lineHeight: 1.3,
+      cursor: 'pointer',
+      transition: 'background .18s ease, color .18s ease, border-color .18s ease'
+    };
+  }
+
+  renderVals() {
+    const { a, b } = this.state;
+    return {
+      score: this.props.sampleScore ?? 87,
+      segA0: this.seg(a === 0), segA1: this.seg(a === 1),
+      segB0: this.seg(b === 0), segB1: this.seg(b === 1), segB2: this.seg(b === 2),
+      pickA0: () => this.setState({ a: 0 }),
+      pickA1: () => this.setState({ a: 1 }),
+      pickB0: () => this.setState({ b: 0 }),
+      pickB1: () => this.setState({ b: 1 }),
+      pickB2: () => this.setState({ b: 2 })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+    "name": "RealVows",
+    "short_name": "RealVows",
+    "description": "Find someone ready for marriage. Free to join, every profile verified by a real person.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#4A1220",
+    "theme_color": "#4A1220",
+    "categories": ["lifestyle", "social"],
+    "icons": [
+        {
+            "src": "/icons/rv-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/rv-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/rv-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

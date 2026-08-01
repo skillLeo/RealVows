@@ -1,0 +1,762 @@
+/* ==========================================================================
+   RealVows design system
+   Tokens extracted verbatim from _design/00-foundation.html (client-approved).
+   Colours, type scale, spacing, radius and border weights are locked — never
+   improvise them. Components read from these variables only and must never
+   hard-code a colour or a size.
+   ========================================================================== */
+
+:root {
+  /* ---- Colour ---------------------------------------------------------- */
+  --oxblood-deep: #4A1220;   /* full-bleed panels, page backgrounds */
+  --oxblood:      #6B1834;   /* primary buttons, headings on cream */
+  --rose:         #A64452;   /* secondary / ghost actions, error states */
+  --brass:        #B99154;   /* logo, hairline borders, accents, active */
+  --brass-bright: #D4AF6A;   /* hover, focus rings, small highlights */
+  --cream:        #F2EFE9;   /* main light surface */
+  --card:         #F8F6F2;   /* raised surfaces on cream */
+  --ink:          #1F1518;   /* body text */
+  --ink-soft:     #6B5F62;   /* labels, helper text */
+
+  --hairline:      rgba(185, 145, 84, .4);
+  --hairline-soft: rgba(185, 145, 84, .2);
+
+  /* Cream at partial strength, for text on oxblood panels */
+  --on-dark:      rgba(242, 239, 233, .74);
+  --on-dark-soft: rgba(242, 239, 233, .60);
+
+  /* ---- Type ------------------------------------------------------------ */
+  --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --ui:      'Inter', system-ui, -apple-system, sans-serif;
+
+  --fs-display-1: 56px;
+  --fs-display-2: 40px;
+  --fs-display-3: 28px;
+  --fs-body-1:    20px;
+  --fs-body-2:    16px;
+  --fs-body-3:    14px;
+
+  /* ---- Space — 8px base ------------------------------------------------ */
+  --u: 8px;
+  --gap-section: 96px;   /* marketing pages */
+  --gap-app:     48px;   /* working screens: builder, dashboard */
+  --pad-card:    32px;
+  --control:     56px;
+  --tap-min:     44px;
+
+  /* ---- Shape ----------------------------------------------------------- */
+  --r: 8px;
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-enter: 520ms;
+  --dur-tap:   180ms;
+
+  /* ---- Chrome ---------------------------------------------------------- */
+  --tabbar-h: 64px;
+}
+
+/* ==========================================================================
+   Reset & base
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: var(--fs-body-2);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}
+
+/* 16px floor stops iOS Safari zooming the page on focus */
+input, select, textarea { font-size: max(var(--fs-body-2), 16px); }
+
+input::placeholder,
+textarea::placeholder { color: var(--ink-soft); opacity: 1; }
+
+img, svg { max-width: 100%; }
+img { height: auto; }
+
+a {
+  color: var(--oxblood);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--hairline);
+}
+a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
+
+/* Focus is a 2px brass-bright ring, offset 2px. Never a shadow. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+  border-radius: var(--r);
+}
+
+::selection { background: var(--brass); color: var(--oxblood-deep); }
+
+/* ==========================================================================
+   Typography — Fraunces at 56/40/28 only, Inter at 20/16/14 only
+   ========================================================================== */
+
+.rv-d1, .rv-d2, .rv-d3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  color: var(--oxblood);
+}
+.rv-d1 { font-size: clamp(40px, 7vw, var(--fs-display-1)); line-height: 1.08; letter-spacing: -0.015em; }
+.rv-d2 { font-size: clamp(30px, 5.4vw, var(--fs-display-2)); line-height: 1.15; letter-spacing: -0.01em; }
+.rv-d3 { font-size: clamp(24px, 4vw, var(--fs-display-3)); line-height: 1.25; }
+
+.rv-lead   { margin: 0; font-size: var(--fs-body-1); line-height: 1.65; color: var(--ink-soft); }
+.rv-body   { margin: 0; font-size: var(--fs-body-2); line-height: 1.6; color: var(--ink-soft); }
+.rv-small  { margin: 0; font-size: var(--fs-body-3); line-height: 1.55; color: var(--ink-soft); }
+.rv-numeral { font-family: var(--display); font-weight: 400; line-height: 1; color: var(--oxblood); }
+
+/* Tracked caps label — 14px, +0.14em */
+.rv-label {
+  font-size: var(--fs-body-3);
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.rv-label--brass { color: var(--brass); letter-spacing: .18em; }
+
+/* On oxblood panels */
+.rv-on-dark { color: var(--cream); }
+.rv-on-dark .rv-d1,
+.rv-on-dark .rv-d2,
+.rv-on-dark .rv-d3 { color: var(--cream); }
+.rv-on-dark .rv-lead,
+.rv-on-dark .rv-body { color: var(--on-dark); }
+.rv-on-dark .rv-small { color: var(--on-dark-soft); }
+.rv-on-dark a { color: var(--brass-bright); text-decoration-color: var(--hairline); }
+.rv-on-dark a:hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
+
+/* ==========================================================================
+   Layout helpers
+   ========================================================================== */
+
+.rv-shell { max-width: 1200px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 64px); }
+.rv-panel { background: var(--oxblood-deep); color: var(--cream); }
+.rv-stack { display: flex; flex-direction: column; }
+.rv-section { padding-block: var(--gap-section); }
+.rv-section--app { padding-block: var(--gap-app); }
+
+.rv-rule { height: 1px; background: var(--hairline); border: 0; margin: 0; }
+.rv-rule--soft { background: var(--hairline-soft); }
+
+.rv-grid { display: grid; gap: 24px; }
+.rv-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.rv-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.rv-grid--4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+
+/* ==========================================================================
+   Card — hairline brass border, never a drop shadow
+   ========================================================================== */
+
+.rv-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  padding: var(--pad-card);
+}
+.rv-card--accent { border-color: var(--brass); }
+.rv-card--flush  { padding: 0; overflow: hidden; }
+.rv-card--quiet  { background: transparent; }
+
+.rv-card--lift { transition: transform var(--dur-tap) var(--ease), border-color var(--dur-tap) var(--ease); }
+.rv-card--lift:hover { transform: translateY(-2px); border-color: var(--brass-bright); }
+
+/* ==========================================================================
+   Buttons — 56px tall, 8px radius, hairline borders
+   ========================================================================== */
+
+.rv-btn {
+  min-height: var(--control);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 32px;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  font-size: var(--fs-body-2);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-tap) var(--ease),
+              border-color var(--dur-tap) var(--ease),
+              color var(--dur-tap) var(--ease),
+              transform var(--dur-tap) var(--ease);
+}
+.rv-btn:active { transform: scale(.98); }
+.rv-btn--block { width: 100%; }
+
+.rv-btn--primary {
+  background: var(--oxblood);
+  border-color: var(--oxblood);
+  color: var(--cream);
+}
+.rv-btn--primary:hover { background: var(--oxblood-deep); border-color: var(--brass); color: var(--cream); }
+
+.rv-btn--secondary {
+  background: var(--card);
+  border-color: var(--hairline);
+  color: var(--oxblood);
+}
+.rv-btn--secondary:hover {
+  border-color: var(--brass-bright);
+  background: color-mix(in oklab, var(--brass) 8%, var(--card));
+  color: var(--oxblood);
+}
+
+.rv-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--rose);
+  padding: 0 24px;
+}
+.rv-btn--ghost:hover {
+  background: color-mix(in oklab, var(--rose) 9%, var(--card));
+  color: var(--oxblood);
+}
+
+/* On oxblood panels */
+.rv-btn--outline-brass {
+  background: transparent;
+  border-color: var(--brass);
+  color: var(--brass-bright);
+}
+.rv-btn--outline-brass:hover {
+  border-color: var(--brass-bright);
+  background: color-mix(in oklab, var(--brass) 14%, transparent);
+  color: var(--cream);
+}
+
+.rv-btn--on-dark {
+  background: var(--oxblood);
+  border-color: var(--brass);
+  color: var(--cream);
+}
+.rv-btn--on-dark:hover { background: var(--brass); border-color: var(--brass-bright); color: var(--oxblood-deep); }
+
+.rv-btn--ghost-on-dark {
+  background: transparent;
+  border-color: transparent;
+  color: var(--on-dark);
+  padding: 0 24px;
+}
+.rv-btn--ghost-on-dark:hover { background: rgba(185, 145, 84, .14); color: var(--cream); }
+
+.rv-btn[disabled],
+.rv-btn[aria-disabled='true'] {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Inline text-weight action, still 44px tappable */
+.rv-link-action {
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  margin-left: -12px;
+  border: 0;
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--rose);
+  font-size: var(--fs-body-2);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-tap) var(--ease), color var(--dur-tap) var(--ease);
+}
+.rv-link-action:hover { background: color-mix(in oklab, var(--rose) 9%, var(--card)); color: var(--oxblood); }
+
+/* ==========================================================================
+   Form fields — 56px tall, label above in tracked caps, helper below
+   ========================================================================== */
+
+.rv-field { display: flex; flex-direction: column; gap: 10px; }
+.rv-field__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+
+.rv-input,
+.rv-select {
+  height: var(--control);
+  width: 100%;
+  padding: 0 16px;
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--dur-tap) var(--ease);
+}
+.rv-input:focus,
+.rv-select:focus {
+  border-color: var(--brass-bright);
+  outline: 2px solid color-mix(in oklab, var(--brass-bright) 45%, transparent);
+  outline-offset: 1px;
+}
+.rv-input[disabled],
+.rv-select[disabled] {
+  background: color-mix(in oklab, var(--brass) 4%, var(--cream));
+  border-color: var(--hairline-soft);
+  color: color-mix(in oklab, var(--ink-soft) 70%, var(--cream));
+  cursor: not-allowed;
+}
+
+.rv-textarea {
+  height: auto;
+  min-height: 160px;
+  padding: 16px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* Field with a trailing control inside the frame (password eye) */
+.rv-input-group {
+  height: var(--control);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 0 16px;
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
+  background: var(--card);
+  transition: border-color var(--dur-tap) var(--ease);
+}
+.rv-input-group:focus-within { border-color: var(--brass-bright); }
+.rv-input-group > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+.rv-input-trailing {
+  flex: 0 0 auto;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--dur-tap) var(--ease), color var(--dur-tap) var(--ease);
+}
+.rv-input-trailing:hover { border-color: var(--brass-bright); color: var(--brass-bright); }
+
+/* Country code select sitting flush against the number input */
+.rv-input-joined { display: flex; align-items: stretch; }
+.rv-input-joined > .rv-select {
+  flex: 0 0 auto;
+  width: auto;
+  border-radius: var(--r) 0 0 var(--r);
+  border-right: none;
+  background: color-mix(in oklab, var(--brass) 5%, var(--card));
+  padding: 0 12px;
+  text-align: center;
+  appearance: none;
+  cursor: pointer;
+}
+.rv-input-joined > .rv-input { border-radius: 0 var(--r) var(--r) 0; }
+
+.rv-help { font-size: var(--fs-body-3); line-height: 1.5; color: var(--ink-soft); }
+
+/* Error state — rose border and message, geometry unchanged */
+.rv-field--error .rv-input,
+.rv-field--error .rv-input-group {
+  border-color: var(--rose);
+  background: color-mix(in oklab, var(--rose) 5%, var(--card));
+}
+.rv-field--error .rv-help { color: var(--rose); }
+
+/* ==========================================================================
+   Segmented control — always used for four or fewer options
+   ========================================================================== */
+
+.rv-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--cream);
+}
+.rv-seg__option {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: var(--fs-body-2);
+  font-weight: 400;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background var(--dur-tap) var(--ease),
+              color var(--dur-tap) var(--ease),
+              border-color var(--dur-tap) var(--ease);
+}
+.rv-seg__option[aria-pressed='true'] {
+  background: var(--oxblood);
+  border-color: var(--brass-bright);
+  color: var(--cream);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Choice controls — 24px marks, 44px rows, 8px radius (radios are squares)
+   ========================================================================== */
+
+.rv-choice {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  font-size: var(--fs-body-2);
+  line-height: 1.5;
+}
+.rv-choice input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.rv-choice__mark {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
+  background: var(--cream);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-tap) var(--ease), border-color var(--dur-tap) var(--ease);
+}
+.rv-choice input:checked + .rv-choice__mark {
+  border-color: var(--brass);
+  background: var(--oxblood);
+}
+.rv-choice input:focus-visible + .rv-choice__mark {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+}
+/* Radio keeps the 8px radius and carries an inset brass square, not a dot */
+.rv-choice--radio input:checked + .rv-choice__mark { background: var(--cream); }
+.rv-choice__dot { width: 10px; height: 10px; border-radius: 2px; background: var(--oxblood); }
+
+.rv-choice--disabled {
+  cursor: not-allowed;
+  color: color-mix(in oklab, var(--ink-soft) 70%, var(--cream));
+}
+.rv-choice--disabled .rv-choice__mark {
+  border-color: var(--hairline-soft);
+  background: color-mix(in oklab, var(--brass) 4%, var(--cream));
+}
+
+/* ==========================================================================
+   Pills & badges — brass only, never green, never a seal
+   ========================================================================== */
+
+.rv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--brass) 12%, var(--card));
+  color: var(--brass);
+  font-size: var(--fs-body-3);
+  font-weight: 500;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.rv-pill--lg { height: var(--tap-min); padding: 0 16px; font-size: var(--fs-body-2); border-color: var(--brass); }
+.rv-pill--solid { background: var(--brass); border-color: var(--brass-bright); color: var(--oxblood-deep); }
+.rv-pill--on-dark {
+  background: color-mix(in oklab, var(--oxblood-deep) 70%, transparent);
+  border-color: var(--brass);
+  color: var(--brass-bright);
+}
+
+/* ==========================================================================
+   Logo lozenge
+   ========================================================================== */
+
+.rv-logo { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; }
+.rv-logo__mark {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  flex: 0 0 auto;
+  border: 1px solid var(--brass);
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: var(--fs-body-1);
+  line-height: 1;
+  letter-spacing: .02em;
+  color: var(--brass-bright);
+}
+.rv-logo__word {
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .01em;
+  color: var(--brass);
+}
+.rv-logo:hover { color: inherit; }
+.rv-logo--sm .rv-logo__word { font-size: var(--fs-body-1); }
+.rv-logo--sm .rv-logo__mark { width: 36px; height: 36px; font-size: var(--fs-body-2); }
+
+/* ==========================================================================
+   Icon lozenge (trust strip, empty slots)
+   ========================================================================== */
+
+.rv-icon-box {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  flex: 0 0 auto;
+  border: 1px solid var(--brass);
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brass);
+}
+
+/* ==========================================================================
+   Mobile bottom tab bar — app chrome, hidden on desktop
+   ========================================================================== */
+
+.rv-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  background: var(--oxblood-deep);
+  border-top: 1px solid var(--hairline);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.rv-tabbar__item {
+  flex: 1 1 0;
+  min-height: var(--tabbar-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--on-dark);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--dur-tap) var(--ease), transform var(--dur-tap) var(--ease);
+}
+.rv-tabbar__item:active { transform: scale(.94); }
+.rv-tabbar__item.is-active { color: var(--brass-bright); }
+
+.rv-has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); }
+
+@media (min-width: 768px) {
+  .rv-tabbar { display: none; }
+  .rv-has-tabbar { padding-bottom: 0; }
+}
+
+/* ==========================================================================
+   Public chrome (Blade marketing pages)
+   ========================================================================== */
+
+.rv-pubhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding-block: 24px;
+}
+
+.rv-pubhead__nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+
+.rv-pubhead__link {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: var(--fs-body-2);
+  font-weight: 500;
+  color: var(--brass-bright);
+  text-decoration-color: var(--hairline);
+}
+.rv-pubhead__link:hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
+
+.rv-pubfoot { padding-block: 56px; color: var(--on-dark); }
+
+.rv-pubfoot__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+
+.rv-pubfoot__word { font-size: var(--fs-body-1); }
+
+.rv-pubfoot__nav { display: flex; flex-wrap: wrap; gap: 8px 32px; font-size: var(--fs-body-3); }
+.rv-pubfoot__nav a {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  color: var(--on-dark);
+  text-decoration-color: var(--hairline-soft);
+}
+.rv-pubfoot__nav a:hover { color: var(--brass-bright); text-decoration-color: var(--brass-bright); }
+
+/* ==========================================================================
+   Sticky app bars
+   ========================================================================== */
+
+.rv-appbar { position: sticky; top: 0; z-index: 20; background: var(--oxblood-deep); color: var(--cream); }
+.rv-progress { height: 2px; background: rgba(185, 145, 84, .2); }
+.rv-progress__fill { height: 100%; background: var(--brass); transition: width 300ms var(--ease); }
+
+.rv-actionbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  background: var(--cream);
+  border-top: 1px solid var(--hairline);
+}
+
+/* ==========================================================================
+   Motion — transform and opacity only, always reduced-motion aware
+   ========================================================================== */
+
+.rv-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--dur-enter) var(--ease), transform var(--dur-enter) var(--ease);
+}
+.rv-reveal.is-in { opacity: 1; transform: none; }
+
+/* Brass hairline drawing itself left to right under a section heading */
+.rv-underline {
+  height: 1px;
+  background: var(--brass);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 600ms var(--ease);
+}
+.rv-reveal.is-in .rv-underline { transform: scaleX(1); }
+
+.rv-slide-enter-active,
+.rv-slide-leave-active { transition: opacity 300ms var(--ease), transform 300ms var(--ease); }
+.rv-slide-enter-from { opacity: 0; transform: translateX(24px); }
+.rv-slide-leave-to   { opacity: 0; transform: translateX(-24px); }
+
+.rv-fade-enter-active, .rv-fade-leave-active { transition: opacity 200ms var(--ease); }
+.rv-fade-enter-from, .rv-fade-leave-to { opacity: 0; }
+
+/* Sheets, not modals, on mobile */
+.rv-sheet-enter-active, .rv-sheet-leave-active { transition: transform 300ms var(--ease), opacity 300ms var(--ease); }
+.rv-sheet-enter-from, .rv-sheet-leave-to { transform: translateY(100%); opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .rv-reveal { opacity: 1; transform: none; }
+  .rv-underline { transform: scaleX(1); }
+}
+
+/* ==========================================================================
+   Skeletons — never spinners
+   ========================================================================== */
+
+.rv-skeleton {
+  border-radius: var(--r);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--brass) 8%, var(--card)) 0%,
+    color-mix(in oklab, var(--brass) 16%, var(--card)) 50%,
+    color-mix(in oklab, var(--brass) 8%, var(--card)) 100%
+  );
+  background-size: 200% 100%;
+  animation: rv-shimmer 1.4s var(--ease) infinite;
+}
+@keyframes rv-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+.rv-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rv-skip {
+  position: absolute;
+  left: 16px;
+  top: -80px;
+  z-index: 100;
+  padding: 12px 20px;
+  border-radius: var(--r);
+  background: var(--oxblood);
+  color: var(--cream);
+  transition: top var(--dur-tap) var(--ease);
+}
+.rv-skip:focus { top: 16px; color: var(--cream); }

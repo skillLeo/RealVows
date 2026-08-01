@@ -3,9 +3,9 @@
  * Inline SVG icon set.
  *
  * Deliberately not an icon font: the design's original `--glyph` face
- * (Noto Sans Symbols 2) existed only to render zodiac glyphs, which are no
- * longer permitted anywhere a user can see. Inline SVG also removes a
- * render-blocking font request on shared hosting.
+ * (Noto Sans Symbols 2) existed only to draw symbols that are no longer
+ * permitted anywhere a user can see — see app/Services/Sign/SignCalculator.php.
+ * Inline SVG also removes a render-blocking font request on shared hosting.
  *
  * Every icon inherits `currentColor` so it reads from the design tokens.
  */

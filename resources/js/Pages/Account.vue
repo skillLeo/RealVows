@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
@@ -13,6 +14,20 @@ const props = defineProps({
 });
 
 const page = usePage();
+
+/**
+ * The administration shortcuts come from the same server-built navigation
+ * every other surface renders, so this card cannot offer a door the tab bar
+ * knows is shut.
+ *
+ * It used to be gated on an `isAdmin` flag sent by the controller — a role
+ * check standing in for a permission check, which showed a reviewer a
+ * Settings button that 404'd. Same defect as the nav bar had, hiding one
+ * layer down in a page rather than in the chrome.
+ */
+const adminLinks = computed(() =>
+    (page.props.nav ?? []).filter((link) => link.href.startsWith('/admin'))
+);
 
 const contact = useForm({
     phone_country_code: props.account.phoneCountryCode ?? props.countryCodes[0]?.value,
@@ -143,12 +158,18 @@ const logout = () => router.post('/logout');
                 </form>
             </BaseCard>
 
-            <BaseCard v-if="account.isAdmin" accent>
+            <BaseCard v-if="adminLinks.length" accent>
                 <div class="rv-stack" style="gap: 16px">
                     <span class="rv-label rv-label--brass">Administration</span>
                     <div class="rv-actions">
-                        <BaseButton href="/admin/verifications" variant="secondary">Verification queue</BaseButton>
-                        <BaseButton href="/admin/settings" variant="secondary">Settings</BaseButton>
+                        <BaseButton
+                            v-for="link in adminLinks"
+                            :key="link.key"
+                            :href="link.href"
+                            variant="secondary"
+                        >
+                            {{ link.label }}
+                        </BaseButton>
                     </div>
                 </div>
             </BaseCard>

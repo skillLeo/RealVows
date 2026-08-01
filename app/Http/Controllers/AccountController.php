@@ -24,7 +24,6 @@ class AccountController extends Controller
                 'phoneCountryCode' => $user->phone_country_code,
                 'phoneNumber' => $user->phone_number,
                 'phoneVerified' => $user->phoneIsVerified(),
-                'isAdmin' => $user->isAdmin(),
             ],
             'countryCodes' => Auth\RegisteredUserController::countryCodes(),
         ]);

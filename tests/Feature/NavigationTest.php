@@ -141,6 +141,93 @@ class NavigationTest extends TestCase
     }
 
     /**
+     * ⚠️ THE ROOT-CAUSE TEST. Read this before adding a prop.
+     *
+     * Chrome was only half the problem. The Account page carried its own
+     * Administration card with a hardcoded /admin/settings button, gated on
+     * an `isAdmin` flag its controller sent — a second role check one layer
+     * down, offering a reviewer a link that 404'd.
+     *
+     * A payload test cannot catch that: the href is compiled into the Vue
+     * template, so it never appears in the props at all. What DOES appear,
+     * and what the defect cannot exist without, is the role flag itself.
+     *
+     * So the invariant is enforced at the root: no role-shaped value may
+     * reach the browser on any page. Without one there is nothing for a
+     * template to gate on, and the dead link cannot be written. Where a
+     * component needs to know what someone may do, it reads `nav`, which is
+     * built from the permissions the routes actually enforce.
+     */
+    public function test_no_role_flag_ever_reaches_the_browser(): void
+    {
+        $roleShaped = '/^(is_?admin|is_?staff|is_?super_?admin|roles?|permissions?)$/i';
+
+        $scan = function (array $node, string $path) use (&$scan, $roleShaped, &$found) {
+            foreach ($node as $key => $value) {
+                if (is_string($key) && preg_match($roleShaped, $key)) {
+                    $found[] = "{$path}.{$key}";
+                }
+
+                if (is_array($value)) {
+                    $scan($value, "{$path}.{$key}");
+                }
+            }
+        };
+
+        foreach (['member', 'admin', 'super_admin'] as $role) {
+            $user = $this->userWithRole($role);
+
+            foreach (['/account', '/dashboard'] as $url) {
+                $found = [];
+                $scan($this->actingAs($user)->get($url)->viewData('page')['props'], $url);
+
+                $this->assertSame(
+                    [],
+                    $found,
+                    "A role flag reached the browser for {$role}: ".implode(', ', $found)
+                        .'. Gate on `nav` instead — a role flag makes every reader guess '
+                        .'which permissions it implies, and eventually one guesses wrong.'
+                );
+            }
+        }
+    }
+
+    /**
+     * The complementary half: where a destination DOES travel through props,
+     * a reviewer must never be sent one they cannot open.
+     */
+    public function test_no_page_offers_a_reviewer_a_destination_they_cannot_open(): void
+    {
+        $reviewer = $this->userWithRole('admin');
+
+        foreach (['/account', '/dashboard', '/admin/verifications'] as $url) {
+            // JSON_UNESCAPED_SLASHES matters: without it json_encode writes
+            // "\/admin\/settings" and a search for the plain path finds
+            // nothing, so this assertion would pass even with the bug present.
+            $payload = json_encode(
+                $this->actingAs($reviewer)->get($url)->viewData('page')['props'],
+                JSON_UNESCAPED_SLASHES
+            );
+
+            $this->assertStringNotContainsString(
+                '/admin/settings',
+                $payload,
+                "{$url} offers a reviewer /admin/settings, which 404s for them."
+            );
+        }
+    }
+
+    public function test_an_owner_still_gets_the_administration_shortcuts(): void
+    {
+        $payload = json_encode(
+            $this->actingAs($this->userWithRole('super_admin'))->get('/account')->viewData('page')['props'],
+            JSON_UNESCAPED_SLASHES
+        );
+
+        $this->assertStringContainsString('/admin/settings', $payload);
+    }
+
+    /**
      * A member who has not confirmed their email is redirected to do so —
      * which is intended, and is not a broken link. What must never happen is
      * a 404.

@@ -62,10 +62,28 @@
   /* ---- Shape ----------------------------------------------------------- */
   --r: 8px;
 
-  /* ---- Motion ---------------------------------------------------------- */
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --dur-enter: 520ms;
-  --dur-tap:   180ms;
+  /* ---- Motion ----------------------------------------------------------
+   *
+   * The register is CEREMONIAL — a wedding invitation, a sealed letter, a
+   * slow reveal. Nothing bounces, nothing springs, nothing pops. Warmth here
+   * comes from slowness and inevitability, not from energy.
+   *
+   * --ease and --dur-enter shipped in Phase 1 and are kept under their own
+   * names rather than duplicated under new ones. Only genuinely new values
+   * are added below.
+   */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);   /* the default: decisive out, soft landing */
+  --dur-enter: 520ms;                        /* cards arriving, panels opening */
+  --dur-tap:   180ms;                        /* pressed states */
+
+  --ease-veil:   cubic-bezier(0.65, 0, 0.35, 1);   /* symmetric, for reveals and covers */
+  --ease-settle: cubic-bezier(0.34, 1.2, 0.64, 1); /* the ONLY overshoot allowed, and never above 1.2 */
+
+  --dur-quick:    200ms;   /* hovers, toggles, the tab indicator */
+  --dur-move:     320ms;   /* sheets, page transitions */
+  --dur-ceremony: 900ms;   /* the unsealing. Nothing else. */
+
+  --stagger: 70ms;         /* between siblings in a sequence */
 
   /* ---- Chrome ---------------------------------------------------------- */
   --tabbar-h: 64px;
@@ -1419,3 +1437,493 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 .rv-demobar strong { font-weight: 600; }
 .rv-demobar span { opacity: .85; }
+
+/* ==========================================================================
+   PHASE 2 — Introductions
+   ==========================================================================
+   Everything below is built from the locked tokens. No new colour, no new
+   typeface, no new radius, no shadow anywhere. Elevation is carried by
+   hairline weight, exactly as it is on the rest of the product.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   The Arrival — content entering, staggered, capped so a long list never
+   crawls. Only transform and opacity, so it stays on the compositor.
+   -------------------------------------------------------------------------- */
+
+@keyframes rv-arrive {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.rv-arrive {
+  animation: rv-arrive var(--dur-enter) var(--ease) both;
+}
+
+/* Six is the cap. Beyond that the last card would wait half a second for
+   nothing, which reads as slow rather than considered. */
+.rv-arrive:nth-child(1) { animation-delay: calc(var(--stagger) * 0); }
+.rv-arrive:nth-child(2) { animation-delay: calc(var(--stagger) * 1); }
+.rv-arrive:nth-child(3) { animation-delay: calc(var(--stagger) * 2); }
+.rv-arrive:nth-child(4) { animation-delay: calc(var(--stagger) * 3); }
+.rv-arrive:nth-child(5) { animation-delay: calc(var(--stagger) * 4); }
+.rv-arrive:nth-child(n+6) { animation-delay: calc(var(--stagger) * 5); }
+
+/* Scroll-driven where supported, so the animation is tied to the scroller
+   rather than to a timer. IntersectionObserver is NOT needed as a fallback
+   here: without support the element simply renders in its final state. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rv-arrive--scroll {
+      animation: rv-arrive linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The Bloom + The Count — the compatibility ring.
+   The number is the hook. It is never diminished, blurred or teased.
+   -------------------------------------------------------------------------- */
+
+.rv-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 132px;
+  flex: 0 0 auto;
+}
+
+.rv-ring__svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+
+.rv-ring__track { fill: none; stroke: var(--hairline-soft); stroke-width: 3; }
+
+.rv-ring__arc {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: 3;
+  stroke-linecap: round;
+  /* Drawn from twelve o'clock by animating the offset only. */
+  transition: stroke-dashoffset var(--dur-ceremony) var(--ease);
+}
+
+.rv-ring__value {
+  position: relative;
+  font-family: var(--display);
+  font-size: var(--fs-display-1);
+  line-height: 1;
+  color: var(--oxblood);
+  /* tabular-nums so counting up never shifts the layout under itself */
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-ring--sm { width: 96px; height: 96px; }
+.rv-ring--sm .rv-ring__value { font-size: var(--fs-display-2); }
+
+/* The single permitted piece of atmosphere: a very slow brass drift behind
+   the ring. 4% opacity swing over 20s — present but never noticed. */
+@keyframes rv-drift {
+  0%, 100% { opacity: .03; transform: scale(1); }
+  50%      { opacity: .07; transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rv-ring::before {
+    content: '';
+    position: absolute;
+    inset: -12%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--brass) 0%, transparent 70%);
+    animation: rv-drift 20s var(--ease-veil) infinite;
+    pointer-events: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Match cards
+   -------------------------------------------------------------------------- */
+
+.rv-matches {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .rv-matches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.rv-match {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: var(--pad-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+  overflow: hidden;
+}
+
+/* Elevation by hairline weight, never by shadow. */
+.rv-match--open { border-color: var(--brass); }
+
+.rv-match__head {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.rv-match__who { min-width: 0; }
+
+.rv-match__name {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  line-height: 1.25;
+  color: var(--oxblood);
+}
+
+.rv-match__city {
+  margin: 4px 0 0;
+  font-size: var(--fs-body-3);
+  color: var(--ink-soft);
+}
+
+.rv-match__rationale {
+  margin: 0;
+  font-size: var(--fs-body-2);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.rv-match__lozenge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: color-mix(in oklab, var(--brass) 12%, var(--card));
+  color: var(--brass-ink);
+  font-size: var(--fs-body-3);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   The veil — a locked card's photo area.
+
+   ⚠️ THERE IS NO <img> BEHIND THIS. It is a gradient panel, and the reason
+   matters: a CSS blur over a real photograph means anyone who opens devtools
+   recovers the full-resolution picture of a real person on a marriage
+   platform. The signed URL is never generated for a locked match, so there is
+   nothing in the payload to recover.
+   -------------------------------------------------------------------------- */
+
+.rv-veil {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r);
+  background: linear-gradient(160deg, var(--oxblood) 0%, var(--oxblood-deep) 100%);
+  overflow: hidden;
+}
+
+.rv-veil__mark {
+  font-family: var(--display);
+  font-size: var(--fs-display-2);
+  letter-spacing: .08em;
+  color: var(--brass);
+  opacity: .28;
+  user-select: none;
+}
+
+/* The Veil choreography: a brass sheen sweeping left to right. */
+@keyframes rv-sheen {
+  from { transform: translateX(-120%); }
+  to   { transform: translateX(120%); }
+}
+
+.rv-veil__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--brass-bright) 55%, transparent) 50%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.rv-unsealing .rv-veil__sheen {
+  animation: rv-sheen var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+/* The photograph revealed underneath, wiping in the same direction so the
+   sheen appears to be doing the revealing. */
+@keyframes rv-unwipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+.rv-match__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--r);
+  background: var(--cream);
+}
+
+.rv-unsealing .rv-match__photo {
+  animation: rv-unwipe var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+/* The border drawing itself around the card, clockwise from top-left. */
+@keyframes rv-border-draw {
+  from { border-color: var(--brass-bright); }
+  to   { border-color: var(--brass); }
+}
+
+.rv-unsealing {
+  animation: rv-border-draw var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+/* Everything else quiets while the ceremony runs. */
+.rv-ceremony-dim {
+  opacity: .4;
+  transition: opacity var(--dur-move) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The match is still revealed. The ceremony is simply not performed. */
+  .rv-unsealing .rv-veil__sheen { animation: none; opacity: 0; }
+  .rv-unsealing .rv-match__photo { animation: none; clip-path: none; }
+  .rv-unsealing { animation: none; }
+  .rv-ceremony-dim { opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   The Press — every button and card. Nothing more than this.
+   -------------------------------------------------------------------------- */
+
+@media (hover: none) {
+  .rv-pressable:active { transform: scale(.97); }
+}
+
+.rv-pressable { transition: transform var(--dur-tap) var(--ease); }
+
+/* --------------------------------------------------------------------------
+   Packages — a snap rail on a phone, a row on a desktop
+   -------------------------------------------------------------------------- */
+
+.rv-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 82%;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+  margin-inline: calc(var(--u) * -2);
+  padding-inline: calc(var(--u) * 2);
+}
+.rv-rail::-webkit-scrollbar { display: none; }
+.rv-rail > * { scroll-snap-align: center; }
+
+@media (min-width: 768px) {
+  .rv-rail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+.rv-package {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--pad-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+/* The middle card is raised by a heavier hairline, never by a shadow. */
+.rv-package--featured { border-color: var(--brass); border-width: 2px; }
+
+.rv-package__price {
+  font-family: var(--display);
+  font-size: var(--fs-display-2);
+  line-height: 1;
+  color: var(--oxblood);
+}
+
+/* --------------------------------------------------------------------------
+   Bottom sheets — native <dialog>, so the browser owns focus trapping and
+   the escape key rather than us reimplementing both badly.
+   -------------------------------------------------------------------------- */
+
+.rv-sheet {
+  width: 100%;
+  max-width: 560px;
+  margin: auto auto 0;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-bottom: none;
+  border-radius: var(--r) var(--r) 0 0;
+  background: var(--card);
+  color: var(--ink);
+  overscroll-behavior: contain;
+}
+
+.rv-sheet::backdrop { background: rgba(31, 21, 24, .55); }
+
+.rv-sheet__grip {
+  width: 40px;
+  height: 4px;
+  margin: 12px auto 4px;
+  border-radius: var(--r);
+  background: var(--hairline);
+}
+
+.rv-sheet__body { padding: 20px var(--pad-card) calc(var(--pad-card) + env(safe-area-inset-bottom)); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rv-sheet {
+    transition: transform var(--dur-move) var(--ease-settle),
+                opacity var(--dur-move) var(--ease),
+                overlay var(--dur-move) allow-discrete,
+                display var(--dur-move) allow-discrete;
+  }
+  .rv-sheet[open] { transform: translateY(0); opacity: 1; }
+  @starting-style {
+    .rv-sheet[open] { transform: translateY(100%); opacity: 0; }
+  }
+  .rv-sheet:not([open]) { transform: translateY(100%); opacity: 0; }
+
+  .rv-sheet::backdrop { transition: opacity var(--dur-move) var(--ease), display var(--dur-move) allow-discrete; }
+}
+
+/* On a desktop the same component is a centred modal. */
+@media (min-width: 768px) {
+  .rv-sheet {
+    margin: auto;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @starting-style {
+      .rv-sheet[open] { transform: translateY(12px); opacity: 0; }
+    }
+    .rv-sheet:not([open]) { transform: translateY(12px); opacity: 0; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   View transitions — same-document navigation on the compositor
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*) { animation-duration: var(--dur-move); }
+
+  /* The chrome stays put while content crosses. */
+  ::view-transition-old(rv-shell),
+  ::view-transition-new(rv-shell) { animation: none; }
+
+  html[data-direction='forward']::view-transition-old(root) {
+    animation: rv-slide-out-left var(--dur-move) var(--ease) both;
+  }
+  html[data-direction='forward']::view-transition-new(root) {
+    animation: rv-slide-in-right var(--dur-move) var(--ease) both;
+  }
+  html[data-direction='back']::view-transition-old(root) {
+    animation: rv-slide-out-right var(--dur-move) var(--ease) both;
+  }
+  html[data-direction='back']::view-transition-new(root) {
+    animation: rv-slide-in-left var(--dur-move) var(--ease) both;
+  }
+}
+
+@keyframes rv-slide-out-left  { to   { transform: translateX(-18px); opacity: 0; } }
+@keyframes rv-slide-in-right  { from { transform: translateX(18px);  opacity: 0; } }
+@keyframes rv-slide-out-right { to   { transform: translateX(18px);  opacity: 0; } }
+@keyframes rv-slide-in-left   { from { transform: translateX(-18px); opacity: 0; } }
+
+/* --------------------------------------------------------------------------
+   Dashboard layout — a true two column at desktop.
+
+   ⚠️ The Phase 1 builder and dashboard both shipped a bug where a two-column
+   layout collapsed into a full-width stacked list ABOVE the content. The
+   grid-template-columns below is declared only inside the media query for
+   exactly that reason: there is no partially-applied state to get wrong.
+   -------------------------------------------------------------------------- */
+
+.rv-dash {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .rv-dash {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 40px;
+  }
+  .rv-dash__rail { position: sticky; top: 104px; }
+}
+
+.rv-rail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+.rv-balance {
+  font-family: var(--display);
+  font-size: var(--fs-display-2);
+  line-height: 1;
+  color: var(--oxblood);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Floating action — never shown when it would do nothing
+   -------------------------------------------------------------------------- */
+
+.rv-fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 22px;
+  border: 1px solid var(--brass-bright);
+  border-radius: var(--r);
+  background: var(--brass);
+  color: var(--oxblood-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (min-width: 768px) {
+  .rv-fab { display: none; }
+}

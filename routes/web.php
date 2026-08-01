@@ -31,6 +31,13 @@ Route::get('/robots.txt', function () {
     return response($body, 200, ['Content-Type' => 'text/plain']);
 })->name('robots');
 
+/*
+ * The offline page the service worker falls back to. Served rather than
+ * static so it stays in one place with the rest of the routes, and cached at
+ * install time so it is available precisely when nothing else is.
+ */
+Route::view('/offline', 'offline')->name('offline');
+
 Route::controller(LegalController::class)->group(function () {
     Route::get('/terms', 'terms')->name('legal.terms');
     Route::get('/privacy', 'privacy')->name('legal.privacy');

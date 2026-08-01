@@ -2,23 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Packages;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PackagesController extends Controller
 {
+    public function __construct(private readonly Packages $packages) {}
+
     /**
-     * A holding page until Phase 2 brings the purchase path.
+     * Three packages, prices read from settings so the client can change them
+     * without a deploy.
      *
-     * The tab bar has four tabs and a member will tap this one, so it states
-     * the real prices and the free-signup promise rather than 404ing. There
-     * is deliberately no "buy" button: a dead checkout would be worse than
-     * an honest "not yet".
+     * No urgency copy, no countdown, no scarcity. The reassurance panel above
+     * the cards is doing real work: somebody who is not ready to pay should
+     * leave feeling their profile is safe, not feeling pushed.
      */
     public function index(Request $request): Response
     {
         return Inertia::render('Packages', [
+            'packages' => array_values($this->packages->all()),
+            'credits' => $request->user()->creditBalance(),
             'completeness' => (int) ($request->user()->profile?->completeness_percent ?? 0),
         ]);
     }

@@ -72,6 +72,69 @@ class ForbiddenLanguageTest extends TestCase
     }
 
     /**
+     * ⚠️ POSITIVE CONTROL FOR assertClean(). Read before trusting this file.
+     *
+     * Every check below is a negative assertion, and a negative assertion
+     * whose search method cannot find the thing is invisible and permanent.
+     * It happened on this project once already: json_encode escaping slashes
+     * made a guard pass against nothing.
+     *
+     * This feeds assertClean() strings that MUST trip it, one per tier and
+     * one per encoding, and asserts it actually does. If this fails, every
+     * green test below it means nothing.
+     */
+    public function test_the_cleanliness_check_actually_catches_forbidden_terms(): void
+    {
+        $mustTrip = [
+            'a tier 1 word' => 'Your zodiac compatibility is high',
+            'a sign name' => 'Two Scorpio matches for you',
+            'a sign name mid-sentence' => 'She is a Leo and you are not',
+            'different case' => 'ASTROLOGY drives our matching',
+            'a glyph' => 'Your sign ♌ suggests warmth',
+            'a tier 2 phrase' => 'A fire sign paired with an air sign',
+            'modality language' => 'Both cardinal, which explains the friction',
+        ];
+
+        foreach ($mustTrip as $why => $text) {
+            $caught = false;
+
+            try {
+                $this->assertClean($text, 'the positive control');
+            } catch (\PHPUnit\Framework\AssertionFailedError) {
+                $caught = true;
+            }
+
+            $this->assertTrue(
+                $caught,
+                "assertClean() did NOT catch {$why}: \"{$text}\". Every other assertion in this file is worthless."
+            );
+        }
+    }
+
+    /**
+     * The counterpart: ordinary romantic copy must NOT trip it, or the guard
+     * gets switched off the first time it blocks good writing.
+     *
+     * "Down to earth" is exactly the phrase that made the old flat grep
+     * unusable.
+     */
+    public function test_ordinary_romantic_copy_does_not_trip_the_check(): void
+    {
+        $mustPass = [
+            'A patient, home-building match with closely aligned family values.',
+            'You both value independence and a similar pace in a relationship.',
+            'She is down to earth and he is warm company.',
+            'Shared warmth and directness, with aligned expectations on commitment.',
+            'You both speak Urdu and English.',
+            'Neither of you smokes.',
+        ];
+
+        foreach ($mustPass as $text) {
+            $this->assertClean($text, 'ordinary copy');
+        }
+    }
+
+    /**
      * Every fragment the writer can possibly emit, checked directly. This is
      * exhaustive over the template library rather than a sample of it.
      */

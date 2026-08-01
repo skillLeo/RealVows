@@ -81,6 +81,47 @@ class TeaserPhotoLeakTest extends TestCase
         return json_encode($props, JSON_UNESCAPED_SLASHES);
     }
 
+    /**
+     * ⚠️ POSITIVE CONTROL. Read this before trusting anything below it.
+     *
+     * Every leak assertion in this file is a NEGATIVE assertion on serialised
+     * output, which is the most dangerous kind of test there is: if the
+     * search method cannot see the thing even when it IS present, the
+     * assertion passes against nothing and nobody ever finds out.
+     *
+     * That already happened once on this project — json_encode escapes
+     * slashes, so searching a payload for "/admin/settings" found nothing and
+     * a guard passed vacuously.
+     *
+     * So this proves the search method works, using the payload of an
+     * UNLOCKED match where every one of those strings is legitimately
+     * present. If this test ever fails, every leak assertion below it is
+     * worthless regardless of whether it is green.
+     */
+    public function test_the_search_method_can_actually_find_a_photo_path(): void
+    {
+        [$user, $match, $photo] = $this->memberWithLockedMatch();
+
+        app(CreditService::class)->adjust($user, 1, 'goodwill', 'Positive control', $user);
+        app(CreditService::class)->unlockMatch($user->fresh(), $match);
+
+        $payload = $this->dashboardPayload($user->fresh());
+
+        // The exact strings the leak tests search for, in a payload where
+        // they are supposed to be. If the encoding hides them here, it hides
+        // them everywhere.
+        $this->assertStringContainsString('/photos/', $payload, 'The search cannot see a photo route.');
+        $this->assertStringContainsString('signature=', $payload, 'The search cannot see a signed URL.');
+        $this->assertStringContainsString('Bakare', $payload, 'The search cannot see a last name.');
+
+        // And the basename check the locked test relies on.
+        $this->assertStringContainsString(
+            'photos',
+            $payload,
+            'The search cannot see the photos key.'
+        );
+    }
+
     /** ⚠️ The load-bearing assertion. */
     public function test_no_string_in_the_dashboard_response_resolves_to_a_photo_path(): void
     {

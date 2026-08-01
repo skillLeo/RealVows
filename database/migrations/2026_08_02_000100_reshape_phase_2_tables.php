@@ -239,10 +239,85 @@ return new class extends Migration
         });
     }
 
+    /**
+     * ⚠️ REVERSIBILITY, AND WHY THIS IS LONGER THAN YOU EXPECT.
+     *
+     * The obvious `down()` — three dropIfExists calls — is wrong, and it was
+     * wrong here until it was actually tested rather than assumed.
+     *
+     * These tables were created by three PHASE 1 migrations, which stay
+     * marked as run when this one is rolled back. Dropping without recreating
+     * leaves the database claiming three tables exist that do not, and the
+     * only reason it appears to recover is that re-running this migration
+     * builds them again. Rolling back and stopping leaves a broken database.
+     *
+     * So `down()` restores the Phase 1 shapes exactly. Rollback returns the
+     * schema to what the previous migration left behind, which is the whole
+     * contract.
+     *
+     * Data is not restored, and cannot be — see the warning on `up()`.
+     */
     public function down(): void
     {
         Schema::dropIfExists('matches');
         Schema::dropIfExists('credit_ledger');
         Schema::dropIfExists('purchases');
+
+        // ── The Phase 1 shapes, restored verbatim ────────────────────────
+
+        Schema::create('purchases', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('package_key', ['single', 'triple', 'octet']);
+            $table->unsignedInteger('amount_cents');
+            $table->char('currency', 3)->default('USD');
+            $table->unsignedSmallInteger('credits_granted');
+            $table->enum('status', ['pending', 'completed', 'failed', 'refunded'])->default('pending');
+            $table->string('gateway', 32)->nullable();
+            $table->string('gateway_transaction_id')->nullable()->unique();
+            $table->json('gateway_response')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
+
+            $table->index(['user_id', 'status']);
+            $table->index('created_at');
+        });
+
+        Schema::create('credit_ledger', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->integer('delta');
+            $table->integer('balance_after');
+            $table->enum('reason', ['purchase', 'match_reserved', 'match_refunded', 'admin_adjustment']);
+            $table->string('reference_type')->nullable();
+            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->string('gateway_transaction_id')->nullable()->unique();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('created_at')->useCurrent();
+
+            $table->index(['user_id', 'created_at']);
+            $table->index(['reference_type', 'reference_id']);
+        });
+
+        Schema::create('matches', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('seeker_profile_id')->constrained('profiles')->cascadeOnDelete();
+            $table->foreignId('matched_profile_id')->constrained('profiles')->cascadeOnDelete();
+            $table->decimal('total_score', 5, 2);
+            $table->json('score_breakdown');
+            $table->text('compatibility_rationale')->nullable();
+            $table->enum('status', ['reserved', 'delivered', 'viewed', 'interested', 'passed', 'expired'])
+                ->default('reserved');
+            $table->boolean('is_unlocked')->default(false);
+            $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('viewed_at')->nullable();
+            $table->timestamp('responded_at')->nullable();
+            $table->timestamps();
+
+            $table->unique(['seeker_profile_id', 'matched_profile_id']);
+            $table->index(['seeker_profile_id', 'status']);
+            $table->index(['seeker_profile_id', 'is_unlocked']);
+            $table->index('total_score');
+        });
     }
 };

@@ -223,6 +223,57 @@ does not re-read the file.
 
 ---
 
+## Standing notes from things that went wrong
+
+### Closing the chrome is not closing the pages
+
+A reviewer was shown a Settings tab that 404'd. The nav was fixed, the shared
+`is_admin` prop was deleted, and the fix was declared complete.
+
+It was not. `Account.vue` carried its own Administration card gated on a
+**different** flag (`account.isAdmin`, sent by its controller) with a
+hardcoded link. Deleting the shared prop never touched it.
+
+**The lesson: chrome and pages are two separate surfaces, and fixing one says
+nothing about the other.** A defect class is only closed when the invariant is
+enforced somewhere both surfaces have to pass through — here, the server-built
+`nav` array plus `NavigationCrawlTest`, which crawls every link a page and its
+child components can render and opens each one as each role.
+
+### Every negative assertion needs a positive control
+
+A guard searched a payload for `/admin/settings` and passed. It passed because
+`json_encode` escapes slashes to `\/admin\/settings`, so the search could
+never have found it — present or absent.
+
+**A negative assertion whose search method cannot find the thing is invisible
+and it accumulates.** From here: assert the thing is absent, then assert in the
+same test that the same method finds it when it IS present. See
+`ForbiddenLanguageTest::test_the_cleanliness_check_actually_catches_forbidden_terms`
+and `TeaserPhotoLeakTest::test_the_search_method_can_actually_find_a_photo_path`.
+
+### Test the URL the code builds, not the route it targets
+
+Checkout was dead on the live site while the suite was green. Every callback
+test posted to the signed route *directly*; none followed the URL the gateway
+actually constructed. The gateway was appending `?SpiToken=` to a signed URL,
+and the signature covers the whole query string, so the route answered 403.
+
+**If code builds a URL, a test must follow that URL.**
+
+### Seed assets are not in git
+
+`storage/app/seed/` is gitignored, and `DemoSeeder` guards its photo step with
+`is_file()` — so on a fresh server it silently produced 30 members with zero
+photographs. Sync it explicitly:
+
+```bash
+rsync -az -e "ssh -p 65002 -i ~/.ssh/skillleo_deploy" \
+  storage/app/seed/ USER@HOST:domains/realvows.skillleo.com/public_html/storage/app/seed/
+```
+
+---
+
 ## Verify the web root is safe
 
 Run this after any deploy or any change to `public_html`. Every line must show

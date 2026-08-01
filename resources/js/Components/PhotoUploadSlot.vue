@@ -1,18 +1,32 @@
 <script setup>
+import { ref } from 'vue';
 import RvIcon from './RvIcon.vue';
 
 /**
  * One of exactly four photo slots. Never five, never six, never "up to".
- * The slot names are fixed by the specification and are passed in.
+ * The slot names are fixed by the specification and passed in.
+ *
+ * The image cross-fades in when an upload lands — a hard swap reads as a
+ * glitch, a fade reads as the photo arriving.
  */
 defineProps({
     index: { type: Number, required: true },
     title: { type: String, required: true },
     help: { type: String, required: true },
     preview: { type: String, default: null },
+    busy: { type: Boolean, default: false },
 });
 
-defineEmits(['upload']);
+const emit = defineEmits(['upload', 'remove']);
+
+const input = ref(null);
+
+function choose(event) {
+    const file = event.target.files?.[0];
+    if (file) emit('upload', file);
+    // Reset so choosing the same file twice in a row still fires a change.
+    event.target.value = '';
+}
 </script>
 
 <template>
@@ -23,19 +37,54 @@ defineEmits(['upload']);
         </div>
 
         <div class="rv-slot__frame">
-            <img v-if="preview" :src="preview" alt="" width="480" height="600" loading="lazy" class="rv-slot__img" />
+            <Transition name="rv-fade">
+                <img
+                    v-if="preview"
+                    :key="preview"
+                    :src="preview"
+                    :alt="`Your ${title.toLowerCase()} photo`"
+                    width="480"
+                    height="600"
+                    loading="lazy"
+                    class="rv-slot__img"
+                />
+            </Transition>
 
-            <template v-else>
-                <span class="rv-slot__empty">
-                    <RvIcon name="image" :size="28" />
-                </span>
-            </template>
+            <span v-if="!preview" class="rv-slot__empty" aria-hidden="true">
+                <RvIcon name="image" :size="28" />
+            </span>
 
             <span v-if="preview" class="rv-pill rv-pill--on-dark rv-slot__flag">Uploaded</span>
 
-            <button type="button" class="rv-btn rv-btn--on-dark rv-slot__action" @click="$emit('upload', index)">
-                {{ preview ? 'Replace photo' : 'Upload photo' }}
-            </button>
+            <input
+                ref="input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="rv-visually-hidden"
+                :aria-label="`Upload your ${title.toLowerCase()} photo`"
+                @change="choose"
+            />
+
+            <div class="rv-slot__actions">
+                <button
+                    type="button"
+                    class="rv-btn rv-btn--on-dark rv-slot__action"
+                    :disabled="busy"
+                    @click="input.click()"
+                >
+                    {{ busy ? 'Uploading' : preview ? 'Replace' : 'Upload photo' }}
+                </button>
+
+                <button
+                    v-if="preview && !busy"
+                    type="button"
+                    class="rv-slot__remove"
+                    :aria-label="`Remove your ${title.toLowerCase()} photo`"
+                    @click="emit('remove')"
+                >
+                    Remove
+                </button>
+            </div>
         </div>
 
         <p class="rv-small">{{ help }}</p>
@@ -67,7 +116,7 @@ defineEmits(['upload']);
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    gap: 16px;
+    gap: 12px;
     padding: 16px;
 }
 
@@ -77,7 +126,12 @@ defineEmits(['upload']);
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity var(--dur-enter) var(--ease);
+}
+
+/* 300ms cross-fade as the photo lands */
+.rv-fade-enter-active,
+.rv-fade-leave-active {
+    transition: opacity 300ms var(--ease);
 }
 
 .rv-slot__empty {
@@ -95,9 +149,32 @@ defineEmits(['upload']);
     top: 12px;
 }
 
-.rv-slot__action {
+.rv-slot__actions {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.rv-slot__action {
     min-height: var(--tap-min);
     padding: 0 16px;
+}
+
+.rv-slot__remove {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--r);
+    background: transparent;
+    color: var(--brass-bright);
+    font-size: var(--fs-body-3);
+    cursor: pointer;
+    transition: color var(--dur-tap) var(--ease);
+}
+
+.rv-slot__remove:hover {
+    color: var(--cream);
 }
 </style>

@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\ProfileBuilderController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -42,4 +44,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('verified')
         ->name('dashboard');
+
+    Route::middleware('verified')->group(function () {
+        Route::get('/profile', [ProfileBuilderController::class, 'show'])->name('profile');
+
+        Route::get('/profile/{step}', [ProfileBuilderController::class, 'show'])->name('profile.step');
+
+        // Autosave. PUT because it replaces the values of one step, and it is
+        // hit repeatedly while somebody is still typing.
+        Route::put('/profile/{step}', [ProfileBuilderController::class, 'save'])->name('profile.save');
+
+        Route::post('/profile/submit', [ProfileBuilderController::class, 'submit'])->name('profile.submit');
+
+        // Photos. Signed on top of auth on the read route, so a URL that
+        // escapes into a chat log stops working within the hour.
+        Route::post('/photos', [PhotoController::class, 'store'])->name('photos.store');
+        Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
+        Route::get('/photos/{photo}', [PhotoController::class, 'show'])
+            ->middleware('signed')
+            ->name('photos.show');
+
+        Route::post('/verification/selfie', [PhotoController::class, 'storeVerificationSelfie'])
+            ->name('verification.selfie');
+        Route::get('/verification/selfie/{verification}', [PhotoController::class, 'showVerificationSelfie'])
+            ->middleware('signed')
+            ->name('verification.selfie.show');
+        Route::post('/verification/code', [PhotoController::class, 'regenerateCode'])
+            ->name('verification.code');
+    });
 });

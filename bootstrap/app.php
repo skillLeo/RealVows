@@ -25,7 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // `api/*` alone was wrong: the profile autosave endpoint lives under
+        // /profile and asks for JSON, so restricting JSON rendering by path
+        // sent it an HTML redirect it could not read, and a validation error
+        // surfaced as a 500 instead of a 422. Honour what the request asks
+        // for as well as where it points.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();

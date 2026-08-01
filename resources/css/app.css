@@ -163,6 +163,13 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-rule { height: 1px; background: var(--hairline); border: 0; margin: 0; }
 .rv-rule--soft { background: var(--hairline-soft); }
 
+/* Two fields side by side on desktop, stacked on a phone */
+.rv-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 24px;
+}
+
 .rv-grid { display: grid; gap: 24px; }
 .rv-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 .rv-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }

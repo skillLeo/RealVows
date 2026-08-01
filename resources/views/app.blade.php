@@ -8,6 +8,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RealVows">
 
+    {{-- Read by the autosave composable, which posts outside Inertia so a
+         save never re-renders the page under the member's cursor. --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title inertia>{{ config('app.name', 'RealVows') }}</title>
 
     <link rel="manifest" href="/manifest.webmanifest">

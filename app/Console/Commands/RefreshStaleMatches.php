@@ -25,8 +25,20 @@ class RefreshStaleMatches extends Command
 
     protected $description = 'Queue introduction refreshes for verified members whose matches have gone stale';
 
-    public function handle(): int
+    public function handle(\App\Services\Matching\MatchLifecycle $lifecycle): int
     {
+        /*
+         * Expire first, then top up. Doing it the other way round would count
+         * stale teasers as filling a member's set and generate nothing to
+         * replace them — the sweep would run, report success and leave the
+         * member with the same three-month-old people.
+         */
+        $expired = $lifecycle->expireStaleTeasers();
+
+        if ($expired > 0) {
+            $this->info("Expired {$expired} stale introduction".($expired === 1 ? '' : 's').'.');
+        }
+
         $chunk = (int) config('matching.nightly_chunk');
         $limit = $this->option('limit') ? (int) $this->option('limit') : null;
         $staleBefore = now()->subDays((int) config('matching.stale_after_days'));

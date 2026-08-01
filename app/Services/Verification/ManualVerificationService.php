@@ -55,7 +55,23 @@ class ManualVerificationService implements VerificationService
 
     public function reject(Verification $verification, User $reviewer, string $reason, ?string $note = null): Verification
     {
-        return DB::transaction(function () use ($verification, $reviewer, $reason, $note) {
+        $wasVerified = $verification->status === Verification::STATUS_VERIFIED;
+
+        return DB::transaction(function () use ($verification, $reviewer, $reason, $note, $wasVerified) {
+            /*
+             * ⚠️ Losing verification withdraws every introduction to this
+             * person, and returns the credit to anybody who paid for one.
+             *
+             * They bought an introduction to a VERIFIED member. If we can no
+             * longer stand behind that person, the thing they paid for does
+             * not exist, and they get their money back without having to
+             * notice or ask.
+             */
+            if ($wasVerified && $verification->profile) {
+                app(\App\Services\Matching\MatchLifecycle::class)
+                    ->withdrawIntroductionsTo($verification->profile, 'verification withdrawn');
+            }
+
             $verification->update([
                 'status' => Verification::STATUS_REJECTED,
                 'reviewed_by' => $reviewer->id,

@@ -46,8 +46,25 @@ class FakeGateway implements PaymentGateway
             );
         }
 
+        /*
+         * ⚠️ THE CALLBACK URL IS RETURNED UNTOUCHED. Do not append to it.
+         *
+         * It is a Laravel signed URL, and the signature is computed over the
+         * WHOLE query string. Adding `?SpiToken=...` — or `&SpiToken=...` —
+         * changes what is being verified and the route answers 403.
+         *
+         * This shipped and broke checkout on the live site. It survived the
+         * suite because every other callback test posts to the signed route
+         * directly, so the URL the gateway actually builds was never
+         * followed. There is a test for it now.
+         *
+         * Appending it was pointless as well as harmful: the callback
+         * identifies the purchase from the {order} route parameter and then
+         * re-queries the gateway. It never reads SpiToken off the request,
+         * because nothing in an unsigned callback is trusted.
+         */
         return GatewayHandoff::redirect(
-            $callbackUrl.'?SpiToken=fake-spi-'.$purchase->order_identifier,
+            $callbackUrl,
             'fake-spi-'.$purchase->order_identifier,
             ['fake' => true]
         );

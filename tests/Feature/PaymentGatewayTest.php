@@ -326,6 +326,64 @@ class PaymentGatewayTest extends TestCase
         ]);
     }
 
+    /**
+     * ⚠️ THE TEST THAT WAS MISSING, AND THE BUG IT WOULD HAVE CAUGHT.
+     *
+     * Every other callback test posts to the signed route directly, which
+     * exercises the route but never the URL the gateway actually builds. The
+     * callback URL is signed and already carries `expires` and `signature`,
+     * so appending `?SpiToken=` produced two question marks, corrupted the
+     * signature and answered 403 — on the live site, after the tests passed.
+     *
+     * This follows the real handoff URL end to end.
+     */
+    public function test_the_handoff_url_is_a_valid_signed_url_the_callback_accepts(): void
+    {
+        $purchase = $this->purchase(['amount_cents' => 5000, 'status' => Purchase::STATUS_INITIATED]);
+
+        $callback = \Illuminate\Support\Facades\URL::signedRoute('checkout.callback', [
+            'order' => $purchase->order_identifier,
+        ]);
+
+        $handoff = app(\App\Services\Payments\FakeGateway::class)->initiate($purchase, $callback);
+
+        $this->assertTrue($handoff->ok);
+        $this->assertNotNull($handoff->redirectUrl);
+
+        // The signature covers the whole query string, so the gateway must
+        // not have added anything to it.
+        $this->assertSame(
+            $callback,
+            $handoff->redirectUrl,
+            'The handoff altered the signed callback URL, which invalidates its signature.'
+        );
+
+        // And the route must actually accept it.
+        $this->get($handoff->redirectUrl)->assertRedirect();
+
+        $this->assertSame(3, $purchase->user->fresh()->creditBalance());
+    }
+
+    public function test_a_challenge_form_posts_to_a_url_the_callback_accepts(): void
+    {
+        // FakeGateway issues a 3DS challenge for anything ending 02.
+        $purchase = $this->purchase(['amount_cents' => 5002, 'status' => Purchase::STATUS_INITIATED]);
+
+        $callback = \Illuminate\Support\Facades\URL::signedRoute('checkout.callback', [
+            'order' => $purchase->order_identifier,
+        ]);
+
+        $handoff = app(\App\Services\Payments\FakeGateway::class)->initiate($purchase, $callback);
+
+        $this->assertNotNull($handoff->html);
+
+        preg_match('/action="([^"]+)"/', $handoff->html, $m);
+        $action = html_entity_decode($m[1]);
+
+        $this->post($action, ['SpiToken' => $handoff->spiToken])->assertRedirect();
+        $this->assertSame(3, $purchase->user->fresh()->creditBalance());
+    }
+
     // ── Reconciliation ───────────────────────────────────────────────────
 
     /** The job that saves a member whose callback was lost in transit. */

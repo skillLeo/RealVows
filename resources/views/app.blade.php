@@ -12,6 +12,12 @@
          save never re-renders the page under the member's cursor. --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- The one-click sign-in is open on the review build, so it must not
+         be indexed. Removed automatically when it goes live. --}}
+    @if (config('realvows.is_demo'))
+        <meta name="robots" content="noindex, nofollow, noarchive">
+    @endif
+
     <title inertia>{{ config('app.name', 'RealVows') }}</title>
 
     <link rel="manifest" href="/manifest.webmanifest">

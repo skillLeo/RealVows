@@ -70,11 +70,12 @@ const submit = () => form.post('/login', { onFinish: () => form.reset('password'
             </form>
         </BaseCard>
 
-        <!-- Local demo only. Never rendered anywhere else. -->
+        <!-- Review build only. The array arrives empty on a live
+             environment, so this panel is absent rather than hidden. -->
         <BaseCard v-if="demoAccounts.length" accent class="rv-auth__card rv-demo">
             <div class="rv-stack" style="gap: 20px">
                 <div class="rv-stack" style="gap: 8px">
-                    <span class="rv-label rv-label--brass">Demo · local only</span>
+                    <span class="rv-label rv-label--brass">Review access</span>
                     <p class="rv-small">
                         One click signs you straight in. Password for every account is
                         <strong>realvows2026</strong>.

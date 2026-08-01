@@ -77,6 +77,18 @@ const asOptions = (options) =>
                 </p>
             </header>
 
+            <!--
+                While the one-click sign-in is open, this page is reachable by
+                anyone who finds the URL. Storing a live credential here now
+                would hand it to them — and "Test connection" would happily
+                exercise it. The warning goes away with the review build.
+            -->
+            <p v-if="$page.props.isDemo" class="rv-flash rv-flash--error" role="alert">
+                <strong>Review build — do not store real credentials yet.</strong>
+                One-click sign-in is open on this URL, so anyone who finds it can reach this
+                page. Add real mail, storage and gateway keys only after this goes live.
+            </p>
+
             <nav class="rv-tabs" aria-label="Settings groups">
                 <Link
                     v-for="group in groups"

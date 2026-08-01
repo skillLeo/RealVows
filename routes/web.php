@@ -16,6 +16,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicPageController::class, 'home'])->name('home');
 
+/*
+ * Served rather than static, because it must answer differently on the review
+ * build. While the one-click sign-in is open, nothing here should be indexed —
+ * a search result pointing at a page with an admin button on it is a door
+ * anyone can walk through. Reverts to normal automatically when it goes live.
+ */
+Route::get('/robots.txt', function () {
+    $body = config('realvows.is_demo')
+        ? "User-agent: *\nDisallow: /\n"
+        : "User-agent: *\nDisallow: /admin\nDisallow: /profile\nDisallow: /dashboard\nDisallow: /account\n";
+
+    return response($body, 200, ['Content-Type' => 'text/plain']);
+})->name('robots');
+
 Route::controller(LegalController::class)->group(function () {
     Route::get('/terms', 'terms')->name('legal.terms');
     Route::get('/privacy', 'privacy')->name('legal.privacy');

@@ -8,6 +8,12 @@
     <title>@yield('title', 'RealVows') · RealVows</title>
     <meta name="description" content="@yield('description', 'Find someone ready for marriage. Free to join, every profile verified by a real person, matches delivered to your email and WhatsApp.')">
 
+    {{-- The one-click sign-in is open on the review build, so it must
+         not be indexed. Removed automatically when it goes live. --}}
+    @if (config('realvows.is_demo'))
+        <meta name="robots" content="noindex, nofollow, noarchive">
+    @endif
+
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="manifest" href="/manifest.webmanifest">
 

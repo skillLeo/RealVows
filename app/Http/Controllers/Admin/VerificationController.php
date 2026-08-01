@@ -59,11 +59,9 @@ class VerificationController extends Controller
         return Inertia::render('Admin/Verifications/Index', [
             'verifications' => $verifications,
             'status' => $status,
-            'counts' => [
-                'pending' => Verification::whereIn('status', [Verification::STATUS_PENDING, Verification::STATUS_REVIEW])
-                    ->whereHas('profile', fn ($q) => $q->whereNotNull('submitted_at'))
-                    ->count(),
-            ],
+            // A count per filter, so each tab says how much work is behind it
+            // rather than making the reviewer click to find out.
+            'counts' => $this->counts(),
         ]);
     }
 
@@ -152,6 +150,26 @@ class VerificationController extends Controller
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=600',
         ]);
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function counts(): array
+    {
+        $submitted = fn ($query) => $query->whereHas('profile', fn ($q) => $q->whereNotNull('submitted_at'));
+
+        return [
+            'pending' => Verification::query()
+                ->whereIn('status', [Verification::STATUS_PENDING, Verification::STATUS_REVIEW])
+                ->tap($submitted)->count(),
+            'verified' => Verification::query()
+                ->where('status', Verification::STATUS_VERIFIED)
+                ->tap($submitted)->count(),
+            'rejected' => Verification::query()
+                ->where('status', Verification::STATUS_REJECTED)
+                ->tap($submitted)->count(),
+        ];
     }
 
     private function thumbnailUrl(Verification $verification): ?string

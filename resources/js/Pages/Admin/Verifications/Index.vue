@@ -31,19 +31,21 @@ const FILTERS = [
                 </p>
             </header>
 
-            <p v-if="page.props.flash?.success" class="rv-queue__flash" role="status">
+            <p v-if="page.props.flash?.success" class="rv-flash" role="status">
                 {{ page.props.flash.success }}
             </p>
 
-            <nav class="rv-settings__tabs" aria-label="Filter">
+            <nav class="rv-tabs" aria-label="Filter by status">
                 <Link
                     v-for="filter in FILTERS"
                     :key="filter.key"
                     :href="`/admin/verifications?status=${filter.key}`"
-                    class="rv-settings__tab"
+                    class="rv-tab"
                     :class="{ 'is-active': filter.key === status }"
+                    :aria-current="filter.key === status ? 'page' : undefined"
                 >
-                    {{ filter.label }}
+                    <span>{{ filter.label }}</span>
+                    <span class="rv-tab__count">{{ counts[filter.key] ?? 0 }}</span>
                 </Link>
             </nav>
 
@@ -93,16 +95,6 @@ const FILTERS = [
 </template>
 
 <style scoped>
-.rv-queue__flash {
-    margin: 0;
-    padding: 16px 20px;
-    border: 1px solid var(--brass);
-    border-radius: var(--r);
-    background: color-mix(in oklab, var(--brass) 10%, var(--card));
-    color: var(--oxblood);
-    font-size: var(--fs-body-2);
-}
-
 .rv-queue__row {
     display: flex;
     flex-wrap: wrap;

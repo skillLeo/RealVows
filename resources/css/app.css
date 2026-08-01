@@ -512,6 +512,108 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 /* ==========================================================================
+   Filter tabs
+
+   ⚠️ These live here, globally, on purpose. They were first written inside
+   one page's <style scoped> block and reused on another, where scoping meant
+   they matched nothing at all — the filters rendered as three bare underlined
+   links run together with no gap. Anything used by more than one component
+   belongs in this file.
+
+   Four or fewer options is a segmented control, so that is what this is: one
+   framed group, the active option filled oxblood with a brass-bright
+   hairline, counts carried inside each option.
+   ========================================================================== */
+
+.rv-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--cream);
+}
+
+.rv-tab {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: var(--fs-body-2);
+  font-weight: 400;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--dur-tap) var(--ease),
+    color var(--dur-tap) var(--ease),
+    border-color var(--dur-tap) var(--ease);
+}
+
+.rv-tab:hover { color: var(--oxblood); background: color-mix(in oklab, var(--brass) 8%, var(--cream)); }
+
+.rv-tab.is-active {
+  background: var(--oxblood);
+  border-color: var(--brass-bright);
+  color: var(--cream);
+  font-weight: 500;
+}
+.rv-tab.is-active:hover { background: var(--oxblood); color: var(--cream); }
+
+/* The count sits inside its option, so a filter reads as "Waiting — 4" */
+.rv-tab__count {
+  min-width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: var(--r);
+  background: color-mix(in oklab, var(--brass) 20%, var(--cream));
+  color: var(--brass-ink);
+  font-size: var(--fs-body-3);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.rv-tab.is-active .rv-tab__count { background: var(--brass); color: var(--oxblood-deep); }
+
+/* ==========================================================================
+   Flash messages & action rows — shared, for the same reason as above
+   ========================================================================== */
+
+.rv-flash {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--brass);
+  border-radius: var(--r);
+  background: color-mix(in oklab, var(--brass) 10%, var(--card));
+  color: var(--oxblood);
+  font-size: var(--fs-body-2);
+  animation: rv-flash-in 300ms var(--ease) both;
+}
+.rv-flash--error {
+  border-color: var(--rose);
+  background: color-mix(in oklab, var(--rose) 8%, var(--card));
+  color: var(--ink);
+}
+
+@keyframes rv-flash-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.rv-actions { display: flex; flex-wrap: wrap; gap: 16px; }
+
+.rv-strong { font-size: var(--fs-body-2); font-weight: 500; color: var(--ink); }
+
+/* ==========================================================================
    Pills & badges — brass only, never green, never a seal
    ========================================================================== */
 

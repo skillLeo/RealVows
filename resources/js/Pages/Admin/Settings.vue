@@ -76,12 +76,12 @@ const asOptions = (options) =>
                 </p>
             </header>
 
-            <nav class="rv-settings__tabs" aria-label="Settings groups">
+            <nav class="rv-tabs" aria-label="Settings groups">
                 <Link
                     v-for="group in groups"
                     :key="group.key"
                     :href="`/admin/settings/${group.key}`"
-                    class="rv-settings__tab"
+                    class="rv-tab"
                     :class="{ 'is-active': group.key === activeGroup }"
                     :aria-current="group.key === activeGroup ? 'page' : undefined"
                 >
@@ -91,8 +91,8 @@ const asOptions = (options) =>
 
             <p
                 v-if="page.props.flash?.success || page.props.flash?.error"
-                class="rv-settings__flash"
-                :class="{ 'is-error': !!page.props.flash?.error }"
+                class="rv-flash"
+                :class="{ 'rv-flash--error': !!page.props.flash?.error }"
                 role="status"
             >
                 {{ page.props.flash?.success || page.props.flash?.error }}
@@ -170,7 +170,7 @@ const asOptions = (options) =>
                     </div>
                 </BaseCard>
 
-                <div class="rv-settings__actions">
+                <div class="rv-actions">
                     <BaseButton type="submit" variant="primary" :disabled="form.processing">
                         {{ form.processing ? 'Saving' : 'Save changes' }}
                     </BaseButton>
@@ -191,7 +191,7 @@ const asOptions = (options) =>
 </template>
 
 <style scoped>
-.rv-settings__tabs {
+.rv-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -199,35 +199,10 @@ const asOptions = (options) =>
     border-bottom: 1px solid var(--hairline);
 }
 
-.rv-settings__tab {
-    min-height: var(--tap-min);
-    display: inline-flex;
-    align-items: center;
-    padding: 0 16px;
-    border-radius: var(--r);
-    border: 1px solid transparent;
-    color: var(--ink-soft);
-    font-size: var(--fs-body-2);
-    font-weight: 500;
-    text-decoration: none;
-    transition:
-        background var(--dur-tap) var(--ease),
-        color var(--dur-tap) var(--ease),
-        border-color var(--dur-tap) var(--ease);
-}
 
-.rv-settings__tab:hover {
-    color: var(--oxblood);
-    border-color: var(--hairline);
-}
 
-.rv-settings__tab.is-active {
-    background: var(--brass);
-    border-color: var(--brass);
-    color: var(--oxblood-deep);
-}
 
-.rv-settings__flash {
+.rv-flash {
     margin: 0;
     padding: 16px 20px;
     border: 1px solid var(--brass);
@@ -237,12 +212,12 @@ const asOptions = (options) =>
     font-size: var(--fs-body-2);
 }
 
-.rv-settings__flash.is-error {
+.rv-flash.is-error {
     border-color: var(--rose);
     background: color-mix(in oklab, var(--rose) 8%, var(--card));
 }
 
-.rv-settings__actions {
+.rv-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;

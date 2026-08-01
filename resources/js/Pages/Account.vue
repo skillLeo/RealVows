@@ -44,7 +44,7 @@ const logout = () => router.post('/logout');
                 <h1 class="rv-d2">Settings</h1>
             </header>
 
-            <p v-if="page.props.flash?.success" class="rv-queue__flash" role="status">
+            <p v-if="page.props.flash?.success" class="rv-flash" role="status">
                 {{ page.props.flash.success }}
             </p>
 
@@ -53,7 +53,7 @@ const logout = () => router.post('/logout');
                     <div class="rv-account__row">
                         <div class="rv-stack" style="gap: 6px">
                             <span class="rv-label">Email address</span>
-                            <span class="rv-dash__strong">{{ account.email }}</span>
+                            <span class="rv-strong">{{ account.email }}</span>
                         </div>
                         <VerifiedBadge v-if="account.emailVerified" label="Confirmed" />
                         <span v-else class="rv-pill">Not confirmed</span>
@@ -146,7 +146,7 @@ const logout = () => router.post('/logout');
             <BaseCard v-if="account.isAdmin" accent>
                 <div class="rv-stack" style="gap: 16px">
                     <span class="rv-label rv-label--brass">Administration</span>
-                    <div class="rv-review__actions">
+                    <div class="rv-actions">
                         <BaseButton href="/admin/verifications" variant="secondary">Verification queue</BaseButton>
                         <BaseButton href="/admin/settings" variant="secondary">Settings</BaseButton>
                     </div>
@@ -156,7 +156,7 @@ const logout = () => router.post('/logout');
             <BaseCard quiet>
                 <div class="rv-account__row">
                     <div class="rv-stack" style="gap: 6px">
-                        <span class="rv-dash__strong">Signed in on this device</span>
+                        <span class="rv-strong">Signed in on this device</span>
                         <span class="rv-small">Your profile stays exactly as it is.</span>
                     </div>
                     <BaseButton variant="ghost" @click="logout">Log out</BaseButton>

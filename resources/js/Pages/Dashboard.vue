@@ -62,7 +62,7 @@ const isVerified = computed(() => props.verification.status === 'verified');
                         <div class="rv-dash__ring">
                             <ProgressRing :percent="completeness" />
                             <div class="rv-stack" style="gap: 6px">
-                                <span class="rv-dash__strong">Profile {{ completeness }}% complete</span>
+                                <span class="rv-strong">Profile {{ completeness }}% complete</span>
                                 <span class="rv-small">
                                     {{ completeness === 100 ? 'Everything is filled in' : 'Pick up where you left off' }}
                                 </span>
@@ -134,7 +134,7 @@ const isVerified = computed(() => props.verification.status === 'verified');
     gap: 20px;
 }
 
-.rv-dash__strong {
+.rv-strong {
     font-size: var(--fs-body-2);
     font-weight: 500;
 }

@@ -100,7 +100,7 @@ const decided = props.verification.status === 'verified' || props.verification.s
                 </p>
             </BaseCard>
 
-            <div v-else class="rv-review__actions">
+            <div v-else class="rv-actions">
                 <BaseButton variant="primary" :disabled="form.processing" @click="approve">
                     Approve this member
                 </BaseButton>
@@ -133,7 +133,7 @@ const decided = props.verification.status === 'verified' || props.verification.s
                     <span class="rv-help">This is shown to the member, so keep it kind.</span>
                 </div>
 
-                <div class="rv-review__actions">
+                <div class="rv-actions">
                     <BaseButton variant="primary" :disabled="form.processing" @click="reject">
                         Send it back
                     </BaseButton>
@@ -212,7 +212,7 @@ const decided = props.verification.status === 'verified' || props.verification.s
     font-size: var(--fs-body-3);
 }
 
-.rv-review__actions {
+.rv-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;

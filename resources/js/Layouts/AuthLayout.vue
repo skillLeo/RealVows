@@ -14,6 +14,11 @@ defineProps({
 <template>
     <Head :title="title" />
 
+    <div v-if="$page.props.isDemo" class="rv-demobar" role="status">
+        <strong>Review build</strong>
+        <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
+    </div>
+
     <div class="rv-auth">
         <div class="rv-auth__band rv-auth__band--photo">
             <Link href="/" class="rv-logo" aria-label="RealVows home">

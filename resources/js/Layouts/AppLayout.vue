@@ -49,6 +49,11 @@ const links = computed(() =>
 
     <a href="#rv-main" class="rv-skip">Skip to content</a>
 
+    <div v-if="$page.props.isDemo" class="rv-demobar" role="status">
+        <strong>Review build</strong>
+        <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
+    </div>
+
     <div class="rv-app">
         <header class="rv-app__bar">
             <div class="rv-shell rv-app__bar-inner">

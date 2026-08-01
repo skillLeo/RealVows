@@ -22,6 +22,13 @@
 <body>
     <a href="#rv-main" class="rv-skip">Skip to content</a>
 
+    @if (config('realvows.is_demo'))
+        <div class="rv-demobar" role="status">
+            <strong>Review build</strong>
+            <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
+        </div>
+    @endif
+
     <header class="rv-panel">
         <div class="rv-shell rv-pubhead">
             <a href="{{ route('home') }}" class="rv-logo" aria-label="RealVows home">

@@ -21,7 +21,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           # GD is what the photo pipeline uses. It is the extension actually
           # present on Hostinger shared hosting, so CI matches production.
           extensions: mbstring, pdo, pdo_sqlite, gd, bcmath, intl

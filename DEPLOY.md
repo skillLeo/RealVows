@@ -10,9 +10,9 @@ Verified on the box rather than assumed:
 
 | | |
 |---|---|
-| Default CLI PHP | **8.2.31** |
-| PHP 8.3 | `/opt/alt/php83/usr/bin/php` → 8.3.31 |
-| PHP 8.4 | `/opt/alt/php84/usr/bin/php` → 8.4.21 |
+| Default CLI PHP | **8.2.31** — too old, do not use |
+| PHP 8.3 | `/opt/alt/php83/usr/bin/php` → 8.3.31 — also too old |
+| PHP 8.4 | `/opt/alt/php84/usr/bin/php` → **8.4.21 ← use this** |
 | Image extensions | **GD and Imagick both present** ✅ |
 | Composer | 2.9.8 |
 | Git | 2.52.0 |
@@ -21,10 +21,12 @@ Verified on the box rather than assumed:
 
 Two consequences that shape everything below:
 
-**The default `php` is 8.2 but this application requires 8.3.** Every CLI
+**The default `php` is 8.2 but this application requires 8.4.** Laravel 13
+pulls in Symfony 8, which needs PHP ≥ 8.4.1 — so 8.2 and 8.3 both fail at
+`composer install` with a platform error. Every CLI
 command — migrations, caches, the queue cron — must call
-`/opt/alt/php83/usr/bin/php` explicitly. The *web* PHP version is separate and
-is set per-domain in hPanel; it must also be 8.3 or the site will not boot.
+`/opt/alt/php84/usr/bin/php` explicitly. The *web* PHP version is separate and
+is set per-domain in hPanel; it must also be 8.4 or the site will not boot.
 
 **There is no Node on the server.** Assets are therefore built in CI and the
 compiled output is shipped. Never try to run `npm` on the box.
@@ -38,13 +40,26 @@ else exposed would serve `.env` to the internet.
 
 ```
 ~/domains/realvows.skillleo.com/
-├── app/            ← the application. NOT web-reachable.
-│   ├── .env        ← lives only here, never in git
-│   ├── storage/    ← member photos. NEVER overwritten by a deploy.
+├── DO_NOT_UPLOAD_HERE   ← Hostinger's empty marker. See the note below.
+├── app/                 ← the application. NOT web-reachable.
+│   ├── .env             ← lives only here, never in git
+│   ├── storage/         ← member photos. NEVER overwritten by a deploy.
 │   └── ...
-└── public_html/    ← the web root; contents of Laravel's public/
-    └── index.php   ← points back into ../app
+└── public_html/         ← the web root; contents of Laravel's public/
+    └── index.php        ← points back into ../app
 ```
+
+> **About `DO_NOT_UPLOAD_HERE`.** Hostinger drops this empty, zero-byte file
+> into every domain folder. It means "your *website* files go in
+> `public_html`, not at this level" — guidance aimed at someone about to
+> upload `index.html` one directory too high. It enforces nothing.
+>
+> For a Laravel application the app deliberately sits at this level, because
+> only `public_html` is served over the web. If the framework lived inside
+> `public_html`, then `.env` — the database password, the app key — and
+> `storage/` — every member's photographs — would be fetchable by anyone who
+> guessed the URL. Keeping the app one level up is what makes that
+> impossible, and it is the standard layout for Laravel on shared hosting.
 
 ---
 
@@ -57,7 +72,7 @@ Hostinger these are prefixed, e.g. `u290685119_realvows`.
 
 ### 2. PHP version for the web
 
-hPanel → Advanced → PHP Configuration → select **8.3**. Without this the site
+hPanel → Advanced → PHP Configuration → select **8.4**. Without this the site
 returns a composer platform error on the first request.
 
 ### 3. The `.env`
@@ -99,7 +114,7 @@ drains the queue and exits. Without it, **no email ever sends.**
 hPanel → Advanced → Cron Jobs, every minute:
 
 ```
-cd ~/domains/realvows.skillleo.com/app && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+cd ~/domains/realvows.skillleo.com/app && /opt/alt/php84/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
 > Some cheap Hostinger tiers restrict cron to every 15 minutes. That is
@@ -110,7 +125,7 @@ cd ~/domains/realvows.skillleo.com/app && /opt/alt/php83/usr/bin/php artisan sch
 
 ```bash
 cd ~/domains/realvows.skillleo.com/app
-/opt/alt/php83/usr/bin/php artisan realvows:create-admin \
+/opt/alt/php84/usr/bin/php artisan realvows:create-admin \
   --name="Umar" --email="umar@realvows.com" --role=super_admin
 ```
 
@@ -162,7 +177,7 @@ back up, and fails loudly if the home page does not answer 200.
 
 `ci.yml` runs three jobs, and all three can fail a build:
 
-1. **Tests** — the full suite on PHP 8.3 with GD, matching production
+1. **Tests** — the full suite on PHP 8.4 with GD, matching production
 2. **Content rules** — the contractual ones. No astrology language anywhere in
    `resources/`, four photos never six, and no UI copy promising "instantly"
    when the architecture batches work by cron. These are enforced by the
@@ -174,11 +189,11 @@ back up, and fails loudly if the home page does not answer 200.
 
 ## Routine commands
 
-Always with the 8.3 binary:
+Always with the 8.4 binary:
 
 ```bash
 cd ~/domains/realvows.skillleo.com/app
-P=/opt/alt/php83/usr/bin/php
+P=/opt/alt/php84/usr/bin/php
 
 $P artisan migrate --force
 $P artisan config:cache && $P artisan route:cache && $P artisan view:cache
@@ -196,7 +211,7 @@ does not re-read the file.
 
 | Symptom | Cause |
 |---|---|
-| Composer platform error on first load | Web PHP is not 8.3 (hPanel) |
+| Composer platform error on first load | Web PHP is not 8.4 (hPanel) |
 | 500 with a blank page | `storage/` not writable, or `APP_KEY` missing |
 | No email ever arrives | The cron is missing, or mail settings are unset in `/admin/settings` |
 | Photos 404 | `storage/app` permissions — they are served through PHP, never as static files |

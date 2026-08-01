@@ -17,9 +17,11 @@
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="manifest" href="/manifest.webmanifest">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    {{-- Self-hosted. The home page is the one that has to be fast on a
+         mid-range phone over 4G, so it is the page that benefits most from
+         not opening a connection to a third party before it can show text. --}}
+    <link rel="preload" href="/fonts/fraunces-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     {{-- Blade pages load only the stylesheet and the small vanilla motion
          script. No Vue, no Inertia, no hydration cost. --}}

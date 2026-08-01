@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CreditAdminController;
+use App\Http\Controllers\Admin\MatchAuditController;
+use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\LegalController;
@@ -69,6 +72,30 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/verifications/{verification}/review', [VerificationController::class, 'review'])
         ->middleware('admin:verifications.review')
         ->name('verifications.review');
+
+    /*
+     * Match audit. The only place the six component scores are visible, and
+     * only to staff holding matches.view.
+     */
+    Route::middleware('admin:matches.view')->group(function () {
+        Route::get('/matches', [MatchAuditController::class, 'index'])->name('matches');
+        Route::get('/matches/{match}', [MatchAuditController::class, 'show'])->name('matches.show');
+    });
+
+    /*
+     * Money. super_admin only — a reviewer brought in to check photographs
+     * has no business voiding transactions.
+     */
+    Route::middleware('admin:settings.update')->group(function () {
+        Route::get('/payments', [PaymentAdminController::class, 'index'])->name('payments');
+        Route::post('/payments/{purchase}/requery', [PaymentAdminController::class, 'requery'])->name('payments.requery');
+        Route::post('/payments/{purchase}/void', [PaymentAdminController::class, 'void'])->name('payments.void');
+    });
+
+    Route::middleware('admin:credits.adjust')->group(function () {
+        Route::get('/users/{user}/credits', [CreditAdminController::class, 'show'])->name('credits');
+        Route::post('/users/{user}/credits', [CreditAdminController::class, 'store'])->name('credits.store');
+    });
 
     Route::post('/settings/test', [SettingsController::class, 'test'])
         ->middleware('admin:settings.update')

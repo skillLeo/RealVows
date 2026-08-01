@@ -21,9 +21,13 @@
     <title inertia>{{ config('app.name', 'RealVows') }}</title>
 
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    {{-- Self-hosted, so there is no third-party DNS lookup, handshake and TLS
+         negotiation standing between a phone on 4G and readable text. The two
+         faces that appear above the fold are preloaded; the rest arrive with
+         the stylesheet. --}}
+    <link rel="preload" href="/fonts/fraunces-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead

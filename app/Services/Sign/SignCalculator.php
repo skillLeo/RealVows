@@ -7,9 +7,14 @@ use Illuminate\Support\Carbon;
 /**
  * INTERNAL ONLY — NEVER SURFACED TO A MEMBER.
  *
- * Derives the two values that feed 40% of the Phase 2 compatibility score
- * from a date of birth. It runs silently when a member saves their date of
- * birth and writes to `profiles.sign` and `profiles.element`.
+ * Derives the two values behind the affinity component of the compatibility
+ * score from a date of birth. It runs silently when a member saves their
+ * date of birth and writes to `profiles.sign` and `profiles.element`.
+ *
+ * What that component is worth lives in config/matching.php and nowhere
+ * else — deliberately not repeated here, because a number written into a
+ * comment goes stale the first time somebody tunes it, and a comment that
+ * lies about the mechanism is worse than no comment.
  *
  * Nothing this class returns may reach a browser: not in an Inertia prop,
  * not in an API response, not in an email, not in alt text, not in a page

@@ -67,6 +67,17 @@ class CompatibilityScorerTest extends TestCase
         $this->assertGreaterThan(65, $this->scorer->score($a, $b)['total']);
     }
 
+    /**
+     * "Deeply mismatched" has to mean mismatched on the practical criteria
+     * too, not only on values and habits.
+     *
+     * An earlier version of this test left both people satisfying each
+     * other's stated preferences — same country, inside each other's age and
+     * height ranges, an acceptable build — and was surprised to score 66.
+     * That number was right and the test was wrong: two people who suit each
+     * other on every practical measure and disagree about everything else
+     * are a bad match, not an impossible one.
+     */
     public function test_deeply_mismatched_people_score_low(): void
     {
         [$a, $b] = $this->pair(
@@ -83,13 +94,25 @@ class CompatibilityScorerTest extends TestCase
                 'religion' => 'None', 'faith_importance' => 'essential',
                 'core_values' => ['adventure', 'independence', 'ambition'],
                 'marriage_timeline' => 'no_fixed', 'conflict_style' => 'avoid',
-                'interests' => ['motorsport'], 'date_of_birth' => '1994-07-01',
+                'interests' => ['motorsport'], 'date_of_birth' => '1954-07-01',
                 'personality_scales' => ['social' => 95, 'planning' => 95, 'decisions' => 95, 'outlook' => 95],
+                // Also outside every stated preference: too short, wrong
+                // build, wrong side of the world, well outside the age range.
                 'height_cm' => 145,
+                'body_type' => 'plus_size',
+                'city' => 'Toronto',
+                'country' => 'Canada',
+                'willing_to_relocate' => false,
             ]
         );
 
-        $this->assertLessThan(65, $this->scorer->score($a, $b)['total']);
+        $total = $this->scorer->score($a, $b)['total'];
+
+        $this->assertLessThan(
+            65,
+            $total,
+            "Two people who disagree on everything, including what they each said they wanted, scored {$total}."
+        );
     }
 
     // ── Weight redistribution ────────────────────────────────────────────

@@ -2,8 +2,10 @@
 
 namespace App\Actions\Profile;
 
+use App\Jobs\RegenerateMatchesForProfile;
 use App\Models\Profile;
 use App\Services\Profile\ProfileCompleteness;
+use App\Services\Matching\MatchingFieldsHash;
 use App\Services\Sign\SignCalculator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +21,7 @@ class SaveProfileStep
     public function __construct(
         private readonly SignCalculator $signs,
         private readonly ProfileCompleteness $completeness,
+        private readonly MatchingFieldsHash $hashes,
     ) {}
 
     /**
@@ -41,7 +44,8 @@ class SaveProfileStep
              * ⚠️ The silent derivation.
              *
              * Saving a date of birth recalculates the two internal columns
-             * that feed 40% of the Phase 2 score. Nothing about it is
+             * behind the affinity component — see config/matching.php for
+             * what that component is currently worth. Nothing about it is
              * returned to the browser, nothing is shown to the member, and
              * there is no reveal card — the approved design had one and it
              * was deliberately removed. See SignCalculator for the reasoning.
@@ -74,7 +78,41 @@ class SaveProfileStep
                 $profile->saveQuietly();
             }
 
+            $this->queueRegenerationIfScoringChanged($profile);
+
             return $assessment;
         });
+    }
+
+    /**
+     * An edit only regenerates matches when it touched something the engine
+     * actually reads.
+     *
+     * This endpoint is hit every 800ms while somebody is typing, so the
+     * cheap check comes first: hash the fields that affect scoring and
+     * compare. Rewriting a bio or fixing a typo in an occupation changes
+     * nothing here and queues nothing.
+     *
+     * The job is delayed and unique per profile, so somebody working through
+     * six fields queues one run rather than six — the uniqueness lock does
+     * the debouncing.
+     */
+    private function queueRegenerationIfScoringChanged(Profile $profile): void
+    {
+        if (! $profile->isVerified()) {
+            return;
+        }
+
+        $hash = $this->hashes->for($profile->fresh(['preferences']));
+
+        if ($hash === $profile->matching_fields_hash) {
+            return;
+        }
+
+        $profile->forceFill(['matching_fields_hash' => $hash])->saveQuietly();
+
+        RegenerateMatchesForProfile::dispatch($profile->id)
+            ->delay(now()->addMinutes(config('matching.regenerate_debounce_minutes')))
+            ->afterCommit();
     }
 }

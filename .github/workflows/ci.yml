@@ -66,61 +66,108 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
       # ─────────────────────────────────────────────────────────────────────
       # The contractual content rules, enforced by the pipeline rather than by
       # anyone remembering them.
       #
-      # The matching mechanism is the client's commercial secret and must
-      # never reach a member. This job fails the build if it ever does — which
-      # is what stops a well-meaning change in six months from undoing a
-      # decision that was made for market reasons.
+      # ⚠️ THESE GREPS ARE THE SECOND NET, NOT THE GUARANTEE.
+      #
+      # The real guarantee is ForbiddenLanguageTest, which exercises the
+      # actual generators over a thousand pairs — copy assembled at runtime
+      # from two innocent halves would pass every grep below and fail there.
+      # These exist to catch the other direction: somebody hardcoding a term
+      # into a template where no test happens to look.
+      #
+      # Three tiers, because a single flat list was already failing on honest
+      # writing. "Down to earth" is good copy; \bearth\b across all of
+      # resources/ would reject it.
       # ─────────────────────────────────────────────────────────────────────
-      - name: No internal matching language in user-facing code
+
+      - name: "Tier 1 — banned outright, everywhere a member can reach"
         run: |
           set +e
           FOUND=0
 
+          # The compiled bundle is included deliberately: it is what actually
+          # ships, and it catches anything a template imported from elsewhere.
+          SCOPE="resources/ public/build/ app/Mail/ lang/"
+
           check () {
-            MATCH=$(grep -rniE "$1" resources/ 2>/dev/null)
+            MATCH=$(grep -rniE "$1" $SCOPE 2>/dev/null \
+              | grep -v 'Services/Matching/AffinityMatrix' \
+              | grep -v 'Services/Sign/SignCalculator')
             if [ -n "$MATCH" ]; then
               echo "::error::$2"
-              echo "$MATCH"
+              echo "$MATCH" | head -20
               FOUND=1
             fi
           }
 
-          check 'zodiac|star sign|sun sign|astrolog|synastry|horoscope' \
-                'Banned astrology term found in resources/'
+          check 'zodiac|star sign|sun sign|astrolog|synastry|horoscope|natal chart|birth chart|celestial' \
+                'A banned mechanism term reached user-facing code.'
+
           check '\b(aries|taurus|gemini|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b' \
-                'A sign name found in resources/'
-          check '\b(fire|air|earth|water)\b' \
-                'Element word found in resources/ — check it is not a compatibility context'
+                'A sign name reached user-facing code.'
 
-          # "Leo" needs its own pass so it does not trip on SkillLeo.
-          LEO=$(grep -rnE '\bLeo\b' resources/ 2>/dev/null | grep -viE 'skillleo')
-          if [ -n "$LEO" ]; then echo "::error::Sign name 'Leo' found"; echo "$LEO"; FOUND=1; fi
+          # "Cancer" and "Leo" need their own passes: one is a disease and a
+          # perfectly ordinary word, the other is inside SkillLeo.
+          CANCER=$(grep -rniE '\bcancer\b' $SCOPE 2>/dev/null | grep -viE 'cancer (research|charity|awareness)')
+          if [ -n "$CANCER" ]; then echo "::error::Sign name 'Cancer' found"; echo "$CANCER" | head -5; FOUND=1; fi
 
-          if grep -rnP '[\x{2648}-\x{2653}]' resources/ 2>/dev/null; then
-            echo "::error::A sign glyph found in resources/"; FOUND=1
+          LEO=$(grep -rnE '\bLeo\b' $SCOPE 2>/dev/null | grep -viE 'skillleo')
+          if [ -n "$LEO" ]; then echo "::error::Sign name 'Leo' found"; echo "$LEO" | head -5; FOUND=1; fi
+
+          if grep -rnP '[\x{2648}-\x{2653}]' $SCOPE 2>/dev/null; then
+            echo "::error::A sign glyph reached user-facing code."; FOUND=1
           fi
 
           exit $FOUND
 
-      - name: Four photos, never six
+      - name: "Tier 2 — mechanism vocabulary inside generated copy"
         run: |
-          if grep -rniE 'six photos|6 photos' resources/; then
-            echo "::error::Photo count is four. 'six photos' is the obsolete spec."
+          # Scoped to the generators only. These words are innocent in
+          # ordinary romantic writing and would fire constantly platform-wide;
+          # inside a rationale or a commonality they are a tell.
+          set +e
+          if grep -rniE '(fire|air|earth|water) sign|fire and air|earth and water|\b(cardinal|mutable|modality|elemental)\b' \
+               app/Services/Matching/Copy/ 2>/dev/null; then
+            echo "::error::Mechanism vocabulary found in a copy generator."
             exit 1
+          fi
+          exit 0
+
+      - name: "Tier 3 — the product rules"
+        run: |
+          set +e
+          FOUND=0
+
+          if grep -rniE 'six photos|6 photos' resources/ 2>/dev/null; then
+            echo "::error::Photo count is four. 'six photos' is the obsolete spec."
+            FOUND=1
           fi
 
-      - name: Never promise instant background work
-        run: |
-          # Shared hosting batches queued work roughly every minute. Saying
-          # "instantly" in UI copy would be a promise the architecture cannot keep.
-          if grep -rniE '>[^<]*\b(instantly|immediately)\b' resources/views resources/js/Pages; then
+          # Shared hosting batches queued work roughly every minute. Promising
+          # instant behaviour is a promise the architecture cannot keep.
+          if grep -rniE '>[^<]*\b(instantly|immediately|right away)\b' resources/views resources/js 2>/dev/null; then
             echo "::error::UI copy promises instant behaviour. Use 'shortly' or 'usually within a day'."
-            exit 1
+            FOUND=1
           fi
+
+          # There is no browsing in this product, in any phase.
+          if grep -rniE 'browse profiles|search profiles|all members|profile directory' resources/ 2>/dev/null; then
+            echo "::error::Browsing language found. The engine chooses; members never shop."
+            FOUND=1
+          fi
+
+          exit $FOUND
 
   assets:
     name: Build & budget

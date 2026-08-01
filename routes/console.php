@@ -27,3 +27,30 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('queue:work --stop-when-empty --tries=3 --max-time=50')
     ->everyMinute()
     ->withoutOverlapping();
+
+/*
+ * Tops up introductions for anyone verified whose set has gone stale. Queues
+ * jobs rather than doing the work, so the drain above does it a chunk at a
+ * time and being killed mid-run costs at most one chunk.
+ */
+Schedule::command('realvows:refresh-matches')
+    ->dailyAt('03:10')
+    ->withoutOverlapping();
+
+/*
+ * Finds purchases the gateway never told us the outcome of. This is what
+ * saves a member who paid and never got their credits because a callback was
+ * lost — without it, the only way that surfaces is a complaint.
+ */
+Schedule::command('realvows:reconcile-payments')
+    ->hourly()
+    ->withoutOverlapping();
+
+/*
+ * Walks every credit chain and proves nobody's balance drifted. Reports
+ * rather than repairs — an automatic fix to a money record would destroy the
+ * evidence of whatever caused the problem.
+ */
+Schedule::command('realvows:verify-ledger')
+    ->dailyAt('03:40')
+    ->withoutOverlapping();

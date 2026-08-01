@@ -3,6 +3,7 @@
 namespace App\Services\Verification;
 
 use App\Actions\RecordAuditLog;
+use App\Jobs\GenerateTeaserMatches;
 use App\Mail\VerificationApproved;
 use App\Mail\VerificationRejected;
 use App\Models\User;
@@ -36,6 +37,17 @@ class ManualVerificationService implements VerificationService
             ], $reviewer);
 
             $this->notify($verification, new VerificationApproved($verification));
+
+            /*
+             * Introductions are built now, before the member has paid
+             * anything. They log in to find people already waiting for them,
+             * locked — which is the commercial engine of the product, and
+             * the reason matching runs on approval rather than on purchase.
+             *
+             * afterCommit so the job cannot start against a transaction that
+             * has not landed yet and find an unverified profile.
+             */
+            GenerateTeaserMatches::dispatch($verification->profile_id)->afterCommit();
 
             return $verification->fresh();
         });

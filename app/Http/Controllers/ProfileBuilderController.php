@@ -143,10 +143,21 @@ class ProfileBuilderController extends Controller
 
     private function profileFor(Request $request): Profile
     {
-        // A member only ever reaches their own profile — it is resolved from
-        // the session, never from an id in the URL, so there is no id to
-        // change and nothing for a policy to catch.
-        return $request->user()->profile()->with(['preferences', 'photos'])->firstOrFail();
+        /*
+         * A member only ever reaches their own profile — resolved from the
+         * session, never from an id in the URL, so there is no id to change
+         * and nothing for a policy to catch.
+         *
+         * firstOrCreate rather than firstOrFail: registration always makes a
+         * profile, but an administrator created from the console has none,
+         * and a 404 on their own Profile tab is a confusing dead end. Creating
+         * the empty row costs nothing and lets staff walk the member flow.
+         */
+        $user = $request->user();
+
+        $user->profile()->firstOrCreate(['user_id' => $user->id]);
+
+        return $user->profile()->with(['preferences', 'photos'])->firstOrFail();
     }
 
     /**

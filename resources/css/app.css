@@ -631,6 +631,100 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 /* ==========================================================================
+   Paper
+
+   Cream on a screen is flat in a way cream on paper never is. A single
+   inline SVG turbulence — no extra request, no image file — puts a barely
+   perceptible tooth on the light surfaces, so the page reads as something
+   printed rather than something rendered. At 3.5% it is felt, not seen.
+   ========================================================================== */
+
+.rv-paper { position: relative; isolation: isolate; }
+.rv-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   Ornament — the mark between one thought and the next
+   ========================================================================== */
+
+.rv-ornament {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--brass-ink);
+  padding-block: 8px;
+}
+.rv-ornament--dark { color: var(--brass); }
+
+.rv-ornament__rule {
+  flex: 1 1 auto;
+  height: 1px;
+  max-width: 180px;
+  background: linear-gradient(90deg, transparent, var(--hairline) 45%, var(--hairline));
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 700ms var(--ease);
+}
+.rv-ornament__rule:last-child {
+  background: linear-gradient(270deg, transparent, var(--hairline) 45%, var(--hairline));
+  transform-origin: left center;
+}
+.rv-ornament svg {
+  opacity: 0;
+  transform: scale(.7) rotate(-25deg);
+  transition: opacity 600ms var(--ease) 180ms, transform 600ms var(--ease) 180ms;
+}
+
+/* The ornament draws itself outward from the centre as it arrives */
+.rv-reveal.is-in .rv-ornament__rule,
+.rv-ornament.is-in .rv-ornament__rule { transform: scaleX(1); }
+.rv-reveal.is-in .rv-ornament svg,
+.rv-ornament.is-in svg { opacity: 1; transform: none; }
+
+.rv-ornament--centred { justify-content: center; }
+
+/* ==========================================================================
+   Editorial type — the wedding-invitation register
+   ========================================================================== */
+
+/* A quiet italic serif line, used above a headline the way an invitation
+   says "together with their families" before the names. */
+.rv-eyebrow {
+  margin: 0;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: var(--fs-body-1);
+  line-height: 1.4;
+  letter-spacing: .01em;
+  color: var(--brass-ink);
+}
+.rv-on-dark .rv-eyebrow { color: var(--brass); }
+
+/* Optical tightening for the very large display sizes. At 56px the default
+   word spacing reads loose; invitations set them tighter. */
+.rv-d1 { word-spacing: -0.02em; }
+
+/* A pull-quote sized between the display and body scales, italic, used once
+   per page at most. */
+.rv-vow {
+  margin: 0;
+  max-width: 28ch;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(24px, 3.6vw, var(--fs-display-3));
+  line-height: 1.45;
+  color: var(--oxblood);
+}
+.rv-on-dark .rv-vow { color: var(--cream); }
+
+/* ==========================================================================
    Public chrome (Blade marketing pages)
    ========================================================================== */
 
@@ -933,21 +1027,60 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--brass);
 }
 
+/* A hairline that draws itself under the headline as the hero settles.
+   scaleX, never width — animating width relayouts the whole column on every
+   frame, and this page has a 1.5s budget on a mid-range phone. */
+.rv-hero__flourish {
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brass), transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: rv-draw 900ms var(--ease) 260ms forwards;
+}
+@keyframes rv-draw { to { transform: scaleX(1); } }
+
+.rv-hero__eyebrow-line { animation: rv-rise 700ms var(--ease) both; }
+.rv-hero .rv-d1 { animation: rv-rise 800ms var(--ease) 90ms both; }
+.rv-hero__copy-inner .rv-lead { animation: rv-rise 800ms var(--ease) 200ms both; }
+
+@keyframes rv-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .rv-hero__art {
   position: relative;
-  min-height: clamp(360px, 52vw, 660px);
+  min-height: clamp(360px, 52vw, 680px);
   border-left: 1px solid var(--hairline);
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
 }
 
 .rv-hero__frame {
   position: relative;
   overflow: hidden;
   margin: 0;
+  border-radius: var(--r);
+  border: 1px solid var(--hairline);
   background: linear-gradient(150deg, var(--oxblood) 0%, var(--oxblood-deep) 100%);
+  animation: rv-frame-in 1000ms var(--ease) both;
 }
-.rv-hero__frame--second { border-left: 1px solid var(--hairline); }
+
+/* Offset, not flush. Two photographs side by side at identical height read
+   as a stock banner; a small vertical stagger reads as an arrangement. */
+.rv-hero__frame--second {
+  margin-top: clamp(20px, 5vw, 56px);
+  animation-delay: 140ms;
+}
+
+@keyframes rv-frame-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .rv-hero__frame img {
   position: absolute;
   inset: 0;
@@ -955,7 +1088,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   height: 100%;
   object-fit: cover;
   object-position: center 30%;
+  /* A very slow settle out of a slight zoom. Transform only, so it costs
+     nothing to composite, and it stops after one pass — a looping image is
+     restless, and restless is the opposite of what this page is for. */
+  animation: rv-photo-settle 2400ms var(--ease) both;
 }
+
+@keyframes rv-photo-settle {
+  from { transform: scale(1.06); }
+  to   { transform: none; }
+}
+
+/* The band that holds the single line of promise */
+.rv-promise {
+  background: var(--card);
+  border-block: 1px solid var(--hairline);
+  padding-block: clamp(56px, 9vw, 96px);
+}
+.rv-promise__inner { align-items: center; text-align: center; gap: 32px; }
+
+.rv-section__head { gap: 12px; margin-bottom: 48px; }
 
 .rv-hero__note {
   position: absolute;

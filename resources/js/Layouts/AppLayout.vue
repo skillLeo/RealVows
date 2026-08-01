@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import RvLogo from '@/Components/RvLogo.vue';
 import BottomTabBar from '@/Components/BottomTabBar.vue';
+import AccountMenu from '@/Components/AccountMenu.vue';
 
 /**
  * Chrome for every authenticated screen.
@@ -20,15 +21,27 @@ const props = defineProps({
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
-const initial = computed(() => (user.value?.first_name || user.value?.name || '·').charAt(0).toUpperCase());
 const current = computed(() => page.url.split('?')[0]);
 
-const links = [
-    { label: 'Matches', href: '/dashboard' },
-    { label: 'Profile', href: '/profile' },
-    { label: 'Packages', href: '/packages' },
-    { label: 'Account', href: '/account' },
-];
+/**
+ * Staff get their own bar. Sending an administrator to the member tabs was
+ * how the Profile link ended up 404ing for them — they have no profile row,
+ * and a link that cannot work should not be shown in the first place.
+ */
+const links = computed(() =>
+    user.value?.is_admin
+        ? [
+              { label: 'Queue', href: '/admin/verifications' },
+              { label: 'Settings', href: '/admin/settings' },
+              { label: 'Matches', href: '/dashboard' },
+          ]
+        : [
+              { label: 'Matches', href: '/dashboard' },
+              { label: 'Profile', href: '/profile' },
+              { label: 'Packages', href: '/packages' },
+              { label: 'Account', href: '/account' },
+          ]
+);
 </script>
 
 <template>
@@ -54,10 +67,7 @@ const links = [
                     </Link>
                 </nav>
 
-                <div v-if="user" class="rv-app__member">
-                    <span class="rv-app__name">{{ user.first_name || user.name }}</span>
-                    <span class="rv-app__avatar" aria-hidden="true">{{ initial }}</span>
-                </div>
+                <AccountMenu v-if="user" :user="user" />
             </div>
 
             <slot name="bar" />

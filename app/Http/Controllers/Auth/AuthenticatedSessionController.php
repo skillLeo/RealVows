@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -58,12 +59,29 @@ class AuthenticatedSessionController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
-    public function destroy(Request $request): RedirectResponse
+    // SymfonyResponse, not Inertia\Response: Inertia::location() hands back a
+    // 409 carrying an X-Inertia-Location header, which is a plain HTTP
+    // response rather than a rendered page.
+    public function destroy(Request $request): SymfonyResponse
     {
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        /*
+         * Inertia::location, not redirect().
+         *
+         * Logout is triggered from an Inertia page, so the response comes back
+         * over XHR. The home page is plain Blade — not an Inertia response —
+         * and Inertia cannot consume it, so a normal redirect made it pop the
+         * whole marketing page into a white error modal instead of navigating.
+         * location() tells the browser to do a real visit, which is what
+         * leaving the app actually is.
+         */
+        if ($request->header('X-Inertia')) {
+            return Inertia::location(route('home'));
+        }
 
         return redirect()->route('home');
     }

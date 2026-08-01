@@ -5,13 +5,20 @@
 
 @section('content')
 
-    {{-- ── Hero ─────────────────────────────────────────────────────────── --}}
+    {{-- ── Hero ─────────────────────────────────────────────────────────────
+         The photography is given more room than the words, and the words are
+         set the way an invitation sets them: a quiet italic line, then the
+         names, then the detail. --}}
     <section class="rv-hero rv-on-dark">
         <div class="rv-hero__copy">
-            <div class="rv-hero__copy-inner rv-stack" style="gap: 32px">
+            <div class="rv-hero__copy-inner rv-stack" style="gap: 28px">
+                <p class="rv-eyebrow rv-hero__eyebrow-line">For those who mean it</p>
+
                 <h1 class="rv-d1">Find someone ready for marriage.</h1>
 
-                <p class="rv-lead" style="max-width: 46ch">
+                <span class="rv-hero__flourish"></span>
+
+                <p class="rv-lead" style="max-width: 44ch">
                     Free to join. Every profile verified by a real person. Matches delivered to your
                     email and WhatsApp.
                 </p>
@@ -31,7 +38,10 @@
         {{-- Two couples, deliberately. One visibly Muslim, so Muslim members
              can see at a glance that this platform is for them — a market
              decision from the client, not decoration. Never AI-generated
-             people: the whole pitch is verified real humans. --}}
+             people: the whole pitch is verified real humans.
+
+             The frames are offset from one another rather than flush, which
+             is what stops a two-up photo pair reading like a stock banner. --}}
         <div class="rv-hero__art">
             <figure class="rv-hero__frame">
                 <img src="{{ asset('images/site/hero-a.jpg') }}"
@@ -47,8 +57,24 @@
         </div>
     </section>
 
-    {{-- ── Trust strip ──────────────────────────────────────────────────── --}}
-    <section class="rv-trust">
+    {{-- ── The promise ─────────────────────────────────────────────────────
+         One line, centred, given a whole band to itself. A page that never
+         pauses feels like a brochure; this is the pause. --}}
+    <section class="rv-paper rv-promise">
+        <div class="rv-shell rv-stack rv-promise__inner" data-reveal>
+            @include('public.partials.ornament')
+
+            <p class="rv-vow">
+                Nobody here is passing the time. Everyone on RealVows is looking for the person
+                they are going to marry.
+            </p>
+
+            @include('public.partials.ornament')
+        </div>
+    </section>
+
+    {{-- ── Trust strip ─────────────────────────────────────────────────── --}}
+    <section class="rv-trust rv-paper">
         <div class="rv-shell rv-trust__grid" data-stagger>
             @foreach ([
                 ['diamond', 'Free to join', 'Sign up and build your full profile at no cost'],
@@ -65,9 +91,10 @@
         </div>
     </section>
 
-    {{-- ── How it works ─────────────────────────────────────────────────── --}}
-    <section class="rv-shell rv-section">
-        <div class="rv-stack" style="gap: 12px; margin-bottom: 48px" data-reveal>
+    {{-- ── How it works ────────────────────────────────────────────────── --}}
+    <section class="rv-shell rv-section rv-paper">
+        <div class="rv-stack rv-section__head" data-reveal>
+            <p class="rv-eyebrow">Three steps, then we take over</p>
             <h2 class="rv-d2">How it works</h2>
             <span class="rv-underline" style="max-width: 220px"></span>
         </div>
@@ -78,7 +105,7 @@
                 ['02', 'Get verified', "A real person checks you're you, usually within a day"],
                 ['03', 'Receive your matches', 'Chosen for you and delivered to your inbox — there is nothing to search through'],
             ] as [$number, $title, $body])
-                <div class="rv-card rv-card--lift rv-stack" style="gap: 20px" data-reveal>
+                <div class="rv-card rv-card--lift rv-step rv-stack" style="gap: 20px" data-reveal>
                     <span class="rv-numeral rv-step__number">{{ $number }}</span>
                     <h3 class="rv-d3">{{ $title }}</h3>
                     <span class="rv-rule rv-rule--soft"></span>
@@ -97,9 +124,10 @@
         their pace, the life they are trying to build.
     --}}
     <section class="rv-panel rv-compat rv-on-dark">
-        <div class="rv-shell rv-stack" style="gap: 64px">
-            <div class="rv-stack" style="gap: 24px" data-reveal>
-                <h2 class="rv-d2" style="max-width: 24ch">Compatibility, measured properly.</h2>
+        <div class="rv-shell rv-stack" style="gap: 56px">
+            <div class="rv-stack rv-section__head" data-reveal>
+                <p class="rv-eyebrow">Not a guess</p>
+                <h2 class="rv-d2" style="max-width: 22ch">Compatibility, measured properly.</h2>
                 <span class="rv-underline" style="max-width: 200px"></span>
                 <p class="rv-lead" style="max-width: 54ch">
                     Every introduction begins with a compatibility score out of 100, built from what
@@ -113,12 +141,17 @@
             <div class="rv-card rv-card--accent rv-compat__panel" data-reveal>
                 @include('public.partials.compatibility-mark', ['score' => 87])
             </div>
+
+            <div data-reveal>
+                @include('public.partials.ornament', ['tone' => 'dark'])
+            </div>
         </div>
     </section>
 
     {{-- ── Closing call to action ───────────────────────────────────────── --}}
-    <section class="rv-shell rv-section">
+    <section class="rv-shell rv-section rv-paper">
         <div class="rv-closing rv-stack" data-reveal>
+            <p class="rv-eyebrow">No card, no catch</p>
             <h2 class="rv-d2">Sign up is 100% free</h2>
             <p class="rv-lead" style="max-width: 52ch">
                 Build your whole profile without paying anything. Choose a match package only when
@@ -127,6 +160,7 @@
             <div>
                 <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
             </div>
+            @include('public.partials.ornament', ['tone' => 'light'])
         </div>
     </section>
 

@@ -13,12 +13,22 @@ import RvIcon from './RvIcon.vue';
  */
 const page = usePage();
 
-const tabs = [
-    { label: 'Matches', icon: 'matches', href: '/dashboard' },
-    { label: 'Profile', icon: 'profile', href: '/profile' },
-    { label: 'Packages', icon: 'packages', href: '/packages' },
-    { label: 'Account', icon: 'account', href: '/account' },
-];
+// Staff get the tabs that exist for them. An administrator has no profile
+// row, so showing them a Profile tab is showing them a dead end.
+const tabs = computed(() =>
+    page.props.auth?.user?.is_admin
+        ? [
+              { label: 'Queue', icon: 'check', href: '/admin/verifications' },
+              { label: 'Settings', icon: 'account', href: '/admin/settings' },
+              { label: 'Matches', icon: 'matches', href: '/dashboard' },
+          ]
+        : [
+              { label: 'Matches', icon: 'matches', href: '/dashboard' },
+              { label: 'Profile', icon: 'profile', href: '/profile' },
+              { label: 'Packages', icon: 'packages', href: '/packages' },
+              { label: 'Account', icon: 'account', href: '/account' },
+          ]
+);
 
 const current = computed(() => page.url.split('?')[0]);
 

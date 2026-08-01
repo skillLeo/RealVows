@@ -36,6 +36,21 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # Required, not optional. public/build is gitignored, and every page
+      # renders through @vite — without a manifest each one returns 500 and
+      # the whole suite fails for a reason that has nothing to do with the
+      # code under test. Building here also means the tests exercise the real
+      # asset pipeline rather than a stub.
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
       - name: Prepare environment
         run: |
           cp .env.example .env

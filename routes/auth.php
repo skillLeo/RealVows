@@ -11,6 +11,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PackagesController;
 use App\Http\Controllers\PhotoController;
@@ -104,6 +105,10 @@ Route::middleware('auth')->group(function () {
         | enumerate, because every route below checks ownership.
         */
         Route::get('/matches/{match}', [MatchController::class, 'show'])->name('matches.show');
+
+        Route::post('/matches/{match}/report', [ReportController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('matches.report');
 
         Route::post('/matches/{match}/unlock', [MatchController::class, 'unlock'])
             ->middleware('throttle:unlock')

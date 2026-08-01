@@ -20,7 +20,20 @@ use Tests\TestCase;
  */
 class MigrationReversibilityTest extends TestCase
 {
-    private const PHASE_2_STEPS = 4;
+    /**
+     * ⚠️ Derived, never hardcoded.
+     *
+     * This was `= 4` and broke the moment a fifth Phase 2 migration was
+     * added: rolling back four left the reshape applied, and the test failed
+     * claiming the schema was wrong when the count was. A constant that has
+     * to be remembered will eventually not be.
+     */
+    private function phase2Steps(): int
+    {
+        return count(glob(database_path('migrations/2026_08_0[2-9]*.php')))
+            + count(glob(database_path('migrations/2026_0[9]*.php')))
+            + count(glob(database_path('migrations/202[7-9]*.php')));
+    }
 
     private const RESHAPED = ['matches', 'credit_ledger', 'purchases'];
 
@@ -40,7 +53,7 @@ class MigrationReversibilityTest extends TestCase
         $this->assertTrue(Schema::hasColumn('purchases', 'order_identifier'));
         $this->assertTrue(Schema::hasTable('payment_events'));
 
-        Artisan::call('migrate:rollback', ['--step' => self::PHASE_2_STEPS]);
+        Artisan::call('migrate:rollback', ['--step' => $this->phase2Steps()]);
 
         /*
          * The load-bearing assertion. Rollback must leave the three tables
@@ -76,7 +89,7 @@ class MigrationReversibilityTest extends TestCase
     public function test_the_schema_survives_a_full_down_and_up_cycle(): void
     {
         Artisan::call('migrate:fresh');
-        Artisan::call('migrate:rollback', ['--step' => self::PHASE_2_STEPS]);
+        Artisan::call('migrate:rollback', ['--step' => $this->phase2Steps()]);
         Artisan::call('migrate');
 
         foreach ([...self::RESHAPED, ...self::CREATED] as $table) {
@@ -98,7 +111,7 @@ class MigrationReversibilityTest extends TestCase
     public function test_no_migration_is_marked_as_run_against_a_missing_table(): void
     {
         Artisan::call('migrate:fresh');
-        Artisan::call('migrate:rollback', ['--step' => self::PHASE_2_STEPS]);
+        Artisan::call('migrate:rollback', ['--step' => $this->phase2Steps()]);
 
         $ran = \DB::table('migrations')->pluck('migration');
 

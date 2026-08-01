@@ -15,6 +15,16 @@ const props = defineProps({
     score: { type: Number, required: true },
     small: { type: Boolean, default: false },
     label: { type: String, default: 'Compatibility' },
+
+    /**
+     * ⚠️ The ceremony runs ONCE.
+     *
+     * A count-up that replays on every visit is not an arrival, it is a
+     * delay — the member already knows the number and is now waiting to read
+     * it again. The match view passes `firstView` from the server, derived
+     * from whether `viewed_at` has been stamped.
+     */
+    animate: { type: Boolean, default: true },
 });
 
 const RADIUS = 62;
@@ -30,9 +40,9 @@ const reduceMotion = () =>
 function run() {
     const target = Math.max(0, Math.min(100, props.score));
 
-    // With motion off the information still arrives — it simply arrives at
-    // once rather than being performed.
-    if (reduceMotion()) {
+    // With motion off — or on a revisit — the information still arrives. It
+    // simply arrives at once rather than being performed.
+    if (reduceMotion() || !props.animate) {
         displayed.value = target;
         offset.value = CIRCUMFERENCE * (1 - target / 100);
         return;

@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Models\MatchRecord;
 use App\Models\Photo;
+use App\Models\Profile;
+use App\Support\ProfileOptions;
 use Illuminate\Support\Facades\URL;
 
 /**
@@ -82,12 +84,160 @@ class MatchPresenter
             'languages' => $them?->languages ?? [],
             'photos' => $this->signedPhotos($them?->photos ?? collect()),
             'unlockedAt' => $match->unlocked_at?->format('j F Y'),
+            'verified' => $them?->isVerified() ?? false,
+
+            /*
+             * ⚠️ THE CEREMONY RUNS ONCE.
+             *
+             * The count and the ring drawing themselves are an arrival, and an
+             * arrival that happens every time somebody revisits a page is not
+             * an arrival, it is a delay. `viewed_at` is set the first time
+             * this route is opened, so this is false on every visit after.
+             */
+            'firstView' => $match->viewed_at === null,
+
+            'sections' => $this->sections($them),
 
             /*
              * Still absent: score_breakdown, and anything derived from a date
              * of birth beyond the age the member volunteered.
              */
         ];
+    }
+
+    /**
+     * The profile proper, in the same order as the seven-step builder, so it
+     * is immediately legible to anyone who has filled one in.
+     *
+     * Photos and Account are deliberately not sections — the photos are the
+     * gallery at the top, and the account is nobody else's business.
+     *
+     * ⚠️ EMPTY-FIELD DISCIPLINE. A row with nothing under it is never
+     * emitted, and a section with no rows is never emitted at all. A profile
+     * with gaps must read as a person who chose not to answer, never as a
+     * broken page.
+     */
+    private function sections(?Profile $them): array
+    {
+        if (! $them) {
+            return [];
+        }
+
+        $sections = [
+            'Personal' => [
+                'Lives in' => $this->place($them),
+                'Nationality' => $them->nationality,
+                'Open to relocating' => $this->yesNo($them->willing_to_relocate),
+            ],
+            'Physical' => [
+                'Height' => $them->height_cm ? $this->height($them->height_cm) : null,
+                'Build' => ProfileOptions::BODY_TYPE[$them->body_type] ?? null,
+                'Eyes' => $them->eye_colour,
+                'Hair' => $them->hair_colour,
+            ],
+            'Lifestyle' => [
+                'Work' => $them->occupation,
+                'Industry' => $them->industry,
+                'Education' => $them->education,
+                'Faith' => $them->religion,
+                'How much faith matters' => ProfileOptions::FAITH_IMPORTANCE[$them->faith_importance] ?? null,
+                'Smoking' => ProfileOptions::FREQUENCY[$them->smoking] ?? null,
+                'Drinking' => ProfileOptions::FREQUENCY[$them->drinking] ?? null,
+                'Children' => ProfileOptions::HAS_CHILDREN[$them->has_children] ?? null,
+                'Languages' => $this->list($them->languages),
+                'Pets' => $this->pets($them->pets),
+            ],
+            'Values' => [
+                'Hoping to marry' => ProfileOptions::MARRIAGE_TIMELINE[$them->marriage_timeline] ?? null,
+                'Wants children' => ProfileOptions::WANTS_CHILDREN[$them->wants_children] ?? null,
+                'What matters most' => $this->coreValues($them->core_values),
+                'When there is a disagreement' => ProfileOptions::CONFLICT_STYLE[$them->conflict_style] ?? null,
+                'Shows care by' => $this->loveLanguages($them->love_languages),
+                'Interests' => $this->list($them->interests),
+            ],
+            'Preferences' => [
+                'Looking for' => $this->ageRange($them->preferences),
+                'How far they would look' => ProfileOptions::DISTANCE_PREFERENCE[$them->preferences?->distance_preference] ?? null,
+                'Qualities they hope for' => $this->list($them->preferences?->preferred_qualities),
+            ],
+        ];
+
+        // Drop empty rows, then drop sections left with nothing in them.
+        $out = [];
+
+        foreach ($sections as $heading => $rows) {
+            $rows = array_filter($rows, fn ($v) => $v !== null && $v !== '');
+
+            if ($rows !== []) {
+                $out[] = ['heading' => $heading, 'rows' => $rows];
+            }
+        }
+
+        return $out;
+    }
+
+    private function place(?Profile $them): ?string
+    {
+        return implode(', ', array_filter([$them?->city, $them?->country])) ?: null;
+    }
+
+    /** Centimetres with feet and inches alongside — the audience uses both. */
+    private function height(int $cm): string
+    {
+        $inches = (int) round($cm / 2.54);
+
+        return sprintf('%dcm (%d\'%d")', $cm, intdiv($inches, 12), $inches % 12);
+    }
+
+    private function yesNo(?bool $value): ?string
+    {
+        return $value === null ? null : ($value ? 'Yes' : 'No');
+    }
+
+    private function list(?array $values): ?string
+    {
+        $values = array_filter($values ?? [], fn ($v) => is_string($v) && trim($v) !== '');
+
+        return $values === [] ? null : implode(', ', $values);
+    }
+
+    private function pets(?array $pets): ?string
+    {
+        $pets = array_filter($pets ?? []);
+
+        if ($pets === [] || $pets === ['none']) {
+            return $pets === ['none'] ? 'None' : null;
+        }
+
+        return implode(', ', array_map(fn ($p) => ProfileOptions::PETS[$p] ?? $p, $pets));
+    }
+
+    /** Ranked, and shown in rank order because the order is the meaning. */
+    private function coreValues(?array $values): ?string
+    {
+        $values = array_filter($values ?? []);
+
+        return $values === []
+            ? null
+            : implode(', ', array_map(fn ($v) => ProfileOptions::CORE_VALUES[$v] ?? $v, $values));
+    }
+
+    private function loveLanguages(?array $values): ?string
+    {
+        $values = array_filter($values ?? []);
+
+        return $values === []
+            ? null
+            : implode(', ', array_map(fn ($v) => ProfileOptions::LOVE_LANGUAGES[$v] ?? $v, $values));
+    }
+
+    private function ageRange(?object $preferences): ?string
+    {
+        if (! $preferences?->age_min && ! $preferences?->age_max) {
+            return null;
+        }
+
+        return "Someone {$preferences->age_min}–{$preferences->age_max}";
     }
 
     /**

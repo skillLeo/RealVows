@@ -249,6 +249,37 @@ does not re-read the file.
 
 ---
 
+## Restoring a backup
+
+⚠️ **Strip the first line before restoring with anything but a modern client.**
+
+MariaDB 11.8's `mysqldump` — which is what the live server runs — prepends:
+
+```
+/*M!999999\- enable the sandbox mode */
+```
+
+Clients older than 10.11 cannot parse that directive and fail at line 1 with
+`Unknown command '\-'`. The dump itself is fine; only the restore path is
+affected, and it fails in exactly the situation where somebody is under
+pressure and reaching for whatever `mysql` is on their laptop.
+
+```bash
+# Take one
+mysqldump -h127.0.0.1 -u USER -pPASS DBNAME > backup.sql
+
+# Restore anywhere, including older clients
+tail -n +2 backup.sql | mysql -h127.0.0.1 -u USER -pPASS TARGET_DB
+```
+
+Verified on 2026-08-01: the 172 KB backup restores cleanly with the first
+line stripped, and contains the full pre-migration state.
+
+**A backup nobody has restored is a hope, not a backup.** Restore into a
+scratch database after any change to the backup routine.
+
+---
+
 ## Standing notes from things that went wrong
 
 ### Closing the chrome is not closing the pages

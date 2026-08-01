@@ -32,13 +32,24 @@ class MatchController extends Controller
 
         abort_unless($match->isUnlocked(), 404);
 
+        $match->load(['matched.photos', 'matched.preferences', 'matched.verification']);
+
+        /*
+         * ⚠️ The payload is built BEFORE `viewed_at` is stamped.
+         *
+         * `firstView` is derived from that column, and stamping it first
+         * would make every visit look like a repeat — the ring would never
+         * draw and the score would never count, including the one time it
+         * should. Order matters here in a way that is easy to reverse by
+         * accident while tidying.
+         */
+        $payload = $this->presenter->full($match);
+
         if (! $match->viewed_at) {
             $match->forceFill(['viewed_at' => now()])->save();
         }
 
-        return Inertia::render('Matches/Show', [
-            'match' => $this->presenter->full($match),
-        ]);
+        return Inertia::render('Matches/Show', ['match' => $payload]);
     }
 
     /**

@@ -40,26 +40,30 @@ else exposed would serve `.env` to the internet.
 
 ```
 ~/domains/realvows.skillleo.com/
-├── DO_NOT_UPLOAD_HERE   ← Hostinger's empty marker. See the note below.
-├── app/                 ← the application. NOT web-reachable.
-│   ├── .env             ← lives only here, never in git
-│   ├── storage/         ← member photos. NEVER overwritten by a deploy.
-│   └── ...
-└── public_html/         ← the web root; contents of Laravel's public/
-    └── index.php        ← points back into ../app
+└── public_html/          ← web root AND the application
+    ├── .htaccess         ← the only thing protecting everything below
+    ├── .env              ← db password + app key
+    ├── app/ config/ storage/ vendor/ …
+    └── public/           ← what .htaccess rewrites every request into
 ```
 
-> **About `DO_NOT_UPLOAD_HERE`.** Hostinger drops this empty, zero-byte file
-> into every domain folder. It means "your *website* files go in
-> `public_html`, not at this level" — guidance aimed at someone about to
-> upload `index.html` one directory too high. It enforces nothing.
+> **Why the whole application sits inside the web root, and what that costs.**
 >
-> For a Laravel application the app deliberately sits at this level, because
-> only `public_html` is served over the web. If the framework lived inside
-> `public_html`, then `.env` — the database password, the app key — and
-> `storage/` — every member's photographs — would be fetchable by anyone who
-> guessed the URL. Keeping the app one level up is what makes that
-> impossible, and it is the standard layout for Laravel on shared hosting.
+> Laravel's normal layout keeps the framework one directory *above* the served
+> folder, so `.env` and `storage/` are physically unreachable. That layout was
+> rejected for this project, so everything lives in `public_html` instead —
+> which means the database password, the app key and every member photograph
+> are inside the directory Apache serves.
+>
+> `public_html/.htaccess` is therefore load-bearing. It denies the sensitive
+> paths twice, through two different Apache modules, so that disabling one
+> does not open the doors. Verified after deploy: `.env`, `.git/config`,
+> `storage/logs/`, `vendor/`, `app/`, `config/` and `composer.json` all
+> return **403**.
+>
+> **If that file is ever deleted or overwritten, `.env` becomes downloadable
+> by anyone.** Check it after any change to the web root, and re-run the
+> verification block at the end of this document.
 
 ---
 
@@ -216,3 +220,20 @@ does not re-read the file.
 | No email ever arrives | The cron is missing, or mail settings are unset in `/admin/settings` |
 | Photos 404 | `storage/app` permissions — they are served through PHP, never as static files |
 | Settings changes have no effect | `config:cache` after editing `.env` |
+
+---
+
+## Verify the web root is safe
+
+Run this after any deploy or any change to `public_html`. Every line must show
+`403` or `404`. A `200` means that file is downloadable by anyone on the
+internet.
+
+```bash
+for p in /.env /.env.example /storage/logs/laravel.log /composer.json \
+         /artisan /.git/config /vendor/autoload.php /app/Models/User.php \
+         /config/database.php; do
+  printf '%-34s %s\n' "$p" \
+    "$(curl -s -o /dev/null -w '%{http_code}' https://realvows.skillleo.com$p)"
+done
+```

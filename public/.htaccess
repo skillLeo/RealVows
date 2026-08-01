@@ -23,3 +23,11 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Apache has no built-in type for .webmanifest, so it was going out as
+# text/plain. Chrome tolerates that with a console warning; stricter
+# installs reject the manifest outright, and a rejected manifest means no
+# home-screen install at all.
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>

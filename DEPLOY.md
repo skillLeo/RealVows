@@ -196,7 +196,7 @@ back up, and fails loudly if the home page does not answer 200.
 Always with the 8.4 binary:
 
 ```bash
-cd ~/domains/realvows.skillleo.com/app
+cd ~/domains/realvows.skillleo.com/public_html
 P=/opt/alt/php84/usr/bin/php
 
 $P artisan migrate --force

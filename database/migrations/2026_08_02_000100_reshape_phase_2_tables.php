@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -29,6 +30,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $this->refuseIfRealMoneyHasSettled();
+
         Schema::dropIfExists('matches');
         Schema::dropIfExists('credit_ledger');
         Schema::dropIfExists('purchases');
@@ -36,6 +39,46 @@ return new class extends Migration
         $this->createPurchases();
         $this->createCreditLedger();
         $this->createMatches();
+    }
+
+    /**
+     * ⚠️ THE GUARD, BECAUSE A COMMENT WILL NOT STOP ANYONE AT 2AM.
+     *
+     * The warning above explains why dropping is safe today. This makes the
+     * database refuse when it stops being true — a settled payment, or a live
+     * gateway transaction id, means real money has moved and these tables are
+     * the record of it. From that point the only correct migration is a
+     * conversion with a backfill.
+     *
+     * Deliberately checks the DATA rather than the environment. A staging
+     * copy of production holds real payments too, and `APP_ENV` would happily
+     * say `local` while it did.
+     */
+    private function refuseIfRealMoneyHasSettled(): void
+    {
+        if (! Schema::hasTable('purchases')) {
+            return;
+        }
+
+        $settled = DB::table('purchases')
+            ->where('status', 'completed')
+            ->where(function ($q) {
+                // Demo purchases go through FakeGateway and are identifiable.
+                $q->whereNull('gateway_transaction_id')
+                    ->orWhere('gateway_transaction_id', 'not like', 'fake-%');
+            })
+            ->count();
+
+        if ($settled === 0) {
+            return;
+        }
+
+        throw new RuntimeException(
+            "Refusing to run: {$settled} settled payment(s) exist in `purchases`. "
+            .'This migration DROPS the tables holding the record of money members have paid. '
+            .'Convert with a backfill instead of recreating, and restore a backup into a scratch '
+            .'database to rehearse it first.'
+        );
     }
 
     private function createPurchases(): void

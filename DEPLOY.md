@@ -125,7 +125,33 @@ cd ~/domains/realvows.skillleo.com/app && /opt/alt/php84/usr/bin/php artisan sch
 > tolerable for email but slow for anything a member is waiting on. Confirm
 > the plan supports one-minute cron.
 
-### 5. First administrator
+### 5. Seed images — the repository is NOT sufficient on its own
+
+⚠️ **A clean checkout plus these steps must produce a working environment.
+Without this step it does not.**
+
+`storage/app/seed/` holds the 70 demonstration photographs and is gitignored
+(6.9 MB of licensed stock, and `storage/` is excluded wholesale). `DemoSeeder`
+guards each file with `is_file()`, so on a fresh server it silently produced
+thirty members with zero photographs and reported success.
+
+That guard is now loud and the seeder aborts — but the sync is still a step
+somebody has to run:
+
+```bash
+rsync -az -e "ssh -p 65002 -i ~/.ssh/skillleo_deploy" \
+  storage/app/seed/ \
+  u290685119@46.202.183.38:domains/realvows.skillleo.com/public_html/storage/app/seed/
+```
+
+Verify before seeding — 30 portraits and 40 scenes:
+
+```bash
+ls storage/app/seed/portraits | wc -l   # 30
+ls storage/app/seed/scenes | wc -l      # 40
+```
+
+### 6. First administrator
 
 ```bash
 cd ~/domains/realvows.skillleo.com/app

@@ -17,6 +17,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -41,6 +42,9 @@ class DemoSeeder extends Seeder
     /** Slot 1 is their own portrait; the rest are scenes, never faces. */
     private const SCENE_SLOTS = ['full_length', 'social', 'open'];
 
+    /** @var list<string> Seed images that were not found, reported at the end. */
+    private array $skippedPhotos = [];
+
     public function __construct(
         private readonly PhotoStorageService $photos,
         private readonly ProfileCompleteness $completeness,
@@ -63,6 +67,8 @@ class DemoSeeder extends Seeder
         $this->createMatches($men, $women);
         $this->createPurchaseHistory($women->take(3));
         $this->openSomeMatches($women->take(3));
+
+        $this->reportSkips();
 
         $this->command?->newLine();
         $this->command?->info('Demo data ready.');
@@ -255,6 +261,8 @@ class DemoSeeder extends Seeder
                 ...$this->photos->store($this->asUpload($portrait), $profile->id, 'passport'),
                 'slot' => 'passport',
             ]);
+        } else {
+            $this->recordSkip($portrait);
         }
 
         foreach (self::SCENE_SLOTS as $offset => $slot) {
@@ -268,8 +276,50 @@ class DemoSeeder extends Seeder
                     ...$this->photos->store($this->asUpload($scene), $profile->id, $slot),
                     'slot' => $slot,
                 ]);
+            } else {
+                $this->recordSkip($scene);
             }
         }
+    }
+
+    /**
+     * ⚠️ A GUARD THAT SKIPS MUST BE LOUD.
+     *
+     * This exact `is_file()` produced thirty members with zero photographs on
+     * the live server and said nothing — `storage/app/seed/` is gitignored, so
+     * a clean deploy has no source images and every check quietly failed. The
+     * seeder reported success and the product looked healthy and empty.
+     *
+     * Counted here and shouted about at the end of the run, because a silent
+     * skip is how an empty product reaches production looking fine.
+     */
+    private function recordSkip(string $path): void
+    {
+        $this->skippedPhotos[] = $path;
+
+        Log::warning('DemoSeeder: seed image missing, photo not created.', ['path' => $path]);
+    }
+
+    /** Fails the seed rather than letting a photoless demo look successful. */
+    private function reportSkips(): void
+    {
+        if ($this->skippedPhotos === []) {
+            return;
+        }
+
+        $count = count($this->skippedPhotos);
+        $example = $this->skippedPhotos[0];
+
+        $this->command?->newLine();
+        $this->command?->error("  {$count} seed images were missing — those photos do not exist.");
+        $this->command?->line("  First missing: {$example}");
+        $this->command?->line('  storage/app/seed/ is gitignored. Sync it (see DEPLOY.md step 6) and re-run.');
+
+        throw new \RuntimeException(
+            "DemoSeeder skipped {$count} photographs because their source files are missing. "
+            .'Sync storage/app/seed/ to this environment and run the seeder again. '
+            .'A demo with no photographs looks like a broken product.'
+        );
     }
 
     private function asUpload(string $path): UploadedFile

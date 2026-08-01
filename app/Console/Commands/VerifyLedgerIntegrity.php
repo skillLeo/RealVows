@@ -25,6 +25,13 @@ class VerifyLedgerIntegrity extends Command
 
     protected $description = 'Check every credit ledger chain against its running balance';
 
+    public function __construct(
+        private readonly \App\Services\Settings\SettingsService $settings,
+        private readonly \App\Services\Settings\RuntimeMailConfigurator $mail,
+    ) {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $problems = [];
@@ -75,6 +82,49 @@ class VerifyLedgerIntegrity extends Command
 
         Log::critical('Credit ledger integrity check failed', ['problems' => $problems]);
 
+        /*
+         * ⚠️ AN INTEGRITY CHECK NOBODY READS IS NOT A CHECK.
+         *
+         * This runs at 03:40 from a cron whose output goes to /dev/null. A
+         * critical log line in a file nobody opens is indistinguishable from
+         * silence, so a discrepancy in the record of members' money has to
+         * arrive somewhere a person actually looks.
+         */
+        $this->alertAHuman($problems);
+
         return self::FAILURE;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $problems
+     */
+    private function alertAHuman(array $problems): void
+    {
+        $to = $this->settings->get('general', 'admin_notification_email')
+            ?: $this->settings->get('general', 'support_email');
+
+        if (! $to) {
+            $this->warn('No admin notification email is set, so nobody has been told. Set one in /admin/settings.');
+
+            return;
+        }
+
+        try {
+            $this->mail->apply();
+
+            \Illuminate\Support\Facades\Mail::raw(
+                "The nightly credit ledger check found ".count($problems)." discrepancies on ".config('app.url').".\n\n"
+                ."This means a member's recorded balance disagrees with the sum of their ledger, which should be "
+                ."impossible through the application. Someone should look at this today.\n\n"
+                .json_encode($problems, JSON_PRETTY_PRINT),
+                fn ($m) => $m->to($to)->subject('RealVows: credit ledger discrepancy found')
+            );
+
+            $this->line("Alert sent to {$to}.");
+        } catch (\Throwable $e) {
+            // Never let the alert failing hide the finding itself.
+            $this->error('Could not send the alert: '.$e->getMessage());
+            Log::critical('Ledger alert email failed', ['error' => $e->getMessage()]);
+        }
     }
 }

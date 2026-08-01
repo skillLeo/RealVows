@@ -264,6 +264,38 @@ class TeaserPhotoLeakTest extends TestCase
     }
 
     /**
+     * ⚠️ The other half of the photo-authorisation fix.
+     *
+     * Opening the door for paid matches must not open it for unpaid ones. A
+     * member who guesses a teaser's photo id — or keeps a URL from before a
+     * reversal — still gets nothing.
+     */
+    public function test_a_teaser_grants_no_access_to_the_photo_route(): void
+    {
+        [$user, $match, $photo] = $this->memberWithLockedMatch();
+
+        // Built by hand ON PURPOSE here: the presenter refuses to emit one,
+        // so this is the attack of somebody constructing it themselves.
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'photos.show',
+            now()->addHour(),
+            ['photo' => $photo->id]
+        );
+
+        $this->actingAs($user)->get($url)->assertNotFound();
+
+        // And once paid for, the same id opens.
+        app(CreditService::class)->adjust($user, 1, 'goodwill', 'test', $user);
+        app(CreditService::class)->unlockMatch($user->fresh(), $match);
+
+        $this->assertNotSame(
+            404,
+            $this->actingAs($user->fresh())->get($url)->getStatusCode(),
+            'Paying did not grant access to the photograph.'
+        );
+    }
+
+    /**
      * There is no browse surface in this product, in any phase. These are the
      * URLs somebody would try first.
      */

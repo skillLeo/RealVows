@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Verification\EnsureVerificationCode;
 use App\Http\Requests\Profile\UploadPhotoRequest;
+use App\Models\MatchRecord;
 use App\Models\Photo;
 use App\Models\Verification;
 use App\Services\Photos\PhotoStorageService;
@@ -121,11 +122,45 @@ class PhotoController extends Controller
         return back()->with('success', 'Here is a new code. Please write this one on your note.');
     }
 
+    /**
+     * A member may see a photograph in exactly two cases: it is theirs, or
+     * they have PAID to open an introduction to the person in it.
+     *
+     * ⚠️ This second case was missing, and it was a live bug. Phase 1's rule
+     * was "your own photos only", which was correct while the profile builder
+     * was the only thing showing photographs. Phase 2 added the match view
+     * and MatchPresenter began emitting signed URLs for the OTHER person's
+     * photos — which this method then refused. Members were paying to open an
+     * introduction and getting four broken images.
+     *
+     * It was found by a test that followed the URL the serialiser actually
+     * emitted, rather than rebuilding one. Nothing else would have caught it:
+     * the URL was correctly signed, the route existed, the photo existed, and
+     * the authorisation said no.
+     *
+     * ⚠️ A TEASER GRANTS NOTHING. Only `status = unlocked` opens this door,
+     * which is the same rule the presenter applies when deciding whether to
+     * generate a URL at all. Two independent checks, same answer.
+     */
     private function authorizeOwnership(Request $request, Photo $photo): void
     {
+        $profileId = $request->user()->profile?->id;
+
         // 404 rather than 403: another member's photo id should look like it
         // does not exist, because as far as this member is concerned it does not.
-        abort_unless($photo->profile_id === $request->user()->profile?->id, 404);
+        abort_if($profileId === null, 404);
+
+        if ($photo->profile_id === $profileId) {
+            return;
+        }
+
+        $hasPaidToSeeThem = MatchRecord::query()
+            ->where('seeker_profile_id', $profileId)
+            ->where('matched_profile_id', $photo->profile_id)
+            ->where('status', MatchRecord::STATUS_UNLOCKED)
+            ->exists();
+
+        abort_unless($hasPaidToSeeThem, 404);
     }
 
     private function payload(Photo $photo): array

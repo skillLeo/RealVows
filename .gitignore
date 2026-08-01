@@ -27,3 +27,7 @@ Homestead.yaml
 Thumbs.db
 
 /_design
+
+# Demo seed originals — large, regenerable, and not part of the product.
+# Re-download with the curl block documented in DEMO.md.
+/storage/app/seed

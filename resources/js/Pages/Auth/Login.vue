@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import BaseButton from '@/Components/BaseButton.vue';
@@ -6,9 +7,19 @@ import BaseCard from '@/Components/BaseCard.vue';
 import BaseField from '@/Components/BaseField.vue';
 import PasswordField from '@/Components/PasswordField.vue';
 
-defineProps({
+const props = defineProps({
     status: { type: String, default: null },
+    demoAccounts: { type: Array, default: () => [] },
 });
+
+// Grouped only for display. The array arrives empty on anything that is not
+// a local demo, so this whole panel disappears rather than being hidden.
+const demoGroups = computed(() =>
+    props.demoAccounts.reduce((groups, account) => {
+        (groups[account.group] ??= []).push(account);
+        return groups;
+    }, {})
+);
 
 const form = useForm({ email: '', password: '', remember: false });
 
@@ -58,5 +69,68 @@ const submit = () => form.post('/login', { onFinish: () => form.reset('password'
                 </div>
             </form>
         </BaseCard>
+
+        <!-- Local demo only. Never rendered anywhere else. -->
+        <BaseCard v-if="demoAccounts.length" accent class="rv-auth__card rv-demo">
+            <div class="rv-stack" style="gap: 20px">
+                <div class="rv-stack" style="gap: 8px">
+                    <span class="rv-label rv-label--brass">Demo · local only</span>
+                    <p class="rv-small">
+                        One click signs you straight in. Password for every account is
+                        <strong>realvows2026</strong>.
+                    </p>
+                </div>
+
+                <div v-for="(accounts, group) in demoGroups" :key="group" class="rv-stack" style="gap: 8px">
+                    <span class="rv-label">{{ group }}</span>
+                    <div class="rv-demo__row">
+                        <a
+                            v-for="account in accounts"
+                            :key="account.key"
+                            :href="`/demo-login/${account.key}`"
+                            class="rv-demo__btn"
+                        >
+                            {{ account.label }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </BaseCard>
     </AuthLayout>
 </template>
+
+<style scoped>
+.rv-demo__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rv-demo__btn {
+    min-height: var(--tap-min);
+    display: inline-flex;
+    align-items: center;
+    padding: 0 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r);
+    background: var(--cream);
+    color: var(--oxblood);
+    font-size: var(--fs-body-3);
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+        background var(--dur-tap) var(--ease),
+        border-color var(--dur-tap) var(--ease),
+        transform var(--dur-tap) var(--ease);
+}
+
+.rv-demo__btn:hover {
+    border-color: var(--brass-bright);
+    background: color-mix(in oklab, var(--brass) 12%, var(--cream));
+    color: var(--oxblood);
+}
+
+.rv-demo__btn:active {
+    transform: scale(0.98);
+}
+</style>

@@ -15,7 +15,7 @@ defineProps({
     <Head :title="title" />
 
     <div class="rv-auth">
-        <div class="rv-auth__band">
+        <div class="rv-auth__band rv-auth__band--photo">
             <Link href="/" class="rv-logo" aria-label="RealVows home">
                 <span class="rv-logo__mark" aria-hidden="true">RV</span>
                 <span class="rv-logo__word">RealVows</span>

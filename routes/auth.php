@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\DemoLoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -11,6 +12,15 @@ use App\Http\Controllers\PackagesController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileBuilderController;
 use Illuminate\Support\Facades\Route;
+
+/*
+ * ⚠️ One-click demo sign-in. The route is only REGISTERED when the config
+ * allows it, so on staging or production this URL does not exist at all
+ * rather than existing and being defended. See DemoLoginController.
+ */
+if (config('realvows.demo_logins')) {
+    Route::get('/demo-login/{account}', DemoLoginController::class)->name('demo.login');
+}
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');

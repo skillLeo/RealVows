@@ -30,8 +30,13 @@ const submit = () =>
     <Head title="Create your free account" />
 
     <div class="rv-split">
-        <!-- Left: the promise, full-bleed oxblood -->
-        <section class="rv-split__panel rv-on-dark">
+        <!--
+            Left: the promise over wedding photography, veiled in oxblood.
+            The image sits behind a heavy oxblood wash rather than beside the
+            words — warm and ceremonial, and the headline still holds 13:1
+            contrast because the wash, not the photo, is what the text sits on.
+        -->
+        <section class="rv-split__panel rv-split__panel--photo rv-on-dark">
             <Link href="/" class="rv-logo" aria-label="RealVows home">
                 <span class="rv-logo__mark" aria-hidden="true">RV</span>
                 <span class="rv-logo__word">RealVows</span>

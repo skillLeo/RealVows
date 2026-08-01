@@ -34,16 +34,14 @@
              people: the whole pitch is verified real humans. --}}
         <div class="rv-hero__art">
             <figure class="rv-hero__frame">
-                <img
-                    src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&w=900&q=80"
-                    alt="A couple standing together at their wedding celebration"
-                    width="900" height="1200" fetchpriority="high" decoding="async">
+                <img src="{{ asset('images/site/hero-a.jpg') }}"
+                     alt="A couple standing together at their wedding celebration"
+                     width="1400" height="1750" fetchpriority="high" decoding="async">
             </figure>
             <figure class="rv-hero__frame rv-hero__frame--second">
-                <img
-                    src="https://images.unsplash.com/photo-1599462616558-2b75fd26a283?auto=format&fit=crop&w=900&q=80"
-                    alt="A bride and groom in traditional dress at their wedding"
-                    width="900" height="1200" loading="lazy" decoding="async">
+                <img src="{{ asset('images/site/hero-b.jpg') }}"
+                     alt="A bride and groom in traditional dress at their wedding"
+                     width="1400" height="1750" loading="lazy" decoding="async">
             </figure>
             <span class="rv-pill rv-pill--on-dark rv-hero__note">Final photography to be added</span>
         </div>

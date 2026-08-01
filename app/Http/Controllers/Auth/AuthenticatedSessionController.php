@@ -16,6 +16,9 @@ class AuthenticatedSessionController extends Controller
     {
         return Inertia::render('Auth/Login', [
             'status' => session('status'),
+            // Empty on anything that is not a local demo, so the panel does
+            // not render at all rather than rendering and being disabled.
+            'demoAccounts' => DemoLoginController::buttons(),
         ]);
     }
 

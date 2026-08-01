@@ -747,11 +747,85 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 .rv-split__panel {
+  position: relative;
+  isolation: isolate;
   background: var(--oxblood-deep);
   display: flex;
   flex-direction: column;
   gap: 64px;
   padding: clamp(32px, 5vw, 56px) clamp(20px, 5vw, 64px) clamp(56px, 8vw, 96px);
+}
+
+/*
+   Photography behind an oxblood wash.
+
+   The wash is deliberately heavy. Text must never sit on a raw photograph —
+   contrast becomes whatever the image happens to be that day — so the
+   headline is reading against the wash, which is a known colour, and the
+   photograph supplies warmth underneath it rather than legibility.
+*/
+.rv-split__panel--photo::before,
+.rv-split__panel--photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.rv-split__panel--photo::before {
+  background-image: url('/images/site/signup.jpg');
+  background-size: cover;
+  background-position: center 30%;
+}
+.rv-split__panel--photo::after {
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--oxblood-deep) 78%, transparent) 0%,
+    color-mix(in oklab, var(--oxblood-deep) 94%, transparent) 55%,
+    var(--oxblood-deep) 100%
+  );
+}
+
+.rv-auth__band--photo { position: relative; isolation: isolate; }
+.rv-auth__band--photo::before,
+.rv-auth__band--photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.rv-auth__band--photo::before {
+  background-image: url('/images/site/login.jpg');
+  background-size: cover;
+  background-position: center 28%;
+}
+.rv-auth__band--photo::after {
+  background: color-mix(in oklab, var(--oxblood-deep) 88%, transparent);
+}
+
+/* Packages sits on the same treatment, full-bleed behind the whole screen. */
+.rv-packages-art { position: relative; isolation: isolate; }
+.rv-packages-art::before,
+.rv-packages-art::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+.rv-packages-art::before {
+  background-image: url('/images/site/packages.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.rv-packages-art::after { background: color-mix(in oklab, var(--oxblood-deep) 93%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rv-split__panel--photo::before,
+  .rv-auth__band--photo::before { animation: rv-settle-photo 900ms var(--ease) both; }
+}
+
+@keyframes rv-settle-photo {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: none; }
 }
 
 .rv-split__copy {

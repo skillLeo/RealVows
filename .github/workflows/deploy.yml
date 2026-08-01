@@ -1,0 +1,114 @@
+name: Deploy
+
+# Manual only, and only from main.
+#
+# Deliberately not automatic on push. The client reviews and signs off each
+# phase on a staging build before it becomes live, so a commit landing on main
+# is not the same event as a release.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY to confirm'
+        required: true
+        default: ''
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      # Through env, never interpolated straight into the shell. Workflow
+      # inputs are attacker-controlled text as far as the runner is concerned,
+      # and `${{ }}` inside run: is substituted before bash ever sees it — so
+      # a crafted value would execute rather than be compared.
+      - name: Check the confirmation
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
+        run: |
+          [ "$CONFIRM" = "DEPLOY" ] || { echo "::error::Type DEPLOY to confirm."; exit 1; }
+
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql, gd, bcmath, intl
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # Assets are built here, not on the server. Shared hosting has little
+      # memory and often no Node at all; shipping the compiled output keeps
+      # the deploy fast and the server simple.
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install production dependencies
+        run: composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Open the SSH connection
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust the host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Put the site into maintenance
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && php artisan down --retry=30 || true"
+
+      # .env, storage and the public uploads are the server's own state and
+      # are never overwritten by a deploy. Losing storage would lose every
+      # member photograph.
+      - name: Sync the application
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude '.env' \
+            --exclude 'storage' \
+            --exclude '_design' \
+            --exclude 'tests' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+      - name: Migrate and warm the caches
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && \
+             php artisan migrate --force && \
+             php artisan db:seed --class=RolesAndPermissionsSeeder --force && \
+             php artisan db:seed --class=SettingsSeeder --force && \
+             php artisan config:cache && \
+             php artisan route:cache && \
+             php artisan view:cache"
+
+      - name: Bring the site back
+        if: always()
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && php artisan up"
+
+      - name: Confirm it is serving
+        run: |
+          sleep 5
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' https://realvows.skillleo.com)
+          echo "Home page: $CODE"
+          [ "$CODE" = "200" ] || { echo "::error::Site did not come back with 200"; exit 1; }

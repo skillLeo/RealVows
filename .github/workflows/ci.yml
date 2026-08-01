@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          # GD is what the photo pipeline uses. It is the extension actually
+          # present on Hostinger shared hosting, so CI matches production.
+          extensions: mbstring, pdo, pdo_sqlite, gd, bcmath, intl
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run the test suite
+        run: ./vendor/bin/phpunit
+
+  content-rules:
+    name: Content rules
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ─────────────────────────────────────────────────────────────────────
+      # The contractual content rules, enforced by the pipeline rather than by
+      # anyone remembering them.
+      #
+      # The matching mechanism is the client's commercial secret and must
+      # never reach a member. This job fails the build if it ever does — which
+      # is what stops a well-meaning change in six months from undoing a
+      # decision that was made for market reasons.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: No internal matching language in user-facing code
+        run: |
+          set +e
+          FOUND=0
+
+          check () {
+            MATCH=$(grep -rniE "$1" resources/ 2>/dev/null)
+            if [ -n "$MATCH" ]; then
+              echo "::error::$2"
+              echo "$MATCH"
+              FOUND=1
+            fi
+          }
+
+          check 'zodiac|star sign|sun sign|astrolog|synastry|horoscope' \
+                'Banned astrology term found in resources/'
+          check '\b(aries|taurus|gemini|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b' \
+                'A sign name found in resources/'
+          check '\b(fire|air|earth|water)\b' \
+                'Element word found in resources/ — check it is not a compatibility context'
+
+          # "Leo" needs its own pass so it does not trip on SkillLeo.
+          LEO=$(grep -rnE '\bLeo\b' resources/ 2>/dev/null | grep -viE 'skillleo')
+          if [ -n "$LEO" ]; then echo "::error::Sign name 'Leo' found"; echo "$LEO"; FOUND=1; fi
+
+          if grep -rnP '[\x{2648}-\x{2653}]' resources/ 2>/dev/null; then
+            echo "::error::A sign glyph found in resources/"; FOUND=1
+          fi
+
+          exit $FOUND
+
+      - name: Four photos, never six
+        run: |
+          if grep -rniE 'six photos|6 photos' resources/; then
+            echo "::error::Photo count is four. 'six photos' is the obsolete spec."
+            exit 1
+          fi
+
+      - name: Never promise instant background work
+        run: |
+          # Shared hosting batches queued work roughly every minute. Saying
+          # "instantly" in UI copy would be a promise the architecture cannot keep.
+          if grep -rniE '>[^<]*\b(instantly|immediately)\b' resources/views resources/js/Pages; then
+            echo "::error::UI copy promises instant behaviour. Use 'shortly' or 'usually within a day'."
+            exit 1
+          fi
+
+  assets:
+    name: Build & budget
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # The performance budget is a requirement, not a hope. Members open this
+      # on mid-range phones over 4G — a slow page is an unromantic page.
+      - name: Enforce the JS budget
+        run: |
+          HOME_KB=$(gzip -c public/build/assets/public-*.js | wc -c | awk '{print int($1/1024)}')
+          APP_KB=$(gzip -c public/build/assets/app-*.js | wc -c | awk '{print int($1/1024)}')
+
+          echo "home JS: ${HOME_KB} KB gzipped (budget 30)"
+          echo "app  JS: ${APP_KB} KB gzipped (budget 150)"
+
+          [ "$HOME_KB" -le 30 ]  || { echo "::error::Home JS over budget"; exit 1; }
+          [ "$APP_KB"  -le 150 ] || { echo "::error::App JS over budget";  exit 1; }
+
+      - name: Keep the built assets for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: public/build
+          retention-days: 5

@@ -1,58 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RealVows
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A premium, marriage-focused matchmaking platform. Not casual dating: every
+member is here to find the person they are going to marry.
 
-## About Laravel
+Built by **SkillLeo SMC Pvt Ltd** for RealVows under agreement SKL-2026-RV-001.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## How it works for a member
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Signs up **free** — building a full profile never costs anything
+2. Completes a **seven-step guided profile** that saves as they type
+3. Uploads **exactly four photos** plus one verification photo of themselves
+   holding a handwritten code
+4. A **real person** reviews and approves or rejects that verification
+5. Once verified, the engine finds the people they are most compatible with
+6. Those matches appear **locked** — score visible, faces hidden *(Phase 2)*
+7. A **one-time package** unlocks them *(Phase 2)*
+8. Matches arrive by **email and WhatsApp** with a secure link *(Phase 3)*
 
-## Learning Laravel
+**There is no browsing.** Members never search, filter or scroll a directory.
+The engine chooses and delivers. No search, no filters, no member grid.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**No subscriptions.** Every payment is one-time: US$20 / 1 match ·
+US$50 / 3 · US$100 / 8.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Delivery
 
-## Agentic Development
+| Phase | Scope | Status |
+|---|---|---|
+| **1 — Foundation & Profiles** | Auth, seven-step builder, photo pipeline, manual verification, settings, admin | ✅ **Complete** |
+| **2 — Engine & Money** | Matching engine, locked teaser matches, PowerTranz (sandbox), credit ledger | Not started |
+| **3 — Delivery & Launch** | Email + WhatsApp delivery, match inbox, hardening, handover | Not started |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Phase 2 begins only on written sign-off of the Phase 1 staging build.
+
+---
+
+## Stack
+
+Laravel 13 · Inertia · Vue 3 · MySQL · Vite
+
+Deployed to **Hostinger shared hosting**, which shapes the architecture: no
+Redis, no Supervisor, no persistent processes. Queues, cache and sessions all
+run on the database driver, and a one-minute cron drains the queue. Background
+work is therefore **batched, never instant** — UI copy says "shortly" or
+"usually within a day", never "instantly".
+
+**Rendering is deliberately split.** Public pages (home, legal) are plain
+Blade with almost no JavaScript, so they are fast on a mid-range phone and
+crawlable. The authenticated app is Inertia + Vue, where reactivity earns its
+weight.
+
+### Performance budget — enforced in CI
+
+| | Budget | Actual |
+|---|---|---|
+| Home page JS | 30 KB gzipped | **0.6 KB** |
+| App JS | 150 KB gzipped | **~93 KB** |
+
+---
+
+## Running it locally
 
 ```bash
-composer require laravel/boost --dev
+composer install
+npm install
+cp .env.example .env && php artisan key:generate
 
-php artisan boost:install
+# create the database, then:
+php artisan migrate --seed
+
+npm run build
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+For demonstration data — 30 members, real photos, matches, and one-click
+sign-in buttons — see **[DEMO.md](DEMO.md)**.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Deployment
 
-## Code of Conduct
+Manual, from the Actions tab: **Deploy → Run workflow → type `DEPLOY`**.
+Deliberately not automatic on push, because a commit landing on `main` is not
+the same event as a release — the client signs off each phase first.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Full server setup, the required GitHub secrets and the cron entry are in
+**[DEPLOY.md](DEPLOY.md)**.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## The rules this codebase enforces
 
-## License
+Some of these are contractual. CI fails the build if any is broken, so they
+survive changes made months from now by someone who was not in the room.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **The matching mechanism is never named to a member.** It is the client's
+  commercial secret and a deliberate market decision. It exists server-side
+  only — see `app/Services/Sign/SignCalculator.php`. Members see a
+  compatibility score and a rationale written from their own answers.
+- **Exactly four photos**, in fixed named slots, plus one separate
+  verification photo that is never shown on a profile or to another member.
+- **Verification gates everything.** An unverified profile can never be
+  matched, matched to, or shown. Enforced at query level, not in the UI.
+- **Photos are private.** Stored off the public path, served only through a
+  short-lived signed URL behind both an auth check and an ownership check.
+  EXIF, including GPS, is stripped on upload.
+- **Credit balances are derived**, never stored. Summing an append-only ledger
+  with a unique constraint on the gateway transaction id makes a
+  double-credit structurally impossible rather than merely unlikely.
+- **The matching weights (40/20/15/10/10/5) are constants in code**, not
+  settings — they are contractually fixed.
+- **Every third-party credential lives in the database**, editable in the
+  browser at `/admin/settings`, because the client will never edit a file on
+  a server. Secrets are encrypted at rest and only ever leave masked.
+
+---
+
+## Testing
+
+```bash
+./vendor/bin/phpunit
+```
+
+46 feature tests, 207 assertions. They cover the things that would be silent
+if they broke: a member reaching `/admin` (must be 404, never 403), one member
+reading another's photo, a masked secret surviving a settings save, the
+server-side age check, and a profile draft surviving a refresh.

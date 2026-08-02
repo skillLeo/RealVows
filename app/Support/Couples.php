@@ -103,7 +103,7 @@ class Couples
             $out[] = [
                 'key' => $key,
                 // Null renders a sealed panel rather than the wrong couple.
-                'src' => $src ?? self::FALLBACKS[$key],
+                'src' => $src ? self::versioned($src) : self::FALLBACKS[$key],
                 'focal' => $couple['focal'],
                 'alt' => $couple['alt'],
                 'describes' => $couple['describes'],
@@ -112,6 +112,27 @@ class Couples
         }
 
         return $out;
+    }
+
+    /**
+     * ⚠️ CACHE-BUSTING, AND IT IS NOT OPTIONAL.
+     *
+     * Hostinger's CDN caches images for seven days. Swapping a photograph on
+     * the server therefore changes nothing a visitor sees — the old one keeps
+     * being served from the edge, and it looks exactly like a failed deploy.
+     * That happened: the origin held the new photograph while the live page
+     * showed the previous one.
+     *
+     * Appending the file's modification time means a swapped file is a new
+     * URL, so the CDN has nothing cached for it and fetches immediately. Every
+     * future photograph swap now takes effect the moment the file lands, with
+     * nothing to remember and nothing to purge.
+     */
+    private static function versioned(string $path): string
+    {
+        $full = public_path($path);
+
+        return is_file($full) ? $path.'?v='.filemtime($full) : $path;
     }
 
     /** True while either photograph is still a stand-in. */

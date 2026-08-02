@@ -1388,7 +1388,12 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-left: 1px solid var(--hairline);
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  /*
+   * ⚠️ NO GAP. The two frames are joined into one panel — the client's
+   * instruction, and the reason the inner corners are squared below. A gap
+   * here reopens the seam and the pair goes back to reading as two cards.
+   */
+  gap: 0;
   padding: 12px;
 }
 
@@ -1435,7 +1440,6 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    */
   .rv-hero__art {
     padding: clamp(24px, 3vw, 44px);
-    gap: clamp(16px, 2vw, 24px);
     align-content: center;
   }
 }
@@ -1471,6 +1475,40 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * is an arrangement that costs the layout nothing.
  */
 .rv-hero__frame--second { animation-delay: 140ms; }
+
+/*
+ * ⚠️ THE PAIR IS ONE PANEL, SO ONLY ITS OUTER CORNERS ARE ROUND.
+ *
+ * Closing the gap is not enough on its own. Two rounded rectangles pushed
+ * together leave four curves meeting in the middle, which reads as a printing
+ * error rather than as a join — the eye sees the pale background through the
+ * notches and the seam looks like a defect. Squaring the inner corners and
+ * dropping the doubled border between them is what actually joins them.
+ *
+ * The pair splits differently depending on how it is stacked, so the radius
+ * follows the axis: top/bottom when the frames sit one above the other on a
+ * phone, left/right when they sit side by side.
+ */
+.rv-hero__frame:first-of-type {
+  border-radius: var(--r) var(--r) 0 0;
+  border-bottom: 0;
+}
+
+.rv-hero__frame--second {
+  border-radius: 0 0 var(--r) var(--r);
+}
+
+@media (min-width: 560px) {
+  .rv-hero__frame:first-of-type {
+    border-radius: var(--r) 0 0 var(--r);
+    border-bottom: 1px solid var(--hairline);
+    border-right: 0;
+  }
+
+  .rv-hero__frame--second {
+    border-radius: 0 var(--r) var(--r) 0;
+  }
+}
 
 @keyframes rv-frame-in {
   from { opacity: 0; transform: translateY(20px); }

@@ -217,6 +217,23 @@ class CouplesPhotographyTest extends TestCase
             $css,
             'A min-height on the hero art drives the frame box instead of the aspect ratio.'
         );
+
+        /*
+         * ⚠️ The two frames are joined into one panel — no gutter at all.
+         * A non-zero gap here reopens the seam the client asked to close.
+         */
+        preg_match_all('/\.rv-hero__art[^{}]*\{([^}]*)\}/', $css, $blocks);
+
+        foreach ($blocks[1] as $body) {
+            if (preg_match('/(?:^|[;{\s])gap:\s*([^;}]+)/', $body, $m)) {
+                $this->assertSame(
+                    '0',
+                    trim($m[1]),
+                    'The hero frames have a gutter between them again. They are meant to read as '
+                        .'one panel split in two, which is also why their inner corners are squared.'
+                );
+            }
+        }
     }
 
     /**

@@ -37,34 +37,74 @@ class HorizontalOverflowTest extends TestCase
      * Every selector whose ::before or ::after is animated with a scale must
      * clip, or the scaled box pushes the document wider than the viewport.
      */
-    public function test_every_scaling_pseudo_element_lives_in_a_clipping_parent(): void
+    /**
+     * Every selector that scales an element UP, in either form it can take.
+     *
+     * ⚠️ THERE ARE TWO FORMS NOW, AND MISSING THE SECOND MADE THIS SCAN BLIND.
+     *
+     * The catalogue used to carry a separate keyframe per scale — rv-hero-zoom,
+     * rv-settle-photo and so on — each with a literal `scale(1.03)` inside it,
+     * which is what this scan originally looked for. Those nine near-identical
+     * keyframes were collapsed into one parameterised `rv-arrive`, so the
+     * literal now lives at the CALL SITE as `--arrive-scale`. A scan that only
+     * reads keyframe bodies sees no scaling anywhere and passes on everything.
+     *
+     * @return array<string, string> selector => what scales it
+     */
+    private function scalingSelectors(string $css): array
     {
-        $css = $this->css();
+        $found = [];
 
-        // Keyframes that scale up at any point.
-        preg_match_all('/@keyframes\s+([\w-]+)\s*\{([^}]*\{[^}]*\}[^}]*)*\}/', $css, $blocks, PREG_SET_ORDER);
-
-        $scaling = [];
+        // Form 1 — a literal scale inside a keyframe, used by a selector.
+        preg_match_all('/@keyframes\s+([\w-]+)\s*\{(?:[^{}]|\{[^{}]*\})*\}/', $css, $blocks, PREG_SET_ORDER);
 
         foreach ($blocks as $block) {
-            if (preg_match('/scale\(\s*1\.\d/', $block[0])) {
-                $scaling[] = $block[1];
+            if (! preg_match('/scale\(\s*1\.\d/', $block[0])) {
+                continue;
             }
-        }
 
-        $this->assertNotEmpty($scaling, 'No scaling keyframes found — the scan has stopped matching.');
-
-        $offences = [];
-
-        foreach ($scaling as $keyframe) {
-            // Which pseudo-element selectors use it.
             preg_match_all(
-                '/([.#][\w-]+(?:--[\w-]+)?)::(?:before|after)[^{]*\{[^}]*animation:\s*'.preg_quote($keyframe, '/').'/',
+                '/([^{}]*)\{[^}]*animation:[^;}]*\b'.preg_quote($block[1], '/').'\b/',
                 $css,
                 $uses
             );
 
-            foreach (array_unique($uses[1]) as $parent) {
+            foreach ($uses[1] as $selector) {
+                $found[trim($selector)] = $block[1];
+            }
+        }
+
+        // Form 2 — rv-arrive parameterised by --arrive-scale at the call site.
+        preg_match_all(
+            '/([^{}]*)\{[^{}]*--arrive-scale:\s*1\.\d[^{}]*\}/',
+            $css,
+            $params,
+            PREG_SET_ORDER
+        );
+
+        foreach ($params as $param) {
+            $found[trim($param[1])] = 'rv-arrive via --arrive-scale';
+        }
+
+        return $found;
+    }
+
+    public function test_every_scaling_pseudo_element_lives_in_a_clipping_parent(): void
+    {
+        $css = $this->css();
+
+        $scaling = $this->scalingSelectors($css);
+
+        $this->assertNotEmpty($scaling, 'No scaling selectors found — the scan has stopped matching.');
+
+        $offences = [];
+
+        foreach ($scaling as $selector => $keyframe) {
+            if (! preg_match('/([.#][\w-]+(?:--[\w-]+)?)::(?:before|after)/', $selector, $hit)) {
+                continue;
+            }
+
+            foreach ([$hit[1]] as $parent) {
                 /*
                  * The element itself must clip — either through its own rule
                  * or through its BEM base class, since `.a--b` always carries
@@ -113,15 +153,7 @@ class HorizontalOverflowTest extends TestCase
     {
         $css = $this->css();
 
-        preg_match_all('/@keyframes\s+([\w-]+)\s*\{(?:[^{}]|\{[^{}]*\})*\}/', $css, $blocks, PREG_SET_ORDER);
-
-        $scaling = [];
-
-        foreach ($blocks as $block) {
-            if (preg_match('/scale\(\s*1\.\d/', $block[0])) {
-                $scaling[] = $block[1];
-            }
-        }
+        $scaling = $this->scalingSelectors($css);
 
         $offences = [];
 
@@ -135,22 +167,14 @@ class HorizontalOverflowTest extends TestCase
             'rv-mosaic', 'rv-mosaic__tile',
         ];
 
-        foreach ($scaling as $keyframe) {
-            preg_match_all(
-                '/([^{}]*)\{[^}]*animation:[^;}]*\b'.preg_quote($keyframe, '/').'\b/',
-                $css,
-                $uses
-            );
-
-            foreach ($uses[1] as $selector) {
-                foreach ($fullWidth as $wide) {
-                    // Must be the LAST class in the selector — the element
-                    // being animated, not merely an ancestor in the chain.
-                    if (preg_match('/\.'.preg_quote($wide, '/').'\s*$/', trim($selector))) {
-                        $offences[] = trim($selector)." is animated with {$keyframe}, which scales up. "
-                            .'That selector spans the full width, so scaling it makes the page scroll '
-                            .'sideways. Put the scale on the image inside a clipping frame instead.';
-                    }
+        foreach ($scaling as $selector => $keyframe) {
+            foreach ($fullWidth as $wide) {
+                // Must be the LAST class in the selector — the element being
+                // animated, not merely an ancestor in the chain.
+                if (preg_match('/\.'.preg_quote($wide, '/').'\s*$/', trim($selector))) {
+                    $offences[] = trim($selector)." is scaled up by {$keyframe}. "
+                        .'That selector spans the full width, so scaling it makes the page scroll '
+                        .'sideways. Put the scale on the image inside a clipping frame instead.';
                 }
             }
         }
@@ -179,9 +203,17 @@ class HorizontalOverflowTest extends TestCase
             'The split panel no longer clips.'
         );
 
-        // And that a scaling keyframe is actually detected.
-        $this->assertMatchesRegularExpression('/@keyframes\s+rv-settle-photo/', $css);
-        $this->assertStringContainsString('scale(1.03)', $css);
+        /*
+         * And that scaling is actually detected in the form it now takes.
+         * rv-settle-photo no longer exists — it was one of nine near-identical
+         * keyframes collapsed into rv-arrive — so the scan must find the
+         * parameter instead of the literal.
+         */
+        $this->assertStringContainsString('--arrive-scale', $css);
+        $this->assertNotEmpty(
+            $this->scalingSelectors($css),
+            'The scan can no longer find any scaling selector in the real stylesheet.'
+        );
     }
 
     /**
@@ -199,16 +231,27 @@ class HorizontalOverflowTest extends TestCase
         $offending = "@keyframes rv-x { from { transform: scale(1.04); } to { transform: scale(1); } }\n"
             ."[data-arrival='running'] .rv-hero__art { animation: rv-x 900ms ease both; }";
 
-        preg_match_all('/@keyframes\s+([\w-]+)\s*\{(?:[^{}]|\{[^{}]*\})*\}/', $offending, $blocks, PREG_SET_ORDER);
-        $this->assertNotEmpty($blocks, 'The keyframe matcher cannot read a keyframe block.');
-        $this->assertMatchesRegularExpression('/scale\(\s*1\.\d/', $blocks[0][0]);
+        $found = false;
 
-        // And that the selector-side matcher finds the full-width element.
-        preg_match_all('/([^{}]*)\{[^}]*animation:[^;}]*\brv-x\b/', $offending, $uses);
+        foreach (array_keys($this->scalingSelectors($offending)) as $selector) {
+            if (preg_match('/\.rv-hero__art\s*$/', trim($selector))) {
+                $found = true;
+            }
+        }
+
+        $this->assertTrue($found, 'The scan cannot see the literal-keyframe form of the bug.');
+
+        /*
+         * ⚠️ AND THE SAME BUG WRITTEN THE NEW WAY. This is the form the bug
+         * would take today, and the reason the scan was rewritten: the scale
+         * is a parameter, not a literal, and the old reader saw nothing.
+         */
+        $parameterised = "[data-arrival='running'] .rv-hero__art { --arrive-scale: 1.04; "
+            .'animation: rv-arrive 900ms ease both; }';
 
         $found = false;
 
-        foreach ($uses[1] as $selector) {
+        foreach (array_keys($this->scalingSelectors($parameterised)) as $selector) {
             if (preg_match('/\.rv-hero__art\s*$/', trim($selector))) {
                 $found = true;
             }
@@ -224,8 +267,15 @@ class HorizontalOverflowTest extends TestCase
         // inside the frame, which clips, not on the track.
         $css = $this->css();
 
+        /*
+         * ⚠️ The zoom used to be its own keyframe, rv-hero-zoom. It is now
+         * The Arrival parameterised, so the fix is expressed as the scale
+         * PARAMETER sitting on the image rather than on the track — but what
+         * is being asserted is unchanged: the thing that scales is the
+         * photograph inside the clipping plate.
+         */
         $this->assertMatchesRegularExpression(
-            '/\.rv-mosaic__plate img \{\s*animation: rv-hero-zoom/',
+            '/\.rv-mosaic__plate img \{[^}]*--arrive-scale/',
             $css,
             'The hero zoom is no longer on the image inside the clipping plate. Scaling the '
                 .'tile or the grid instead pushes the mosaic wider than the viewport.'

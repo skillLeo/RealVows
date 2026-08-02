@@ -46,6 +46,8 @@ class PurchasesController extends Controller
         return Inertia::render('Purchases', [
             'purchases' => $purchases,
             'balance' => $request->user()->creditBalance(),
+            // The same billing identity the receipt and the email carry.
+            'billing' => app(\App\Support\Billing::class)->forDisplay(),
         ]);
     }
 }

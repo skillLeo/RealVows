@@ -86,6 +86,28 @@ class SettingsSeeder extends Seeder
                 ['key' => 'terminal_id', 'label' => 'Terminal ID', 'type' => 'text'],
                 ['key' => 'api_key', 'label' => 'API key', 'type' => 'password', 'is_secret' => true],
                 ['key' => 'environment', 'label' => 'Environment', 'type' => 'select', 'options' => ['sandbox' => 'Sandbox', 'live' => 'Live'], 'description' => 'Stays on sandbox until the merchant account clears.'],
+
+                /*
+                 * ⚠️ THE BILLING IDENTITY. The legal entity and the trading
+                 * name are genuinely different for this product.
+                 *
+                 * "RealVows" could not be registered as a company in time, so
+                 * the gateway account sits under a company the client already
+                 * controls, with RealVows as the trading name. Money settles
+                 * to one business; the payer sees another name on their card
+                 * statement. That gap is the commonest cause of a chargeback,
+                 * which is why the receipt states the descriptor outright.
+                 *
+                 * ⚠️ These ship EMPTY on purpose and stay empty until the
+                 * client confirms the entity with his bank. A placeholder
+                 * company name on a receipt is a false statement about who is
+                 * holding somebody's money.
+                 */
+                ['key' => 'billing_legal_entity', 'label' => 'Billing — registered company', 'type' => 'text', 'description' => 'The company that actually receives the money. Leave empty until the bank confirms it.'],
+                ['key' => 'billing_trading_name', 'label' => 'Billing — trading name', 'type' => 'text', 'description' => 'The name the member knows. Normally RealVows.'],
+                ['key' => 'statement_descriptor', 'label' => 'Billing — statement descriptor', 'type' => 'text', 'description' => 'Exactly what appears on a card statement. Must match what the gateway is configured to send.'],
+                ['key' => 'billing_address', 'label' => 'Billing — registered address', 'type' => 'textarea', 'description' => 'The registered address of the company above.'],
+                ['key' => 'billing_support_email', 'label' => 'Billing — billing enquiries', 'type' => 'text', 'description' => 'Where a member writes about a charge they do not recognise.'],
             ],
             /*
              * Prices and credit counts are editable, which is safe because

@@ -11,6 +11,12 @@ import BaseButton from '@/Components/BaseButton.vue';
 defineProps({
     purchases: { type: Object, required: true },
     balance: { type: Number, default: 0 },
+    /**
+     * ⚠️ Comes from settings, never from a constant. The company that
+     * receives the money is not the name on the member's statement, and this
+     * page is where somebody comes to check an unfamiliar charge.
+     */
+    billing: { type: Object, default: () => ({}) },
 });
 </script>
 
@@ -63,11 +69,33 @@ defineProps({
                     </div>
                 </article>
             </div>
+
+            <!--
+                ⚠️ THE SAME SENTENCE THE RECEIPT AND THE EMAIL CARRY.
+
+                This is the page somebody opens when they see a name they do
+                not recognise on a statement. It is the last place the answer
+                can arrive before they phone their bank instead.
+            -->
+            <p v-if="billing.statementLine" class="rv-caption rv-purchases__billing">
+                {{ billing.statementLine }}
+                <template v-if="billing.tradingAsLine">
+                    Payments are processed by {{ billing.tradingAsLine }}.
+                </template>
+                <template v-if="billing.supportEmail">
+                    Questions about a charge: {{ billing.supportEmail }}
+                </template>
+            </p>
         </div>
     </AppLayout>
 </template>
 
 <style scoped>
+.rv-purchases__billing {
+    max-width: 60ch;
+    color: var(--ink-soft);
+}
+
 .rv-receipt {
     display: flex;
     flex-wrap: wrap;

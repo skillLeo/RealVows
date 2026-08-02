@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
-use App\Support\SkillLeo;
+use App\Support\Billing;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -46,7 +46,7 @@ class ReceiptController extends Controller
 
         return view('receipt', [
             'purchase' => $purchase,
-            'billedBy' => SkillLeo::BILLING,
+            'billing' => app(Billing::class)->forDisplay(),
         ]);
     }
 }

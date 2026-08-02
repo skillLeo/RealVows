@@ -72,9 +72,21 @@
     <div class="sheet">
         <div class="head">
             <span class="mark" aria-hidden="true">RV</span>
+            {{--
+                ⚠️ NOTHING IS PRINTED UNTIL THE ENTITY IS CONFIRMED.
+
+                A receipt naming the wrong company is worse than one naming
+                none — it is a false statement about who is holding somebody's
+                money. The fields are empty until the client's bank confirms
+                which business the gateway account sits under.
+            --}}
             <div style="text-align:right">
-                <div class="billed"><strong>{{ $billedBy['name'] }}</strong></div>
-                <div class="billed">on behalf of {{ $billedBy['onBehalfOf'] }}</div>
+                @if ($billing['tradingAsLine'])
+                    <div class="billed"><strong>{{ $billing['legalEntity'] }}</strong></div>
+                    <div class="billed">trading as {{ $billing['tradingName'] }}</div>
+                @elseif ($billing['legalEntity'])
+                    <div class="billed"><strong>{{ $billing['legalEntity'] }}</strong></div>
+                @endif
             </div>
         </div>
 
@@ -116,7 +128,26 @@
 
         <hr class="rule">
 
-        <p class="billed">{{ $billedBy['note'] }}</p>
+        {{--
+            ⚠️ THE SENTENCE THAT PREVENTS CHARGEBACKS.
+
+            The company taking the money and the name on the card statement
+            are different for this product. Somebody who sees an unfamiliar
+            name on their statement and cannot connect it to a marriage site
+            phones their bank — this line is what stops that, and it has to
+            arrive before the statement does, not after.
+        --}}
+        @if ($billing['statementLine'])
+            <p class="billed">{{ $billing['statementLine'] }}</p>
+        @endif
+
+        @if ($billing['address'])
+            <p class="billed">{{ $billing['address'] }}</p>
+        @endif
+
+        @if ($billing['supportEmail'])
+            <p class="billed">Questions about this charge: {{ $billing['supportEmail'] }}</p>
+        @endif
 
         <div class="seal" aria-hidden="true">RV</div>
 

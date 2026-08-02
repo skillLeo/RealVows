@@ -68,4 +68,26 @@
     <p style="margin:12px 0 0; font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
         <a href="{{ $receiptUrl }}" style="color:#7F5F2E;">View or print this receipt</a>
     </p>
+
+    {{--
+        ⚠️ THE DESCRIPTOR BELONGS IN THE EMAIL, NOT ONLY ON THE RECEIPT.
+
+        This arrives days before the card statement does. Somebody who reads
+        it here recognises the name later; somebody who only finds it by
+        opening a receipt they never opened phones their bank instead.
+    --}}
+    @if ($billing['statementLine'])
+        <p style="margin:24px 0 0; font-family:Inter,Helvetica,Arial,sans-serif; font-size:13px; color:#6B5F62;">
+            {{ $billing['statementLine'] }}
+            @if ($billing['tradingAsLine'])
+                Payments are processed by {{ $billing['tradingAsLine'] }}.
+            @endif
+        </p>
+    @endif
+
+    @if ($billing['supportEmail'])
+        <p style="margin:8px 0 0; font-family:Inter,Helvetica,Arial,sans-serif; font-size:13px; color:#6B5F62;">
+            Questions about this charge: {{ $billing['supportEmail'] }}
+        </p>
+    @endif
 @endcomponent

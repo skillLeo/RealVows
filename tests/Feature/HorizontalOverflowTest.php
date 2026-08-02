@@ -96,6 +96,66 @@ class HorizontalOverflowTest extends TestCase
     }
 
     /**
+     * ⚠️ THE SAME MISTAKE ON A REGULAR ELEMENT, WHICH THE PSEUDO-ELEMENT
+     * CHECK ABOVE DOES NOT SEE.
+     *
+     * The hero arrival scaled `.rv-hero__art` to 1.04. That is a full-width
+     * grid track, so a 375px element became 390px and the page scrolled
+     * sideways by 8px — while the pseudo-element scan sat there passing,
+     * because the offending selector had no `::before`.
+     *
+     * A scale belongs on something that is clipped. The fix was to move it
+     * onto the photograph inside the frame, which already clips, and that is
+     * usually the right answer: it is the picture that should settle, not the
+     * box around it.
+     */
+    public function test_no_full_width_element_is_animated_with_a_scale(): void
+    {
+        $css = $this->css();
+
+        preg_match_all('/@keyframes\s+([\w-]+)\s*\{(?:[^{}]|\{[^{}]*\})*\}/', $css, $blocks, PREG_SET_ORDER);
+
+        $scaling = [];
+
+        foreach ($blocks as $block) {
+            if (preg_match('/scale\(\s*1\.\d/', $block[0])) {
+                $scaling[] = $block[1];
+            }
+        }
+
+        $offences = [];
+
+        // Selectors known to span the full viewport width. Scaling any of
+        // these pushes the document wider than the screen.
+        $fullWidth = [
+            'rv-hero', 'rv-hero__art', 'rv-hero__copy', 'rv-shell', 'rv-panel',
+            'rv-section', 'rv-couples', 'rv-app__main', 'rv-auth', 'rv-split',
+        ];
+
+        foreach ($scaling as $keyframe) {
+            preg_match_all(
+                '/([^{}]*)\{[^}]*animation:[^;}]*\b'.preg_quote($keyframe, '/').'\b/',
+                $css,
+                $uses
+            );
+
+            foreach ($uses[1] as $selector) {
+                foreach ($fullWidth as $wide) {
+                    // Must be the LAST class in the selector — the element
+                    // being animated, not merely an ancestor in the chain.
+                    if (preg_match('/\.'.preg_quote($wide, '/').'\s*$/', trim($selector))) {
+                        $offences[] = trim($selector)." is animated with {$keyframe}, which scales up. "
+                            .'That selector spans the full width, so scaling it makes the page scroll '
+                            .'sideways. Put the scale on the image inside a clipping frame instead.';
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $offences, "\n  ".implode("\n  ", $offences));
+    }
+
+    /**
      * ⚠️ POSITIVE CONTROL. This scan is a negative assertion over regexes, so
      * it is worthless unless it can see a real offence.
      */

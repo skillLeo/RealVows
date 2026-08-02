@@ -47,30 +47,41 @@ or replace them. They are almost certainly Unsplash and therefore fine, but
 
 ---
 
-## The couples rail — Home section 4
+## The two couples — Home section 4
 
-Eight portrait 3:4 images, `rail-1.jpg` … `rail-8.jpg`.
+**Exactly two.** `couple-muslim.jpg` and `couple-christian.jpg`.
 
-**Not yet supplied.** The rail is built and running on the existing site
-images as placeholders so the section is reviewable, and it degrades to
-whatever is present rather than breaking.
+⚠️ **Not a wider spread, and specifically not Hindu or Sikh imagery.** The
+client named his two audiences: Muslim and Christian. A rail of many faces
+reads as a stock library and as trying to represent everyone, which this
+product is not doing.
 
-Requirements for the final eight:
+⚠️ **`hero-b.jpg` is currently wrong and must be replaced.** It shows a couple
+in Hindu/Sikh wedding dress — a red turban with a kalgi and a sherwani. It is
+standing in for the Muslim couple and should not ship.
+
+### What the two need to be
 
 - Portrait 3:4, minimum 1200px on the short edge
-- Warm, candid, celebration-dressed, natural light, real affection —
-  hands, laughter, a shared glance
+- **Faces in the upper third**, so a `object-position: center 22%` crop keeps
+  them whole on a narrow phone
+- Warm, candid, celebration-dressed, natural light, real affection — hands,
+  laughter, a shared glance
 - **Never posed studio work.** Never anything that reads as a stock library
-- **The visibly Muslim couple sits in the first three**, not buried
-- A spread of ages and appearances; this is a Caribbean and diaspora product
+- Never AI-generated people. The product's promise is verified humans
 
-| File | Description | Source | Photographer | Licence |
+| File | Needs to show | Source | Photographer | Licence |
 |---|---|---|---|---|
-| `rail-1.jpg` | | | | |
-| `rail-2.jpg` | | | | |
-| `rail-3.jpg` | | | | |
-| `rail-4.jpg` | | | | |
-| `rail-5.jpg` | | | | |
-| `rail-6.jpg` | | | | |
-| `rail-7.jpg` | | | | |
-| `rail-8.jpg` | | | | |
+| `couple-muslim.jpg` | A visibly Muslim couple — nikah or walima dress | | | |
+| `couple-christian.jpg` | A Christian or Western wedding couple | | | |
+
+Drop both into `public/images/site/` with those exact names. The page picks
+them up automatically; no code change is needed.
+
+---
+
+## Also used in the hero
+
+`hero-a.jpg` and `hero-b.jpg` are the two photographs in the home hero. The
+same rule applies: one Muslim couple, one Christian couple, faces in the upper
+third. `hero-b.jpg` currently fails that and needs replacing.

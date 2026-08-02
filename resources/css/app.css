@@ -1298,13 +1298,27 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    Home page
    ========================================================================== */
 
+/*
+ * ⚠️ ONE EXPLICIT COLUMN ON A PHONE.
+ *
+ * `repeat(auto-fit, minmax(min(100%, 440px), 1fr))` resolved to a track
+ * wider than the viewport at 375px and pushed the page sideways by 8px.
+ * auto-fit is clever and worth using where there is room to be clever; at
+ * phone width there is exactly one column and saying so removes the whole
+ * class of question.
+ */
 .rv-hero {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  grid-template-columns: 1fr;
   background: var(--oxblood-deep);
 }
 
+@media (min-width: 880px) {
+  .rv-hero { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+}
+
 .rv-hero__copy {
+  min-width: 0;
   display: flex;
   align-items: center;
   padding: clamp(56px, 8vw, 104px) clamp(20px, 5vw, 64px);
@@ -1348,18 +1362,44 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   to   { opacity: 1; transform: none; }
 }
 
+/*
+ * ⚠️ ONE COLUMN ON A PHONE.
+ *
+ * Two frames side by side on a 375px screen leaves each about 165px wide.
+ * `object-fit: cover` then crops hard from both sides and cuts the faces
+ * off — which is exactly what it was doing, and the whole point of these
+ * photographs is the people in them. Found on a real device; no automated
+ * check would have called it a bug, because nothing overflowed and nothing
+ * failed. It just looked wrong.
+ *
+ * Stacked, each frame gets the full width and the couples are whole.
+ */
 .rv-hero__art {
   position: relative;
+  /*
+   * ⚠️ `min-width: 0` is load-bearing.
+   *
+   * A grid item defaults to `min-width: auto`, which means it refuses to
+   * shrink below its content's intrinsic width — so this track measured
+   * 390px inside a 375px viewport and pushed the page sideways. The images
+   * carry width attributes, and that is what it was refusing to go below.
+   */
+  min-width: 0;
   min-height: clamp(360px, 52vw, 680px);
   border-left: 1px solid var(--hairline);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   padding: 12px;
 }
 
+@media (min-width: 560px) {
+  .rv-hero__art { grid-template-columns: 1fr 1fr; }
+}
+
 .rv-hero__frame {
   position: relative;
+  min-width: 0;
   overflow: hidden;
   margin: 0;
   border-radius: var(--r);
@@ -1370,9 +1410,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* Offset, not flush. Two photographs side by side at identical height read
    as a stock banner; a small vertical stagger reads as an arrangement. */
-.rv-hero__frame--second {
-  margin-top: clamp(20px, 5vw, 56px);
-  animation-delay: 140ms;
+.rv-hero__frame--second { animation-delay: 140ms; }
+
+/* The stagger is an arrangement of two columns. Stacked, it is just a gap. */
+@media (min-width: 560px) {
+  .rv-hero__frame--second { margin-top: clamp(20px, 5vw, 56px); }
 }
 
 @keyframes rv-frame-in {
@@ -1386,7 +1428,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center 22%;
   /* A very slow settle out of a slight zoom. Transform only, so it costs
      nothing to composite, and it stops after one pass — a looping image is
      restless, and restless is the opposite of what this page is for. */
@@ -2253,59 +2295,47 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* --------------------------------------------------------------------------
    4 · Two people, properly introduced
 
-   A slow continuous drift, run entirely by a CSS transform loop. No scroll
-   listener, no JavaScript, no layout work per frame — which is what makes it
-   free on a mid-range phone over 4G.
+   ⚠️ A still, deliberate pair — not a drifting rail. Two images cannot loop
+   without visibly repeating, and a wedding invitation does not scroll.
    -------------------------------------------------------------------------- */
 
 .rv-couples {
   padding-block: var(--gap-section);
-  overflow: hidden;
 }
 
-.rv-couples__rail {
-  overflow: hidden;
-  /* Fades the edges so images enter and leave rather than being cut off. */
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+.rv-couples__pair {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-inline: 20px;
 }
 
-.rv-couples__track {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  animation: rv-drift-left 90s linear infinite;
-  will-change: transform;
+/*
+ * Side by side only once there is room for each to be a person rather than a
+ * sliver. Below this they stack, because a cropped face is worse than a
+ * taller page — which is exactly the mistake the hero was making.
+ */
+@media (min-width: 560px) {
+  .rv-couples__pair { grid-template-columns: 1fr 1fr; gap: 24px; }
 }
-
-/* Half the track is a duplicate, so -50% lands exactly on the seam. */
-@keyframes rv-drift-left {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-
-/* Pausing on hover and on touch, so somebody can actually look at one. */
-@media (hover: hover) {
-  .rv-couples__rail:hover .rv-couples__track { animation-play-state: paused; }
-}
-.rv-couples__rail:active .rv-couples__track { animation-play-state: paused; }
 
 .rv-couples__frame {
   margin: 0;
-  flex: 0 0 auto;
-  width: 210px;
   border: 1px solid var(--hairline);
   border-radius: var(--r);
   overflow: hidden;
   background: var(--card);
 }
 
-@media (min-width: 768px) { .rv-couples__frame { width: 280px; } }
-
 .rv-couples__frame img {
   display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  /* Faces sit high in a portrait; bias the crop upward so nobody is cut. */
+  object-position: center 22%;
 }
 
 .rv-couples__line {
@@ -2318,13 +2348,6 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   line-height: 1.25;
   color: var(--oxblood);
   font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Frozen to a static grid. The couples are still shown; they simply
-     stop moving. */
-  .rv-couples__rail { mask-image: none; overflow-x: auto; }
-  .rv-couples__track { animation: none; }
 }
 
 /* --------------------------------------------------------------------------
@@ -2487,14 +2510,36 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * animations then fought over the same element and the zoom stopped
    * behaving. Found by rendering the page and measuring it.
    */
-  [data-arrival='running'] .rv-hero__art {
+  /*
+   * ⚠️ THE SCALE GOES ON THE PHOTOGRAPH, NOT ON ITS CONTAINER.
+   *
+   * This was on .rv-hero__art, which is a full-width grid track — scaling it
+   * to 1.04 made a 375px element 390px and pushed the page sideways by 8px
+   * on a phone. The frames already clip, so scaling the image inside gives
+   * exactly the same settle with nothing escaping.
+   *
+   * The brief asks for "the photograph" to settle from 1.04. It meant the
+   * photograph.
+   */
+  [data-arrival='running'] .rv-hero__frame {
     animation: rv-hero-arrive 900ms var(--ease) both;
     animation-delay: 700ms;
   }
 
   @keyframes rv-hero-arrive {
-    from { opacity: 0; transform: scale(1.04); }
-    to   { opacity: 1; transform: scale(1); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* The zoom itself, on the image, inside the frame's own clip. */
+  [data-arrival='running'] .rv-hero__frame img {
+    animation: rv-hero-zoom 900ms var(--ease) both;
+    animation-delay: 700ms;
+  }
+
+  @keyframes rv-hero-zoom {
+    from { transform: scale(1.04); }
+    to   { transform: scale(1); }
   }
 
   /* Each word of the headline, in turn. */

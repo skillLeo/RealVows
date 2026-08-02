@@ -1,57 +1,51 @@
 {{--
     ── Section 4: "Two people, properly introduced" ──────────────────────────
 
-    The romantic centrepiece, and the section carrying the couples brief.
+    ⚠️ TWO COUPLES. NOT A RAIL OF EIGHT.
 
-    ⚠️ The images drift on a CSS transform loop — not a scroll listener, not
-    JavaScript. Two consequences: it runs on the compositor, and it costs
-    nothing on a mid-range phone over 4G.
+    One visibly Muslim, one Christian — the client's two audiences, stated
+    plainly. This is deliberately NOT a wider spread: a drifting rail of eight
+    faces reads as a stock library, and this product is not trying to look
+    like it represents everyone. Two is a statement. Eight is decoration.
 
-    The rail is duplicated once so the loop is seamless. The copy is
-    aria-hidden so a screen reader hears each couple once rather than twice.
+    A drifting loop also stops making sense at two images — it either repeats
+    visibly or leaves gaps — so this is a still, deliberate pair. Which suits
+    the register better anyway: a wedding invitation does not scroll.
 
-    Licensing and provenance for every file: public/images/site/CREDITS.md
+    Licensing and provenance: public/images/site/CREDITS.md
 --}}
 @php
     /*
-     * The final eight, with the existing licensed site images standing in
-     * until they arrive. Whatever is actually present is used, so the section
-     * is reviewable now and needs no code change when the real files land.
+     * The final two, with existing images standing in until they arrive.
+     * Whatever is present is used, so the section is reviewable now and needs
+     * no code change when the real files land.
      */
-    $fallbacks = [
-        'images/site/hero-a.jpg', 'images/site/hero-b.jpg', 'images/site/login.jpg',
-        'images/site/signup.jpg', 'images/site/verify.jpg', 'images/site/packages.jpg',
-    ];
-
-    $rail = collect(range(1, 8))->map(function ($n) use ($fallbacks) {
-        $file = "images/site/rail-{$n}.jpg";
-
-        return [
-            'src' => is_file(public_path($file)) ? $file : $fallbacks[($n - 1) % count($fallbacks)],
+    $couples = collect([
+        [
+            'file' => 'images/site/couple-muslim.jpg',
+            'fallback' => 'images/site/hero-b.jpg',
             'alt' => 'A couple together on their wedding day',
-        ];
+        ],
+        [
+            'file' => 'images/site/couple-christian.jpg',
+            'fallback' => 'images/site/hero-a.jpg',
+            'alt' => 'A couple together on their wedding day',
+        ],
+    ])->map(function (array $couple) {
+        $couple['src'] = is_file(public_path($couple['file'])) ? $couple['file'] : $couple['fallback'];
+
+        return $couple;
     });
 @endphp
 
 <section class="rv-couples rv-paper" aria-labelledby="rv-couples-line">
-    <div class="rv-couples__rail">
-        <div class="rv-couples__track">
-            @foreach ($rail as $img)
-                <figure class="rv-couples__frame">
-                    <img src="{{ asset($img['src']) }}" alt="{{ $img['alt'] }}"
-                         width="900" height="1200" loading="lazy" decoding="async">
-                </figure>
-            @endforeach
-
-            {{-- The seamless half. Hidden from assistive technology so the
-                 same couples are not announced twice. --}}
-            @foreach ($rail as $img)
-                <figure class="rv-couples__frame" aria-hidden="true">
-                    <img src="{{ asset($img['src']) }}" alt="" width="900" height="1200"
-                         loading="lazy" decoding="async">
-                </figure>
-            @endforeach
-        </div>
+    <div class="rv-couples__pair" data-reveal>
+        @foreach ($couples as $couple)
+            <figure class="rv-couples__frame">
+                <img src="{{ asset($couple['src']) }}" alt="{{ $couple['alt'] }}"
+                     width="900" height="1200" loading="lazy" decoding="async">
+            </figure>
+        @endforeach
     </div>
 
     <p class="rv-couples__line" id="rv-couples-line">

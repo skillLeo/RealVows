@@ -37,14 +37,24 @@ class Couples
     public const PAIR = [
         'muslim' => [
             'names' => ['couple-muslim.jpg', 'rail-1.jpg'],
-            // Provisional. Re-set by eye when the real file lands.
-            'focal' => '50% 28%',
+            /*
+             * Set by eye against the real photograph. Both faces sit at
+             * roughly 38% down the frame — the umbrellas above them take the
+             * top third — so anything higher crops the heads and anything
+             * lower loses the groom's face first.
+             */
+            'focal' => '50% 38%',
             'alt' => 'A couple together on their wedding day',
             'describes' => 'A visibly Muslim couple — nikah or walima dress',
         ],
         'christian' => [
             'names' => ['couple-christian.jpg', 'rail-2.jpg'],
-            'focal' => '50% 25%',
+            /*
+             * Set by eye. The couple's faces are high in this frame, around
+             * 22%, with sky above and the dress filling the lower half —
+             * so the crop is biased well up.
+             */
+            'focal' => '50% 22%',
             'alt' => 'A couple together on their wedding day',
             'describes' => 'A Christian or Western wedding couple',
         ],
@@ -70,7 +80,7 @@ class Couples
      */
     private const FALLBACKS = [
         'muslim' => null,
-        'christian' => 'images/site/hero-a.jpg',
+        'christian' => null,
     ];
 
     /**

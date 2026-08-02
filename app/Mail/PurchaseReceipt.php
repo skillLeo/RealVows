@@ -32,6 +32,13 @@ class PurchaseReceipt extends Mailable implements ShouldQueue
                 'amount' => $this->purchase->amountFormatted(),
                 'credits' => $this->purchase->credits_granted,
                 'paidOn' => $this->purchase->completed_at?->format('j F Y'),
+
+                // Signed, so it opens straight from the email with no session.
+                'receiptUrl' => \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'receipt',
+                    now()->addYears(2),
+                    ['order' => $this->purchase->order_identifier]
+                ),
             ],
         );
     }

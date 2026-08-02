@@ -46,6 +46,13 @@ defineProps({
                     </div>
 
                     <div class="rv-receipt__right">
+                        <a
+                            v-if="purchase.receiptUrl"
+                            :href="purchase.receiptUrl"
+                            class="rv-receipt__link"
+                            target="_blank"
+                            rel="noopener"
+                        >Receipt</a>
                         <span class="rv-strong">{{ purchase.amount }}</span>
                         <span
                             class="rv-match__lozenge"
@@ -77,6 +84,12 @@ defineProps({
     display: flex;
     align-items: center;
     gap: 16px;
+}
+
+.rv-receipt__link {
+    color: var(--brass-ink);
+    font-size: var(--fs-body-3);
+    text-underline-offset: 3px;
 }
 
 .rv-lozenge--quiet {

@@ -49,6 +49,14 @@ class Navigation
         $isMember = $user->getAllPermissions()->isEmpty();
 
         $items = [
+            /*
+             * ⚠️ Reports deliberately do NOT get their own tab.
+             *
+             * The bar is four tabs, never five, and reports live inside the
+             * verification area because it is the same job — a person
+             * deciding whether somebody belongs here. Adding a fifth tab
+             * would have been the easy thing and the wrong one.
+             */
             [
                 'key' => 'queue',
                 'label' => 'Queue',

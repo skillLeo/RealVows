@@ -3,11 +3,13 @@
 use App\Http\Controllers\Admin\CreditAdminController;
 use App\Http\Controllers\Admin\MatchAuditController;
 use App\Http\Controllers\Admin\PaymentAdminController;
+use App\Http\Controllers\Admin\ReportQueueController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
+use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +76,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('verifications.review');
 
     /*
+     * Concerns members have raised. Sits with the verification queue because
+     * it is the same job — a person deciding whether somebody belongs here.
+     */
+    Route::middleware('admin:verifications.review')->group(function () {
+        Route::get('/reports', [ReportQueueController::class, 'index'])->name('reports');
+        Route::post('/reports/{report}', [ReportQueueController::class, 'resolve'])->name('reports.resolve');
+    });
+
+    /*
      * Match audit. The only place the six component scores are visible, and
      * only to staff holding matches.view.
      */
@@ -137,5 +148,16 @@ Route::match(['get', 'post'], '/payments/callback/{order}', PaymentCallbackContr
     ->middleware('signed')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->name('checkout.callback');
+
+/*
+ * The receipt.
+ *
+ * Signed rather than authenticated, so it opens from an email client with no
+ * session — which is the entire reason it exists as a page rather than only
+ * as an email body. Ownership is still checked when somebody IS signed in.
+ */
+Route::get('/receipt/{order}', [ReceiptController::class, 'show'])
+    ->middleware('signed')
+    ->name('receipt');
 
 require __DIR__.'/auth.php';

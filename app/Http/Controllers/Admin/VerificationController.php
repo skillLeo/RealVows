@@ -57,6 +57,8 @@ class VerificationController extends Controller
             ]);
 
         return Inertia::render('Admin/Verifications/Index', [
+            // The reports queue is reached from here, so its count belongs here.
+            'openReports' => \App\Models\Report::where('status', \App\Models\Report::STATUS_OPEN)->count(),
             'verifications' => $verifications,
             'status' => $status,
             // A count per filter, so each tab says how much work is behind it

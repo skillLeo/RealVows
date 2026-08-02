@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'index'])->name('account');
     Route::post('/account/contact', [AccountController::class, 'updateContact'])->name('account.contact');
     Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
+    Route::post('/account/notifications', [AccountController::class, 'updateNotifications'])->name('account.notifications');
 
     Route::middleware('verified')->group(function () {
         Route::get('/packages', [PackagesController::class, 'index'])->name('packages');

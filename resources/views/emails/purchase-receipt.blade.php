@@ -64,4 +64,8 @@
     <p style="margin:24px 0 0; font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
         Your introductions do not expire. Open them whenever you are ready.
     </p>
+
+    <p style="margin:12px 0 0; font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
+        <a href="{{ $receiptUrl }}" style="color:#7F5F2E;">View or print this receipt</a>
+    </p>
 @endcomponent

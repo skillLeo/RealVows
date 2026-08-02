@@ -25,8 +25,39 @@ class AccountController extends Controller
                 'phoneNumber' => $user->phone_number,
                 'phoneVerified' => $user->phoneIsVerified(),
             ],
+
+            /*
+             * ⚠️ Receipts are deliberately absent from this array. A receipt
+             * for money taken is a record the member is entitled to, not a
+             * marketing preference — the screen says so rather than offering
+             * a toggle that would be dishonest to provide.
+             */
+            'notifications' => [
+                'emailMatches' => (bool) ($user->notificationPreference?->email_matches ?? true),
+                'whatsappMatches' => (bool) ($user->notificationPreference?->whatsapp_matches ?? false),
+            ],
             'countryCodes' => Auth\RegisteredUserController::countryCodes(),
         ]);
+    }
+
+    /**
+     * The WhatsApp toggle is honest about not being connected yet — Phase 3
+     * wires the channel. A switch that silently does nothing is worse than
+     * one that says when it will start working.
+     */
+    public function updateNotifications(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'email_matches' => ['required', 'boolean'],
+            'whatsapp_matches' => ['required', 'boolean'],
+        ]);
+
+        $request->user()->notificationPreference()->updateOrCreate(
+            ['user_id' => $request->user()->id],
+            $data
+        );
+
+        return back()->with('success', 'Saved.');
     }
 
     public function updateContact(Request $request, RecordAuditLog $audit): RedirectResponse

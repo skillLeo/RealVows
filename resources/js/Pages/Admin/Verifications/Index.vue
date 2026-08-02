@@ -8,6 +8,7 @@ defineProps({
     verifications: { type: Object, required: true },
     status: { type: String, required: true },
     counts: { type: Object, required: true },
+    openReports: { type: Number, default: 0 },
 });
 
 const page = usePage();
@@ -46,6 +47,17 @@ const FILTERS = [
                 >
                     <span>{{ filter.label }}</span>
                     <span class="rv-tab__count">{{ counts[filter.key] ?? 0 }}</span>
+                </Link>
+
+                <!--
+                    Reports sit here rather than in the tab bar. It is the same
+                    job — deciding whether somebody belongs here — and the bar
+                    is four tabs, never five.
+                -->
+                <Link href="/admin/reports" class="rv-tab">
+                    <span>Reports</span>
+                    <span v-if="openReports > 0" class="rv-tab__count">{{ openReports }}</span>
+                    <span v-else class="rv-tab__count rv-tab__count--done">—</span>
                 </Link>
             </nav>
 

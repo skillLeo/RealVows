@@ -4,6 +4,7 @@ import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
+import BaseCheckbox from '@/Components/BaseCheckbox.vue';
 import BaseField from '@/Components/BaseField.vue';
 import PasswordField from '@/Components/PasswordField.vue';
 import VerifiedBadge from '@/Components/VerifiedBadge.vue';
@@ -11,6 +12,7 @@ import VerifiedBadge from '@/Components/VerifiedBadge.vue';
 const props = defineProps({
     account: { type: Object, required: true },
     countryCodes: { type: Array, required: true },
+    notifications: { type: Object, default: () => ({}) },
 });
 
 const page = usePage();
@@ -28,6 +30,15 @@ const page = usePage();
 const adminLinks = computed(() =>
     (page.props.nav ?? []).filter((link) => link.href.startsWith('/admin'))
 );
+
+const notifyForm = useForm({
+    email_matches: props.notifications?.emailMatches ?? true,
+    whatsapp_matches: props.notifications?.whatsappMatches ?? false,
+});
+
+function saveNotifications() {
+    notifyForm.post('/account/notifications', { preserveScroll: true });
+}
 
 const contact = useForm({
     phone_country_code: props.account.phoneCountryCode ?? props.countryCodes[0]?.value,
@@ -155,6 +166,41 @@ const logout = () => router.post('/logout');
                             {{ password.processing ? 'Saving' : 'Change password' }}
                         </BaseButton>
                     </div>
+                </form>
+            </BaseCard>
+
+            <BaseCard>
+                <form class="rv-stack" style="gap: 20px" @submit.prevent="saveNotifications">
+                    <span class="rv-label">When we have news</span>
+                    <span class="rv-underline" aria-hidden="true" />
+
+                    <BaseCheckbox v-model="notifyForm.email_matches">
+                        Email me when there is someone new
+                    </BaseCheckbox>
+
+                    <div class="rv-stack" style="gap: 4px">
+                        <BaseCheckbox v-model="notifyForm.whatsapp_matches">
+                            Message me on WhatsApp
+                        </BaseCheckbox>
+                        <!-- Honest about not being connected yet. A switch
+                             that silently does nothing is worse than one that
+                             says when it will start working. -->
+                        <span class="rv-help">
+                            We'll use this once WhatsApp delivery is switched on.
+                        </span>
+                    </div>
+
+                    <div class="rv-stack" style="gap: 4px">
+                        <span class="rv-strong">Receipts</span>
+                        <span class="rv-help">
+                            Always sent. A receipt for money you have paid is a record you are
+                            entitled to, so there is nothing to switch off here.
+                        </span>
+                    </div>
+
+                    <BaseButton type="submit" variant="secondary" :disabled="notifyForm.processing">
+                        {{ notifyForm.processing ? 'Saving' : 'Save preferences' }}
+                    </BaseButton>
                 </form>
             </BaseCard>
 

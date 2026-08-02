@@ -309,6 +309,32 @@ same test that the same method finds it when it IS present. See
 `ForbiddenLanguageTest::test_the_cleanliness_check_actually_catches_forbidden_terms`
 and `TeaserPhotoLeakTest::test_the_search_method_can_actually_find_a_photo_path`.
 
+### An assertion that cannot fail is not a test
+
+The same root failure has now shipped **four times in four costumes**, and
+every one of them was invisible because the suite was green:
+
+1. `json_encode` escapes slashes, so searching a payload for
+   `/admin/settings` found nothing whether or not it was there.
+2. Callback tests **built** the signed URL themselves, so the URL the gateway
+   actually produced was never exercised — checkout was dead on the live site.
+3. `MatchPresenter` emitted photo URLs the photo route refused, and no test
+   followed an emitted URL — members paid and got four broken images.
+4. `Mail::assertNothingSent()` on a `ShouldQueue` mailable passes **even when
+   an email has gone out**, because queued mail is never "sent" in a test.
+
+In each case the passing condition did not depend on the thing being claimed.
+
+**The rule: any assertion about a queued or deferred side effect must either
+run the queue synchronously in the test, or assert on the queue itself —
+never on the channel the work has not reached yet.** And every negative
+assertion gets a positive control proving the search method works.
+
+`AssertionsCanFailTest` enforces the mechanical half: it fails the build if
+any test asserts a queued mailable was *sent*, or uses `assertNothingSent()`
+without pairing it with `assertNothingQueued()`. It has its own positive
+control, since it would otherwise be exactly the kind of test it bans.
+
 ### Test the URL the code builds, not the route it targets
 
 Checkout was dead on the live site while the suite was green. Every callback

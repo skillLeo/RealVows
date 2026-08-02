@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Purchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,6 +31,16 @@ class PurchasesController extends Controller
                 'credits' => $p->credits_granted,
                 'status' => $p->status,
                 'succeeded' => $p->isComplete(),
+
+                /*
+                 * Signed and long-lived. A receipt somebody cannot open in a
+                 * year is not a receipt, so this deliberately outlives the
+                 * one-hour expiry used for photographs — a receipt reveals
+                 * nothing about another member.
+                 */
+                'receiptUrl' => $p->isComplete()
+                    ? URL::temporarySignedRoute('receipt', now()->addYears(2), ['order' => $p->order_identifier])
+                    : null,
             ]);
 
         return Inertia::render('Purchases', [

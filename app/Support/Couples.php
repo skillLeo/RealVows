@@ -38,24 +38,38 @@ class Couples
         'muslim' => [
             'names' => ['couple-muslim.jpg', 'rail-1.jpg'],
             /*
-             * Set by eye against the real photograph. Both faces sit at
-             * roughly 38% down the frame — the umbrellas above them take the
-             * top third — so anything higher crops the heads and anything
-             * lower loses the groom's face first.
+             * Measured, not guessed. The 3:4 crop discards 247px of a 2247px
+             * frame — 11% — and this photograph fills almost all of it, so
+             * both edges are tight and the value is a genuine compromise:
+             *
+             *   top     her hijab begins ~100px in, so anything above ~40%
+             *           slices the crown of it. That headscarf is the only
+             *           religious signal in the entire design; it does not
+             *           get clipped.
+             *   bottom  at 15% the line falls in the gap between their
+             *           clasped hands (which end ~1990) and his hand resting
+             *           on his knee (which starts ~2090), so it passes
+             *           through cloth rather than through either.
              */
-            'focal' => '50% 38%',
-            'alt' => 'A couple together on their wedding day',
-            'describes' => 'A visibly Muslim couple — nikah or walima dress',
+            'focal' => '50% 15%',
+            'alt' => 'A couple sitting together at home, her arms around his shoulders',
+            'describes' => 'A visibly Muslim couple — contemporary hijab, everyday clothes',
         ],
         'christian' => [
             'names' => ['couple-christian.jpg', 'rail-2.jpg'],
             /*
-             * Set by eye against the real file. Both faces sit at about 20%
-             * down — veil and bouquet below them, greenery above — so the
-             * crop keeps the heads whole at every width.
+             * This frame has room to spare: the top quarter is out-of-focus
+             * background above her headpiece, so the 11% the 3:4 crop takes
+             * never reaches it. 45% lifts both faces off the centre line and
+             * spends the loss on the hem of her gown.
+             *
+             * Horizontally it stays at 50% for the desktop hero, which is a
+             * far narrower box (0.57) and cuts 15% of the width. That keeps
+             * his head — it starts 11% in — and spends the right-hand loss on
+             * the outer edge of her hair, which is the only thing there.
              */
-            'focal' => '50% 20%',
-            'alt' => 'A couple together on their wedding day',
+            'focal' => '50% 45%',
+            'alt' => 'A bride in a beaded gown, her groom standing behind her',
             'describes' => 'A Christian or Western wedding couple',
         ],
     ];

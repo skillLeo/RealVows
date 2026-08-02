@@ -69,43 +69,42 @@ awkward on a paid site.
 ⚠️ **Attribution not required is not the same as attribution unrecorded.**
 Record it either way.
 
-### Live right now — Wikimedia Commons, attribution REQUIRED
-
-These are stand-ins until the hand-picked pair lands. Both licences oblige
-attribution, so this table is not optional while they are deployed.
+### Live — Pexels, hand-picked by the client
 
 | Slot | File | Photographer | Licence | Source |
 |---|---|---|---|---|
-| Muslim | `couple-muslim.jpg` | Faiaz Ahmad Emon | **CC BY 2.0** | [Sojib and Tanha](https://commons.wikimedia.org/wiki/File:Sojib_and_Tanha.jpg) |
-| Christian | `couple-christian.jpg` | OJjnr | **CC BY-SA 4.0** | [Church Wedding Exclusives 67](https://commons.wikimedia.org/wiki/File:Church_Wedding_Exclusives_67.jpg) |
+| Muslim | `couple-muslim.jpg` | Pavel Danilyuk | Pexels License | [pexels.com/photo/8525680](https://www.pexels.com/photo/8525680/) |
+| Christian | `couple-christian.jpg` | Chidy | Pexels License | [pexels.com/photo/24051124](https://www.pexels.com/photo/24051124/) |
 
-⚠️ Both are **wedding photographs**, which the current brief rejects. They are
-displayed only because something has to be, and they will be replaced.
+Photographer and photo ID are read off the download filenames, which Pexels
+generates as `pexels-{photographer}-{id}.jpg`. Neither name was typed from
+memory.
 
-### Incoming — Pexels, hand-picked
+Both were downscaled to 1500px on the long edge, quality 82, EXIF stripped, at
+roughly 300KB each. The originals were 3840px and 3168px wide — around 8MB
+of photograph on a page that needs about 0.6MB of it.
 
-Overwrite this table when the files land. Photographer and source URL go in
-even though the Pexels License does not demand them.
-
-| Slot | File | Photographer | Licence | Source |
-|---|---|---|---|---|
-| Muslim | `couple-muslim.jpg` | *pending* | Pexels License | *pending* |
-| Christian | `couple-christian.jpg` | *pending* | Pexels License | *pending* |
+The Wikimedia Commons stand-ins they replaced (Faiaz Ahmad Emon, CC BY 2.0;
+OJjnr, CC BY-SA 4.0) are gone from the repository, so their attribution
+obligation has gone with them.
 
 ### The specification they were chosen against
 
-- Portrait, croppable to 3:4 without cutting a face or a hand
-- 1200px+ on the short edge, faces in the upper third of the final crop
-- **Everyday or smart-casual clothes — NOT wedding wear.** A wedding photograph
-  shows two people who already found each other, which is the wrong message on
-  a page trying to convert somebody who has not
-- **Contemporary hijab as the only religious signal.** No bridal jewellery, no
+- Portrait, 2:3 or 3:4, croppable without cutting a face or a hand
+- 1200px+ on the short edge
+- **Contemporary hijab as the only religious signal in the Muslim slot.** No
   forehead ornament, no heavy henna styling — those read as a South Asian
   wedding first and as Muslim second, which inverts the point
 - **US market.** Couples an American viewer recognises from their own city
-- Mixed-heritage pairings welcome and preferred for at least one slot
 - Quiet, tender, reserved. No kissing, no open-mouth laughing, no lifted poses,
-  nothing physically intimate, eyes down or on each other rather than at camera
+  eyes down or on each other rather than at camera
+
+⚠️ **The no-wedding-wear rule was applied to the Muslim slot and relaxed for
+the Christian slot**, by the client, choosing by eye. The Muslim photograph is
+a couple at home in everyday clothes; the Christian one is a bride in a beaded
+gown with her groom behind her. Recorded because the rule as originally
+written would reject a file that is deliberately shipped, and a specification
+that disagrees with what is on the page misleads whoever reads it next.
 
 ### The register both must share
 
@@ -126,6 +125,32 @@ it is right for a given photograph.
 ### If you replace one
 
 Drop the file in as `couple-muslim.jpg` or `couple-christian.jpg` (or
-`rail-1.jpg` / `rail-2.jpg` — both names work). Portrait 3:4, 1200px+ short
-edge, faces in the upper third, no kissing, no camera-facing poses, a
-ceremonial setting over a photoshoot. Then update this table.
+`rail-1.jpg` / `rail-2.jpg` — both names work), downscale it to 1500px on the
+long edge, then set its focal point and update the table above.
+
+⚠️ **There are TWO crop shapes, and the obvious one is not the tight one.**
+
+| Where | Ratio | What gets cut |
+|---|---|---|
+| Couples section, every width | 3:4 | ~11% of the height — top and bottom |
+| Hero below 880px | 3:4 | same |
+| **Hero at 880px and up** | **0.52 – 0.57** | **~15–22% of the WIDTH — left and right** |
+
+The desktop hero is a tall narrow column, not a 3:4 card. A photograph that
+crops perfectly on a phone can still lose somebody's head sideways there. It
+is the constraint that decides the horizontal half of the focal point, and it
+is invisible unless you look for it.
+
+To set a focal point honestly, compute the exact crop rather than eyeballing
+the whole frame — for the 3:4 case, on a 1500×2250 file:
+
+```
+excess = 2250 - (1500 / 0.75) = 250px
+offset = excess × Y%          # Y is the second number in the focal point
+magick couple-x.jpg -crop 1500x2000+0+<offset> +repage -resize 400x out.png
+```
+
+Then look at `out.png`. Both current values were chosen this way, and the
+first guess was wrong both times: 41% sliced the crown of the hijab, and 29%
+clipped a hand at the bottom edge. Neither was visible in the full frame.
+

@@ -7,8 +7,9 @@ use Tests\TestCase;
 
 /**
  * ⚠️ RULE 4: AN ASSERTION THAT CANNOT FAIL IS NOT A TEST.
+ * ⚠️ RULE 5: A GUARD THAT SCANS MUST PROVE IT CAN STILL SEE.
  *
- * This project has now shipped the same root failure three times, in three
+ * This project has now shipped the same root failure four times, in four
  * different costumes, and each one was invisible because the test was green:
  *
  *  1. `json_encode` escapes slashes, so searching a payload for
@@ -19,12 +20,35 @@ use Tests\TestCase;
  *  3. `Mail::assertNothingSent()` on a ShouldQueue mailable passes even when
  *     an email HAS gone out, because a queued mailable is never "sent"
  *     during the test.
+ *  4. The horizontal-overflow guard scanned keyframe bodies for a literal
+ *     `scale(1.0x)`. Nine near-identical keyframes were then collapsed into
+ *     one parameterised `rv-arrive`, which moved the literal out to the call
+ *     site as `--arrive-scale`. The scan found ZERO scaling selectors in the
+ *     entire stylesheet and passed everything. A refactor had quietly turned
+ *     the guard off, and nothing said so.
  *
  * Every one of them is an assertion whose passing condition did not depend
  * on the thing it claimed to check.
  *
- * This file enforces the third mechanically, because it is the one with a
- * shape a machine can recognise. The other two are enforced by convention
+ * ── RULE 5, WHICH THE FOURTH ONE EARNED ───────────────────────────────────
+ *
+ * Any test or guard that inspects source, output or structure must carry a
+ * positive control proving it can still find what it looks for — and that
+ * control must be re-verified whenever the thing being inspected is
+ * refactored.
+ *
+ * The distinguishing symptom is always the same: SUCCESS REPORTED WHILE
+ * NOTHING IS BEING CHECKED. A negative assertion over an empty result set is
+ * indistinguishable from a negative assertion over a clean one, and only the
+ * positive control can tell them apart.
+ *
+ * ⚠️ An extraction scan is the dangerous shape. `preg_match_all` that feeds a
+ * loop is fine while the pattern matches and silently vacuous the moment it
+ * stops — so every such scan must assert it found something, either in the
+ * method itself or at the call site of the helper that runs it.
+ *
+ * This file enforces Rules 3 and 5 mechanically, because those are the two
+ * with a shape a machine can recognise. The others are enforced by convention
  * and by the positive controls that now sit beside every negative assertion.
  */
 class AssertionsCanFailTest extends TestCase
@@ -182,5 +206,83 @@ class AssertionsCanFailTest extends TestCase
         // rediscovered each time somebody debugs a silently passing test.
         $this->assertNotEmpty($files);
         $this->addToAssertionCount(1);
+    }
+
+    /**
+     * ⚠️ RULE 5, ENFORCED: every scanning guard must prove it can still see.
+     *
+     * A `preg_match_all` that feeds a loop is the dangerous shape — correct
+     * while the pattern matches, and silently vacuous the moment a refactor
+     * moves what it was looking for. The overflow guard spent a commit in
+     * exactly that state, reporting success over an empty result set.
+     *
+     * The fix is cheap and total: any file that extracts must also assert,
+     * somewhere, that an extraction found something. That single
+     * `assertNotEmpty` is what separates "nothing is wrong" from "I can no
+     * longer see anything".
+     */
+    public function test_every_scanning_guard_proves_it_can_still_see(): void
+    {
+        $blind = [];
+
+        foreach (File::allFiles(base_path('tests')) as $file) {
+            if (! str_ends_with($file->getFilename(), 'Test.php')) {
+                continue;
+            }
+
+            // Not itself — this file discusses the pattern it bans.
+            if ($file->getFilename() === 'AssertionsCanFailTest.php') {
+                continue;
+            }
+
+            $source = File::get($file->getPathname());
+
+            if (! str_contains($source, 'preg_match_all')) {
+                continue;
+            }
+
+            /*
+             * Either the file asserts one of its own extractions is non-empty,
+             * or it carries a named positive control that exercises the reader
+             * against a known-bad sample. Both prove the same thing.
+             */
+            $provesItSees = str_contains($source, 'assertNotEmpty(')
+                || preg_match('/function test_[a-z_]*(can_see|can_actually|recognises|can_detect|readers_can)/', $source) === 1;
+
+            if (! $provesItSees) {
+                $blind[] = $file->getFilename();
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $blind,
+            "These guards extract with preg_match_all but never prove the extraction found "
+                ."anything, so a refactor can turn them off silently:\n  ".implode("\n  ", $blind)
+                ."\n\nAdd an assertNotEmpty on the extraction, or a positive control that runs "
+                .'the reader against a known-bad sample.'
+        );
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL for the check above — which would otherwise be an
+     * exact instance of the thing it exists to prevent.
+     */
+    public function test_the_blindness_check_recognises_a_guard_that_cannot_see(): void
+    {
+        $blind = '<?php class X { public function t() { preg_match_all("/x/", $s, $m); '
+            .'foreach ($m[1] as $v) { $this->assertSame([], $v); } } }';
+
+        $this->assertStringContainsString('preg_match_all', $blind);
+        $this->assertStringNotContainsString('assertNotEmpty(', $blind);
+        $this->assertSame(
+            0,
+            preg_match('/function test_[a-z_]*(can_see|can_actually|recognises|can_detect|readers_can)/', $blind),
+            'The control sample must not look like it carries a positive control.'
+        );
+
+        // And a guarded one is NOT flagged.
+        $sighted = $blind.' public function t2() { $this->assertNotEmpty($m); }';
+        $this->assertStringContainsString('assertNotEmpty(', $sighted);
     }
 }

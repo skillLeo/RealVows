@@ -111,6 +111,25 @@ jobs:
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan up"
 
+      # ⚠️ A 200 ON THE HOME PAGE IS NOT PROOF THE DEPLOY WAS SAFE.
+      #
+      # On 2 August 2026 rsync --delete removed the web-root .htaccess, which
+      # both rewrites into public/ and guards everything else. The site
+      # answered 403 and composer.json became publicly readable. The health
+      # check below could not tell the difference between "broken" and
+      # "serving you its source code" — this step can.
+      - name: Confirm the web root is not exposing the application
+        env:
+          DEPLOY_URL: https://realvows.skillleo.com
+        run: |
+          # ⚠️ The production install above dropped PHPUnit, and `tests/` is
+          # excluded from the rsync, so the check exists on neither side by
+          # default. Restoring dev dependencies HERE, on the runner, after the
+          # server has already been synced, is what lets the assertion live in
+          # one place instead of being duplicated as a shell loop that drifts.
+          composer install --no-interaction --prefer-dist --quiet
+          php artisan test --filter=WebRootExposure
+
       - name: Confirm it is serving
         run: |
           sleep 5

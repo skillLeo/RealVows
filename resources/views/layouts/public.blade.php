@@ -20,7 +20,7 @@
     {{-- Self-hosted. The home page is the one that has to be fast on a
          mid-range phone over 4G, so it is the page that benefits most from
          not opening a connection to a third party before it can show text. --}}
-    <link rel="preload" href="/fonts/fraunces-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fraunces-var-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     {{-- Blade pages load only the stylesheet and the small vanilla motion

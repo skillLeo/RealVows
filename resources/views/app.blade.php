@@ -26,7 +26,7 @@
          negotiation standing between a phone on 4G and readable text. The two
          faces that appear above the fold are preloaded; the rest arrive with
          the stylesheet. --}}
-    <link rel="preload" href="/fonts/fraunces-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fraunces-var-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

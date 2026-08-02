@@ -21,32 +21,26 @@
 
 /* latin-ext */
 @font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/fraunces-400-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-/* latin */
-@font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/fraunces-400-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* latin-ext */
-@font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url(/fonts/inter-400-latin-ext.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Fraunces — one variable file carrying opsz, SOFT and WONK */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/fraunces-var-latin.woff2') format('woff2-variations');
+  /* Declared so the browser knows the axes exist before it paints. */
+  font-variation-settings: 'opsz' 40, 'SOFT' 0, 'WONK' 0;
+  unicode-range: U+0000-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2000-206F, U+2020, U+20A0-20C0, U+2113, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+2C60-2C7F, U+A720-A7FF, U+FEFF, U+FFFD;
 }
 
 /* latin */
@@ -254,9 +248,54 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-weight: 400;
   color: var(--oxblood);
 }
-.rv-d1 { font-size: clamp(40px, 7vw, var(--fs-display-1)); line-height: 1.08; letter-spacing: -0.015em; }
-.rv-d2 { font-size: clamp(30px, 5.4vw, var(--fs-display-2)); line-height: 1.15; letter-spacing: -0.01em; }
-.rv-d3 { font-size: clamp(24px, 4vw, var(--fs-display-3)); line-height: 1.25; }
+/*
+ * ⚠️ THE VARIABLE AXES, AND WHY THEY ARE NOT USED EVERYWHERE.
+ *
+ * Fraunces carries SOFT (rounded terminals) and WONK (the eccentric
+ * single-storey letterforms that give it its warmth). Used at the two
+ * largest display sizes it reads as a considered wedding-invitation face.
+ * Used everywhere it reads as a novelty, so 28 stays sober — a card title
+ * is a label, not a flourish.
+ *
+ * `opsz` tracks the actual size, which is what an optical-size axis is for:
+ * large type wants tighter, finer detail than small type.
+ */
+.rv-d1 {
+  font-size: clamp(40px, 7vw, var(--fs-display-1));
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 40, 'WONK' 1;
+}
+.rv-d2 {
+  font-size: clamp(30px, 5.4vw, var(--fs-display-2));
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variation-settings: 'opsz' 96, 'SOFT' 25, 'WONK' 1;
+}
+.rv-d3 {
+  font-size: clamp(24px, 4vw, var(--fs-display-3));
+  line-height: 1.25;
+  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
+}
+
+/*
+ * ⚠️ NUMBERS STAY SOBER AND STAY STILL.
+ *
+ * WONK swaps in alternate letterforms, and on digits that means the shapes
+ * change as a number counts up — the score would visibly wobble while The
+ * Count runs. Tabular figures stop the width changing at the same time.
+ *
+ * Applied to every element that carries a number that moves.
+ */
+.rv-ring__value,
+.rv-balance,
+.rv-row__score,
+.rv-ledger__delta,
+.rv-package__price {
+  font-variation-settings: 'opsz' 144, 'SOFT' 20, 'WONK' 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
 
 .rv-lead   { margin: 0; font-size: var(--fs-body-1); line-height: 1.65; color: var(--ink-soft); }
 .rv-body   { margin: 0; font-size: var(--fs-body-2); line-height: 1.6; color: var(--ink-soft); }
@@ -1726,9 +1765,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-veil {
   position: relative;
+  /* The seal overhangs the lower edge, so the veil itself must not clip. */
+  overflow: visible;
+  margin-bottom: 16px;
+  aspect-ratio: 4 / 3;
+}
+
+/*
+ * The sheen has to be clipped to the panel while the seal has to escape it,
+ * so they live at different levels: this inner element clips, the veil does
+ * not, and the seal is a sibling of this rather than a child.
+ */
+.rv-veil__inner {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  aspect-ratio: 4 / 3;
   border-radius: var(--r);
   background: linear-gradient(160deg, var(--oxblood) 0%, var(--oxblood-deep) 100%);
   overflow: hidden;
@@ -1736,11 +1788,12 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-veil__mark {
   font-family: var(--display);
-  font-size: var(--fs-display-2);
-  letter-spacing: .08em;
+  font-size: var(--fs-display-3);
+  letter-spacing: .16em;
   color: var(--brass);
-  opacity: .28;
+  opacity: .22;
   user-select: none;
+  font-variation-settings: 'opsz' 96, 'SOFT' 30, 'WONK' 1;
 }
 
 /* The Veil choreography: a brass sheen sweeping left to right. */
@@ -2027,4 +2080,142 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 @media (min-width: 768px) {
   .rv-fab { display: none; }
+}
+
+/* ==========================================================================
+   THE SEAL — the product's one physical metaphor
+   ==========================================================================
+   A pressed brass disc bearing the RV mark, sitting where a wax seal sits on
+   an envelope flap. It is the through-line: intact on a locked card, split
+   during the unsealing, quiet on a receipt, and the same geometry as the
+   verification badge.
+
+   ⚠️ THE RELIEF IS DRAWN WITHOUT A SHADOW, because shadows are banned in
+   this design system. Instead: a brass-bright arc on the upper edge and an
+   oxblood-deep arc on the lower edge, so the disc reads as catching
+   candlelight from above. That is a real letterpress technique and it costs
+   two pseudo-elements.
+   ========================================================================== */
+
+.rv-seal {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 34%,
+    color-mix(in oklab, var(--brass-bright) 40%, var(--brass)) 0%,
+    var(--brass) 62%,
+    color-mix(in oklab, var(--oxblood-deep) 22%, var(--brass)) 100%
+  );
+  color: var(--oxblood-deep);
+  font-family: var(--display);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: .04em;
+  font-variation-settings: 'opsz' 40, 'SOFT' 0, 'WONK' 0;
+  user-select: none;
+}
+
+/* The lit edge — light falling from above. */
+.rv-seal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-top-color: var(--brass-bright);
+  border-left-color: color-mix(in oklab, var(--brass-bright) 60%, transparent);
+  pointer-events: none;
+}
+
+/* The shaded edge. */
+.rv-seal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-bottom-color: color-mix(in oklab, var(--oxblood-deep) 70%, transparent);
+  border-right-color: color-mix(in oklab, var(--oxblood-deep) 40%, transparent);
+  pointer-events: none;
+}
+
+.rv-seal--sm { width: 32px; height: 32px; font-size: 10px; }
+.rv-seal--lg { width: 96px; height: 96px; font-size: 30px; }
+
+/* Sitting on the flap: bottom-centre, overlapping the card's lower edge. */
+.rv-seal--flap {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   The Seal Break — what turns the unsealing from a reveal into an OPENING.
+
+   The disc splits along a hairline and its two halves part, each rotating
+   ±6°, as the sheen sweeps through. Clip-path and transform only.
+   -------------------------------------------------------------------------- */
+
+.rv-seal__half {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  transform-origin: center;
+}
+
+.rv-seal__half--l { clip-path: inset(0 50% 0 0); }
+.rv-seal__half--r { clip-path: inset(0 0 0 50%); }
+
+@keyframes rv-seal-part-l {
+  from { transform: translateX(0) rotate(0); opacity: 1; }
+  to   { transform: translateX(-18px) rotate(-6deg); opacity: 0; }
+}
+
+@keyframes rv-seal-part-r {
+  from { transform: translateX(0) rotate(0); opacity: 1; }
+  to   { transform: translateX(18px) rotate(6deg); opacity: 0; }
+}
+
+.rv-unsealing .rv-seal__half--l {
+  animation: rv-seal-part-l var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+.rv-unsealing .rv-seal__half--r {
+  animation: rv-seal-part-r var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+/* The hairline the seal splits along, revealed as the halves part. */
+.rv-unsealing .rv-seal {
+  background: none;
+  color: transparent;
+}
+
+.rv-unsealing .rv-seal::before,
+.rv-unsealing .rv-seal::after { opacity: 0; transition: opacity var(--dur-quick) var(--ease); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The seal still goes; it simply is not performed. */
+  .rv-unsealing .rv-seal__half--l,
+  .rv-unsealing .rv-seal__half--r { animation: none; opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   The verified badge — the same disc, smaller, so verified and sealed are
+   visibly the same family.
+   -------------------------------------------------------------------------- */
+
+.rv-verified-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-body-3);
+  color: var(--brass-ink);
 }

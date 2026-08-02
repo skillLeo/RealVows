@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import CompatibilityRing from './CompatibilityRing.vue';
+import RvSeal from './RvSeal.vue';
 import BaseButton from './BaseButton.vue';
 
 /**
@@ -57,8 +58,16 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
         <!-- Locked: a gradient panel. There is deliberately no image element
              in this branch at all. -->
         <div v-if="!isOpen" class="rv-veil">
-            <span class="rv-veil__mark" aria-hidden="true">RV</span>
-            <span class="rv-veil__sheen" aria-hidden="true" />
+            <!-- The inner element clips the sheen; the veil does not, so the
+                 seal can overhang its lower edge. -->
+            <div class="rv-veil__inner">
+                <span class="rv-veil__mark" aria-hidden="true">RealVows</span>
+                <span class="rv-veil__sheen" aria-hidden="true" />
+            </div>
+
+            <!-- The seal sits on the flap and IS the locked state. A card
+                 wearing an intact seal does not need a label saying so. -->
+            <RvSeal on-flap breakable />
         </div>
 
         <img
@@ -86,8 +95,6 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
         </ul>
 
         <div class="rv-match__foot">
-            <span v-if="!isOpen" class="rv-match__lozenge">Locked</span>
-
             <BaseButton v-if="isOpen" :href="`/matches/${match.id}`" variant="secondary">
                 See their profile
             </BaseButton>

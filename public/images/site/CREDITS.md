@@ -99,12 +99,38 @@ obligation has gone with them.
 - Quiet, tender, reserved. No kissing, no open-mouth laughing, no lifted poses,
   eyes down or on each other rather than at camera
 
-⚠️ **The no-wedding-wear rule was applied to the Muslim slot and relaxed for
-the Christian slot**, by the client, choosing by eye. The Muslim photograph is
-a couple at home in everyday clothes; the Christian one is a bride in a beaded
-gown with her groom behind her. Recorded because the rule as originally
-written would reject a file that is deliberately shipped, and a specification
-that disagrees with what is on the page misleads whoever reads it next.
+### ⚠️ The two must be distinguishable by faith at a glance
+
+This is the entire reason there are two photographs, and it has now been
+missed twice.
+
+The Muslim slot carries a **contemporary hijab**. The Christian slot must
+therefore carry **no head covering at all** — and that means no ornate
+jewelled headpiece, no gele or wrap, and no heavily embellished gold or
+beaded gown either. Those read as Eastern styling regardless of the wearer's
+actual faith, so the pair comes across as two Muslim couples and the contrast
+the section exists to make simply does not happen.
+
+**What the Christian slot needs:** plain Western clothing, uncovered hair,
+quiet and reserved in the same register as the left photograph. A small cross
+necklace is the clearest Christian signal available without returning to
+wedding imagery.
+
+**Rejected on this basis:** a Yoruba couple in fila and gele, and a bride in
+a jewelled headpiece and gold beaded gown. Both were beautiful photographs.
+Neither was legible as Christian next to a hijab.
+
+### ⚠️ The two must also match in scale
+
+Identical frames make a mismatch in the photographs themselves obvious, and
+one tight portrait beside one wide one reads as two different pages.
+
+**The measurable version: a head should occupy roughly 20–25% of the frame
+height, and you should see both people from about the waist up with clear
+space above their heads.** The current Muslim photograph sits at ~22%. A
+head-and-shoulders close-up lands near 55% and cannot be rescued by a focal
+point — the crop can only ever remove more, never pull back. Scale is a
+property of the source file, so it has to be judged before download.
 
 ### The register both must share
 
@@ -128,18 +154,15 @@ Drop the file in as `couple-muslim.jpg` or `couple-christian.jpg` (or
 `rail-1.jpg` / `rail-2.jpg` — both names work), downscale it to 1500px on the
 long edge, then set its focal point and update the table above.
 
-⚠️ **There are TWO crop shapes, and the obvious one is not the tight one.**
+**There is exactly one crop shape: 3:4, everywhere.** A 2:3 photograph loses
+about 11% of its height to it, top and bottom, and nothing off the sides. A
+focal point set against a phone is therefore automatically right on a desktop.
 
-| Where | Ratio | What gets cut |
-|---|---|---|
-| Couples section, every width | 3:4 | ~11% of the height — top and bottom |
-| Hero below 880px | 3:4 | same |
-| **Hero at 880px and up** | **0.52 – 0.57** | **~15–22% of the WIDTH — left and right** |
-
-The desktop hero is a tall narrow column, not a 3:4 card. A photograph that
-crops perfectly on a phone can still lose somebody's head sideways there. It
-is the constraint that decides the horizontal half of the focal point, and it
-is invisible unless you look for it.
+⚠️ That was not true until 2 Aug 2026. The hero used to release the ratio
+above 880px and resolve to **0.52** — a tall narrow column that cut 15–22% off
+the WIDTH instead. Two crop shapes meant two chances to slice a face, and the
+desktop one was invisible unless you went looking. `CouplesPhotographyTest`
+now fails if anything reintroduces it.
 
 To set a focal point honestly, compute the exact crop rather than eyeballing
 the whole frame — for the 3:4 case, on a 1500×2250 file:

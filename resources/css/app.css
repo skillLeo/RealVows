@@ -1403,16 +1403,41 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  *
  * A frame shaped like the photograph inside it can be cropped gently.
  */
+/*
+ * ⚠️ 3:4 AT EVERY WIDTH, WITH NO OVERRIDE ANYWHERE.
+ *
+ * This used to release the ratio above 880px and let a `min-height` drive
+ * the box instead, which produced a frame measuring 0.52 — a tall narrow
+ * column that cropped 22% off the WIDTH. Two consequences, both reported by
+ * the client as "distorted":
+ *
+ *   1. The two frames were different heights (656 and 600), because only one
+ *      of them carried the stagger's margin, so the shared row height landed
+ *      differently on each.
+ *   2. A photograph cropped correctly for 3:4 on a phone lost the sides of
+ *      people's heads on a desktop. Two crop shapes meant two chances to cut
+ *      a face, and one of them was invisible unless you went looking for it.
+ *
+ * Holding the ratio at every width means ONE crop shape. A focal point set
+ * against a phone is now automatically right on a desktop.
+ */
 .rv-hero__frame { aspect-ratio: 3 / 4; }
-
-@media (min-width: 880px) {
-  /* Side by side beside the copy, where the column is tall rather than wide. */
-  .rv-hero__art { min-height: clamp(360px, 52vw, 680px); }
-  .rv-hero__frame { aspect-ratio: auto; }
-}
 
 @media (min-width: 560px) {
   .rv-hero__art { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 880px) {
+  /*
+   * Beside the copy the art needs real margins. It previously carried a flat
+   * 12px, so the right-hand frame sat 12px off the viewport edge and read as
+   * bleeding off the page rather than sitting inside the layout.
+   */
+  .rv-hero__art {
+    padding: clamp(24px, 3vw, 44px);
+    gap: clamp(16px, 2vw, 24px);
+    align-content: center;
+  }
 }
 
 .rv-hero__frame {
@@ -1426,14 +1451,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   animation: rv-frame-in 1000ms var(--ease) both;
 }
 
-/* Offset, not flush. Two photographs side by side at identical height read
-   as a stock banner; a small vertical stagger reads as an arrangement. */
+/*
+ * ⚠️ NO VERTICAL STAGGER. DO NOT REINTRODUCE IT.
+ *
+ * The second frame used to carry `margin-top: clamp(20px, 5vw, 56px)`. The
+ * intent was that a small offset reads as an arrangement where two flush
+ * photographs read as a stock banner. The client read it as a bug — twice,
+ * unprompted, in the word "distorted" — and once someone has read a layout
+ * as broken, the intent behind it has already failed.
+ *
+ * It also did real damage rather than only aesthetic: the margin came out of
+ * the shared grid row, so the two frames resolved to different heights (656
+ * and 600 at 1440px) and the right-hand photograph was scaled differently
+ * from the left. The stagger was the cause of the size mismatch, not a
+ * separate complaint.
+ *
+ * The frames are now identical: same width, same height, same ratio, tops on
+ * one line, equal gutter. The arrival delay stays — sequencing them in time
+ * is an arrangement that costs the layout nothing.
+ */
 .rv-hero__frame--second { animation-delay: 140ms; }
-
-/* The stagger is an arrangement of two columns. Stacked, it is just a gap. */
-@media (min-width: 560px) {
-  .rv-hero__frame--second { margin-top: clamp(20px, 5vw, 56px); }
-}
 
 @keyframes rv-frame-in {
   from { opacity: 0; transform: translateY(20px); }

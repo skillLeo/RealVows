@@ -171,6 +171,73 @@ class CouplesPhotographyTest extends TestCase
     }
 
     /**
+     * ⚠️ THE TWO HERO FRAMES ARE IDENTICAL. THIS IS A CLIENT REQUIREMENT,
+     * NOT A STYLE PREFERENCE.
+     *
+     * Three rules used to conspire to break it: the ratio was released above
+     * 880px, a `min-height` drove the box instead, and the second frame
+     * carried a top margin. The result measured 304x656 and 304x600 — two
+     * different heights, two different crops of the same page, and the
+     * right-hand frame 12px off the viewport edge.
+     *
+     * The client reported it twice, unprompted, as "distorted". Holding one
+     * ratio at every width also collapses two crop shapes into one, so a
+     * focal point set against a phone is automatically right on a desktop.
+     */
+    public function test_the_two_hero_frames_cannot_drift_apart_again(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.rv-hero__frame\s*\{\s*aspect-ratio:\s*3\s*\/\s*4\s*;?\s*\}/',
+            $css,
+            'The hero frames no longer declare a 3:4 ratio.'
+        );
+
+        // Nothing may release the ratio at any breakpoint.
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.rv-hero__frame[^{}]*\{[^}]*aspect-ratio:\s*(auto|none)/',
+            $css,
+            'Something releases the hero frame ratio again. That is what produced a 0.52 '
+                .'box on desktop, which cropped 22% off the WIDTH and cut the sides off heads.'
+        );
+
+        // The stagger is what made the two heights differ.
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.rv-hero__frame--second[^{}]*\{[^}]*margin-top:/',
+            $css,
+            'The vertical stagger is back on the second hero frame. It comes out of the shared '
+                .'grid row, so the two frames resolve to different heights and the client reads '
+                .'the layout as broken.'
+        );
+
+        // A min-height on the track overrides the ratio and reintroduces both.
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.rv-hero__art[^{}]*\{[^}]*min-height:/',
+            $css,
+            'A min-height on the hero art drives the frame box instead of the aspect ratio.'
+        );
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL for the check above. Every assertion in it is a
+     * negative, so it is worth nothing unless it can see the real thing.
+     */
+    public function test_the_frame_check_recognises_the_css_that_actually_shipped(): void
+    {
+        // Reconstructed verbatim from the rules that caused the defect.
+        $broken = "@media (min-width: 880px) {\n"
+            ."  .rv-hero__art { min-height: clamp(360px, 52vw, 680px); }\n"
+            ."  .rv-hero__frame { aspect-ratio: auto; }\n"
+            ."}\n"
+            .'.rv-hero__frame--second { margin-top: clamp(20px, 5vw, 56px); }';
+
+        $this->assertMatchesRegularExpression('/\.rv-hero__frame[^{}]*\{[^}]*aspect-ratio:\s*(auto|none)/', $broken);
+        $this->assertMatchesRegularExpression('/\.rv-hero__frame--second[^{}]*\{[^}]*margin-top:/', $broken);
+        $this->assertMatchesRegularExpression('/\.rv-hero__art[^{}]*\{[^}]*min-height:/', $broken);
+    }
+
+    /**
      * ⚠️ POSITIVE CONTROL. Every assertion above is about absence or shape,
      * so this proves the reader can actually see what it claims to check.
      */

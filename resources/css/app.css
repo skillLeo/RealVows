@@ -1385,12 +1385,30 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * carry width attributes, and that is what it was refusing to go below.
    */
   min-width: 0;
-  min-height: clamp(360px, 52vw, 680px);
   border-left: 1px solid var(--hairline);
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
   padding: 12px;
+}
+
+/*
+ * ⚠️ THE FRAMES ARE PORTRAIT, AND THAT IS THE ACTUAL FIX FOR THE CROP.
+ *
+ * The art used to carry a fixed `min-height` split between two stacked
+ * frames, which made each one a short wide band — roughly 350x140 on a
+ * phone. A portrait photograph forced into a band that shape gets sliced
+ * horizontally no matter what the focal point says, and the heads come off.
+ * Setting the focal point alone would not have fixed it.
+ *
+ * A frame shaped like the photograph inside it can be cropped gently.
+ */
+.rv-hero__frame { aspect-ratio: 3 / 4; }
+
+@media (min-width: 880px) {
+  /* Side by side beside the copy, where the column is tall rather than wide. */
+  .rv-hero__art { min-height: clamp(360px, 52vw, 680px); }
+  .rv-hero__frame { aspect-ratio: auto; }
 }
 
 @media (min-width: 560px) {

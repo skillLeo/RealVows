@@ -182,6 +182,53 @@ class HorizontalOverflowTest extends TestCase
     }
 
     /**
+     * ⚠️ POSITIVE CONTROL FOR THE GAP THAT LET A REAL BUG THROUGH.
+     *
+     * The pseudo-element scan sat there passing while the hero arrival scaled
+     * a full-width grid track to 1.04 — because that selector had no
+     * `::before`, so the scan never looked at it. The regular-element check
+     * was added to close exactly that hole, and this proves the check can see
+     * the shape of the bug rather than merely existing.
+     */
+    public function test_the_full_width_scale_check_recognises_the_bug_it_was_added_for(): void
+    {
+        // The exact CSS that shipped and broke, reconstructed.
+        $offending = "@keyframes rv-x { from { transform: scale(1.04); } to { transform: scale(1); } }\n"
+            ."[data-arrival='running'] .rv-hero__art { animation: rv-x 900ms ease both; }";
+
+        preg_match_all('/@keyframes\s+([\w-]+)\s*\{(?:[^{}]|\{[^{}]*\})*\}/', $offending, $blocks, PREG_SET_ORDER);
+        $this->assertNotEmpty($blocks, 'The keyframe matcher cannot read a keyframe block.');
+        $this->assertMatchesRegularExpression('/scale\(\s*1\.\d/', $blocks[0][0]);
+
+        // And that the selector-side matcher finds the full-width element.
+        preg_match_all('/([^{}]*)\{[^}]*animation:[^;}]*\brv-x\b/', $offending, $uses);
+
+        $found = false;
+
+        foreach ($uses[1] as $selector) {
+            if (preg_match('/\.rv-hero__art\s*$/', trim($selector))) {
+                $found = true;
+            }
+        }
+
+        $this->assertTrue(
+            $found,
+            'The check cannot recognise a scale applied to .rv-hero__art, which is the exact '
+                .'bug it exists to catch.'
+        );
+
+        // The live stylesheet must have the fix: the scale sits on the image
+        // inside the frame, which clips, not on the track.
+        $css = $this->css();
+
+        $this->assertMatchesRegularExpression(
+            '/\.rv-hero__frame img \{\s*animation: rv-hero-zoom/',
+            $css,
+            'The hero zoom is no longer on the image inside the clipping frame.'
+        );
+    }
+
+    /**
      * `100vw` includes the scrollbar on desktop, so a full-bleed element sized
      * with it overflows by the scrollbar width on every page that scrolls.
      * Permitted only inside a `calc()` that subtracts a gutter.

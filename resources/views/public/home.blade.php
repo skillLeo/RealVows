@@ -42,18 +42,33 @@
 
              The frames are offset from one another rather than flush, which
              is what stops a two-up photo pair reading like a stock banner. --}}
+        {{--
+            ⚠️ THE SAME TWO PEOPLE AS THE COUPLES SECTION, on purpose.
+
+            One Muslim couple and one Christian couple are the only two people
+            this product shows anywhere. Two separate sets would be two
+            licences to maintain and two slightly different stories being told
+            on one page.
+
+            Each carries its own focal point, because `object-fit: cover` with
+            the default centre crops blindly and will cut through a face at
+            one width while looking fine at another. See App\Support\Couples.
+        --}}
         <div class="rv-hero__art">
-            <figure class="rv-hero__frame">
-                <img src="{{ asset('images/site/hero-a.jpg') }}"
-                     alt="A couple standing together at their wedding celebration"
-                     width="1400" height="1750" fetchpriority="high" decoding="async">
-            </figure>
-            <figure class="rv-hero__frame rv-hero__frame--second">
-                <img src="{{ asset('images/site/hero-b.jpg') }}"
-                     alt="A bride and groom in traditional dress at their wedding"
-                     width="1400" height="1750" loading="lazy" decoding="async">
-            </figure>
-            <span class="rv-pill rv-pill--on-dark rv-hero__note">Final photography to be added</span>
+            @foreach (\App\Support\Couples::all() as $i => $couple)
+                <figure class="rv-hero__frame @if ($i === 1) rv-hero__frame--second @endif">
+                    <img src="{{ asset($couple['src']) }}"
+                         alt="{{ $couple['alt'] }}"
+                         style="object-position: {{ $couple['focal'] }}"
+                         width="1400" height="1750"
+                         @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif
+                         decoding="async">
+                </figure>
+            @endforeach
+
+            @if (\App\Support\Couples::awaitingRealPhotography())
+                <span class="rv-pill rv-pill--on-dark rv-hero__note">Final photography to be added</span>
+            @endif
         </div>
     </section>
 

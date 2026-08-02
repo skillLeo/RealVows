@@ -309,6 +309,37 @@ same test that the same method finds it when it IS present. See
 `ForbiddenLanguageTest::test_the_cleanliness_check_actually_catches_forbidden_terms`
 and `TeaserPhotoLeakTest::test_the_search_method_can_actually_find_a_photo_path`.
 
+### CSS fails silently — assume it and guard it
+
+CSS has no collision warning, no unused-symbol warning and no error state.
+Every one of these was accepted happily by the browser while doing the wrong
+thing, and all of them shipped:
+
+- **A duplicate `@keyframes` name.** `rv-photo-settle` already animated the
+  hero zoom; a second definition for the hero arrival silently replaced it.
+  The later definition simply wins.
+- **A scale on a full-width element.** The arrival scaled `.rv-hero__art`,
+  a full-width grid track, so 375px became 390px and the page scrolled
+  sideways by 8px.
+- **A scaled pseudo-element in an unclipped parent.** `scale(1.03)` behind
+  the auth band pushed every public page 1.5% wider than the viewport.
+- **A crop that cuts faces.** Two photographs of different proportions in
+  short wide frames, cropped by `object-fit: cover` with the default centre,
+  which has no idea where the people are. Nothing overflowed, nothing
+  errored — it was simply wrong at a size a real device shows.
+
+`StylesheetIntegrityTest`, `HorizontalOverflowTest` and
+`CouplesPhotographyTest` enforce what can be enforced. **The last one on that
+list cannot be automated at all** — a crop that touches a face is only
+visible to eyes, at real widths, on the actual photograph.
+
+⚠️ **Headless Chrome clamps its viewport to 500px minimum.** A screenshot at
+`--window-size=375` is 375 physical pixels of a 500px layout and lies
+convincingly — it showed clipped text on every section and nearly sent me
+fixing a layout that was fine. **An iframe has no such floor:** an iframe
+375px wide IS a 375px viewport, media queries and all. Measure and screenshot
+through an iframe, never through the window.
+
 ### An assertion that cannot fail is not a test
 
 The same root failure has now shipped **four times in four costumes**, and

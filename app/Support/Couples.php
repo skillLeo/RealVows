@@ -50,12 +50,11 @@ class Couples
         'christian' => [
             'names' => ['couple-christian.jpg', 'rail-2.jpg'],
             /*
-             * Set by eye. The couple's faces are high in this frame, around
-             * 18% — they are kissing, and the crop is set so the embrace is the
-             * first thing you see rather than the dress below it —
-             * so the crop is biased well up.
+             * Set by eye against the real file. Both faces sit at about 20%
+             * down — veil and bouquet below them, greenery above — so the
+             * crop keeps the heads whole at every width.
              */
-            'focal' => '50% 18%',
+            'focal' => '50% 20%',
             'alt' => 'A couple together on their wedding day',
             'describes' => 'A Christian or Western wedding couple',
         ],

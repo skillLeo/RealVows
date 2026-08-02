@@ -71,60 +71,46 @@ references `hero-b.jpg` again.
 
 ---
 
-## The two couples
+## The two couples — INSTALLED
 
-**Exactly two photographs, and the same pair appears in the hero AND the
-couples section.** One Muslim couple, one Christian couple.
+Both sourced from Wikimedia Commons, cropped to 3:4 with the focal point set
+by eye against the real file.
 
-This is a content decision from the client: no other religion, no wider
-spread. Two separate sets would be two licences to maintain and two slightly
-different stories on one page.
+| Slot | File | Photographer | Licence | Source |
+|---|---|---|---|---|
+| Muslim | `couple-muslim.jpg` | Faiaz Ahmad Emon | **CC BY 2.0** | [Sojib and Tanha](https://commons.wikimedia.org/wiki/File:Sojib_and_Tanha.jpg) |
+| Christian | `couple-christian.jpg` | OJjnr | **CC BY-SA 4.0** | [Church Wedding Exclusives 67](https://commons.wikimedia.org/wiki/File:Church_Wedding_Exclusives_67.jpg) |
 
-Drop the files into `public/images/site/` under **either** naming — the code
-accepts both, so nobody has to remember which:
+⚠️ **CC BY and CC BY-SA both require attribution.** This table is that
+attribution. If the photographs ever appear somewhere that is not this
+repository, the credit has to travel with them.
 
-| Slot | Accepted filenames | Needs to show |
+### Focal points, and why
+
+| Slot | Focal | Reason |
 |---|---|---|
-| Muslim | `couple-muslim.jpg` or `rail-1.jpg` | A visibly Muslim couple — nikah or walima dress |
-| Christian | `couple-christian.jpg` or `rail-2.jpg` | A Christian or Western wedding couple |
+| Muslim | `50% 38%` | Faces sit ~38% down; the umbrellas take the top third |
+| Christian | `50% 20%` | Faces ~20% down, veil and bouquet below, greenery above |
 
-No code change is needed; the pages pick them up and the "Final photography
-to be added" pill disappears by itself.
+### The register both must share
 
-### Specification
+Quiet, tender, reserved, warm. Modesty on the home page is a **product
+requirement**, not a preference: this is a marriage-first platform courting a
+Muslim audience and positioning itself against casual dating.
 
-- Portrait **3:4**, minimum **1200px** on the short edge
-- **Faces in the upper third of the frame.** Both placements crop to a fixed
-  ratio, and a face low in the frame cannot be kept safe at every width
-- Warm, candid, celebration-dressed, natural light, real affection
-- **Never posed studio work.** Never anything that reads as a stock library
-- **Never AI-generated people.** The product's promise is verified humans
+**Rejected on that basis:** a beach photograph of a kissing couple. It was
+beautiful, and beauty was not the criterion — it read as physical intimacy on
+the first screen, which is the wrong signal for this product.
 
-### ⚠️ Focal points — re-set these whenever an image changes
+⚠️ **When you swap either photograph, re-set its focal point by eye** and
+check the crop at 375, 834 and 1440. A new image with an old focal point
+silently reintroduces a crop that cuts faces. `CouplesPhotographyTest`
+enforces that a focal point exists and is sane; only a person can tell whether
+it is right for a given photograph.
 
-`object-fit: cover` with the default `center` crops blindly. It has no idea
-where the couple is in a given frame, so it will slice through a face at one
-width and look fine at another. **That is the bug that cut the top of a
-groom's headwear off on a phone.**
+### If you replace one
 
-Each photograph therefore carries a hand-set focal point in
-`App\Support\Couples`, as `object-position: horizontal% vertical%`.
-
-| Slot | Focal point | Why |
-|---|---|---|
-| Muslim | `50% 28%` | ⚠️ Provisional — set for the placeholder, **must be re-checked** |
-| Christian | `50% 25%` | ⚠️ Provisional — set for the placeholder, **must be re-checked** |
-
-**The procedure, when you swap an image:**
-
-1. Open the photograph and find the vertical position of the faces as a
-   percentage from the top — usually 20–35% in a wedding portrait
-2. Set that as the second value in `App\Support\Couples::PAIR`
-3. Record it in the table above with a sentence on why
-4. Check the rendered card at **375px, 834px and 1440px** and look at what
-   the crop line actually touches — not "does it look fine", but "does the
-   crop cross a face, a hand, or the join between the two people"
-
-`CouplesPhotographyTest` enforces that a focal point exists, is not the
-default centre, and is not below the middle of the frame. **It cannot check
-whether the point is right for a particular photograph — only a person can.**
+Drop the file in as `couple-muslim.jpg` or `couple-christian.jpg` (or
+`rail-1.jpg` / `rail-2.jpg` — both names work). Portrait 3:4, 1200px+ short
+edge, faces in the upper third, no kissing, no camera-facing poses, a
+ceremonial setting over a photoshoot. Then update this table.

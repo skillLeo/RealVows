@@ -2219,3 +2219,280 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-size: var(--fs-body-3);
   color: var(--brass-ink);
 }
+
+/* ==========================================================================
+   PUBLIC PASS — the four new home sections
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   4 · Two people, properly introduced
+
+   A slow continuous drift, run entirely by a CSS transform loop. No scroll
+   listener, no JavaScript, no layout work per frame — which is what makes it
+   free on a mid-range phone over 4G.
+   -------------------------------------------------------------------------- */
+
+.rv-couples {
+  padding-block: var(--gap-section);
+  overflow: hidden;
+}
+
+.rv-couples__rail {
+  overflow: hidden;
+  /* Fades the edges so images enter and leave rather than being cut off. */
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.rv-couples__track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: rv-drift-left 90s linear infinite;
+  will-change: transform;
+}
+
+/* Half the track is a duplicate, so -50% lands exactly on the seam. */
+@keyframes rv-drift-left {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Pausing on hover and on touch, so somebody can actually look at one. */
+@media (hover: hover) {
+  .rv-couples__rail:hover .rv-couples__track { animation-play-state: paused; }
+}
+.rv-couples__rail:active .rv-couples__track { animation-play-state: paused; }
+
+.rv-couples__frame {
+  margin: 0;
+  flex: 0 0 auto;
+  width: 210px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--card);
+}
+
+@media (min-width: 768px) { .rv-couples__frame { width: 280px; } }
+
+.rv-couples__frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.rv-couples__line {
+  margin: 40px auto 0;
+  max-width: 30ch;
+  padding-inline: 24px;
+  text-align: center;
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  line-height: 1.25;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Frozen to a static grid. The couples are still shown; they simply
+     stop moving. */
+  .rv-couples__rail { mask-image: none; overflow-x: auto; }
+  .rv-couples__track { animation: none; }
+}
+
+/* --------------------------------------------------------------------------
+   6 · What arrives
+   -------------------------------------------------------------------------- */
+
+.rv-arrives {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  margin-top: 48px;
+}
+
+@media (min-width: 768px) {
+  .rv-arrives { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+}
+
+.rv-arrives__card { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.rv-arrives__mock {
+  position: relative;
+  padding: var(--pad-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+.rv-arrives__from {
+  margin: 0;
+  font-size: var(--fs-body-3);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+}
+
+.rv-arrives__subject {
+  margin: 8px 0 0;
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  line-height: 1.25;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
+}
+
+.rv-arrives__rule {
+  display: block;
+  height: 1px;
+  margin: 20px 0;
+  background: var(--hairline);
+}
+
+.rv-arrives__score {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-display-1);
+  line-height: 1;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 144, 'SOFT' 20, 'WONK' 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-arrives__body { margin: 12px 0 0; font-size: var(--fs-body-2); color: var(--ink); }
+
+.rv-arrives__cta {
+  margin: 20px 0 0;
+  font-weight: 600;
+  color: var(--brass-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rv-arrives__seal { position: absolute; right: 20px; bottom: 20px; }
+
+/* The chat variant */
+.rv-arrives__mock--chat { background: var(--cream); }
+
+.rv-arrives__bubble {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+  font-size: var(--fs-body-2);
+  line-height: 1.6;
+}
+
+.rv-arrives__url { color: var(--brass-ink); }
+
+.rv-arrives__stamp {
+  margin: 8px 0 0;
+  text-align: right;
+  font-size: var(--fs-body-3);
+  color: var(--ink-soft);
+}
+
+.rv-arrives__note { margin-top: 24px; text-align: center; }
+
+/* --------------------------------------------------------------------------
+   7 · This is not for everyone
+   -------------------------------------------------------------------------- */
+
+.rv-notforeveryone { padding-block: var(--gap-section); }
+
+.rv-notforeveryone__grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .rv-notforeveryone__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; }
+}
+
+.rv-notforeveryone .rv-d2 { color: var(--cream); }
+.rv-notforeveryone__counter { color: var(--on-dark); margin: 0; }
+
+/* --------------------------------------------------------------------------
+   8 · Sealed until it is opened
+   -------------------------------------------------------------------------- */
+
+/*
+ * Sections 8 and 9 are both padded light surfaces sitting next to each
+ * other, so their padding stacks and leaves a 192px hole that reads as a
+ * missing section rather than as breathing room. The seal section gives up
+ * its lower half; the invitation keeps its full space because it is the
+ * close.
+ */
+.rv-sealed { padding-bottom: calc(var(--gap-section) / 2); }
+
+.rv-sealed__inner {
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   1 · The hero arrival — the page being SET, the way a table is set.
+
+   Every step is opacity and transform only. The whole sequence is skipped
+   under reduced motion and after the first visit in a session.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-arrival='pending'] .rv-arrive-step {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  [data-arrival='running'] .rv-arrive-step {
+    animation: rv-arrive var(--dur-enter) var(--ease) both;
+  }
+
+  /*
+   * ⚠️ NAMED rv-hero-arrive, NOT rv-photo-settle.
+   *
+   * rv-photo-settle already exists for the slow zoom on the hero images, and
+   * defining it a second time here silently replaced the original — CSS has
+   * no collision warning, the later definition simply wins. The two
+   * animations then fought over the same element and the zoom stopped
+   * behaving. Found by rendering the page and measuring it.
+   */
+  [data-arrival='running'] .rv-hero__art {
+    animation: rv-hero-arrive 900ms var(--ease) both;
+    animation-delay: 700ms;
+  }
+
+  @keyframes rv-hero-arrive {
+    from { opacity: 0; transform: scale(1.04); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* Each word of the headline, in turn. */
+  [data-arrival='running'] .rv-word {
+    animation: rv-arrive 420ms var(--ease) both;
+  }
+}
+
+.rv-word { display: inline-block; white-space: pre; }
+
+/* The parallax. Scroll-driven, so it is on the compositor rather than on a
+   scroll listener. Silently absent where unsupported, which is correct —
+   nobody misses a parallax they never saw. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    .rv-hero__art {
+      animation: rv-parallax linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    @keyframes rv-parallax {
+      from { transform: translate3d(0, -3%, 0); }
+      to   { transform: translate3d(0, 3%, 0); }
+    }
+  }
+}

@@ -9,14 +9,14 @@
          The photography is given more room than the words, and the words are
          set the way an invitation sets them: a quiet italic line, then the
          names, then the detail. --}}
-    <section class="rv-hero rv-on-dark">
+    <section class="rv-hero rv-on-dark" data-hero>
         <div class="rv-hero__copy">
             <div class="rv-hero__copy-inner rv-stack" style="gap: 28px">
-                <p class="rv-eyebrow rv-hero__eyebrow-line">For those who mean it</p>
+                <p class="rv-eyebrow rv-hero__eyebrow-line rv-arrive-step">For those who mean it</p>
 
-                <h1 class="rv-d1">Find someone ready for marriage.</h1>
+                <h1 class="rv-d1" data-arrival-words>Find someone ready for marriage.</h1>
 
-                <span class="rv-hero__flourish"></span>
+                <span class="rv-hero__flourish rv-arrive-step"></span>
 
                 <p class="rv-lead" style="max-width: 44ch">
                     Free to join. Every profile verified by a real person. Matches delivered to your
@@ -91,6 +91,9 @@
         </div>
     </section>
 
+    {{-- ── 4 · Two people, properly introduced ─────────────────────────── --}}
+    @include('public.partials.couples-rail')
+
     {{-- ── How it works ────────────────────────────────────────────────── --}}
     <section class="rv-shell rv-section rv-paper">
         <div class="rv-stack rv-section__head" data-reveal>
@@ -148,6 +151,15 @@
         </div>
     </section>
 
+    {{-- ── 6 · What arrives ─────────────────────────────────────────────── --}}
+    @include('public.partials.what-arrives')
+
+    {{-- ── 7 · This is not for everyone ─────────────────────────────────── --}}
+    @include('public.partials.not-for-everyone')
+
+    {{-- ── 8 · Sealed until it is opened ────────────────────────────────── --}}
+    @include('public.partials.sealed')
+
     {{-- ── Closing call to action ───────────────────────────────────────── --}}
     <section class="rv-shell rv-section rv-paper">
         <div class="rv-closing rv-stack" data-reveal>
@@ -163,5 +175,7 @@
             @include('public.partials.ornament', ['tone' => 'light'])
         </div>
     </section>
+
+    @include('public.partials.arrival')
 
 @endsection

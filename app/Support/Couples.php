@@ -58,19 +58,15 @@ class Couples
         'christian' => [
             'names' => ['couple-christian.jpg', 'rail-2.jpg'],
             /*
-             * This frame has room to spare: the top quarter is out-of-focus
-             * background above her headpiece, so the 11% the 3:4 crop takes
-             * never reaches it. 45% lifts both faces off the centre line and
-             * spends the loss on the hem of her gown.
-             *
-             * Horizontally it stays at 50% for the desktop hero, which is a
-             * far narrower box (0.57) and cuts 15% of the width. That keeps
-             * his head — it starts 11% in — and spends the right-hand loss on
-             * the outer edge of her hair, which is the only thing there.
+             * Both faces centered, waist-up framing, clear space above their
+             * heads. The crop takes ~11% of the height (249px of 2249), and
+             * 40% down the frame centers on both of them without cutting
+             * headroom. At the 3:4 ratio this is the axis that decides the
+             * output.
              */
-            'focal' => '50% 45%',
-            'alt' => 'A bride in a beaded gown, her groom standing behind her',
-            'describes' => 'A Christian or Western wedding couple',
+            'focal' => '50% 40%',
+            'alt' => 'A couple standing together in a park, both smiling',
+            'describes' => 'A couple in everyday clothes, quiet and warm',
         ],
     ];
 

@@ -64,6 +64,26 @@ else exposed would serve `.env` to the internet.
 > **If that file is ever deleted or overwritten, `.env` becomes downloadable
 > by anyone.** Check it after any change to the web root, and re-run the
 > verification block at the end of this document.
+>
+> ### ⚠️ THIS HAPPENED. 2 August 2026.
+>
+> The file was hand-written on the server during first-time setup and never
+> committed. The deploy runs `rsync -az --delete`, which removes anything on
+> the server that the repository does not have — so the first deploy after
+> that gap removed it. The rewrite into `public/` went with it and the site
+> returned **403 for every request**. `composer.json` was publicly readable
+> and application PHP was being executed directly by the web server. `.env`
+> survived only because LiteSpeed blocks dotfiles by default, which is luck,
+> not design.
+>
+> **The fix was to commit it.** `.htaccess` is now tracked at the repository
+> root, so `--delete` can only ever restore it. Do **not** add it to
+> `.gitignore` and do **not** add it to the rsync excludes — an excluded file
+> drifts silently, which is the situation that caused this.
+>
+> Sensitive paths now answer **404** rather than 403, because the rewrite
+> reaches them before the `FilesMatch` rules do. That is a better answer: it
+> does not confirm the file exists.
 
 ---
 

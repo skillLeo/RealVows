@@ -1,0 +1,101 @@
+# =============================================================================
+#  THE WEB ROOT GUARD
+# =============================================================================
+#
+#  ⚠️ THIS FILE IS LOAD-BEARING. DELETING IT EXPOSES THE APPLICATION.
+#
+#  On this host the entire Laravel application lives INSIDE the served
+#  directory (`public_html/`), not one level above it as Laravel intends.
+#  That layout was a hosting constraint, not a choice, and it means `.env`,
+#  `storage/` and every member photograph sit inside the folder the web
+#  server is willing to serve. This file is the only thing standing in front
+#  of them.
+#
+#  ── ⚠️ WHY IT IS IN THE REPOSITORY, AND MUST STAY THERE ──────────────────
+#
+#  It was originally hand-written on the server and never committed. The
+#  deploy runs `rsync -az --delete`, which deletes anything on the server
+#  that is not in the repository — so the first deploy after that discovery
+#  removed this file, the rewrite into `public/` went with it, and the site
+#  returned 403 for every request. `composer.json` became publicly readable
+#  and application PHP was being executed directly by the web server.
+#
+#  Tracking it here is the fix: `--delete` can only remove what the
+#  repository does not have. DO NOT add it to .gitignore, and DO NOT add it
+#  to the rsync excludes — an excluded file drifts silently, which is how
+#  this started.
+#
+#  Verify after every deploy:
+#      /            → 200
+#      /.env        → 403
+#      /composer.json → 403
+#      /storage/logs/laravel.log → 403
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+#  1 · Every request goes into public/
+# -----------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Already inside public/ — leave it alone, or the rule below loops.
+    RewriteCond %{REQUEST_URI} ^/public/ [OR]
+    RewriteCond %{REQUEST_URI} ^/index\.php
+    RewriteRule ^ - [L]
+
+    # Everything else is rewritten into public/, which holds Laravel's own
+    # .htaccess and front controller.
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# -----------------------------------------------------------------------------
+#  2 · Deny the sensitive paths — MOD_AUTHZ_CORE
+# -----------------------------------------------------------------------------
+#
+#  ⚠️ The same paths are denied twice, by two different modules, in this
+#  block and the next. That is deliberate: if one module is disabled during a
+#  server upgrade the other still holds. A single point of failure in front
+#  of a database password is not a risk worth taking to save eight lines.
+# -----------------------------------------------------------------------------
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.(env|env\..*|git.*|htaccess|htpasswd)$">
+        Require all denied
+    </FilesMatch>
+
+    <FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|artisan|.*\.md|.*\.ya?ml|.*\.sqlite)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# -----------------------------------------------------------------------------
+#  3 · Deny the same paths again — MOD_ACCESS_COMPAT
+# -----------------------------------------------------------------------------
+<IfModule mod_access_compat.c>
+    <FilesMatch "^\.(env|env\..*|git.*|htaccess|htpasswd)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    <FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|artisan|.*\.md|.*\.ya?ml|.*\.sqlite)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# -----------------------------------------------------------------------------
+#  4 · Directories that must never be reachable at all
+# -----------------------------------------------------------------------------
+#
+#  ⚠️ Belt and braces with the rewrite above. The rewrite sends these into
+#  public/, where they do not exist, so they would 404 anyway — but a broken
+#  or disabled mod_rewrite would otherwise leave them served directly, and a
+#  404 and a directory listing are very different outcomes for storage/.
+# -----------------------------------------------------------------------------
+RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|storage|tests|vendor|node_modules|\.git|\.github)(/|$)
+
+# -----------------------------------------------------------------------------
+#  5 · No directory listings, anywhere
+# -----------------------------------------------------------------------------
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>

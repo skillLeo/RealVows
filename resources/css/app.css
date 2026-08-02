@@ -239,6 +239,55 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 ::selection { background: var(--brass); color: var(--oxblood-deep); }
 
 /* ==========================================================================
+   THE MOTION CATALOGUE — sixteen primitives, each built once
+   ==========================================================================
+
+   Every animation in this product is one of these. MotionCatalogueTest fails
+   the build on any `@keyframes` that is not registered here, which is what
+   stops the catalogue drifting back into nine names for one idea — it had
+   done exactly that, and the nine were only found by counting them.
+
+    1 · The Arrival ....... rv-arrive      content entering view
+    2 · The Ribbon Draw ... rv-draw        brass hairline under a heading
+    3 · The Count ......... (JS)           score and credit balance
+    4 · The Bloom ......... (transition)   the compatibility ring drawing
+    5 · The Veil .......... rv-sheen       + rv-unwipe, rv-border-draw
+    6 · The Seal Break .... rv-seal-part-l + rv-seal-part-r
+    7 · The Press ......... (:active)      scale(.97), one value everywhere
+    8 · The Settle ........ (transition)   sheets and toasts
+    9 · The Morph ......... (view-transition)
+   10 · The Slide ......... (transition)   the tab bar indicator
+   11 · The Shimmer ...... rv-shimmer      skeletons.        MAY LOOP
+   12 · The Draw ......... (JS)            pull to refresh
+   13 · The Collapse ..... (JS)            the top bar
+   14 · The Candlelight .. rv-drift        ambient warmth.   MAY LOOP
+   15 · The Gleam ........ rv-arch-gleam   MARKETING ONLY.   MAY LOOP
+   16 · The Ticker ....... rv-marquee-slide MARKETING ONLY.  MAY LOOP
+
+   ── ⚠️ ON 15 AND 16, BECAUSE THIS WAS ARGUED AND SETTLED ─────────────────
+
+   The rule was "nothing loops except the Shimmer and the Candlelight", and
+   these two broke it. The rule was not wrong — it was scoped wrongly.
+
+   It exists because inside the authenticated product a loop competes with a
+   task: a member reading a match rationale does not need a second thing
+   moving in the corner. A marketing page has no task. A ticker that stops is
+   not restrained, it is broken, and a hero that never catches the light is
+   not calm, it is flat.
+
+   So the constraint is now scoped rather than deleted: NEITHER MAY APPEAR ON
+   ANY AUTHENTICATED ROUTE. MotionCatalogueTest enforces that too — if the
+   gleam or the ticker turns up in a Vue page or a dashboard partial, the
+   build fails. Adding a seventeenth loop needs the same argument made again.
+
+   ── The rules that did not change ────────────────────────────────────────
+
+   · transform, opacity and clip-path only. Nothing else animates.
+   · Nothing else animates while The Veil or The Seal Break is running.
+   · Everything degrades to a <=200ms opacity change under reduced motion.
+   ========================================================================== */
+
+/* ==========================================================================
    Typography — Fraunces at 56/40/28 only, Inter at 20/16/14 only
    ========================================================================== */
 
@@ -394,7 +443,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
               color var(--dur-tap) var(--ease),
               transform var(--dur-tap) var(--ease);
 }
-.rv-btn:active { transform: scale(.98); }
+.rv-btn:active { transform: scale(.97); }
 .rv-btn--block { width: 100%; }
 
 .rv-btn--primary {
@@ -780,17 +829,13 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   background: color-mix(in oklab, var(--brass) 10%, var(--card));
   color: var(--oxblood);
   font-size: var(--fs-body-2);
-  animation: rv-flash-in 300ms var(--ease) both;
+  --arrive-y: -8px;
+  animation: rv-arrive 300ms var(--ease) both;
 }
 .rv-flash--error {
   border-color: var(--rose);
   background: color-mix(in oklab, var(--rose) 8%, var(--card));
   color: var(--ink);
-}
-
-@keyframes rv-flash-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: none; }
 }
 
 .rv-actions { display: flex; flex-wrap: wrap; gap: 16px; }
@@ -906,7 +951,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   text-decoration: none;
   transition: color var(--dur-tap) var(--ease), transform var(--dur-tap) var(--ease);
 }
-.rv-tabbar__item:active { transform: scale(.94); }
+.rv-tabbar__item:active { transform: scale(.97); }
 .rv-tabbar__item.is-active { color: var(--brass-bright); }
 
 .rv-has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); }
@@ -1139,12 +1184,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: rv-settle 400ms var(--ease) both;
-}
-
-@keyframes rv-settle {
-  from { opacity: 0; transform: scale(1.04); }
-  to   { opacity: 1; transform: scale(1); }
+  --arrive-y: 0;
+  --arrive-scale: 1.04;
+  animation: rv-arrive 400ms var(--ease) both;
 }
 
 .rv-link-brass { color: var(--brass); text-decoration-color: var(--hairline); }
@@ -1256,12 +1298,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 @media (prefers-reduced-motion: no-preference) {
   .rv-split__panel--photo::before,
-  .rv-auth__band--photo::before { animation: rv-settle-photo 900ms var(--ease) both; }
-}
-
-@keyframes rv-settle-photo {
-  from { opacity: 0; transform: scale(1.03); }
-  to   { opacity: 1; transform: none; }
+  .rv-auth__band--photo::before {
+    --arrive-y: 0;
+    --arrive-scale: 1.03;
+    animation: rv-arrive 900ms var(--ease) both;
+  }
 }
 
 .rv-split__copy {
@@ -1396,14 +1437,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 @keyframes rv-draw { to { transform: scaleX(1); } }
 
-.rv-hero__eyebrow-line { animation: rv-rise 700ms var(--ease) both; }
-.rv-hero .rv-d1 { animation: rv-rise 800ms var(--ease) 90ms both; }
-.rv-hero__copy-inner .rv-lead { animation: rv-rise 800ms var(--ease) 200ms both; }
-
-@keyframes rv-rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
-}
+.rv-hero__eyebrow-line { --arrive-y: 14px; animation: rv-arrive 700ms var(--ease) both; }
+.rv-hero .rv-d1 { --arrive-y: 14px; animation: rv-arrive 800ms var(--ease) 90ms both; }
+.rv-hero__copy-inner .rv-lead { --arrive-y: 14px; animation: rv-arrive 800ms var(--ease) 200ms both; }
 
 /*
  * ⚠️ ONE COLUMN ON A PHONE.
@@ -1536,17 +1572,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-mosaic__tile--e { grid-area: 4 / 1 / 5 / 3; }
 
 /*
- * ⚠️ THE OFFSET IS A TRANSFORM, NOT A MARGIN.
+ * ⚠️ THE OFFSET IS A TRANSLATE, NOT A MARGIN — AND NOT A TRANSFORM EITHER.
  *
- * A margin comes out of the grid track, so an offset column would end up
- * SHORTER than its neighbours — which is exactly the bug that made the old
- * two-up hero render at two different heights and get reported as
- * "distorted". A transform moves the tile visually and leaves the layout
- * untouched, so every tile keeps the size its cell gave it.
+ * Not a margin, because a margin comes out of the grid track: an offset
+ * column would end up SHORTER than its neighbours, which is exactly the bug
+ * that made the old two-up hero render at two different heights and get
+ * reported as "distorted".
+ *
+ * Not `transform`, because the arrival animation animates `transform` — and
+ * an animation beats a static declaration, so the tile would snap flush the
+ * moment it arrived and stay there. `translate` is an independent property
+ * that COMPOSES with `transform` rather than replacing it, so the offset is
+ * layout and the arrival is motion and neither can overwrite the other.
  */
 .rv-mosaic__tile--b,
 .rv-mosaic__tile--c,
-.rv-mosaic__tile--d { transform: translateY(24px); }
+.rv-mosaic__tile--d { translate: 0 24px; }
 
 /* ⚠️ Dropped, not hidden. `display: none` removes the tile from the grid AND
    stops its lazy image being fetched, which is the reason the phone drops
@@ -1572,11 +1613,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-mosaic__tile--f { grid-area: 5 / 3 / 7 / 4; display: block; }
 
   .rv-mosaic__tile--b,
-  .rv-mosaic__tile--c { transform: none; }
+  .rv-mosaic__tile--c { translate: none; }
 
   .rv-mosaic__tile--d,
   .rv-mosaic__tile--e,
-  .rv-mosaic__tile--f { transform: translateY(48px); }
+  .rv-mosaic__tile--f { translate: 0 48px; }
 }
 
 @media (min-width: 1024px) {
@@ -1617,15 +1658,15 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   /* Column 2 carries the anchor and stays put; everything else steps down.
      Column one's two tiles move as one, or they stop being a column. */
   .rv-mosaic__tile--e,
-  .rv-mosaic__tile--h { transform: translateY(46px); }
-  .rv-mosaic__tile--a { transform: none; }
+  .rv-mosaic__tile--h { translate: 0 46px; }
+  .rv-mosaic__tile--a { translate: none; }
 
   .rv-mosaic__tile--b,
-  .rv-mosaic__tile--c { transform: translateY(24px); }
+  .rv-mosaic__tile--c { translate: 0 24px; }
 
   .rv-mosaic__tile--d,
   .rv-mosaic__tile--f,
-  .rv-mosaic__tile--g { transform: translateY(70px); }
+  .rv-mosaic__tile--g { translate: 0 70px; }
 }
 
 /*
@@ -1833,29 +1874,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * every public page sideways.
  */
 .rv-mosaic__tile {
-  animation: rv-mosaic-in var(--dur-enter) var(--ease) both;
+  --arrive-y: 0;
+  animation: rv-arrive var(--dur-enter) var(--ease) both;
   animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms);
 }
 
 .rv-mosaic__plate img {
-  animation: rv-mosaic-settle var(--dur-ceremony) var(--ease-settle) both;
+  --arrive-y: 0;
+  --arrive-scale: 1.03;
+  --arrive-fade: 1;
+  animation: rv-arrive var(--dur-ceremony) var(--ease-settle) both;
   animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms);
 }
 
 /* The keystones land after their arch has settled, never with it. */
 .rv-mosaic__tile--arch::after {
-  animation: rv-mosaic-in var(--dur-enter) var(--ease) both;
+  --arrive-y: 0;
+  animation: rv-arrive var(--dur-enter) var(--ease) both;
   animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms + var(--dur-ceremony));
-}
-
-@keyframes rv-mosaic-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes rv-mosaic-settle {
-  from { transform: scale(1.03); }
-  to   { transform: none; }
 }
 
 /*
@@ -2339,8 +2375,14 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    -------------------------------------------------------------------------- */
 
 @keyframes rv-arrive {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: var(--arrive-fade, 0);
+    transform: translateY(var(--arrive-y, 16px)) scale(var(--arrive-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .rv-arrive {
@@ -2411,9 +2453,14 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* The single permitted piece of atmosphere: a very slow brass drift behind
    the ring. 4% opacity swing over 20s — present but never noticed. */
+/*
+ * ⚠️ A 4% SWING, .03 TO .07. It had drifted to .08 — a 5% swing, which is
+ * enough to be noticeable as movement rather than felt as warmth. The whole
+ * point of the candlelight is that nobody consciously sees it.
+ */
 @keyframes rv-drift {
   0%, 100% { opacity: .03; }
-  50%      { opacity: .08; }
+  50%      { opacity: .07; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -3285,15 +3332,6 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   }
 
   /*
-   * ⚠️ NAMED rv-hero-arrive, NOT rv-photo-settle.
-   *
-   * rv-photo-settle already exists for the slow zoom on the hero images, and
-   * defining it a second time here silently replaced the original — CSS has
-   * no collision warning, the later definition simply wins. The two
-   * animations then fought over the same element and the zoom stopped
-   * behaving. Found by rendering the page and measuring it.
-   */
-  /*
    * ⚠️ THE SCALE GOES ON THE PHOTOGRAPH, NOT ON ITS CONTAINER.
    *
    * This was on .rv-hero__art, which is a full-width grid track — scaling it
@@ -3306,28 +3344,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    */
   /*
    * The mosaic waits for the headline's brass rule to finish drawing, then
-   * sweeps. 700ms hold, then seven tiles at a 70ms stagger — the last one
+   * sweeps. 700ms hold, then eight tiles at a 70ms stagger — the last one
    * lands a little under 900ms after it starts, which is the ceremony budget.
    */
   [data-arrival='running'] .rv-mosaic__tile {
-    animation: rv-hero-arrive var(--dur-enter) var(--ease) both;
+    --arrive-y: 0;
+    animation: rv-arrive var(--dur-enter) var(--ease) both;
     animation-delay: calc(700ms + var(--i, 0) * 70ms);
-  }
-
-  @keyframes rv-hero-arrive {
-    from { opacity: 0; }
-    to   { opacity: 1; }
   }
 
   /* The zoom itself, on the image, inside the plate's own clip. */
   [data-arrival='running'] .rv-mosaic__plate img {
-    animation: rv-hero-zoom var(--dur-ceremony) var(--ease-settle) both;
+    --arrive-y: 0;
+    --arrive-scale: 1.03;
+    --arrive-fade: 1;
+    animation: rv-arrive var(--dur-ceremony) var(--ease-settle) both;
     animation-delay: calc(700ms + var(--i, 0) * 70ms);
-  }
-
-  @keyframes rv-hero-zoom {
-    from { transform: scale(1.03); }
-    to   { transform: scale(1); }
   }
 
   /* Each word of the headline, in turn. */

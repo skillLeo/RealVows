@@ -130,6 +130,9 @@ class HorizontalOverflowTest extends TestCase
         $fullWidth = [
             'rv-hero', 'rv-hero__art', 'rv-hero__copy', 'rv-shell', 'rv-panel',
             'rv-section', 'rv-couples', 'rv-app__main', 'rv-auth', 'rv-split',
+            // The mosaic spans the full width on a phone, and its tiles are
+            // grid tracks — scaling either widens the document.
+            'rv-mosaic', 'rv-mosaic__tile',
         ];
 
         foreach ($scaling as $keyframe) {
@@ -222,9 +225,10 @@ class HorizontalOverflowTest extends TestCase
         $css = $this->css();
 
         $this->assertMatchesRegularExpression(
-            '/\.rv-hero__frame img \{\s*animation: rv-hero-zoom/',
+            '/\.rv-mosaic__plate img \{\s*animation: rv-hero-zoom/',
             $css,
-            'The hero zoom is no longer on the image inside the clipping frame.'
+            'The hero zoom is no longer on the image inside the clipping plate. Scaling the '
+                .'tile or the grid instead pushes the mosaic wider than the viewport.'
         );
     }
 

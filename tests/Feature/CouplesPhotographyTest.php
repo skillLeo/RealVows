@@ -234,12 +234,27 @@ class CouplesPhotographyTest extends TestCase
          * downloads its photograph — which is the opposite of the reason the
          * phone drops tiles at all.
          */
-        $this->assertMatchesRegularExpression(
-            '/\.rv-mosaic__tile--f,\s*\.rv-mosaic__tile--g\s*\{\s*display:\s*none/',
-            $css,
-            'The tiles the phone drops are no longer display:none, so they still cost a '
-                .'download on the connection least able to afford one.'
+        /*
+         * ⚠️ Read from the manifest, never listed here. This assertion used
+         * to name tiles f and g literally and broke the moment an eighth tile
+         * was added — which is the failure mode where a test teaches you to
+         * edit the test.
+         */
+        $dropped = array_diff(
+            array_keys(\App\Support\Mosaic::TILES),
+            \App\Support\Mosaic::keysAt('mobile')
         );
+
+        $this->assertNotEmpty($dropped, 'The phone no longer drops any tile.');
+
+        foreach ($dropped as $key) {
+            $this->assertMatchesRegularExpression(
+                '/\.rv-mosaic__tile--'.$key.'[,\s][^{]*\{[^}]*display:\s*none/',
+                $css,
+                "Tile {$key} is dropped on mobile but is not display:none, so it still costs a "
+                    .'download on the connection least able to afford one.'
+            );
+        }
     }
 
     /**

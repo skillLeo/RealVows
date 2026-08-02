@@ -976,6 +976,49 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-ornament--centred { justify-content: center; }
 
+/*
+ * The fleuron: the ornament with its rules removed, filling a space rather
+ * than dividing one.
+ */
+.rv-ornament--mark { justify-content: center; padding-block: 0; }
+
+/*
+ * ⚠️ Visible without `is-in`. The separator ornament stages its own arrival
+ * off a scroll observer, but a fleuron is placed inside something that has
+ * already staged one — here the hero's arrive-step — and two arrival systems
+ * on the same element means it waits for a class that never comes and stays
+ * invisible.
+ */
+.rv-ornament--mark svg {
+  width: 48px;
+  height: 48px;
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * ⚠️ THE HERO WAS TIPPING. The arcade made the right side dense while the
+ * left ran out of content below the trust strip, so the whole panel leaned.
+ * A single fleuron in that space is enough to settle it — the eye reads it as
+ * the foot of the column and stops looking for more.
+ *
+ * ⚠️ COPY MUST NEVER GO HERE. Anything with words in it becomes a third
+ * thing to read after the headline and the trust strip, and the balance
+ * problem is replaced by a hierarchy problem.
+ */
+.rv-hero__fleuron {
+  display: none;
+  opacity: .4;
+  /* Pushes to the foot of the copy column, which is where the dead space is. */
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+/* Only desktop has the dead space this exists to fill. */
+@media (min-width: 1024px) {
+  .rv-hero__fleuron { display: block; }
+}
+
 /* ==========================================================================
    Editorial type — the wedding-invitation register
    ========================================================================== */
@@ -1466,8 +1509,23 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   right: 0;
   top: 52%;
   height: 1px;
-  background: var(--hairline);
-  opacity: .3;
+  /*
+   * ⚠️ THE FADE IS WHAT MAKES THIS A RAIL RATHER THAN A DIVIDER.
+   *
+   * At a flat 30% it was invisible, which is the worst of both worlds — a
+   * detail nobody can see is just code. At full strength across the whole
+   * width it becomes a horizontal rule and starts cutting the arrangement in
+   * half. Solid through the middle, gone at both ends: it reads as something
+   * the tiles are hung on, and it stops before it can look like a border.
+   */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--hairline) 15%,
+    var(--hairline) 85%,
+    transparent 100%
+  );
+  opacity: .45;
   pointer-events: none;
 }
 
@@ -1494,7 +1552,8 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    stops its lazy image being fetched, which is the reason the phone drops
    tiles at all. `opacity: 0` would keep paying for both. */
 .rv-mosaic__tile--f,
-.rv-mosaic__tile--g { display: none; }
+.rv-mosaic__tile--g,
+.rv-mosaic__tile--h { display: none; }
 
 @media (min-width: 768px) {
   .rv-mosaic {
@@ -1533,7 +1592,21 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     padding-bottom: 72px;
   }
 
-  .rv-mosaic__tile--e { grid-area: 3 / 1 / 5 / 2; }
+  /*
+   * ⚠️ COLUMN ONE IS TWO TILES, NOT ONE.
+   *
+   * A single small square out here floated alone in a large field of oxblood
+   * with nothing anchoring it — the weakest point in the whole composition.
+   * A second tile beneath it turns a stray into a column, which is what the
+   * other three already were.
+   *
+   * ⚠️ Their 4:5 comes from the cells, not from an `aspect-ratio` on the
+   * tiles. Two rows plus one gap against column one's width lands at almost
+   * exactly 4:5, and taking it from the grid keeps the standing rule intact:
+   * the cell decides the shape, never the tile and never the photograph.
+   */
+  .rv-mosaic__tile--e { grid-area: 2 / 1 / 4 / 2; }
+  .rv-mosaic__tile--h { grid-area: 4 / 1 / 6 / 2; display: block; }
   .rv-mosaic__tile--a { grid-area: 1 / 2 / 7 / 3; }
   .rv-mosaic__tile--b { grid-area: 1 / 3 / 5 / 4; }
   .rv-mosaic__tile--c { grid-area: 5 / 3 / 7 / 4; }
@@ -1541,8 +1614,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-mosaic__tile--f { grid-area: 3 / 4 / 5 / 5; display: block; }
   .rv-mosaic__tile--g { grid-area: 5 / 4 / 7 / 5; display: block; }
 
-  /* Column 2 carries the anchor and stays put; everything else steps down. */
-  .rv-mosaic__tile--e { transform: translateY(46px); }
+  /* Column 2 carries the anchor and stays put; everything else steps down.
+     Column one's two tiles move as one, or they stop being a column. */
+  .rv-mosaic__tile--e,
+  .rv-mosaic__tile--h { transform: translateY(46px); }
   .rv-mosaic__tile--a { transform: none; }
 
   .rv-mosaic__tile--b,
@@ -1601,14 +1676,87 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-mosaic__tile--arch::after {
   content: '';
   position: absolute;
-  top: -12px;
+  /* ⚠️ -8px, not -12px. At twelve it floated free of the arch and read as a
+     speck of dust on the screen; the dot has to sit close enough that the eye
+     groups it with the frame. */
+  top: -8px;
   left: 50%;
-  width: 4px;
-  height: 4px;
-  margin-left: -2px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
   border-radius: 50%;
   background: var(--brass);
 }
+
+/*
+ * ⚠️ THE BRASS GLEAM — LIGHT CATCHING METAL, NOT A GLOW.
+ *
+ * The same instinct as "make it sparkle", executed the only way that survives
+ * on a wedding invitation. Glitter, twinkling or particles would undo the
+ * whole register; a narrow band of light travelling along the frame is what
+ * actually happens to brass in a room, and it costs one pseudo-element.
+ *
+ * ⚠️ MASKED TO THE 1px BORDER, WHICH IS THE ENTIRE DIFFERENCE.
+ *
+ * `padding: 1px` plus two masks composited with `exclude` paints the ring and
+ * nothing else — the inner rectangle is cut out. Without that mask the
+ * gradient washes across the photograph and the frame looks lit from within,
+ * which is the failure mode: it stops being metal and becomes a glow.
+ *
+ * A horizontal sweep is correct here even though the arch is curved. Because
+ * only the frame is painted, the light appears up one side, over the crown,
+ * and down the other — the shape does the work, not the gradient's angle.
+ *
+ * It reuses the sheen primitive's vocabulary deliberately: the same
+ * --brass-bright band that sweeps the veil during an unsealing, so the
+ * marketing page and the product's signature moment are visibly the same
+ * hand.
+ */
+.rv-mosaic__tile--arch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    var(--brass-bright) 50%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  background-position: 180% 0;
+  -webkit-mask: linear-gradient(rgb(0 0 0) 0 0) content-box, linear-gradient(rgb(0 0 0) 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(rgb(0 0 0) 0 0) content-box, linear-gradient(rgb(0 0 0) 0 0);
+  mask-composite: exclude;
+  /* ⚠️ 22% peak. Above roughly 30% it reads as illumination rather than as a
+     highlight, and the frame stops looking like metal. */
+  opacity: .22;
+  pointer-events: none;
+}
+
+/*
+ * 1.8s of travel in a 9s cycle — the other 80% parks it off the right edge,
+ * so the gleam is an event rather than a loop you can watch.
+ */
+@keyframes rv-arch-gleam {
+  0%   { background-position: 180% 0; }
+  20%  { background-position: -80% 0; }
+  100% { background-position: -80% 0; }
+}
+
+/*
+ * ⚠️ The two arches are offset by 4s so they never gleam together. Two
+ * frames lighting in unison reads as a page effect; one after the other
+ * reads as light moving through a room.
+ *
+ * The delay also holds the first gleam until after the tiles have settled —
+ * a highlight travelling over a frame that is still arriving is two motions
+ * competing for the same moment.
+ */
+.rv-mosaic__tile--a::before { animation: rv-arch-gleam 9s linear 1.2s infinite; }
+.rv-mosaic__tile--b::before { animation: rv-arch-gleam 9s linear 5.2s infinite; }
 
 /* ⚠️ On a phone tile B is one of three small squares. An arch that short
    reads as a lozenge, not as architecture, so it keeps its corners. */
@@ -1616,6 +1764,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-mosaic__tile--b { border-radius: var(--r); }
   .rv-mosaic__tile--b .rv-mosaic__plate { border-radius: calc(var(--r) - 3px); }
   .rv-mosaic__tile--b::after { content: none; }
+  /* No arch, no gleam — a highlight travelling around a small square reads
+     as a loading state. */
+  .rv-mosaic__tile--b::before { content: none; }
 }
 
 .rv-mosaic__plate picture { display: contents; }
@@ -1768,12 +1919,225 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-mosaic__tile .rv-mosaic__plate { transform: none; }
 }
 
+/* ==========================================================================
+   "This is how an introduction arrives" — the product's moment, on the page
+   ========================================================================== */
+
+/*
+ * ⚠️ EVERY MOVING PART HERE IS THE PRODUCT'S, DRIVEN BY THE PRODUCT'S SWITCH.
+ *
+ * The sheen, the breakable seal, the unwipe and the ring all come from the
+ * dashboard's unsealing and fire off the same `.rv-unsealing` class. This
+ * block adds placement and exactly one thing the product does not need — see
+ * the veil wipe below. Nothing else here restages the ceremony, because a
+ * second implementation drifts from the first within a release and the
+ * marketing page starts promising a moment the product no longer performs.
+ */
+/*
+ * ⚠️ THE RHYTHM IS SET IN MARGINS, NOT IN A STACK GAP.
+ *
+ * One `gap` cannot say "40px under the heading, 16px under the card, and
+ * nothing else", and the flat gap is what left the card jammed under the
+ * heading with a void beneath it. 96 / 40 / 16 / 96, and the section is as
+ * tall as its contents and no taller — no min-height anywhere.
+ */
+.rv-demo {
+  padding-block: 96px;
+  text-align: center;
+}
+
+.rv-demo__inner { display: block; }
+
+.rv-demo__title {
+  max-width: 22ch;
+  margin: 0 auto 40px;
+}
+
+.rv-demo__card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: left;
+  /* The hit area is positioned against this. */
+  position: relative;
+  /* ⚠️ The seal overhangs the veil's lower edge, so the card must not clip.
+     `.rv-match` sets `overflow: hidden`, which would shear the seal in half
+     along the bottom of the photograph. */
+  overflow: visible;
+}
+
+/*
+ * ⚠️ THE WHOLE CARD IS THE BUTTON, AND THAT IS A TAP-TARGET DECISION.
+ *
+ * The seal is 64px and is the thing that looks tappable, which is exactly the
+ * trap: 64px is above the 44px minimum on paper but not once you account for
+ * how far a thumb lands from where the eye aimed. At 420x315 the target is
+ * the card, and the seal goes back to being decoration.
+ */
+.rv-demo__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  /* Sits above the card, so it must never paint over it. */
+  color: transparent;
+}
+
+.rv-demo__hit:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 3px;
+}
+
+/* The card lifts very slightly under the pointer, so the whole surface reads
+   as the control rather than only the seal. */
+.rv-demo__card:has(.rv-demo__hit:hover) { border-color: var(--brass); }
+
+.rv-demo__stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  /* Room for the seal to hang below the photograph. */
+  margin-bottom: 16px;
+}
+
+.rv-demo__photo {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  margin: 0;
+}
+
+/*
+ * The veil covers the photograph until the ceremony runs.
+ *
+ * ⚠️ SCOPED BY THE STAGE, WHICH IS SPECIFICITY, NOT TIDINESS.
+ *
+ * `.rv-veil` is declared further down this file, so a bare `.rv-demo__veil`
+ * loses every tie on equal specificity. It lost `margin-bottom: 16px` in
+ * particular, which against `inset: 0` shortened the veil and left a strip of
+ * the photograph showing along the bottom edge of a card whose entire job is
+ * to look sealed.
+ */
+.rv-demo__stage .rv-veil {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  aspect-ratio: auto;
+}
+
+/*
+ * ⚠️ THE ONE THING THE PRODUCT DOES NOT NEED.
+ *
+ * In the dashboard the veil is removed from the DOM the moment the match
+ * unlocks, so it never has to animate away — a locked card has no photograph
+ * behind it to reveal, by design, because the server never issues a URL for
+ * one. Here the photograph is licensed stock sitting in the markup from the
+ * start, so the veil has to actually leave.
+ *
+ * It wipes rather than fades, and it wipes in the sheen's direction — the
+ * exact complement of `rv-unwipe`. That is what makes the sheen look like it
+ * is doing the revealing rather than passing over at the same time.
+ */
+@keyframes rv-demo-veil-wipe {
+  from { clip-path: inset(0 0 0 0); }
+  to   { clip-path: inset(0 0 0 100%); }
+}
+
+.rv-unsealing .rv-demo__stage .rv-veil {
+  animation: rv-demo-veil-wipe var(--dur-ceremony) var(--ease-veil) forwards;
+}
+
+/* Once open the veil is gone for good and must not intercept anything. */
+.rv-demo__card.is-open .rv-demo__stage .rv-veil { pointer-events: none; }
+
+/* A caption on the card, not a paragraph floating under it. */
+.rv-demo__hint {
+  margin: 16px 0 0;
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+.rv-demo__after {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/*
+ * ⚠️ `display` ON AN ELEMENT THAT USES `hidden` MUST BE GUARDED.
+ *
+ * The `hidden` attribute works by `display: none` in the UA stylesheet, and
+ * ANY author `display` beats it. `.rv-demo__after { display: grid }` therefore
+ * rendered the closing line and the reset link on a card nobody had opened
+ * yet — the section had no before-state at all, which is the one thing it
+ * exists to demonstrate.
+ */
+.rv-demo__after[hidden] { display: none; }
+
+.rv-demo__line {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+/* A quiet text button — the reset is available, never advertised. */
+.rv-demo__again {
+  border: 0;
+  padding: 4px 8px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--brass-ink);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--hairline);
+}
+
+.rv-demo__again:hover { text-decoration-color: var(--brass); }
+
+.rv-demo__again:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * ⚠️ REDUCED MOTION: THE CARD STILL OPENS, AND THE COPY STILL ARRIVES.
+ *
+ * The ceremony is what gets dropped, never the outcome. A 200ms cross-fade
+ * says the same thing in less movement — and the line underneath is the point
+ * of the section, so it must not be attached to an animation that no longer
+ * runs.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .rv-unsealing .rv-demo__stage .rv-veil {
+    animation: none;
+    opacity: 0;
+    transition: opacity var(--dur-quick) var(--ease);
+  }
+}
+
 /* The band that holds the single line of promise */
 .rv-promise {
   background: var(--card);
   border-block: 1px solid var(--hairline);
   padding-block: clamp(56px, 9vw, 96px);
 }
+
+/*
+ * ⚠️ The vow is a block, not a column of short lines. At 28ch it broke into
+ * three narrow lines stranded in the middle of a wide cream field, which read
+ * as a page of whitespace rather than as the confident pause it is meant to
+ * be.
+ */
+.rv-vow { max-width: 720px; }
 .rv-promise__inner { align-items: center; text-align: center; gap: 32px; }
 
 .rv-section__head { gap: 12px; margin-bottom: 48px; }
@@ -2501,12 +2865,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: radial-gradient(
+  /*
+   * ⚠️ HELD IN A CUSTOM PROPERTY BECAUSE THE HALVES NEED IT AFTER THE FACE
+   * HAS GONE.
+   *
+   * The halves used to take `background: inherit`, which reads the parent's
+   * COMPUTED background — and the first thing the ceremony does is set
+   * `.rv-unsealing .rv-seal { background: none }` to expose the hairline. So
+   * at the exact moment the halves were supposed to part, they inherited
+   * `none` and parted invisibly. A custom property still resolves after the
+   * face is cleared, because it is inherited rather than read back.
+   */
+  --seal-face: radial-gradient(
     circle at 50% 34%,
     color-mix(in oklab, var(--brass-bright) 40%, var(--brass)) 0%,
     var(--brass) 62%,
     color-mix(in oklab, var(--oxblood-deep) 22%, var(--brass)) 100%
   );
+  background: var(--seal-face);
   color: var(--oxblood-deep);
   font-family: var(--display);
   font-size: 17px;
@@ -2563,8 +2939,19 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: inherit;
+  background: var(--seal-face);
   transform-origin: center;
+  /*
+   * ⚠️ INVISIBLE UNTIL THE SEAL BREAKS, and that is what makes the sealed
+   * state read as a pressed disc at all.
+   *
+   * The halves are absolutely positioned, so they paint above the RV mark and
+   * above the lit top edge in `::before`. Left visible they flatten the whole
+   * thing into a plain brass circle — the relief is still there, covered by
+   * two blank semicircles of the same gradient. The parting keyframes set
+   * their own opacity from 1, so they appear exactly when they start moving.
+   */
+  opacity: 0;
 }
 
 .rv-seal__half--l { clip-path: inset(0 50% 0 0); }

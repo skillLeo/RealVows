@@ -70,7 +70,7 @@ class MosaicTest extends TestCase
     private function areasIn(string $css): array
     {
         preg_match_all(
-            '/\.rv-mosaic__tile--([a-g])\s*\{[^}]*grid-area:\s*([^;}]+)/',
+            '/\.rv-mosaic__tile--([a-h])\s*\{[^}]*grid-area:\s*([^;}]+)/',
             $css,
             $m,
             PREG_SET_ORDER
@@ -152,7 +152,7 @@ class MosaicTest extends TestCase
         );
 
         $this->assertSame(['a', 'b', 'c', 'd', 'e', 'f'], Mosaic::keysAt('tablet'));
-        $this->assertSame(['a', 'b', 'c', 'd', 'e', 'f', 'g'], Mosaic::keysAt('desktop'));
+        $this->assertSame(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], Mosaic::keysAt('desktop'));
 
         // And the balance survives the drop: a phone still shows both signals.
         $onPhone = array_map(fn ($k) => Mosaic::TILES[$k]['signal'], Mosaic::keysAt('mobile'));

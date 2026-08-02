@@ -32,54 +32,44 @@
                     <span>18+</span>
                     <span>Verified members</span>
                 </p>
+
+                {{-- Settles the panel, which the arcade left leaning to the
+                     right. Arrives last, after everything with meaning in
+                     it. --}}
+                <div class="rv-hero__fleuron rv-arrive-step">
+                    @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
+                </div>
             </div>
         </div>
 
-        {{-- Two couples, deliberately. One visibly Muslim, so Muslim members
-             can see at a glance that this platform is for them — a market
-             decision from the client, not decoration. Never AI-generated
-             people: the whole pitch is verified real humans.
-
-             The frames are offset from one another rather than flush, which
-             is what stops a two-up photo pair reading like a stock banner. --}}
         {{--
-            ⚠️ THE SAME TWO PEOPLE AS THE COUPLES SECTION, on purpose.
+            ⚠️ SEVEN PHOTOGRAPHS, MIXED SIGNALS, NEVER AI-GENERATED PEOPLE.
 
-            One Muslim couple and one Christian couple are the only two people
-            this product shows anywhere. Two separate sets would be two
-            licences to maintain and two slightly different stories being told
-            on one page.
+            Two tiles are visibly Muslim and two are visibly Western, so both
+            audiences see at a glance that the platform is for them. That is a
+            market decision from the client, not decoration, and it is the
+            reason the manifest records a signal per tile rather than leaving
+            it to whoever picks the files.
 
-            Each carries its own focal point, because `object-fit: cover` with
-            the default centre crops blindly and will cut through a face at
-            one width while looking fine at another. See App\Support\Couples.
+            The whole pitch is verified real humans, so no image here may ever
+            be generated. Two of the seven are deliberately NOT people — a
+            detail shot cannot be got wrong, and a grid of seven faces reads
+            as a stock library where five faces and two quiet details read as
+            a designed page.
+
+            Everything else — placement, arrival, the mount — is in
+            App\Support\Mosaic and the .rv-mosaic block.
         --}}
         <div class="rv-hero__art">
-            @foreach (\App\Support\Couples::all() as $i => $couple)
-                <figure class="rv-hero__frame @if ($i === 1) rv-hero__frame--second @endif">
-                    @if ($couple['src'])
-                        <img src="{{ asset($couple['src']) }}"
-                             alt="{{ $couple['alt'] }}"
-                             style="object-position: {{ $couple['focal'] }}"
-                             width="1400" height="1750"
-                             @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif
-                             decoding="async">
-                    @else
-                        {{-- Sealed rather than wrong. See App\Support\Couples. --}}
-                        <span class="rv-awaiting" role="img"
-                              aria-label="Photograph to be added: {{ $couple['describes'] }}">
-                            <span class="rv-seal" aria-hidden="true">RV</span>
-                            <span class="rv-awaiting__note">{{ $couple['describes'] }}</span>
-                        </span>
-                    @endif
-                </figure>
-            @endforeach
-
-            @if (\App\Support\Couples::awaitingRealPhotography())
-                <span class="rv-pill rv-pill--on-dark rv-hero__note">Final photography to be added</span>
-            @endif
+            @include('public.partials.hero-mosaic')
         </div>
     </section>
+
+    {{-- ── See what an introduction looks like ─────────────────────────────
+         The only thing on this page a visitor DOES rather than reads. It sits
+         directly under the hero because interaction before commitment is the
+         most reliable thing there is for turning a reader into a member. --}}
+    @include('public.partials.introduction-demo')
 
     {{-- ── The promise ─────────────────────────────────────────────────────
          One line, centred, given a whole band to itself. A page that never

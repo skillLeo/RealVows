@@ -158,7 +158,7 @@ class Mosaic
             'source' => null,
             'column' => 0,
             'row' => 0,
-            'grid' => ['desktop' => '3 / 1 / 5 / 2', 'tablet' => '3 / 3 / 5 / 4', 'mobile' => '4 / 1 / 5 / 3'],
+            'grid' => ['desktop' => '2 / 1 / 4 / 2', 'tablet' => '3 / 3 / 5 / 4', 'mobile' => '4 / 1 / 5 / 3'],
             'px' => ['desktop' => 140, 'tablet' => 240, 'mobile' => 330],
         ],
 
@@ -206,7 +206,43 @@ class Mosaic
             'grid' => ['desktop' => '5 / 4 / 7 / 5', 'tablet' => null, 'mobile' => null],
             'px' => ['desktop' => 150, 'tablet' => 0, 'mobile' => 0],
         ],
+        /*
+         * ⚠️ THE ONLY TILE THAT IS NOT A COUPLE, AND THE REASON IS
+         * COMPOSITIONAL RATHER THAN THEMATIC.
+         *
+         * Column one held one small square floating alone in a field of
+         * oxblood, which read as a stray rather than as a column. It needed a
+         * partner beneath it — but an eighth couple would have tipped the
+         * arrangement back toward a stock library, which is the exact failure
+         * the seven distinct photographs were chosen to avoid.
+         *
+         * So it is a detail: clasped hands, cropped out of the anchor
+         * photograph in column two. Same couple, same shoot, same light, so
+         * it belongs to the set by construction rather than by grading — and
+         * a detail is the one thing in a grid of faces that cannot be got
+         * wrong.
+         *
+         * ⚠️ Desktop only. The phone drops to five tiles because faces stop
+         * being legible below about 160px, and a detail is the first thing
+         * that should go when space is short.
+         */
+        'h' => [
+            'file' => 'couple-8.jpg',
+            'kind' => 'detail',
+            'signal' => 'neutral',
+            'shape' => 'square',
+            'focal' => '50% 45%',
+            'brief' => 'Clasped hands. A detail crop from the anchor photograph.',
+            'photographer' => 'Pavel Danilyuk',
+            'licence' => 'Pexels License',
+            'source' => 'https://www.pexels.com/photo/8525680/',
+            'column' => 0,
+            'row' => 1,
+            'grid' => ['desktop' => '4 / 1 / 6 / 2', 'tablet' => null, 'mobile' => null],
+            'px' => ['desktop' => 150, 'tablet' => 0, 'mobile' => 0],
+        ],
     ];
+
 
     /**
      * ⚠️ STAND-INS, AND THE COMPOSITION IS THE ONLY THING THEY ARE FOR.

@@ -12,11 +12,20 @@
     what makes a premium page look cheap.
 
     @param string|null $tone   'dark' when it sits on an oxblood panel
+    @param bool|null   $rules  false for the mark alone, with no hairlines
+
+    ⚠️ Without its rules this is a fleuron rather than a separator — the same
+    mark doing a different job. It fills a space; it does not divide one. Do
+    not give it rules "for consistency": a rule reads as the end of a thought,
+    and a fleuron dropped into empty space has no thought to end.
 --}}
 @php($tone = $tone ?? 'light')
+@php($rules = $rules ?? true)
 
-<div class="rv-ornament {{ $tone === 'dark' ? 'rv-ornament--dark' : '' }}" aria-hidden="true">
-    <span class="rv-ornament__rule"></span>
+<div class="rv-ornament {{ $tone === 'dark' ? 'rv-ornament--dark' : '' }} {{ $rules ? '' : 'rv-ornament--mark' }}" aria-hidden="true">
+    @if ($rules)
+        <span class="rv-ornament__rule"></span>
+    @endif
 
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="1" stroke-linecap="round" stroke-linejoin="round" focusable="false">
@@ -26,5 +35,7 @@
         <path d="M12 7.5c.7 2.6 1.2 3.1 3.8 3.8-2.6.7-3.1 1.2-3.8 3.8-.7-2.6-1.2-3.1-3.8-3.8 2.6-.7 3.1-1.2 3.8-3.8Z" />
     </svg>
 
-    <span class="rv-ornament__rule"></span>
+    @if ($rules)
+        <span class="rv-ornament__rule"></span>
+    @endif
 </div>

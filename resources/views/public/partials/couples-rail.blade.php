@@ -15,10 +15,19 @@
     <div class="rv-couples__pair" data-reveal>
         @foreach (\App\Support\Couples::all() as $couple)
             <figure class="rv-couples__frame">
-                <img src="{{ asset($couple['src']) }}"
-                     alt="{{ $couple['alt'] }}"
-                     style="object-position: {{ $couple['focal'] }}"
-                     width="900" height="1200" loading="lazy" decoding="async">
+                @if ($couple['src'])
+                    <img src="{{ asset($couple['src']) }}"
+                         alt="{{ $couple['alt'] }}"
+                         style="object-position: {{ $couple['focal'] }}"
+                         width="900" height="1200" loading="lazy" decoding="async">
+                @else
+                    {{-- Sealed rather than wrong. See App\Support\Couples. --}}
+                    <span class="rv-awaiting" role="img"
+                          aria-label="Photograph to be added: {{ $couple['describes'] }}">
+                        <span class="rv-seal" aria-hidden="true">RV</span>
+                        <span class="rv-awaiting__note">{{ $couple['describes'] }}</span>
+                    </span>
+                @endif
             </figure>
         @endforeach
     </div>

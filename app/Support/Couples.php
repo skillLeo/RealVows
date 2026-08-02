@@ -51,19 +51,30 @@ class Couples
     ];
 
     /**
-     * Standing in until the real files arrive, so every page is reviewable
-     * now and needs no code change when they land.
+     * ⚠️ A STAND-IN IS ONLY ALLOWED WHERE ITS CONTENT IS ALREADY CORRECT.
      *
-     * ⚠️ `hero-b.jpg` shows a couple in Hindu/Sikh wedding dress and MUST NOT
-     * ship. It is here only so the layout can be judged.
+     * The Christian slot falls back to `hero-a.jpg`, which genuinely shows a
+     * Christian wedding couple — the photograph is a placeholder for
+     * licensing reasons, not for content reasons, so showing it is honest.
+     *
+     * The Muslim slot has NO fallback, and that is deliberate. The only image
+     * available was `hero-b.jpg`, which shows a couple in Hindu wedding dress
+     * — a red turban with a kalgi, and a swastika on the bride's lehenga. On
+     * a product built for Muslim and Christian members, putting that in the
+     * Muslim slot is not a neutral placeholder. It is the wrong statement,
+     * made on the first screen anybody sees.
+     *
+     * A visibly empty frame says "this is not finished". A wrong photograph
+     * says something about who this product is for, and says it confidently.
+     * So that slot renders a sealed panel until the real photograph arrives.
      */
-    private const PLACEHOLDERS = [
-        'muslim' => 'images/site/hero-b.jpg',
+    private const FALLBACKS = [
+        'muslim' => null,
         'christian' => 'images/site/hero-a.jpg',
     ];
 
     /**
-     * @return list<array{src: string, focal: string, alt: string, key: string, isPlaceholder: bool}>
+     * @return list<array{src: string|null, focal: string, alt: string, key: string, isPlaceholder: bool, describes: string}>
      */
     public static function all(): array
     {
@@ -81,9 +92,11 @@ class Couples
 
             $out[] = [
                 'key' => $key,
-                'src' => $src ?? self::PLACEHOLDERS[$key],
+                // Null renders a sealed panel rather than the wrong couple.
+                'src' => $src ?? self::FALLBACKS[$key],
                 'focal' => $couple['focal'],
                 'alt' => $couple['alt'],
+                'describes' => $couple['describes'],
                 'isPlaceholder' => $src === null,
             ];
         }

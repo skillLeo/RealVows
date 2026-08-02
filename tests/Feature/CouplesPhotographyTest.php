@@ -135,6 +135,42 @@ class CouplesPhotographyTest extends TestCase
     }
 
     /**
+     * ⚠️ THE MUSLIM SLOT MUST NEVER FALL BACK TO THE HINDU PHOTOGRAPH.
+     *
+     * `hero-b.jpg` shows a couple in Hindu wedding dress — a red turban with
+     * a kalgi, and a swastika on the bride's lehenga. On a product built for
+     * Muslim and Christian members that is not a neutral stand-in; it is the
+     * wrong statement made on the first screen anybody sees.
+     *
+     * A slot with no correct photograph renders a sealed panel. An obviously
+     * empty frame says "not finished". A wrong photograph says something
+     * about who this product is for, confidently and incorrectly.
+     */
+    public function test_the_muslim_slot_never_falls_back_to_the_wrong_couple(): void
+    {
+        $muslim = collect(Couples::all())->firstWhere('key', 'muslim');
+
+        $this->assertNotNull($muslim);
+
+        if ($muslim['isPlaceholder']) {
+            $this->assertNull(
+                $muslim['src'],
+                'The Muslim slot is falling back to a photograph. There is no correct stand-in '
+                    .'for it — hero-b.jpg shows a Hindu couple — so it must render a sealed panel.'
+            );
+        }
+
+        // And no page may reference that file any more.
+        foreach (['views/public/home.blade.php', 'views/public/partials/couples-rail.blade.php'] as $view) {
+            $this->assertStringNotContainsString(
+                'hero-b.jpg',
+                File::get(resource_path($view)),
+                "{$view} still references hero-b.jpg."
+            );
+        }
+    }
+
+    /**
      * ⚠️ POSITIVE CONTROL. Every assertion above is about absence or shape,
      * so this proves the reader can actually see what it claims to check.
      */
@@ -145,7 +181,14 @@ class CouplesPhotographyTest extends TestCase
         $this->assertNotEmpty($all);
         $this->assertArrayHasKey('focal', $all[0]);
         $this->assertArrayHasKey('src', $all[0]);
-        $this->assertStringStartsWith('images/site/', $all[0]['src']);
+
+        // `src` is deliberately nullable: a slot with no correct photograph
+        // renders a sealed panel rather than the wrong couple.
+        foreach ($all as $couple) {
+            if ($couple['src'] !== null) {
+                $this->assertStringStartsWith('images/site/', $couple['src']);
+            }
+        }
 
         // The focal-point regex would reject a bad value.
         $this->assertDoesNotMatchRegularExpression('/^\d{1,3}% \d{1,3}%$/', 'center');

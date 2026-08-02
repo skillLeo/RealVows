@@ -55,9 +55,19 @@ have to be read by a person and written in here.** Two minutes of work.
 pipeline strips it, correctly), no URL in any commit. They must either be
 re-sourced with a recorded licence, or replaced. Do not ship them as final.
 
-⚠️ **`hero-b.jpg` must be replaced regardless of its licence.** It shows a
-couple in Hindu/Sikh wedding dress — a red turban with a kalgi, and a
-sherwani. It is standing in for the Muslim couple and must not ship.
+⚠️ **`hero-b.jpg` is no longer displayed anywhere, and must not be.** It shows
+a couple in Hindu wedding dress — a red turban with a kalgi, and a swastika on
+the bride's lehenga.
+
+It was standing in for the Muslim couple, which was wrong: on a product built
+for Muslim and Christian members that is not a neutral placeholder, it is the
+wrong statement made on the first screen anybody sees.
+
+**The Muslim slot now has no fallback at all.** It renders a sealed panel
+naming what belongs there. An obviously empty frame says "this is not
+finished"; a wrong photograph says something about who this product is for,
+confidently and incorrectly. `CouplesPhotographyTest` fails if any page
+references `hero-b.jpg` again.
 
 ---
 

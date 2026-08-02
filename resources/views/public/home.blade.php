@@ -57,12 +57,21 @@
         <div class="rv-hero__art">
             @foreach (\App\Support\Couples::all() as $i => $couple)
                 <figure class="rv-hero__frame @if ($i === 1) rv-hero__frame--second @endif">
-                    <img src="{{ asset($couple['src']) }}"
-                         alt="{{ $couple['alt'] }}"
-                         style="object-position: {{ $couple['focal'] }}"
-                         width="1400" height="1750"
-                         @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif
-                         decoding="async">
+                    @if ($couple['src'])
+                        <img src="{{ asset($couple['src']) }}"
+                             alt="{{ $couple['alt'] }}"
+                             style="object-position: {{ $couple['focal'] }}"
+                             width="1400" height="1750"
+                             @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif
+                             decoding="async">
+                    @else
+                        {{-- Sealed rather than wrong. See App\Support\Couples. --}}
+                        <span class="rv-awaiting" role="img"
+                              aria-label="Photograph to be added: {{ $couple['describes'] }}">
+                            <span class="rv-seal" aria-hidden="true">RV</span>
+                            <span class="rv-awaiting__note">{{ $couple['describes'] }}</span>
+                        </span>
+                    @endif
                 </figure>
             @endforeach
 

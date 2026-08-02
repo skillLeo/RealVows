@@ -77,31 +77,45 @@ class CouplesPhotographyTest extends TestCase
     }
 
     /**
-     * ⚠️ ONE PAIR, USED EVERYWHERE. Two sets would be two licences to
-     * maintain and two slightly different stories on one page.
+     * ⚠️ NEITHER PLACEMENT MAY HARDCODE A PATH.
+     *
+     * The hero renders the seven-tile mosaic and the couples section renders
+     * the pair, so they no longer share one set — but both must still read
+     * from a manifest rather than naming files in markup. A hardcoded path is
+     * how a photograph ends up live with no focal point and no licence row.
      */
-    public function test_the_hero_and_the_couples_section_use_the_same_pair(): void
+    public function test_both_placements_read_from_a_manifest(): void
     {
         $home = File::get(resource_path('views/public/home.blade.php'));
+        $mosaic = File::get(resource_path('views/public/partials/hero-mosaic.blade.php'));
         $section = File::get(resource_path('views/public/partials/couples-rail.blade.php'));
 
-        foreach (['home hero' => $home, 'couples section' => $section] as $where => $markup) {
-            $this->assertStringContainsString(
-                'Couples::all()',
-                $markup,
-                "The {$where} no longer reads from the shared pair, so the two placements can drift apart."
-            );
+        $this->assertStringContainsString(
+            'Mosaic::tiles()',
+            $mosaic,
+            'The hero mosaic no longer reads from App\\Support\\Mosaic.'
+        );
 
-            $this->assertStringContainsString(
-                'object-position',
-                $markup,
-                "The {$where} renders a photograph without applying its focal point."
-            );
+        $this->assertStringContainsString(
+            'Rail::all()',
+            $section,
+            'The marquee section no longer reads from App\\Support\\Rail.'
+        );
+
+        // The hero crops live sources, so each needs its own focal point. The
+        // marquee's files are pre-cropped to the tile ratio by the generator,
+        // so there is nothing left to crop and one CSS rule covers all twelve.
+        $this->assertStringContainsString(
+            'object-position',
+            $mosaic,
+            'The hero mosaic renders a photograph without applying its focal point.'
+        );
+
+        // No hardcoded image path has crept into either.
+        foreach (['images/site/hero-a.jpg', 'images/site/hero-b.jpg', 'couple-muslim.jpg'] as $path) {
+            $this->assertStringNotContainsString($path, $home);
+            $this->assertStringNotContainsString($path, $mosaic);
         }
-
-        // And no hardcoded image path has crept back in beside it.
-        $this->assertStringNotContainsString('images/site/hero-a.jpg', $home);
-        $this->assertStringNotContainsString('images/site/hero-b.jpg', $home);
     }
 
     /**
@@ -171,78 +185,71 @@ class CouplesPhotographyTest extends TestCase
     }
 
     /**
-     * ⚠️ THE TWO HERO FRAMES ARE IDENTICAL. THIS IS A CLIENT REQUIREMENT,
-     * NOT A STYLE PREFERENCE.
+     * ⚠️ THE CELL DEFINES THE RATIO. THE PHOTOGRAPH NEVER DOES.
      *
-     * Three rules used to conspire to break it: the ratio was released above
-     * 880px, a `min-height` drove the box instead, and the second frame
-     * carried a top margin. The result measured 304x656 and 304x600 — two
-     * different heights, two different crops of the same page, and the
-     * right-hand frame 12px off the viewport edge.
+     * This is the direct descendant of the "distorted" complaint. The old
+     * hero let a min-height drive the box and released its aspect ratio above
+     * 880px, so two frames resolved to different heights and one photograph
+     * was scaled differently from the other.
      *
-     * The client reported it twice, unprompted, as "distorted". Holding one
-     * ratio at every width also collapses two crop shapes into one, so a
-     * focal point set against a phone is automatically right on a desktop.
+     * On a grid the same failure has a different shape: a row sized `auto`
+     * or a bare `1fr` takes its minimum from its content, so one tall image
+     * silently opens its whole row and every tile beside it changes shape.
+     * `minmax(0, 1fr)` is what forbids that, and it is easy to lose in a
+     * refactor because the layout looks fine until a particular file lands.
      */
-    public function test_the_two_hero_frames_cannot_drift_apart_again(): void
+    public function test_no_photograph_can_change_the_shape_of_its_row(): void
     {
         $css = File::get(resource_path('css/app.css'));
 
+        preg_match('/\.rv-mosaic\s*\{([^}]*)\}/', $css, $m);
+
+        $this->assertNotEmpty($m, 'The .rv-mosaic grid rule has gone.');
+
+        $this->assertStringContainsString(
+            'minmax(0, 1fr)',
+            $m[1],
+            'The mosaic rows are no longer minmax(0, 1fr), so a single tall photograph can '
+                .'open its row and reshape every tile beside it.'
+        );
+
         $this->assertMatchesRegularExpression(
-            '/\.rv-hero__frame\s*\{\s*aspect-ratio:\s*3\s*\/\s*4\s*;?\s*\}/',
-            $css,
-            'The hero frames no longer declare a 3:4 ratio.'
+            '/aspect-ratio:\s*\d+\s*\/\s*\d+/',
+            $m[1],
+            'The mosaic has no aspect-ratio, so its row heights are no longer defined by the '
+                .'grid and the source images decide the layout again.'
         );
 
-        // Nothing may release the ratio at any breakpoint.
+        // A tile must never carry its own ratio — that is the image talking.
         $this->assertDoesNotMatchRegularExpression(
-            '/\.rv-hero__frame[^{}]*\{[^}]*aspect-ratio:\s*(auto|none)/',
+            '/\.rv-mosaic__tile[^{}]*\{[^}]*aspect-ratio:/',
             $css,
-            'Something releases the hero frame ratio again. That is what produced a 0.52 '
-                .'box on desktop, which cropped 22% off the WIDTH and cut the sides off heads.'
-        );
-
-        // The stagger is what made the two heights differ.
-        $this->assertDoesNotMatchRegularExpression(
-            '/\.rv-hero__frame--second[^{}]*\{[^}]*margin-top:/',
-            $css,
-            'The vertical stagger is back on the second hero frame. It comes out of the shared '
-                .'grid row, so the two frames resolve to different heights and the client reads '
-                .'the layout as broken.'
-        );
-
-        // A min-height on the track overrides the ratio and reintroduces both.
-        $this->assertDoesNotMatchRegularExpression(
-            '/\.rv-hero__art[^{}]*\{[^}]*min-height:/',
-            $css,
-            'A min-height on the hero art drives the frame box instead of the aspect ratio.'
+            'A mosaic tile declares its own aspect-ratio. Shape belongs to the grid; a tile '
+                .'that sizes itself is how the frames drifted apart last time.'
         );
 
         /*
-         * ⚠️ The two frames are joined into one panel — no gutter at all.
-         * A non-zero gap here reopens the seam the client asked to close.
+         * ⚠️ Dropped tiles must be display:none, not opacity or visibility.
+         * A tile hidden with opacity still occupies its grid cell AND still
+         * downloads its photograph — which is the opposite of the reason the
+         * phone drops tiles at all.
          */
-        preg_match_all('/\.rv-hero__art[^{}]*\{([^}]*)\}/', $css, $blocks);
-
-        foreach ($blocks[1] as $body) {
-            if (preg_match('/(?:^|[;{\s])gap:\s*([^;}]+)/', $body, $m)) {
-                $this->assertSame(
-                    '0',
-                    trim($m[1]),
-                    'The hero frames have a gutter between them again. They are meant to read as '
-                        .'one panel split in two, which is also why their inner corners are squared.'
-                );
-            }
-        }
+        $this->assertMatchesRegularExpression(
+            '/\.rv-mosaic__tile--f,\s*\.rv-mosaic__tile--g\s*\{\s*display:\s*none/',
+            $css,
+            'The tiles the phone drops are no longer display:none, so they still cost a '
+                .'download on the connection least able to afford one.'
+        );
     }
 
     /**
      * ⚠️ POSITIVE CONTROL for the check above. Every assertion in it is a
-     * negative, so it is worth nothing unless it can see the real thing.
+     * negative or a presence check, so it is worth nothing unless it can see
+     * the real thing.
      */
-    public function test_the_frame_check_recognises_the_css_that_actually_shipped(): void
+    public function test_the_shape_check_recognises_the_css_that_actually_shipped(): void
     {
-        // Reconstructed verbatim from the rules that caused the defect.
+        // The rules that produced two different frame heights, verbatim.
         $broken = "@media (min-width: 880px) {\n"
             ."  .rv-hero__art { min-height: clamp(360px, 52vw, 680px); }\n"
             ."  .rv-hero__frame { aspect-ratio: auto; }\n"
@@ -250,8 +257,23 @@ class CouplesPhotographyTest extends TestCase
             .'.rv-hero__frame--second { margin-top: clamp(20px, 5vw, 56px); }';
 
         $this->assertMatchesRegularExpression('/\.rv-hero__frame[^{}]*\{[^}]*aspect-ratio:\s*(auto|none)/', $broken);
-        $this->assertMatchesRegularExpression('/\.rv-hero__frame--second[^{}]*\{[^}]*margin-top:/', $broken);
         $this->assertMatchesRegularExpression('/\.rv-hero__art[^{}]*\{[^}]*min-height:/', $broken);
+
+        // And the grid-shaped version of the same defect.
+        $loose = '.rv-mosaic { grid-template-rows: repeat(3, 1fr); }'
+            .'.rv-mosaic__tile--a { aspect-ratio: 3 / 4; }';
+
+        $this->assertStringNotContainsString(
+            'minmax(0, 1fr)',
+            $loose,
+            'The reader cannot tell a bare 1fr from a clamped one.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.rv-mosaic__tile[^{}]*\{[^}]*aspect-ratio:/',
+            $loose,
+            'The reader cannot see a tile that sizes itself.'
+        );
     }
 
     /**

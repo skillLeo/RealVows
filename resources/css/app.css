@@ -1374,163 +1374,398 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  *
  * Stacked, each frame gets the full width and the couples are whole.
  */
+/*
+ * ⚠️ THE ART COLUMN IS NOW A WRAPPER, NOT A GRID.
+ *
+ * It used to be the two-up grid itself. The grid moved into .rv-mosaic when
+ * the pair became seven tiles, and leaving grid properties here would have
+ * meant two elements competing to lay out the same children.
+ */
 .rv-hero__art {
   position: relative;
   /*
    * ⚠️ `min-width: 0` is load-bearing.
    *
-   * A grid item defaults to `min-width: auto`, which means it refuses to
-   * shrink below its content's intrinsic width — so this track measured
-   * 390px inside a 375px viewport and pushed the page sideways. The images
-   * carry width attributes, and that is what it was refusing to go below.
+   * A grid item defaults to `min-width: auto`, so it refuses to shrink below
+   * its content's intrinsic width — this track measured 390px inside a 375px
+   * viewport and pushed the page sideways. Images carry width attributes and
+   * that is what it was refusing to go below.
    */
   min-width: 0;
   border-left: 1px solid var(--hairline);
-  display: grid;
-  grid-template-columns: 1fr;
-  /*
-   * ⚠️ NO GAP. The two frames are joined into one panel — the client's
-   * instruction, and the reason the inner corners are squared below. A gap
-   * here reopens the seam and the pair goes back to reading as two cards.
-   */
-  gap: 0;
   padding: 12px;
-}
-
-/*
- * ⚠️ THE FRAMES ARE PORTRAIT, AND THAT IS THE ACTUAL FIX FOR THE CROP.
- *
- * The art used to carry a fixed `min-height` split between two stacked
- * frames, which made each one a short wide band — roughly 350x140 on a
- * phone. A portrait photograph forced into a band that shape gets sliced
- * horizontally no matter what the focal point says, and the heads come off.
- * Setting the focal point alone would not have fixed it.
- *
- * A frame shaped like the photograph inside it can be cropped gently.
- */
-/*
- * ⚠️ 3:4 AT EVERY WIDTH, WITH NO OVERRIDE ANYWHERE.
- *
- * This used to release the ratio above 880px and let a `min-height` drive
- * the box instead, which produced a frame measuring 0.52 — a tall narrow
- * column that cropped 22% off the WIDTH. Two consequences, both reported by
- * the client as "distorted":
- *
- *   1. The two frames were different heights (656 and 600), because only one
- *      of them carried the stagger's margin, so the shared row height landed
- *      differently on each.
- *   2. A photograph cropped correctly for 3:4 on a phone lost the sides of
- *      people's heads on a desktop. Two crop shapes meant two chances to cut
- *      a face, and one of them was invisible unless you went looking for it.
- *
- * Holding the ratio at every width means ONE crop shape. A focal point set
- * against a phone is now automatically right on a desktop.
- */
-.rv-hero__frame { aspect-ratio: 3 / 4; }
-
-@media (min-width: 560px) {
-  .rv-hero__art { grid-template-columns: 1fr 1fr; }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
 }
 
 @media (min-width: 880px) {
-  /*
-   * Beside the copy the art needs real margins. It previously carried a flat
-   * 12px, so the right-hand frame sat 12px off the viewport edge and read as
-   * bleeding off the page rather than sitting inside the layout.
-   */
-  .rv-hero__art {
-    padding: clamp(24px, 3vw, 44px);
-    align-content: center;
-  }
+  /* Beside the copy the art needs real margins. A flat 12px read as the
+     photographs bleeding off the page rather than sitting inside it. */
+  .rv-hero__art { padding: clamp(24px, 3vw, 44px); }
 }
 
-.rv-hero__frame {
+/* ==========================================================================
+   THE HERO ARCADE
+   ========================================================================== */
+
+/*
+ * ⚠️ THE ARCH IS THE ORGANISING IDEA, AND IT IS LOAD-BEARING.
+ *
+ * It is the one architectural form shared by both traditions this page speaks
+ * to: the mihrab arch in a mosque and the nave arcade in a church are the
+ * same gesture — a threshold you pass through to something serious. That is
+ * exactly what this product is, and it is the most romantic shape in
+ * architecture. It costs a border-radius.
+ *
+ * ⚠️ BORDER-RADIUS, NOT CLIP-PATH. A clip-path cannot carry a border, and
+ * every tile here needs the same 1px hairline as its frame. Radius clips the
+ * background, the border and the overflow together, which is the whole job.
+ *
+ * ── Why columns are offset rather than tilted ─────────────────────────────
+ *
+ * The client's references were a tilted scrapbook wall and a hexagon
+ * honeycomb. Both were taken for the idea and rejected for the execution:
+ * hexagons break `--r`, which is a locked token, and rotation with drop
+ * shadows reads as a corkboard. Vertical offsets give the same richness while
+ * staying architectural — and unlike rotation they survive being collapsed
+ * onto a phone.
+ */
+.rv-mosaic {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  /*
+   * ⚠️ `minmax(0, 1fr)` rather than `1fr`, on both axes.
+   *
+   * A bare `1fr` takes an `auto` minimum from its content, so one tall
+   * photograph silently opens its track and every tile beside it changes
+   * shape. This is the direct descendant of the "distorted" complaint: the
+   * cell defines the proportions, the photograph never does.
+   */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  aspect-ratio: 5 / 8;
+  /* Room for the offset column to hang below the grid box without the
+     translate pushing the section open. */
+  padding-bottom: 24px;
+}
+
+/*
+ * ⚠️ THE PICTURE RAIL. One hairline running behind the arrangement, which is
+ * what ties offset columns together instead of leaving them looking as
+ * though they failed to line up. Subtle on purpose — at full strength it
+ * becomes a divider and starts competing with the photographs.
+ */
+.rv-mosaic::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 1px;
+  background: var(--hairline);
+  opacity: .3;
+  pointer-events: none;
+}
+
+.rv-mosaic__tile--a { grid-area: 1 / 1 / 4 / 2; }
+.rv-mosaic__tile--b { grid-area: 1 / 2 / 2 / 3; }
+.rv-mosaic__tile--c { grid-area: 2 / 2 / 3 / 3; }
+.rv-mosaic__tile--d { grid-area: 3 / 2 / 4 / 3; }
+.rv-mosaic__tile--e { grid-area: 4 / 1 / 5 / 3; }
+
+/*
+ * ⚠️ THE OFFSET IS A TRANSFORM, NOT A MARGIN.
+ *
+ * A margin comes out of the grid track, so an offset column would end up
+ * SHORTER than its neighbours — which is exactly the bug that made the old
+ * two-up hero render at two different heights and get reported as
+ * "distorted". A transform moves the tile visually and leaves the layout
+ * untouched, so every tile keeps the size its cell gave it.
+ */
+.rv-mosaic__tile--b,
+.rv-mosaic__tile--c,
+.rv-mosaic__tile--d { transform: translateY(24px); }
+
+/* ⚠️ Dropped, not hidden. `display: none` removes the tile from the grid AND
+   stops its lazy image being fetched, which is the reason the phone drops
+   tiles at all. `opacity: 0` would keep paying for both. */
+.rv-mosaic__tile--f,
+.rv-mosaic__tile--g { display: none; }
+
+@media (min-width: 768px) {
+  .rv-mosaic {
+    grid-template-columns: 1.2fr 1.1fr 1fr;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+    aspect-ratio: 7 / 5;
+    padding-bottom: 48px;
+  }
+
+  .rv-mosaic__tile--a { grid-area: 1 / 1 / 7 / 2; }
+  .rv-mosaic__tile--b { grid-area: 1 / 2 / 5 / 3; }
+  .rv-mosaic__tile--c { grid-area: 5 / 2 / 7 / 3; }
+  .rv-mosaic__tile--d { grid-area: 1 / 3 / 3 / 4; }
+  .rv-mosaic__tile--e { grid-area: 3 / 3 / 5 / 4; }
+  .rv-mosaic__tile--f { grid-area: 5 / 3 / 7 / 4; display: block; }
+
+  .rv-mosaic__tile--b,
+  .rv-mosaic__tile--c { transform: none; }
+
+  .rv-mosaic__tile--d,
+  .rv-mosaic__tile--e,
+  .rv-mosaic__tile--f { transform: translateY(48px); }
+}
+
+@media (min-width: 1024px) {
+  /*
+   * Four columns of deliberately unequal width. Equal columns are a table;
+   * unequal ones are a composition, and the widest is the one holding the
+   * anchor arch.
+   */
+  .rv-mosaic {
+    grid-template-columns: 21fr 31fr 26fr 22fr;
+    gap: 12px;
+    aspect-ratio: 72 / 58;
+    padding-bottom: 72px;
+  }
+
+  .rv-mosaic__tile--e { grid-area: 3 / 1 / 5 / 2; }
+  .rv-mosaic__tile--a { grid-area: 1 / 2 / 7 / 3; }
+  .rv-mosaic__tile--b { grid-area: 1 / 3 / 5 / 4; }
+  .rv-mosaic__tile--c { grid-area: 5 / 3 / 7 / 4; }
+  .rv-mosaic__tile--d { grid-area: 1 / 4 / 3 / 5; }
+  .rv-mosaic__tile--f { grid-area: 3 / 4 / 5 / 5; display: block; }
+  .rv-mosaic__tile--g { grid-area: 5 / 4 / 7 / 5; display: block; }
+
+  /* Column 2 carries the anchor and stays put; everything else steps down. */
+  .rv-mosaic__tile--e { transform: translateY(46px); }
+  .rv-mosaic__tile--a { transform: none; }
+
+  .rv-mosaic__tile--b,
+  .rv-mosaic__tile--c { transform: translateY(24px); }
+
+  .rv-mosaic__tile--d,
+  .rv-mosaic__tile--f,
+  .rv-mosaic__tile--g { transform: translateY(70px); }
+}
+
+/*
+ * ⚠️ IDENTICAL TREATMENT ON EVERY TILE. Seven photographs from seven sources
+ * only read as one page if nothing distinguishes their frames.
+ *
+ * The 6px inset is a mount, the way a print sits inside a window mat rather
+ * than being pasted to the board. It is the difference between a collage and
+ * a gallery wall, and it costs one inset.
+ *
+ * ⚠️ THE TILE DOES NOT CLIP — THE PLATE DOES. The keystone sits 12px above
+ * the frame, so a clipping tile would swallow it.
+ */
+.rv-mosaic__tile {
   position: relative;
   min-width: 0;
-  overflow: hidden;
   margin: 0;
-  border-radius: var(--r);
   border: 1px solid var(--hairline);
-  background: linear-gradient(150deg, var(--oxblood) 0%, var(--oxblood-deep) 100%);
-  animation: rv-frame-in 1000ms var(--ease) both;
+  border-radius: var(--r);
+  background: var(--oxblood-deep);
+}
+
+.rv-mosaic__plate {
+  position: absolute;
+  inset: 6px;
+  overflow: hidden;
+  border-radius: calc(var(--r) - 3px);
+  background: var(--oxblood-deep);
 }
 
 /*
- * ⚠️ NO VERTICAL STAGGER. DO NOT REINTRODUCE IT.
- *
- * The second frame used to carry `margin-top: clamp(20px, 5vw, 56px)`. The
- * intent was that a small offset reads as an arrangement where two flush
- * photographs read as a stock banner. The client read it as a bug — twice,
- * unprompted, in the word "distorted" — and once someone has read a layout
- * as broken, the intent behind it has already failed.
- *
- * It also did real damage rather than only aesthetic: the margin came out of
- * the shared grid row, so the two frames resolved to different heights (656
- * and 600 at 1440px) and the right-hand photograph was scaled differently
- * from the left. The stagger was the cause of the size mismatch, not a
- * separate complaint.
- *
- * The frames are now identical: same width, same height, same ratio, tops on
- * one line, equal gutter. The arrival delay stays — sequencing them in time
- * is an arrangement that costs the layout nothing.
+ * ⚠️ THE ARCH. A 999px top radius resolves to a true semicircle — the
+ * browser clamps it to half the box's width — so the arc is always correct
+ * whatever the tile measures. Hand-picking a radius would break at one
+ * breakpoint and nobody would notice until it shipped.
  */
-.rv-hero__frame--second { animation-delay: 140ms; }
+.rv-mosaic__tile--arch { border-radius: 999px 999px var(--r) var(--r); }
+
+.rv-mosaic__tile--arch .rv-mosaic__plate {
+  border-radius: 999px 999px calc(var(--r) - 3px) calc(var(--r) - 3px);
+}
 
 /*
- * ⚠️ THE PAIR IS ONE PANEL, SO ONLY ITS OUTER CORNERS ARE ROUND.
- *
- * Closing the gap is not enough on its own. Two rounded rectangles pushed
- * together leave four curves meeting in the middle, which reads as a printing
- * error rather than as a join — the eye sees the pale background through the
- * notches and the seam looks like a defect. Squaring the inner corners and
- * dropping the doubled border between them is what actually joins them.
- *
- * The pair splits differently depending on how it is stacked, so the radius
- * follows the axis: top/bottom when the frames sit one above the other on a
- * phone, left/right when they sit side by side.
+ * The keystone: a single brass point above the apex. Small enough that
+ * nobody consciously registers it, and the reason the arch reads as built
+ * rather than as a rounded rectangle.
  */
-.rv-hero__frame:first-of-type {
-  border-radius: var(--r) var(--r) 0 0;
-  border-bottom: 0;
+.rv-mosaic__tile--arch::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--brass);
 }
 
-.rv-hero__frame--second {
-  border-radius: 0 0 var(--r) var(--r);
+/* ⚠️ On a phone tile B is one of three small squares. An arch that short
+   reads as a lozenge, not as architecture, so it keeps its corners. */
+@media (max-width: 767px) {
+  .rv-mosaic__tile--b { border-radius: var(--r); }
+  .rv-mosaic__tile--b .rv-mosaic__plate { border-radius: calc(var(--r) - 3px); }
+  .rv-mosaic__tile--b::after { content: none; }
 }
 
-@media (min-width: 560px) {
-  .rv-hero__frame:first-of-type {
-    border-radius: var(--r) 0 0 var(--r);
-    border-bottom: 1px solid var(--hairline);
-    border-right: 0;
-  }
+.rv-mosaic__plate picture { display: contents; }
 
-  .rv-hero__frame--second {
-    border-radius: 0 var(--r) var(--r) 0;
-  }
-}
-
-@keyframes rv-frame-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: none; }
-}
-
-.rv-hero__frame img {
+.rv-mosaic__plate img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 22%;
-  /* A very slow settle out of a slight zoom. Transform only, so it costs
-     nothing to composite, and it stops after one pass — a looping image is
-     restless, and restless is the opposite of what this page is for. */
-  animation: rv-photo-settle 2400ms var(--ease) both;
+  /*
+   * ⚠️ Object-position comes from the manifest, per photograph. Never
+   * `center` — that crops blind and slices whichever face happens to sit near
+   * an edge at one width while looking fine at another.
+   */
+  filter: saturate(.94) contrast(1.03);
 }
 
-@keyframes rv-photo-settle {
-  from { transform: scale(1.06); }
+/*
+ * ⚠️ THE UNIFYING GRADE. This is what makes seven unrelated photographs look
+ * commissioned rather than collected — a shared cast pulls mismatched white
+ * balances toward one another. Two layers because they do different jobs:
+ * multiply deepens the shadows toward the page's oxblood, soft-light warms
+ * the midtones toward brass without touching the blacks.
+ */
+.rv-mosaic__plate::before,
+.rv-mosaic__plate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rv-mosaic__plate::before {
+  background: var(--brass);
+  mix-blend-mode: soft-light;
+  opacity: .05;
+}
+
+.rv-mosaic__plate::after {
+  background: var(--oxblood);
+  mix-blend-mode: multiply;
+  opacity: .07;
+}
+
+/* The sealed state, for a tile whose photograph has not arrived. */
+.rv-mosaic__plate--awaiting {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, var(--oxblood) 0%, var(--oxblood-deep) 100%);
+}
+
+.rv-mosaic__plate--awaiting::before,
+.rv-mosaic__plate--awaiting::after { content: none; }
+
+/*
+ * ⚠️ COLUMN BY COLUMN, LEFT TO RIGHT — 120ms between columns, 70ms within
+ * one. The arcade builds like a colonnade being walked past rather than
+ * seven pictures appearing at once.
+ *
+ * The fade is on the frame; the settle is on the image inside it, which is
+ * clipped by the plate. Scaling a frame instead widens the grid past the
+ * viewport — that exact mistake shipped once on .rv-hero__art and scrolled
+ * every public page sideways.
+ */
+.rv-mosaic__tile {
+  animation: rv-mosaic-in var(--dur-enter) var(--ease) both;
+  animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms);
+}
+
+.rv-mosaic__plate img {
+  animation: rv-mosaic-settle var(--dur-ceremony) var(--ease-settle) both;
+  animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms);
+}
+
+/* The keystones land after their arch has settled, never with it. */
+.rv-mosaic__tile--arch::after {
+  animation: rv-mosaic-in var(--dur-enter) var(--ease) both;
+  animation-delay: calc(var(--col, 0) * 120ms + var(--row, 0) * 70ms + var(--dur-ceremony));
+}
+
+@keyframes rv-mosaic-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes rv-mosaic-settle {
+  from { transform: scale(1.03); }
   to   { transform: none; }
+}
+
+/*
+ * Ambient drift on the outer columns only, at roughly 0.96x and 1.04x scroll
+ * speed. Scroll driven, so it runs on the compositor rather than on a scroll
+ * listener, and silently absent where unsupported — nobody misses a parallax
+ * they never saw.
+ *
+ * It sits on the plate, not the tile: the tile carries the column offset
+ * transform, and a second transform on the same element would overwrite it.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    .rv-mosaic__tile--e .rv-mosaic__plate {
+      animation: rv-mosaic-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    .rv-mosaic__tile--d .rv-mosaic__plate,
+    .rv-mosaic__tile--g .rv-mosaic__plate {
+      animation: rv-mosaic-drift-reverse linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+
+    @keyframes rv-mosaic-drift {
+      from { transform: translate3d(0, -1.6%, 0); }
+      to   { transform: translate3d(0, 1.6%, 0); }
+    }
+
+    @keyframes rv-mosaic-drift-reverse {
+      from { transform: translate3d(0, 1.6%, 0); }
+      to   { transform: translate3d(0, -1.6%, 0); }
+    }
+  }
+}
+
+/*
+ * ⚠️ REDUCED MOTION: EVERYTHING ARRIVES AT ONCE, AND NOTHING IS HIDDEN.
+ *
+ * The stagger is the failure mode — an `animation: none` that forgets to
+ * reset opacity leaves tiles invisible forever for exactly the people who
+ * asked for less movement.
+ *
+ * ⚠️ The tile's transform is NOT reset here: it carries the column offset,
+ * which is layout rather than motion. Clearing it would collapse the arcade
+ * into a flat grid for those users.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .rv-mosaic__tile,
+  .rv-mosaic__tile--arch::after,
+  .rv-mosaic__plate img,
+  .rv-mosaic__tile .rv-mosaic__plate {
+    animation: none;
+    animation-delay: 0s;
+    opacity: 1;
+  }
+
+  .rv-mosaic__plate img,
+  .rv-mosaic__tile .rv-mosaic__plate { transform: none; }
 }
 
 /* The band that holds the single line of promise */
@@ -2396,39 +2631,107 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   padding-block: var(--gap-section);
 }
 
-.rv-couples__pair {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr;
-  max-width: 720px;
-  margin: 0 auto;
-  padding-inline: 20px;
+/*
+ * ⚠️ THE MARQUEE. A CONTINUOUS TICKER, AND IT IS ONLY POSSIBLE NOW.
+ *
+ * This block used to carry a standing note forbidding exactly this: "a loop
+ * of two images either repeats visibly or leaves gaps". That was right for
+ * two photographs. The constraint was never "no motion" — it was "not enough
+ * photographs". Twelve tiles make about 2300px of track, which covers a
+ * 1440px viewport with room to spare, so the loop point never lands on
+ * screen.
+ *
+ * ⚠️ THE TRACK HOLDS TWO IDENTICAL COPIES AND MOVES BY EXACTLY -50%.
+ *
+ * That is the whole trick, and it is the one thing that must not drift: at
+ * -50% the second copy sits precisely where the first started, so the reset
+ * is invisible. Any other distance, or an odd number of copies, produces a
+ * visible jump once per cycle.
+ */
+.rv-marquee {
+  position: relative;
+  /* ⚠️ Load-bearing. The track is deliberately wider than the viewport, so
+     without this the whole page scrolls sideways. */
+  overflow: hidden;
+  /* Both spellings — Safari still wants the prefix, and a missing mask is a
+     hard edge where the photographs should be dissolving into the paper. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, rgb(0 0 0) 10%, rgb(0 0 0) 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, rgb(0 0 0) 10%, rgb(0 0 0) 90%, transparent);
+}
+
+.rv-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: rv-marquee-slide 64s linear infinite;
+}
+
+.rv-marquee__set {
+  display: flex;
+  gap: clamp(10px, 1.4vw, 18px);
+  /* Matches the gap, so the seam between the two copies is the same width as
+     every other gap. Without it the join reads as a stutter. */
+  padding-right: clamp(10px, 1.4vw, 18px);
 }
 
 /*
- * Side by side only once there is room for each to be a person rather than a
- * sliver. Below this they stack, because a cropped face is worse than a
- * taller page — which is exactly the mistake the hero was making.
+ * ⚠️ PAUSE ON HOVER AND ON FOCUS. Focus matters more than hover: a keyboard
+ * user tabbing past a moving strip has no way to stop it otherwise, and
+ * WCAG 2.2.2 requires a mechanism to pause anything that moves for more
+ * than five seconds.
  */
-@media (min-width: 560px) {
-  .rv-couples__pair { grid-template-columns: 1fr 1fr; gap: 24px; }
+.rv-marquee:hover .rv-marquee__track,
+.rv-marquee:focus-within .rv-marquee__track { animation-play-state: paused; }
+
+@keyframes rv-marquee-slide {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 
-.rv-couples__frame {
+.rv-marquee__tile {
+  position: relative;
+  flex: 0 0 auto;
   margin: 0;
+  width: clamp(132px, 15vw, 196px);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
   border: 1px solid var(--hairline);
   border-radius: var(--r);
-  overflow: hidden;
-  background: var(--card);
+  background: var(--oxblood-deep);
 }
 
-.rv-couples__frame img {
-  display: block;
+/* Every third tile sits a little low, so the rail has a horizon rather than
+   a ruled edge. Subtle enough that it reads as craft, not as misalignment. */
+.rv-marquee__tile:nth-child(3n) { transform: translateY(14px); }
+.rv-marquee__tile:nth-child(4n) { transform: translateY(-8px); }
+
+.rv-marquee__tile picture { display: contents; }
+
+.rv-marquee__tile img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: 100%;
   object-fit: cover;
-  /* Faces sit high in a portrait; bias the crop upward so nobody is cut. */
-  object-position: center 22%;
+  object-position: 50% 40%;
+  /* The same grade as the hero, so both sets of photographs read as one
+     commission rather than as two stock searches. */
+  filter: saturate(.94) contrast(1.03);
+}
+
+/* ⚠️ REDUCED MOTION: the rail stops and becomes something you can push.
+   Stopping it without giving back a way to see the rest would hide ten
+   photographs from the people who asked for less movement. */
+@media (prefers-reduced-motion: reduce) {
+  .rv-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .rv-marquee__track { animation: none; }
+
+  /* The duplicate copy is decoration for a loop that no longer runs. */
+  .rv-marquee__set[aria-hidden='true'] { display: none; }
 }
 
 .rv-couples__line {
@@ -2614,9 +2917,14 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * The brief asks for "the photograph" to settle from 1.04. It meant the
    * photograph.
    */
-  [data-arrival='running'] .rv-hero__frame {
-    animation: rv-hero-arrive 900ms var(--ease) both;
-    animation-delay: 700ms;
+  /*
+   * The mosaic waits for the headline's brass rule to finish drawing, then
+   * sweeps. 700ms hold, then seven tiles at a 70ms stagger — the last one
+   * lands a little under 900ms after it starts, which is the ceremony budget.
+   */
+  [data-arrival='running'] .rv-mosaic__tile {
+    animation: rv-hero-arrive var(--dur-enter) var(--ease) both;
+    animation-delay: calc(700ms + var(--i, 0) * 70ms);
   }
 
   @keyframes rv-hero-arrive {
@@ -2624,14 +2932,14 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     to   { opacity: 1; }
   }
 
-  /* The zoom itself, on the image, inside the frame's own clip. */
-  [data-arrival='running'] .rv-hero__frame img {
-    animation: rv-hero-zoom 900ms var(--ease) both;
-    animation-delay: 700ms;
+  /* The zoom itself, on the image, inside the plate's own clip. */
+  [data-arrival='running'] .rv-mosaic__plate img {
+    animation: rv-hero-zoom var(--dur-ceremony) var(--ease-settle) both;
+    animation-delay: calc(700ms + var(--i, 0) * 70ms);
   }
 
   @keyframes rv-hero-zoom {
-    from { transform: scale(1.04); }
+    from { transform: scale(1.03); }
     to   { transform: scale(1); }
   }
 
@@ -2646,20 +2954,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* The parallax. Scroll-driven, so it is on the compositor rather than on a
    scroll listener. Silently absent where unsupported, which is correct —
    nobody misses a parallax they never saw. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-    .rv-hero__art {
-      animation: rv-parallax linear both;
-      animation-timeline: view();
-      animation-range: entry 0% exit 100%;
-    }
-
-    @keyframes rv-parallax {
-      from { transform: translate3d(0, -3%, 0); }
-      to   { transform: translate3d(0, 3%, 0); }
-    }
-  }
-}
+/* ⚠️ The whole-column parallax is gone. The mosaic drifts two individual
+   tiles instead (see .rv-mosaic__tile--b/--e/--f), and running both meant a
+   moving element inside a moving element — the tiles appeared to swim. */
 
 /* ==========================================================================
    APP BEHAVIOURS — toasts, the collapsing bar, pull to refresh

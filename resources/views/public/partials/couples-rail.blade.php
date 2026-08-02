@@ -1,35 +1,46 @@
 {{--
-    ── Section 4: "Two people, properly introduced" ──────────────────────────
+    ── Section 4: "Every introduction we make is one we would stand behind" ──
 
-    ⚠️ EXACTLY TWO PHOTOGRAPHS — the same pair the hero shows. One Muslim
-    couple, one Christian couple. A content decision from the client, not a
-    placeholder count.
+    A continuous horizontal marquee of twelve photographs, like a headline
+    ticker. The line underneath is the point of the section; the rail is the
+    evidence for it.
 
-    ⚠️ NO DRIFT, NO RAIL ANIMATION. A loop of two images either repeats
-    visibly or leaves gaps, and a wedding invitation does not scroll.
+    ⚠️ THE TRACK IS RENDERED TWICE, AND THE SECOND COPY IS aria-hidden.
 
-    The pair, their focal points and the reason each was chosen live in
-    App\Support\Couples and public/images/site/CREDITS.md.
+    That is what makes the loop seamless: the animation translates the track
+    by exactly -50%, which lands the start of the second copy precisely where
+    the first began, so there is no jump and no gap. The duplicate is decoration
+    for the eye only — a screen reader must not be read twelve photographs and
+    then the same twelve again.
+
+    ⚠️ The whole rail is one labelled image and its tiles are silent, for the
+    same reason as the hero: twelve descriptive alts is noise, twelve empty
+    ones with no wrapper is an accessibility failure.
 --}}
 <section class="rv-couples rv-paper" aria-labelledby="rv-couples-line">
-    <div class="rv-couples__pair" data-reveal>
-        @foreach (\App\Support\Couples::all() as $couple)
-            <figure class="rv-couples__frame">
-                @if ($couple['src'])
-                    <img src="{{ asset($couple['src']) }}"
-                         alt="{{ $couple['alt'] }}"
-                         style="object-position: {{ $couple['focal'] }}"
-                         width="900" height="1200" loading="lazy" decoding="async">
-                @else
-                    {{-- Sealed rather than wrong. See App\Support\Couples. --}}
-                    <span class="rv-awaiting" role="img"
-                          aria-label="Photograph to be added: {{ $couple['describes'] }}">
-                        <span class="rv-seal" aria-hidden="true">RV</span>
-                        <span class="rv-awaiting__note">{{ $couple['describes'] }}</span>
-                    </span>
-                @endif
-            </figure>
-        @endforeach
+    @php($rail = \App\Support\Rail::all())
+
+    <div class="rv-marquee" role="img"
+         aria-label="Couples who found each other through RealVows">
+        {{-- ⚠️ Two identical copies. Changing this to one breaks the loop. --}}
+        <div class="rv-marquee__track">
+            @foreach ([false, true] as $isDuplicate)
+                <div class="rv-marquee__set" @if ($isDuplicate) aria-hidden="true" @endif>
+                    @foreach ($rail as $image)
+                        <figure class="rv-marquee__tile">
+                            <picture>
+                                @if ($image['webp'])
+                                    <source type="image/webp" srcset="{{ asset($image['webp']) }}">
+                                @endif
+                                <img src="{{ asset($image['src']) }}" alt=""
+                                     width="560" height="747"
+                                     loading="lazy" decoding="async" fetchpriority="low">
+                            </picture>
+                        </figure>
+                    @endforeach
+                </div>
+            @endforeach
+        </div>
     </div>
 
     <p class="rv-couples__line" id="rv-couples-line">

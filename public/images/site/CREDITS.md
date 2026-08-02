@@ -30,67 +30,82 @@ is not decoration — it is a claim. Two rules follow from that:
 
 ---
 
-## Currently shipped
+## Legacy images — TO BE REPLACED, NOT INVESTIGATED
 
-Provenance recovered from git history — the images were **hotlinked to
-Unsplash** in the approved design before being downloaded and self-hosted
-(commit `d4382e6`). Two of the six URLs survive in history; four do not.
+Four of these have no recoverable source. **The decision is to replace them
+with model-released stock before launch rather than chase provenance on files
+that were never recorded.** Do not spend more time trying to identify them.
 
-| File | Used on | Source | Photographer | Licence |
-|---|---|---|---|---|
-| `hero-a.jpg` | Hero + couples (Christian slot) | [unsplash.com/photos/1591604466107-ec97de577aff](https://unsplash.com/photos/1591604466107-ec97de577aff) | ⚠️ **open the URL and record** | Unsplash Licence (confirm) |
-| `hero-b.jpg` | Hero + couples (Muslim slot) | [unsplash.com/photos/1599462616558-2b75fd26a283](https://unsplash.com/photos/1599462616558-2b75fd26a283) | ⚠️ **open the URL and record** | Unsplash Licence (confirm) |
-| `login.jpg` | Sign in | ⚠️ **no source in history** | ⚠️ **unknown** | ⚠️ **unverified** |
-| `signup.jpg` | Register | ⚠️ **no source in history** | ⚠️ **unknown** | ⚠️ **unverified** |
-| `verify.jpg` | Verification | ⚠️ **no source in history** | ⚠️ **unknown** | ⚠️ **unverified** |
-| `packages.jpg` | Packages | ⚠️ **no source in history** | ⚠️ **unknown** | ⚠️ **unverified** |
+| File | Used on | Source | Status |
+|---|---|---|---|
+| `hero-a.jpg` | no longer displayed | [unsplash.com/photos/1591604466107-ec97de577aff](https://unsplash.com/photos/1591604466107-ec97de577aff) | ID recovered from git history; photographer still unread |
+| `hero-b.jpg` | **not displayed — Hindu dress, must not ship** | [unsplash.com/photos/1599462616558-2b75fd26a283](https://unsplash.com/photos/1599462616558-2b75fd26a283) | Replace |
+| `login.jpg` | Sign in | no source in any commit, no EXIF | Replace before launch |
+| `signup.jpg` | Register | no source in any commit, no EXIF | Replace before launch |
+| `verify.jpg` | Verification | no source in any commit, no EXIF | Replace before launch |
+| `packages.jpg` | Packages | no source in any commit, no EXIF | Replace before launch |
 
-**How the two known ones were recovered:** the original `images.unsplash.com`
-URLs are still in the git history of the design markup. The photo ID is the
-provenance — opening the URL above shows the photographer and the licence.
-Unsplash blocks automated requests from this environment, so **the two names
-have to be read by a person and written in here.** Two minutes of work.
-
-**The four unknown ones have no recoverable source.** No EXIF (the image
-pipeline strips it, correctly), no URL in any commit. They must either be
-re-sourced with a recorded licence, or replaced. Do not ship them as final.
-
-⚠️ **`hero-b.jpg` is no longer displayed anywhere, and must not be.** It shows
-a couple in Hindu wedding dress — a red turban with a kalgi, and a swastika on
-the bride's lehenga.
-
-It was standing in for the Muslim couple, which was wrong: on a product built
-for Muslim and Christian members that is not a neutral placeholder, it is the
-wrong statement made on the first screen anybody sees.
-
-**The Muslim slot now has no fallback at all.** It renders a sealed panel
-naming what belongs there. An obviously empty frame says "this is not
-finished"; a wrong photograph says something about who this product is for,
-confidently and incorrectly. `CouplesPhotographyTest` fails if any page
-references `hero-b.jpg` again.
+⚠️ **Model releases.** A CC or free-stock licence covers the PHOTOGRAPH. It
+does not cover the right to use an identifiable person's likeness to advertise
+a service. On a marketing page the risk is low but it is not zero, and it stops
+being theoretical the day real members are paying. Budget for model-released
+stock (Adobe Stock or similar) for all six before launch.
 
 ---
 
-## The two couples — INSTALLED
+## The two couples — SOURCED BY THE CLIENT
 
-Both sourced from Wikimedia Commons, cropped to 3:4 with the focal point set
-by eye against the real file.
+Both photographs are chosen by hand, from Pexels, in a browser. That is
+deliberate: every automated source is closed to this environment (Openverse
+rate-limits anonymously, Unsplash blocks bots, Wikimedia Commons is a heritage
+archive holding paintings rather than contemporary lifestyle photography) —
+and more importantly, "does this face feel right" is a judgement only a person
+looking at it can make.
+
+**Pexels License: commercial use permitted, no attribution required.** Cleaner
+for a commercial client project than CC BY-SA, whose share-alike terms are
+awkward on a paid site.
+
+⚠️ **Attribution not required is not the same as attribution unrecorded.**
+Record it either way.
+
+### Live right now — Wikimedia Commons, attribution REQUIRED
+
+These are stand-ins until the hand-picked pair lands. Both licences oblige
+attribution, so this table is not optional while they are deployed.
 
 | Slot | File | Photographer | Licence | Source |
 |---|---|---|---|---|
 | Muslim | `couple-muslim.jpg` | Faiaz Ahmad Emon | **CC BY 2.0** | [Sojib and Tanha](https://commons.wikimedia.org/wiki/File:Sojib_and_Tanha.jpg) |
 | Christian | `couple-christian.jpg` | OJjnr | **CC BY-SA 4.0** | [Church Wedding Exclusives 67](https://commons.wikimedia.org/wiki/File:Church_Wedding_Exclusives_67.jpg) |
 
-⚠️ **CC BY and CC BY-SA both require attribution.** This table is that
-attribution. If the photographs ever appear somewhere that is not this
-repository, the credit has to travel with them.
+⚠️ Both are **wedding photographs**, which the current brief rejects. They are
+displayed only because something has to be, and they will be replaced.
 
-### Focal points, and why
+### Incoming — Pexels, hand-picked
 
-| Slot | Focal | Reason |
-|---|---|---|
-| Muslim | `50% 38%` | Faces sit ~38% down; the umbrellas take the top third |
-| Christian | `50% 20%` | Faces ~20% down, veil and bouquet below, greenery above |
+Overwrite this table when the files land. Photographer and source URL go in
+even though the Pexels License does not demand them.
+
+| Slot | File | Photographer | Licence | Source |
+|---|---|---|---|---|
+| Muslim | `couple-muslim.jpg` | *pending* | Pexels License | *pending* |
+| Christian | `couple-christian.jpg` | *pending* | Pexels License | *pending* |
+
+### The specification they were chosen against
+
+- Portrait, croppable to 3:4 without cutting a face or a hand
+- 1200px+ on the short edge, faces in the upper third of the final crop
+- **Everyday or smart-casual clothes — NOT wedding wear.** A wedding photograph
+  shows two people who already found each other, which is the wrong message on
+  a page trying to convert somebody who has not
+- **Contemporary hijab as the only religious signal.** No bridal jewellery, no
+  forehead ornament, no heavy henna styling — those read as a South Asian
+  wedding first and as Muslim second, which inverts the point
+- **US market.** Couples an American viewer recognises from their own city
+- Mixed-heritage pairings welcome and preferred for at least one slot
+- Quiet, tender, reserved. No kissing, no open-mouth laughing, no lifted poses,
+  nothing physically intimate, eyes down or on each other rather than at camera
 
 ### The register both must share
 

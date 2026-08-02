@@ -261,8 +261,11 @@ These cannot be automated and are genuinely outstanding:
 2. **The one-minute cron** — added in hPanel; confirm it is firing via View Output
 3. **PowerTranz credentials** when the merchant account clears
 4. **The three legal pages**, written properly
-5. **Photography licences** — `public/images/site/CREDITS.md` lists six images whose
-   source is unrecorded. Almost certainly fine, but "almost certainly" is not a licence
+5. **Photography** — buy six model-released images (Adobe Stock or similar) to replace
+   the legacy set. A stock licence covers the photograph; it does not cover using an
+   identifiable person's likeness to advertise a service, and that stops being
+   theoretical the day real members are paying. The decision is to replace rather than
+   chase provenance on files whose source was never recorded
 6. Say the word and I will remove the demonstration members and close the one-click
    sign-in
 

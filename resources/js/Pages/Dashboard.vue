@@ -43,6 +43,15 @@ const state = computed(() => {
 // on open cards next time.
 
 const unsealingId = ref(null);
+
+/*
+ * ⚠️ The unsealing announces itself ONCE, at the end.
+ *
+ * Narrating each card would flood a screen reader with the same sentence
+ * three times while the ceremony it is describing is purely visual. One
+ * polite announcement, after everything has landed.
+ */
+const announcement = ref('');
 const ceremonyRunning = ref(false);
 const finished = ref(false);
 const skipped = ref(false);
@@ -72,6 +81,11 @@ async function runCeremony(ids) {
     unsealingId.value = null;
     ceremonyRunning.value = false;
     finished.value = true;
+
+    announcement.value = ids.length === 1
+        ? '1 introduction unlocked'
+        : `${ids.length} introductions unlocked`;
+
     buzz([10, 40, 10, 40, 10]);
 }
 
@@ -92,7 +106,10 @@ const heading = computed(() => {
 
 <template>
     <AppLayout title="Matches">
-        <div class="rv-shell rv-section--app">
+        <!-- Announced once, when the ceremony finishes. -->
+        <p class="rv-sr-only" role="status" aria-live="polite">{{ announcement }}</p>
+
+        <div class="rv-shell rv-section--app" data-pull-refresh>
             <div class="rv-dash">
                 <!-- ── Main column ──────────────────────────────────────── -->
                 <div class="rv-stack" style="gap: 32px">

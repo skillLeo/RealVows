@@ -9,6 +9,7 @@ use App\Models\Verification;
 use App\Services\Photos\PhotoStorageService;
 use App\Services\Profile\ProfileCompleteness;
 use App\Models\MatchRecord;
+use App\Models\Report;
 use App\Services\Credits\CreditService;
 use App\Services\Matching\MatchGenerator;
 use App\Services\Payments\PurchaseService;
@@ -65,8 +66,7 @@ class DemoSeeder extends Seeder
         $women = $this->createMembers('woman', 15, $reviewer);
 
         $this->createMatches($men, $women);
-        $this->createPurchaseHistory($women->take(3));
-        $this->openSomeMatches($women->take(3));
+        $this->stageTheDemoAccounts($men, $women, $reviewer);
 
         $this->reportSkips();
 
@@ -330,6 +330,145 @@ class DemoSeeder extends Seeder
         copy($path, $temp);
 
         return new UploadedFile($temp, basename($path), 'image/jpeg', null, true);
+    }
+
+
+    /**
+     * ⚠️ EVERY STATE REACHABLE FROM THE LOGIN PANEL, WITHOUT BUYING OR
+     * WAITING FOR ANYTHING.
+     *
+     * The client will click through this once, on a phone, probably while
+     * travelling. If seeing the empty state requires creating an account and
+     * waiting for a cron, he will never see it — so each numbered account is
+     * staged into a different state deliberately.
+     *
+     *   Girl 1  verified, ZERO credits, sealed introductions   the hook
+     *   Girl 2  verified, credits in hand, nothing opened      before the ceremony
+     *   Girl 3  verified, three opened, purchase history       the payoff
+     *   Girl 4  awaiting verification                          the waiting state
+     *   Girl 5  verified, nothing above the threshold          the honest empty state
+     *   Boy 1   mirrors Girl 1                                 the other side
+     */
+    private function stageTheDemoAccounts($men, $women, ?User $reviewer): void
+    {
+        $girl = fn (int $n) => $women[$n - 1] ?? null;
+        $boy = fn (int $n) => $men[$n - 1] ?? null;
+
+        // ── Girl 1 and Boy 1: sealed introductions, no credits ───────────
+        // Nothing to do but make sure they have none. This is the state the
+        // whole commercial engine rests on.
+        foreach ([$girl(1), $boy(1)] as $profile) {
+            $this->setCredits($profile, 0);
+        }
+
+        // ── Girl 2: credits in hand, nothing opened yet ──────────────────
+        $this->buyFor($girl(2), 'triple');
+
+        // ── Girl 3: three opened, with a receipt behind them ─────────────
+        $this->buyFor($girl(3), 'octet');
+        $this->openTopMatches($girl(3), 3);
+        $this->buyFor($girl(3), 'single');
+
+        // ── Girl 4: still waiting to be checked ──────────────────────────
+        if ($girl(4)) {
+            $girl(4)->verification?->forceFill([
+                'status' => Verification::STATUS_PENDING,
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+            ])->save();
+
+            // An unverified profile is not matchable, so its introductions go.
+            MatchRecord::where('seeker_profile_id', $girl(4)->id)->delete();
+        }
+
+        // ── Girl 5: verified, but nobody clears the bar ──────────────────
+        // The honest empty state. Achieved by removing her introductions
+        // rather than by lowering anybody's score.
+        if ($girl(5)) {
+            MatchRecord::where('seeker_profile_id', $girl(5)->id)->delete();
+            $this->setCredits($girl(5), 0);
+        }
+
+        // One report already in the queue, so that screen is not empty when
+        // he opens it.
+        $this->seedOneReport($girl(3), $boy(2));
+
+        $this->command?->line('  demo states : girl1 sealed · girl2 credits · girl3 opened · girl4 waiting · girl5 empty');
+    }
+
+    /** Buys through the real PurchaseService and FakeGateway. */
+    private function buyFor(?Profile $profile, string $package): void
+    {
+        $user = $profile ? User::find($profile->user_id) : null;
+
+        if (! $user) {
+            return;
+        }
+
+        $purchases = app(PurchaseService::class);
+        $purchases->settle($purchases->initiate($user, $package));
+    }
+
+    private function openTopMatches(?Profile $profile, int $count): void
+    {
+        $user = $profile ? User::find($profile->user_id) : null;
+
+        if (! $user) {
+            return;
+        }
+
+        $credits = app(CreditService::class);
+
+        MatchRecord::where('seeker_profile_id', $profile->id)
+            ->where('status', MatchRecord::STATUS_TEASER)
+            ->orderByDesc('total_score')
+            ->limit($count)
+            ->get()
+            ->each(function (MatchRecord $match) use ($credits, $user) {
+                if ($user->fresh()->creditBalance() > 0) {
+                    $credits->unlockMatch($user->fresh(), $match);
+                }
+            });
+    }
+
+    /** Levels a balance to an exact figure through the real ledger. */
+    private function setCredits(?Profile $profile, int $target): void
+    {
+        $user = $profile ? User::find($profile->user_id) : null;
+
+        if (! $user) {
+            return;
+        }
+
+        $delta = $target - $user->creditBalance();
+
+        if ($delta === 0) {
+            return;
+        }
+
+        app(CreditService::class)->adjust(
+            $user,
+            $delta,
+            $delta > 0 ? 'goodwill' : 'admin_adjustment',
+            'Demonstration data staging',
+            $user,
+        );
+    }
+
+    private function seedOneReport(?Profile $reporter, ?Profile $subject): void
+    {
+        if (! $reporter || ! $subject) {
+            return;
+        }
+
+        Report::firstOrCreate([
+            'reporter_profile_id' => $reporter->id,
+            'subject_profile_id' => $subject->id,
+            'status' => Report::STATUS_OPEN,
+        ], [
+            'reason' => 'appears_to_be_scam',
+            'note' => 'They asked me to move the conversation off the platform straight away.',
+        ]);
     }
 
     /**

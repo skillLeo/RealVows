@@ -1,6 +1,7 @@
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import reveal from './directives/reveal';
+import { startAppBehaviours } from './app-behaviours';
 
 const appName = import.meta.env.VITE_APP_NAME || 'RealVows';
 
@@ -71,6 +72,7 @@ createInertiaApp({
             .mount(el);
 
         setUpViewTransitions();
+        startAppBehaviours();
     },
 
     progress: {

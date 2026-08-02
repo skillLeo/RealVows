@@ -1126,9 +1126,13 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   background: var(--cream);
 }
 
+/* `overflow: hidden` for the same reason as .rv-auth__band--photo: the
+   photograph behind this panel animates from a scale, and an unclipped
+   scaled pseudo-element makes the whole document scroll sideways. */
 .rv-split__panel {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
   background: var(--oxblood-deep);
   display: flex;
   flex-direction: column;
@@ -1165,7 +1169,16 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   );
 }
 
-.rv-auth__band--photo { position: relative; isolation: isolate; }
+/*
+ * ⚠️ `overflow: hidden` is load-bearing, not tidiness.
+ *
+ * The ::before below animates from scale(1.03), and a scaled, absolutely
+ * positioned pseudo-element extends past its parent — which made the whole
+ * document scroll sideways by 1.5% of the viewport width. Measured at 6px on
+ * a 375px phone and 22px at 1440. Nothing here needs to escape the band, so
+ * clipping it is both the fix and the correct behaviour.
+ */
+.rv-auth__band--photo { position: relative; isolation: isolate; overflow: hidden; }
 .rv-auth__band--photo::before,
 .rv-auth__band--photo::after {
   content: '';
@@ -1665,20 +1678,33 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* The single permitted piece of atmosphere: a very slow brass drift behind
    the ring. 4% opacity swing over 20s — present but never noticed. */
 @keyframes rv-drift {
-  0%, 100% { opacity: .03; transform: scale(1); }
-  50%      { opacity: .07; transform: scale(1.06); }
+  0%, 100% { opacity: .03; }
+  50%      { opacity: .08; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /*
+   * ⚠️ `inset: 0` and a wider gradient, NOT `inset: -12%` with a scale.
+   *
+   * The glow used to bleed 12% outside the ring and then scale to 1.06 on
+   * top of that, which puts a painted box outside its parent on every card —
+   * enough to make the document scroll sideways on a narrow screen. The
+   * softness now comes from the gradient's own falloff, which paints the
+   * same warmth without leaving the box.
+   */
   .rv-ring::before {
     content: '';
     position: absolute;
-    inset: -12%;
+    inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--brass) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--brass) 0%, transparent 62%);
     animation: rv-drift 20s var(--ease-veil) infinite;
     pointer-events: none;
   }
+
+  /* Contains the drift regardless, so this can never be the thing that makes
+     a page scroll sideways. */
+  .rv-ring { overflow: hidden; }
 }
 
 /* --------------------------------------------------------------------------
@@ -2495,4 +2521,167 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
       to   { transform: translate3d(0, 3%, 0); }
     }
   }
+}
+
+/* ==========================================================================
+   APP BEHAVIOURS — toasts, the collapsing bar, pull to refresh
+   ========================================================================== */
+
+/* Above the tab bar, never over it. */
+.rv-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+  z-index: 70;
+  width: min(420px, calc(100vw - 32px));
+  padding: 14px 20px;
+  border: 1px solid var(--brass);
+  border-radius: var(--r);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-body-3);
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  transition: transform var(--dur-move) var(--ease-settle), opacity var(--dur-move) var(--ease);
+}
+
+.rv-toast.is-in { transform: translate(-50%, 0); opacity: 1; }
+
+@media (min-width: 768px) {
+  .rv-toast { bottom: 24px; }
+}
+
+/* The top bar collapsing. Transform only — it never re-renders. */
+.rv-app__bar {
+  transition: transform var(--dur-quick) var(--ease);
+  will-change: transform;
+}
+
+.rv-app__bar.is-collapsed { transform: translateY(-100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-app__bar.is-collapsed { transform: none; }
+}
+
+/* Pull to refresh — a brass ring that draws itself as you pull. */
+.rv-pull {
+  position: absolute;
+  top: -56px;
+  left: 50%;
+  translate: -50% 0;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  transition: transform var(--dur-quick) var(--ease);
+}
+
+.rv-pull__ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--hairline-soft);
+  /* The arc draws as the finger travels: --pull runs 0 → 1. */
+  background: conic-gradient(
+    var(--brass) calc(var(--pull, 0) * 360deg),
+    transparent 0
+  );
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+}
+
+/* ==========================================================================
+   TABLET — its own layout, not a stretched phone
+   ========================================================================== */
+
+/*
+ * ⚠️ PORTRAIT KEEPS THE BOTTOM TAB BAR. A tablet held in portrait is held
+ * like a large phone, and a left rail there is wrong — the thumb is still at
+ * the bottom.
+ */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+  .rv-tabbar {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: 88px;
+    height: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: calc(24px + env(safe-area-inset-top));
+    border-top: 0;
+    border-right: 1px solid var(--hairline);
+  }
+
+  .rv-tabbar__item {
+    flex-direction: column;
+    width: 100%;
+    min-height: 64px;
+    border-radius: var(--r);
+  }
+
+  /* Active state is a brass pill in the rail, not an underline. */
+  .rv-tabbar__item.is-active {
+    background: color-mix(in oklab, var(--brass) 18%, transparent);
+  }
+
+  .rv-app__main { padding-left: 88px; }
+  .rv-app { padding-bottom: 0; }
+}
+
+/* Tablet dashboard: two columns with a narrower rail than desktop. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .rv-dash {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 32px;
+  }
+}
+
+/* ==========================================================================
+   Accessibility utilities
+   ========================================================================== */
+
+/* Visually hidden, still announced. Not `display: none`, which is silent. */
+.rv-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   The Slide — the tab bar indicator moves between tabs rather than cutting.
+   -------------------------------------------------------------------------- */
+
+.rv-tabbar { position: fixed; }
+
+.rv-tabbar__item {
+  position: relative;
+}
+
+/* A 2px brass bar that travels. Each tab owns its own, and the transition of
+   transform + opacity is what reads as movement between them. */
+.rv-tabbar__item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--brass-bright);
+  transform: scaleX(0);
+  opacity: 0;
+  transition: transform var(--dur-quick) var(--ease), opacity var(--dur-quick) var(--ease);
+}
+
+.rv-tabbar__item.is-active::after { transform: scaleX(1); opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-tabbar__item::after { transition: none; }
 }

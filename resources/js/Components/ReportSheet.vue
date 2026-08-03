@@ -80,7 +80,7 @@ function submit() {
         <div class="rv-sheet__body">
             <!-- Confirmed with certainty and no drama. -->
             <div v-if="sent" class="rv-stack" style="gap: 16px">
-                <h2 class="rv-d3">Thank you.</h2>
+                <h2 class="rv-d3">{{ $t('checkout.thanks') }}</h2>
                 <p class="rv-body" style="margin: 0">
                     Someone will look at this. We will not tell {{ name }} that you got in touch.
                 </p>
@@ -88,7 +88,7 @@ function submit() {
             </div>
 
             <form v-else class="rv-stack" style="gap: 20px" @submit.prevent="submit">
-                <h2 class="rv-d3">Report a concern</h2>
+                <h2 class="rv-d3">{{ $t('report.heading') }}</h2>
                 <p class="rv-small" style="margin: 0">
                     This goes to a person on our team. {{ name }} is never told.
                 </p>
@@ -104,7 +104,7 @@ function submit() {
                 <p v-if="form.errors.reason" class="rv-error" role="alert">{{ form.errors.reason }}</p>
 
                 <label class="rv-field">
-                    <span class="rv-label">Anything you want to add</span>
+                    <span class="rv-label">{{ $t('report.anything_you_want_to') }}</span>
                     <textarea
                         v-model="form.note"
                         class="rv-input rv-textarea"

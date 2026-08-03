@@ -25,7 +25,7 @@ defineProps({
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Your account</span>
-                <h1 class="rv-d2">Purchase history</h1>
+                <h1 class="rv-d2">{{ $t('purchases.heading') }}</h1>
                 <span class="rv-underline" aria-hidden="true" />
                 <p class="rv-lead" style="margin: 0">
                     You have {{ balance }} introduction<template v-if="balance !== 1">s</template> to open.
@@ -34,8 +34,8 @@ defineProps({
 
             <BaseCard v-if="!purchases.data.length">
                 <div class="rv-stack" style="gap: 12px">
-                    <h2 class="rv-d3">Nothing here yet.</h2>
-                    <p class="rv-body">Your receipts will appear here once you open your first introduction.</p>
+                    <h2 class="rv-d3">{{ $t('purchases.empty_heading') }}</h2>
+                    <p class="rv-body">{{ $t('purchases.empty_body') }}</p>
                     <BaseButton href="/packages" variant="secondary">See packages</BaseButton>
                 </div>
             </BaseCard>
@@ -58,7 +58,7 @@ defineProps({
                             class="rv-receipt__link"
                             target="_blank"
                             rel="noopener"
-                        >Receipt</a>
+                        >{{ $t('purchases.receipt') }}</a>
                         <span class="rv-strong">{{ purchase.amount }}</span>
                         <span
                             class="rv-match__lozenge"

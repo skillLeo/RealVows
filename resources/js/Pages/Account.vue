@@ -85,8 +85,7 @@ const logout = () => router.post('/logout');
                         <span v-else class="rv-pill">Not confirmed</span>
                     </div>
                     <p class="rv-small">
-                        Your email is how you sign in, so it cannot be changed here. Write to support
-                        and we will move it for you.
+                        {{ $t('account.your_email_is_how') }}
                     </p>
                 </div>
             </BaseCard>
@@ -95,14 +94,14 @@ const logout = () => router.post('/logout');
                 <form class="rv-stack" style="gap: 24px" @submit.prevent="saveContact">
                     <div class="rv-stack" style="gap: 8px">
                         <h2 class="rv-d3">Mobile number</h2>
-                        <p class="rv-body">This is where your matches are sent by WhatsApp.</p>
+                        <p class="rv-body">{{ $t('account.this_is_where_your') }}</p>
                     </div>
 
                     <div class="rv-field" :class="{ 'rv-field--error': !!contact.errors.phone_number }">
                         <div class="rv-field__head">
                             <label for="rv-account-phone" class="rv-label">Mobile number</label>
                             <VerifiedBadge v-if="account.phoneVerified" label="Verified" />
-                            <span v-else class="rv-pill">Not verified yet</span>
+                            <span v-else class="rv-pill">{{ $t('profile.not_verified') }}</span>
                         </div>
 
                         <div class="rv-input-joined">
@@ -136,7 +135,7 @@ const logout = () => router.post('/logout');
 
             <BaseCard>
                 <form class="rv-stack" style="gap: 24px" @submit.prevent="savePassword">
-                    <h2 class="rv-d3">Change your password</h2>
+                    <h2 class="rv-d3">{{ $t('account.change_your_password') }}</h2>
 
                     <PasswordField
                         v-model="password.current_password"
@@ -171,30 +170,29 @@ const logout = () => router.post('/logout');
 
             <BaseCard>
                 <form class="rv-stack" style="gap: 20px" @submit.prevent="saveNotifications">
-                    <span class="rv-label">When we have news</span>
+                    <span class="rv-label">{{ $t('account.notifications') }}</span>
                     <span class="rv-underline" aria-hidden="true" />
 
                     <BaseCheckbox v-model="notifyForm.email_matches">
-                        Email me when there is someone new
+                        {{ $t('account.email_matches') }}
                     </BaseCheckbox>
 
                     <div class="rv-stack" style="gap: 4px">
                         <BaseCheckbox v-model="notifyForm.whatsapp_matches">
-                            Message me on WhatsApp
+                            {{ $t('account.whatsapp_matches') }}
                         </BaseCheckbox>
                         <!-- Honest about not being connected yet. A switch
                              that silently does nothing is worse than one that
                              says when it will start working. -->
                         <span class="rv-help">
-                            We'll use this once WhatsApp delivery is switched on.
+                            {{ $t('account.whatsapp_note') }}
                         </span>
                     </div>
 
                     <div class="rv-stack" style="gap: 4px">
-                        <span class="rv-strong">Receipts</span>
+                        <span class="rv-strong">{{ $t('account.receipts') }}</span>
                         <span class="rv-help">
-                            Always sent. A receipt for money you have paid is a record you are
-                            entitled to, so there is nothing to switch off here.
+                            {{ $t('account.receipts_note') }}
                         </span>
                     </div>
 
@@ -223,15 +221,15 @@ const logout = () => router.post('/logout');
             <BaseCard quiet>
                 <div class="rv-account__row">
                     <div class="rv-stack" style="gap: 6px">
-                        <span class="rv-strong">Signed in on this device</span>
-                        <span class="rv-small">Your profile stays exactly as it is.</span>
+                        <span class="rv-strong">{{ $t('account.signed_in_on_this') }}</span>
+                        <span class="rv-small">{{ $t('account.your_profile_stays_exactly') }}</span>
                     </div>
                     <BaseButton variant="ghost" @click="logout">Log out</BaseButton>
                 </div>
             </BaseCard>
 
             <p class="rv-small">
-                <Link href="/terms">Terms of Service</Link> ·
+                <Link href="/terms">{{ $t('auth.terms') }}</Link> ·
                 <Link href="/privacy">Privacy Policy</Link> ·
                 <Link href="/community-guidelines">Community Guidelines</Link>
             </p>

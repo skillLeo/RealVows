@@ -44,7 +44,7 @@ function move(index, offset) {
 <template>
     <div class="rv-stack" style="gap: 20px">
         <div class="rv-field__head">
-            <span class="rv-label">Your five core values, most important first</span>
+            <span class="rv-label">{{ $t('profile.values_prompt') }}</span>
             <span class="rv-help">{{ model.length }} of {{ max }}</span>
         </div>
 

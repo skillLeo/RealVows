@@ -29,8 +29,8 @@ const submit = () =>
         <BaseCard class="rv-auth__card">
             <form class="rv-stack" style="gap: 32px" @submit.prevent="submit">
                 <div class="rv-stack" style="gap: 16px">
-                    <h1 class="rv-d3">Choose a new password</h1>
-                    <p class="rv-body">Pick something you haven't used here before.</p>
+                    <h1 class="rv-d3">{{ $t('auth.reset_heading') }}</h1>
+                    <p class="rv-body">{{ $t('auth.reset_body') }}</p>
                 </div>
 
                 <div class="rv-stack" style="gap: 24px">

@@ -64,8 +64,8 @@ const submit = () => form.post('/login', { onFinish: () => form.reset('password'
                 <span class="rv-rule"></span>
 
                 <div class="rv-stack" style="gap: 20px">
-                    <BaseButton href="/register" variant="secondary" block>Create a free account</BaseButton>
-                    <p class="rv-small" style="text-align: center">Secure login · 18+</p>
+                    <BaseButton href="/register" variant="secondary" block>{{ $t('auth.create_account') }}</BaseButton>
+                    <p class="rv-small" style="text-align: center">{{ $t('auth.secure') }}</p>
                 </div>
             </form>
         </BaseCard>
@@ -77,7 +77,7 @@ const submit = () => form.post('/login', { onFinish: () => form.reset('password'
                 <div class="rv-stack" style="gap: 8px">
                     <span class="rv-label rv-label--brass">Review access</span>
                     <p class="rv-small">
-                        One click signs you straight in. Password for every account is
+                        {{ $t('auth.one_click_signs_you') }}
                         <strong>realvows2026</strong>.
                     </p>
                 </div>

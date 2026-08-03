@@ -25,9 +25,9 @@ const logout = () => router.post('/logout');
                 </span>
 
                 <div class="rv-stack" style="gap: 16px">
-                    <h1 class="rv-d3">One quick confirmation</h1>
+                    <h1 class="rv-d3">{{ $t('auth.verify_heading') }}</h1>
                     <p class="rv-body">
-                        We've sent a link to <strong>{{ email }}</strong>. Open it and your account
+                        {{ $t('auth.verify_sent') }} <strong>{{ email }}</strong>. Open it and your account
                         is ready — then you can start building your profile.
                     </p>
                 </div>
@@ -44,7 +44,7 @@ const logout = () => router.post('/logout');
                     <p class="rv-small" style="text-align: center">
                         Wrong address?
                         <button type="button" class="rv-link-brass rv-link-inline" @click="logout">
-                            Log out and start again
+                            {{ $t('auth.verify_restart') }}
                         </button>
                     </p>
                 </div>

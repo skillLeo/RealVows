@@ -133,8 +133,7 @@ const newCode = () => router.post('/verification/code', {}, { preserveScroll: tr
                     </div>
 
                     <p class="rv-body" style="max-width: 46ch">
-                        A photo of you holding a handwritten note with the code below. A real person
-                        checks this — it's how we keep every profile genuine.
+                        {{ $t('profile.a_photo_of_you') }}
                     </p>
 
                     <div class="rv-stack" style="gap: 12px">
@@ -146,7 +145,7 @@ const newCode = () => router.post('/verification/code', {}, { preserveScroll: tr
                     </div>
 
                     <p class="rv-small">
-                        <span class="rv-label">Never shown on your profile</span>
+                        <span class="rv-label">{{ $t('profile.verification_note') }}</span>
                     </p>
                 </div>
 

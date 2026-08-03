@@ -26,9 +26,9 @@ const submit = () => form.post('/forgot-password', { preserveScroll: true });
                 </span>
 
                 <div class="rv-stack" style="gap: 16px">
-                    <h1 class="rv-d3">Check your email</h1>
+                    <h1 class="rv-d3">{{ $t('auth.forgot_sent_heading') }}</h1>
                     <p class="rv-body">
-                        We've sent a reset link to your address. It expires in one hour.
+                        {{ $t('auth.forgot_sent_body') }}
                     </p>
                 </div>
 
@@ -39,7 +39,7 @@ const submit = () => form.post('/forgot-password', { preserveScroll: true });
                     <p class="rv-small" style="text-align: center">
                         Didn't arrive?
                         <button type="button" class="rv-link-brass rv-link-inline" @click="form.post('/forgot-password', { preserveScroll: true })">
-                            Send it again
+                            {{ $t('auth.send_again') }}
                         </button>
                     </p>
                 </div>
@@ -48,9 +48,9 @@ const submit = () => form.post('/forgot-password', { preserveScroll: true });
             <!-- Request -->
             <form v-else class="rv-stack" style="gap: 32px" @submit.prevent="submit">
                 <div class="rv-stack" style="gap: 16px">
-                    <h1 class="rv-d3">Reset your password</h1>
+                    <h1 class="rv-d3">{{ $t('auth.forgot_heading') }}</h1>
                     <p class="rv-body">
-                        Enter the email you signed up with and we'll send you a link.
+                        {{ $t('auth.forgot_body') }}
                     </p>
                 </div>
 

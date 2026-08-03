@@ -40,8 +40,7 @@ function pay() {
                     </div>
 
                     <p class="rv-small" style="margin: 0">
-                        One payment. Nothing recurring, and nothing expires — open them whenever you
-                        are ready.
+                        {{ $t('packages.one_payment') }}
                     </p>
 
                     <BaseButton variant="primary" block :disabled="form.processing" @click="pay">
@@ -49,8 +48,7 @@ function pay() {
                     </BaseButton>
 
                     <p class="rv-small" style="margin: 0; text-align: center">
-                        Your card details go straight to the payment provider. They never touch
-                        RealVows.
+                        {{ $t('packages.card_safety') }}
                     </p>
                 </div>
             </BaseCard>

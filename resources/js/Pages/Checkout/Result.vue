@@ -38,7 +38,7 @@ onMounted(() => {
             <template v-if="succeeded">
                 <header class="rv-stack" style="gap: 12px">
                     <span class="rv-label rv-label--brass">{{ reference }}</span>
-                    <h1 class="rv-d1">Thank you.</h1>
+                    <h1 class="rv-d1">{{ $t('checkout.thanks') }}</h1>
                     <span class="rv-underline" aria-hidden="true" />
                 </header>
 
@@ -48,7 +48,7 @@ onMounted(() => {
                             {{ amount }} paid. You have {{ balance }} introduction<template v-if="balance !== 1">s</template>
                             to open, and a receipt is on its way to your inbox.
                         </p>
-                        <p class="rv-small" style="margin: 0">Taking you to them now.</p>
+                        <p class="rv-small" style="margin: 0">{{ $t('checkout.taking_you_to_them') }}</p>
                     </div>
                 </BaseCard>
             </template>
@@ -56,7 +56,7 @@ onMounted(() => {
             <template v-else>
                 <header class="rv-stack" style="gap: 12px">
                     <span class="rv-label">{{ reference }}</span>
-                    <h1 class="rv-d2">That didn't go through.</h1>
+                    <h1 class="rv-d2">{{ $t('checkout.failed_heading') }}</h1>
                     <span class="rv-underline" aria-hidden="true" />
                 </header>
 
@@ -65,21 +65,20 @@ onMounted(() => {
                         <p class="rv-body" style="margin: 0">{{ failureMessage }}</p>
 
                         <p class="rv-strong" style="margin: 0">
-                            You have not been charged. There is nothing to cancel and nothing to claim
-                            back.
+                            {{ $t('checkout.not_charged') }}
                         </p>
 
                         <div class="rv-actions">
                             <BaseButton :href="`/checkout/${packageKey}`" variant="primary">
-                                Try again
+                                {{ $t('checkout.try_again') }}
                             </BaseButton>
                             <BaseButton href="/packages" variant="secondary">
-                                Choose a different package
+                                {{ $t('checkout.choose_a_different_package') }}
                             </BaseButton>
                         </div>
 
                         <p class="rv-small" style="margin: 0">
-                            Your profile is untouched and your introductions are still waiting.
+                            {{ $t('checkout.untouched') }}
                         </p>
                     </div>
                 </BaseCard>

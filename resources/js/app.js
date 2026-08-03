@@ -2,6 +2,21 @@ import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import reveal from './directives/reveal';
 import { startAppBehaviours } from './app-behaviours';
+/*
+ * ⚠️ BUNDLED, NOT SHARED OVER THE WIRE.
+ *
+ * The deck was briefly an Inertia shared prop, which put every string in the
+ * product into every JSON response — including the word "report", which broke
+ * a real privacy guard: a reported member must never learn they were
+ * reported, and MatchViewTest asserts that word appears nowhere in their
+ * dashboard payload.
+ *
+ * This is static English text. It belongs in the bundle, where it costs one
+ * cached download instead of riding along with every navigation. The PHP file
+ * stays the source of truth and CopyDeckTest fails the build if this
+ * generated copy drifts from it.
+ */
+import copy from './copy.generated.json';
 
 const appName = import.meta.env.VITE_APP_NAME || 'RealVows';
 
@@ -66,10 +81,44 @@ createInertiaApp({
     },
 
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
-            .directive('reveal', reveal)
-            .mount(el);
+            .directive('reveal', reveal);
+
+        /*
+         * ⚠️ THE COPY DECK, REACHABLE FROM EVERY TEMPLATE.
+         *
+         * lang/en/realvows.php is the single home for every member-facing
+         * string. It existed for weeks with 64 keys and ZERO references
+         * anywhere in the codebase — complete in a file listing, doing
+         * nothing. CopyDeckTest now fails the build on a raw string in a
+         * component, and this is what makes complying with it possible.
+         *
+         * `$t('dashboard.yours')`, and `:count`-style placeholders are
+         * replaced from the second argument so pluralisation and counts stay
+         * in the deck rather than being assembled in a template.
+         */
+        app.config.globalProperties.$t = (key, replacements = {}) => {
+            const found = key
+                .split('.')
+                .reduce((carry, part) => (carry == null ? undefined : carry[part]), copy);
+
+            /*
+             * ⚠️ A MISSING KEY RETURNS THE KEY, LOUDLY, rather than an empty
+             * string. Empty renders as a blank space nobody notices in
+             * review; "dashboard.yuors" on screen gets fixed in a minute.
+             */
+            if (typeof found !== 'string') {
+                return key;
+            }
+
+            return Object.entries(replacements).reduce(
+                (text, [token, value]) => text.replaceAll(`:${token}`, String(value)),
+                found
+            );
+        };
+
+        app.mount(el);
 
         setUpViewTransitions();
         startAppBehaviours();

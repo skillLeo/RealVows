@@ -30,6 +30,7 @@
 return [
 
     'dashboard' => [
+        'update_your_photos' => 'Update your photos',
         'waiting_one' => 'One person is waiting to meet you.',
         'waiting_many' => ':count people are waiting to meet you.',
         'yours' => 'Your introductions.',
@@ -78,6 +79,8 @@ return [
     ],
 
     'checkout' => [
+        'choose_a_different_package' => 'Choose a different package',
+        'taking_you_to_them' => 'Taking you to them now.',
         'confirming' => 'Confirming with your bank.',
         'do_not_close' => 'This can take a moment. Please do not close this window or press back.',
         'thanks' => 'Thank you.',
@@ -104,6 +107,7 @@ return [
     ],
 
     'report' => [
+        'anything_you_want_to' => 'Anything you want to add',
         'action' => 'Report a concern',
         'heading' => 'Report a concern',
         'privacy' => 'This goes to a person on our team. :name is never told.',
@@ -117,6 +121,11 @@ return [
     ],
 
     'account' => [
+        'change_your_password' => 'Change your password',
+        'signed_in_on_this' => 'Signed in on this device',
+        'this_is_where_your' => 'This is where your matches are sent by WhatsApp.',
+        'your_email_is_how' => 'Your email is how you sign in, so it cannot be changed here. Write to support and we will move it for you.',
+        'your_profile_stays_exactly' => 'Your profile stays exactly as it is.',
         'notifications' => 'When we have news',
         'email_matches' => 'Email me when there is someone new',
         'whatsapp_matches' => 'Message me on WhatsApp',
@@ -130,6 +139,64 @@ return [
         'empty_heading' => 'Nothing here yet.',
         'empty_body' => 'Your receipts will appear here once you open your first introduction.',
         'receipt' => 'Receipt',
+    ],
+
+    /*
+     * ⚠️ Added when the deck was finally wired up. Every one of these was
+     * sitting inline in a component, which is exactly the drift the deck
+     * exists to prevent — "Not verified yet" appeared in three separate files
+     * and could have been reworded in one of them without anybody noticing.
+     */
+    'auth' => [
+        'one_click_signs_you' => 'One click signs you straight in. Password for every account is',
+        'register_heading' => 'Join people who are serious about marriage.',
+        'register_free' => 'Sign up is completely free. Build your entire profile without paying anything.',
+        'register_submit' => 'Create your account',
+        'age_confirm' => 'I confirm I am 18 years of age or older',
+        'agree_to' => 'I agree to the',
+        'terms' => 'Terms of Service',
+        'have_account' => 'Already have an account?',
+        'create_account' => 'Create a free account',
+        'secure' => 'Secure login · 18+',
+
+        'forgot_heading' => 'Reset your password',
+        'forgot_body' => 'Enter the email you signed up with and we\'ll send you a link.',
+        'forgot_sent_heading' => 'Check your email',
+        'forgot_sent_body' => 'We\'ve sent a reset link to your address. It expires in one hour.',
+        'send_again' => 'Send it again',
+
+        'reset_heading' => 'Choose a new password',
+        'reset_body' => 'Pick something you haven\'t used here before.',
+
+        'verify_heading' => 'One quick confirmation',
+        'verify_sent' => 'We\'ve sent a link to',
+        'verify_restart' => 'Log out and start again',
+    ],
+
+    'profile' => [
+        'a_photo_of_you' => 'A photo of you holding a handwritten note with the code below. A real person checks this — it\'s how we keep every profile genuine.',
+        'these_are_absolute_anyone' => 'These are absolute. Anyone they apply to is removed before any scoring happens, so choose only what you genuinely could not live with.',
+        'not_verified' => 'Not verified yet',
+        'not_confirmed' => 'Not confirmed yet',
+        'whatsapp_destination' => 'We send your matches here by WhatsApp.',
+        'change_in_account' => 'Need to change either of these? You can do it from your account settings.',
+
+        'values_prompt' => 'Your five core values, most important first',
+        'looking_for' => 'What are you looking for?',
+        'on_disagreement' => 'When you disagree with someone close to you',
+        'on_affection' => 'How you show affection',
+        'about_you' => 'A few words about you',
+        'prompts_are_hints' => 'Those prompts are only there to help you start — write it however you like.',
+        'no_better_end' => 'There is no better end of any of these. Put the marker where it honestly falls.',
+
+        'body_types' => 'Body types you are open to',
+        'leave_unticked' => 'Leave them all unticked if you would rather not narrow this.',
+
+        'verification_note' => 'Never shown on your profile',
+    ],
+
+    'demo' => [
+        'banner' => 'Everyone here is invented and the sign-in buttons are open — not the live platform.',
     ],
 
     'offline' => [

@@ -26,7 +26,7 @@ defineProps({
                         <span class="rv-account__value">{{ account.email }}</span>
                     </div>
                     <VerifiedBadge v-if="account.email_verified" label="Confirmed" />
-                    <span v-else class="rv-pill">Not confirmed yet</span>
+                    <span v-else class="rv-pill">{{ $t('profile.not_confirmed') }}</span>
                 </div>
 
                 <span class="rv-rule rv-rule--soft" />
@@ -37,16 +37,16 @@ defineProps({
                         <span class="rv-account__value">
                             {{ account.phone_country_code }} {{ account.phone_number }}
                         </span>
-                        <span class="rv-help">We send your matches here by WhatsApp.</span>
+                        <span class="rv-help">{{ $t('profile.whatsapp_destination') }}</span>
                     </div>
                     <VerifiedBadge v-if="account.phone_verified" label="Verified" />
-                    <span v-else class="rv-pill">Not verified yet</span>
+                    <span v-else class="rv-pill">{{ $t('profile.not_verified') }}</span>
                 </div>
             </div>
         </BaseCard>
 
         <p class="rv-small">
-            Need to change either of these? You can do it from your account settings.
+            {{ $t('profile.change_in_account') }}
         </p>
     </StepShell>
 </template>

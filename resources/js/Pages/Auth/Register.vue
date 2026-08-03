@@ -43,9 +43,9 @@ const submit = () =>
             </Link>
 
             <div class="rv-split__copy rv-stack" style="gap: 32px">
-                <h1 class="rv-d1" style="max-width: 20ch">Join people who are serious about marriage.</h1>
+                <h1 class="rv-d1" style="max-width: 20ch">{{ $t('auth.register_heading') }}</h1>
                 <p class="rv-lead" style="max-width: 46ch">
-                    Sign up is completely free. Build your entire profile without paying anything.
+                    {{ $t('auth.register_free') }}
                 </p>
                 <p class="rv-hero__eyebrow">
                     <span>Marriage-first</span>
@@ -59,7 +59,7 @@ const submit = () =>
         <section class="rv-split__form">
             <BaseCard class="rv-auth__card">
                 <form class="rv-stack" style="gap: 32px" @submit.prevent="submit">
-                    <h2 class="rv-d3">Create your account</h2>
+                    <h2 class="rv-d3">{{ $t('auth.register_submit') }}</h2>
 
                     <div class="rv-stack" style="gap: 24px">
                         <BaseField
@@ -92,7 +92,7 @@ const submit = () =>
                                 <label for="rv-mobile" class="rv-label">Mobile number</label>
                                 <!-- The slot for phone verification exists from day one.
                                      Nothing sends yet; it is wired to WhatsApp in Phase 3. -->
-                                <span class="rv-pill">Not verified yet</span>
+                                <span class="rv-pill">{{ $t('profile.not_verified') }}</span>
                             </div>
 
                             <div class="rv-input-joined">
@@ -126,7 +126,7 @@ const submit = () =>
 
                     <div class="rv-stack" style="gap: 4px">
                         <BaseCheckbox v-model="form.is_adult">
-                            I confirm I am 18 years of age or older
+                            {{ $t('auth.age_confirm') }}
                         </BaseCheckbox>
                         <span v-if="form.errors.is_adult" class="rv-help" style="color: var(--rose)">
                             {{ form.errors.is_adult }}
@@ -134,8 +134,8 @@ const submit = () =>
 
                         <BaseCheckbox v-model="form.accepts_terms">
                             <span>
-                                I agree to the
-                                <a href="/terms" class="rv-link-brass">Terms of Service</a>
+                                {{ $t('auth.agree_to') }}
+                                <a href="/terms" class="rv-link-brass">{{ $t('auth.terms') }}</a>
                                 and
                                 <a href="/privacy" class="rv-link-brass">Privacy Policy</a>
                             </span>
@@ -150,7 +150,7 @@ const submit = () =>
                             {{ form.processing ? 'Creating your account' : 'Create my free account' }}
                         </BaseButton>
                         <p class="rv-body" style="text-align: center">
-                            Already have an account? <Link href="/login">Log in</Link>
+                            {{ $t('auth.have_account') }} <Link href="/login">Log in</Link>
                         </p>
                     </div>
                 </form>

@@ -74,8 +74,8 @@ function toggleIn(field, value, on) {
 
         <BaseCard>
             <div class="rv-stack" style="gap: 12px">
-                <span class="rv-label">Body types you are open to</span>
-                <p class="rv-help">Leave them all unticked if you would rather not narrow this.</p>
+                <span class="rv-label">{{ $t('profile.body_types') }}</span>
+                <p class="rv-help">{{ $t('profile.leave_unticked') }}</p>
                 <div class="rv-stack" style="gap: 4px">
                     <BaseCheckbox
                         v-for="option in options.bodyType"
@@ -93,8 +93,7 @@ function toggleIn(field, value, on) {
             <div class="rv-stack" style="gap: 12px">
                 <span class="rv-label rv-label--brass">Deal-breakers</span>
                 <p class="rv-body">
-                    These are absolute. Anyone they apply to is removed before any scoring happens, so choose
-                    only what you genuinely could not live with.
+                    {{ $t('profile.these_are_absolute_anyone') }}
                 </p>
                 <div class="rv-stack" style="gap: 4px">
                     <BaseCheckbox

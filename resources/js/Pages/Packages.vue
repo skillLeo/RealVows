@@ -15,7 +15,7 @@ defineProps({
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Introductions</span>
-                <h1 class="rv-d2">Open the ones you want.</h1>
+                <h1 class="rv-d2">{{ $t('packages.heading') }}</h1>
                 <span class="rv-underline" aria-hidden="true" />
             </header>
 
@@ -23,10 +23,9 @@ defineProps({
                  feeling their profile is safe, not feeling pushed. -->
             <BaseCard accent>
                 <div class="rv-stack" style="gap: 12px">
-                    <span class="rv-label rv-label--brass">No rush</span>
+                    <span class="rv-label rv-label--brass">{{ $t('packages.reassurance_label') }}</span>
                     <p class="rv-body" style="margin: 0">
-                        Your profile is ready and it stays ready. Introductions do not expire, there is
-                        nothing recurring, and nobody is removed while you think about it.
+                        {{ $t('packages.reassurance') }}
                     </p>
                 </div>
             </BaseCard>
@@ -54,7 +53,7 @@ defineProps({
                         :variant="pack.key === 'triple' ? 'primary' : 'secondary'"
                         block
                     >
-                        Choose
+                        {{ $t('packages.choose') }}
                     </BaseButton>
                 </article>
             </div>

@@ -40,9 +40,9 @@ onBeforeUnmount(() => clearTimeout(timer));
     <div class="rv-processing">
         <div class="rv-stack" style="gap: 24px; max-width: 420px; text-align: center">
             <span class="rv-label rv-label--brass">{{ reference }}</span>
-            <h1 class="rv-d3">Confirming with your bank.</h1>
+            <h1 class="rv-d3">{{ $t('checkout.confirming') }}</h1>
             <p class="rv-body">
-                This can take a moment. Please do not close this window or press back.
+                {{ $t('checkout.do_not_close') }}
             </p>
 
             <div class="rv-stack" style="gap: 12px" aria-hidden="true">

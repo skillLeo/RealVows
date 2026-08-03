@@ -96,10 +96,10 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
 
         <div class="rv-match__foot">
             <BaseButton v-if="isOpen" :href="`/matches/${match.id}`" variant="secondary">
-                See their profile
+                {{ $t('match.open') }}
             </BaseButton>
             <BaseButton v-else variant="primary" @click="$emit('unlock', match.id)">
-                Open this introduction
+                {{ $t('match.locked') }}
             </BaseButton>
         </div>
     </article>

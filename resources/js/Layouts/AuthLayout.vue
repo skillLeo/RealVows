@@ -16,7 +16,7 @@ defineProps({
 
     <div v-if="$page.props.isDemo" class="rv-demobar" role="status">
         <strong>Review build</strong>
-        <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
+        <span>{{ $t('demo.banner') }}</span>
     </div>
 
     <div class="rv-auth">

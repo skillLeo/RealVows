@@ -65,7 +65,7 @@ function setScale(key, value) {
                 <!-- Three options: radios rather than a segmented control,
                      because each label is a full sentence -->
                 <div class="rv-stack" style="gap: 12px">
-                    <span class="rv-label">What are you looking for?</span>
+                    <span class="rv-label">{{ $t('profile.looking_for') }}</span>
                     <div class="rv-stack" style="gap: 4px">
                         <BaseRadio
                             v-for="option in options.relationshipGoal"
@@ -94,7 +94,7 @@ function setScale(key, value) {
         <BaseCard>
             <div class="rv-stack" style="gap: 24px">
                 <div class="rv-stack" style="gap: 12px">
-                    <span class="rv-label">When you disagree with someone close to you</span>
+                    <span class="rv-label">{{ $t('profile.on_disagreement') }}</span>
                     <div class="rv-stack" style="gap: 4px">
                         <BaseRadio
                             v-for="option in options.conflictStyle"
@@ -112,7 +112,7 @@ function setScale(key, value) {
 
                 <div class="rv-stack" style="gap: 12px">
                     <div class="rv-field__head">
-                        <span class="rv-label">How you show affection</span>
+                        <span class="rv-label">{{ $t('profile.on_affection') }}</span>
                         <span class="rv-help">{{ (model.love_languages ?? []).length }} of 3</span>
                     </div>
                     <div class="rv-stack" style="gap: 4px">
@@ -137,7 +137,7 @@ function setScale(key, value) {
             <div class="rv-stack" style="gap: 24px">
                 <div class="rv-field" :class="{ 'rv-field--error': bioState === 'long' }">
                     <div class="rv-field__head">
-                        <label :for="bioId" class="rv-label">A few words about you</label>
+                        <label :for="bioId" class="rv-label">{{ $t('profile.about_you') }}</label>
                         <span class="rv-help">{{ bioMessage }}</span>
                     </div>
 
@@ -150,7 +150,7 @@ function setScale(key, value) {
                     />
 
                     <span class="rv-help">
-                        Those prompts are only there to help you start — write it however you like.
+                        {{ $t('profile.prompts_are_hints') }}
                     </span>
                 </div>
 
@@ -167,7 +167,7 @@ function setScale(key, value) {
             <div class="rv-stack" style="gap: 32px">
                 <div class="rv-stack" style="gap: 8px">
                     <h2 class="rv-d3">Where you sit</h2>
-                    <p class="rv-body">There is no better end of any of these. Put the marker where it honestly falls.</p>
+                    <p class="rv-body">{{ $t('profile.no_better_end') }}</p>
                 </div>
 
                 <PersonalityScale

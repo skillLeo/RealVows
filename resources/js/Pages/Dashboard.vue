@@ -129,23 +129,22 @@ const heading = computed(() => {
                             <span class="rv-label rv-label--brass">Verification</span>
 
                             <template v-if="['pending', 'review'].includes(verification.status)">
-                                <h2 class="rv-d3">Your profile is with our team.</h2>
+                                <h2 class="rv-d3">{{ $t('verification.pending_heading') }}</h2>
                                 <p class="rv-body">
-                                    A real person is reviewing it — usually within a day. We will email you
-                                    when it is done, and your introductions will be waiting.
+                                    {{ $t('verification.pending_body') }}
                                 </p>
                             </template>
 
                             <template v-else-if="verification.status === 'rejected'">
-                                <h2 class="rv-d3">We need one more look.</h2>
+                                <h2 class="rv-d3">{{ $t('verification.rejected_heading') }}</h2>
                                 <p class="rv-body">{{ verification.rejectionReason }}</p>
                                 <BaseButton href="/profile/photos" variant="primary">
-                                    Update your photos
+                                    {{ $t('dashboard.update_your_photos') }}
                                 </BaseButton>
                             </template>
 
                             <template v-else>
-                                <h2 class="rv-d3">Finish your profile.</h2>
+                                <h2 class="rv-d3">{{ $t('verification.incomplete_heading') }}</h2>
                                 <p class="rv-body">
                                     You are {{ completeness }}% of the way there. Once it is complete and
                                     verified, we start looking.
@@ -159,10 +158,9 @@ const heading = computed(() => {
                     <BaseCard v-else-if="state === 'searching'" accent>
                         <div class="rv-stack" style="gap: 16px">
                             <span class="rv-label rv-label--brass">Still looking</span>
-                            <h2 class="rv-d3">We haven't found someone we'd stand behind yet.</h2>
+                            <h2 class="rv-d3">{{ $t('dashboard.searching_heading') }}</h2>
                             <p class="rv-body">
-                                We would rather send you nobody than send you the wrong person. As soon as
-                                someone meets the bar, they will be here.
+                                {{ $t('dashboard.searching_body') }}
                             </p>
                         </div>
                     </BaseCard>
@@ -172,11 +170,10 @@ const heading = computed(() => {
                         <BaseCard v-if="lockedCount > 0" accent>
                             <div class="rv-stack" style="gap: 12px">
                                 <p class="rv-body" style="margin: 0">
-                                    Chosen for you by our matching, not by browsing. Open one whenever
-                                    you're ready.
+                                    {{ $t('dashboard.chosen') }}
                                 </p>
                                 <p class="rv-small" style="margin: 0">
-                                    Chosen for you — RealVows has no profile browsing.
+                                    {{ $t('dashboard.no_browsing') }}
                                 </p>
                             </div>
                         </BaseCard>
@@ -194,7 +191,7 @@ const heading = computed(() => {
                         </div>
 
                         <p v-if="finished" class="rv-d3 rv-arrive" style="text-align: center">
-                            They're yours to meet.
+                            {{ $t('dashboard.unsealed') }}
                         </p>
 
                         <div v-if="ceremonyRunning && !skipped" style="text-align: center">
@@ -203,10 +200,9 @@ const heading = computed(() => {
 
                         <BaseCard v-if="state === 'all-open' && openCount > 0">
                             <div class="rv-stack" style="gap: 12px">
-                                <h2 class="rv-d3">You've opened all your introductions.</h2>
+                                <h2 class="rv-d3">{{ $t('dashboard.all_open_heading') }}</h2>
                                 <p class="rv-body">
-                                    When you would like more, they are here. There is no rush, and nothing
-                                    expires.
+                                    {{ $t('dashboard.all_open_body') }}
                                 </p>
                                 <BaseButton href="/packages" variant="secondary">See packages</BaseButton>
                             </div>
@@ -217,10 +213,10 @@ const heading = computed(() => {
                 <!-- ── Right rail — a real second column at desktop ─────── -->
                 <aside class="rv-dash__rail rv-stack" style="gap: 24px">
                     <div class="rv-rail-card">
-                        <span class="rv-label">Introductions to open</span>
+                        <span class="rv-label">{{ $t('dashboard.credits_label') }}</span>
                         <span class="rv-balance">{{ credits }}</span>
                         <p v-if="credits === 0" class="rv-small" style="margin: 0">
-                            Your profile is ready, and it stays ready.
+                            {{ $t('dashboard.ready') }}
                         </p>
                         <BaseButton href="/packages" :variant="credits === 0 ? 'primary' : 'secondary'">
                             {{ credits === 0 ? 'Open an introduction' : 'Add more' }}
@@ -230,7 +226,7 @@ const heading = computed(() => {
                     <div class="rv-rail-card">
                         <span class="rv-label">Your profile</span>
                         <p class="rv-small" style="margin: 0">{{ completeness }}% complete</p>
-                        <BaseButton href="/purchases" variant="ghost">Purchase history</BaseButton>
+                        <BaseButton href="/purchases" variant="ghost">{{ $t('purchases.heading') }}</BaseButton>
                     </div>
                 </aside>
             </div>

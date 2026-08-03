@@ -101,7 +101,7 @@ const reportOpen = ref(false);
 
                 <BaseCard v-if="match.bio">
                     <div class="rv-stack" style="gap: 12px">
-                        <span class="rv-label">In their words</span>
+                        <span class="rv-label">{{ $t('match.in_their_words') }}</span>
                         <span class="rv-underline" aria-hidden="true" />
                         <p class="rv-body rv-bio">{{ bioShown }}</p>
                         <button
@@ -133,7 +133,7 @@ const reportOpen = ref(false);
 
                 <div class="rv-payoff__quiet">
                     <BaseButton variant="ghost" @click="reportOpen = true">
-                        Report a concern
+                        {{ $t('report.heading') }}
                     </BaseButton>
                 </div>
             </div>

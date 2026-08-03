@@ -17,6 +17,11 @@
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="manifest" href="/manifest.webmanifest">
 
+    {{-- ⚠️ iOS ignores the web manifest's icons entirely and uses this. Without
+         it the home-screen icon is a screenshot of the page, which is the one
+         place the seal has to appear and cannot be checked from a desktop. --}}
+    <link rel="apple-touch-icon" href="/icons/rv-apple-touch.png">
+
     {{-- Self-hosted. The home page is the one that has to be fast on a
          mid-range phone over 4G, so it is the page that benefits most from
          not opening a connection to a third party before it can show text. --}}

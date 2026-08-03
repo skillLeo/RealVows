@@ -174,19 +174,35 @@
     {{-- ── 8 · Sealed until it is opened ────────────────────────────────── --}}
     @include('public.partials.sealed')
 
-    {{-- ── Closing call to action ───────────────────────────────────────── --}}
-    <section class="rv-shell rv-section rv-paper">
-        <div class="rv-closing rv-stack" data-reveal>
+    {{-- ── The closing invitation ───────────────────────────────────────
+         ⚠️ FULL-BLEED OXBLOOD-DEEP, NOT CREAM.
+
+         This is the last thing on the page and the only place left to ask.
+         It shipped on cream, which made it the fifth pale band in a row and
+         let the eye slide past it — the page simply ran out rather than
+         arriving anywhere. Returning to the hero's own colour closes the
+         page where it opened, and the button is the only bright thing in
+         the panel.
+
+         ⚠️ THE FLEURON GOES ABOVE THE BUTTON. Below it, the ornament is the
+         last thing read and the call to action is something you scrolled
+         past; above it, the ornament announces the button. --}}
+    <section class="rv-panel rv-on-dark rv-invitation">
+        <div class="rv-shell rv-stack rv-invitation__inner" data-reveal>
+            @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
+
             <p class="rv-eyebrow">No card, no catch</p>
-            <h2 class="rv-d2">Sign up is 100% free</h2>
-            <p class="rv-lead" style="max-width: 52ch">
+
+            <h2 class="rv-d1 rv-invitation__line">Sign up is 100% free</h2>
+
+            <p class="rv-lead" style="max-width: 46ch">
                 Build your whole profile without paying anything. Choose a match package only when
                 you're ready to be introduced.
             </p>
+
             <div>
-                <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
+                <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
             </div>
-            @include('public.partials.ornament', ['tone' => 'light'])
         </div>
     </section>
 

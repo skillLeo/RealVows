@@ -2160,6 +2160,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   }
 }
 
+/*
+ * ⚠️ THE CLOSING INVITATION. Full-bleed, and the same oxblood the page opened
+ * with — a page that ends on its fifth pale band does not end, it stops.
+ */
+.rv-invitation {
+  padding-block: 96px;
+  text-align: center;
+}
+
+.rv-invitation__inner {
+  align-items: center;
+  gap: 24px;
+}
+
+/* The one unmissable line on the page. */
+.rv-invitation__line { max-width: 16ch; }
+
+/* The fleuron sits above the button, so it announces rather than closes. */
+.rv-invitation .rv-ornament { opacity: .5; }
+
 /* The band that holds the single line of promise */
 .rv-promise {
   background: var(--card);
@@ -2280,14 +2300,79 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
+
+    /*
+     * ⚠️ THE LINE THAT WAS MISSING, AND IT HID THE PRODUCT.
+     *
+     * Killing the duration is not enough on its own. Every arrival animation
+     * is declared `both`, so the element is FILLED with the keyframe's `from`
+     * state — which is `opacity: 0` — and a duration of .01ms does not
+     * reliably advance it off that first frame. The result was measured, not
+     * guessed: with reduced motion on, the hero headline and EVERY match card
+     * on the dashboard computed to opacity 0. A member who asks for less
+     * movement was shown no matches at all.
+     *
+     * Clearing the fill mode means no animation can leave an element parked
+     * on a frame it never played. This is the exact failure the standing note
+     * warns about — "an `animation: none` that forgets to reset opacity
+     * leaves tiles invisible forever for exactly the people who asked for
+     * less movement" — and it was in the global reset the whole time.
+     */
+    animation-fill-mode: none !important;
   }
-  .rv-reveal { opacity: 1; transform: none; }
+
+  /*
+   * And belt-and-braces on the arrival classes themselves, because these are
+   * the ones carrying real content rather than decoration.
+   */
+  .rv-reveal,
+  .rv-arrive,
+  .rv-arrive-step,
+  .rv-mosaic__tile,
+  .rv-match {
+    opacity: 1;
+  }
+
+  .rv-reveal { transform: none; }
   .rv-underline { transform: scaleX(1); }
 }
 
 /* ==========================================================================
    Skeletons — never spinners
    ========================================================================== */
+
+/*
+ * The three-tier loading panel. Fixed under the top bar so it never shifts
+ * the page it is standing in for.
+ */
+.rv-loading {
+  position: fixed;
+  top: calc(var(--bar-h, 64px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 55;
+  display: grid;
+  gap: 10px;
+  width: min(560px, calc(100vw - 32px));
+  padding: 18px 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+.rv-loading__bar { height: 12px; border-radius: 6px; }
+.rv-loading__bar--short { width: 60%; }
+
+/*
+ * ⚠️ ONE HONEST SENTENCE, and only after three seconds. Not a spinner, not a
+ * percentage nobody can verify, and never "almost there" — which is a guess
+ * presented as a fact.
+ */
+.rv-loading__line {
+  margin: 4px 0 0;
+  font-size: var(--fs-body-3);
+  color: var(--ink-soft);
+}
 
 .rv-skeleton {
   border-radius: var(--r);

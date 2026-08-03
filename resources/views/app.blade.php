@@ -22,6 +22,11 @@
 
     <link rel="manifest" href="/manifest.webmanifest">
 
+    {{-- ⚠️ iOS ignores the web manifest's icons entirely and uses this. Without
+         it the home-screen icon is a screenshot of the page, which is the one
+         place the seal has to appear and cannot be checked from a desktop. --}}
+    <link rel="apple-touch-icon" href="/icons/rv-apple-touch.png">
+
     {{-- Self-hosted, so there is no third-party DNS lookup, handshake and TLS
          negotiation standing between a phone on 4G and readable text. The two
          faces that appear above the fold are preloaded; the rest arrive with

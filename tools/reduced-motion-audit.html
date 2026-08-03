@@ -1,0 +1,43 @@
+<!doctype html><meta charset="utf-8"><style>html,body{margin:0}iframe{border:0;display:block}</style>
+<body><script>
+/*
+ * Walks the product with prefers-reduced-motion forced on and reports anything
+ * that is INVISIBLE — the failure mode is never "too much movement", it is an
+ * `animation: none` that forgot to reset opacity, leaving content hidden
+ * forever for exactly the people who asked for less movement.
+ */
+const p = new URLSearchParams(location.search);
+const urls = p.get('urls').split(',');
+const out = []; let i = 0;
+const f = document.createElement('iframe');
+f.width = 1200; f.height = 900; document.body.appendChild(f);
+
+function next() {
+  if (i >= urls.length) { document.title = '@@' + JSON.stringify(out) + '@@'; return; }
+  const url = urls[i++];
+  f.onload = () => setTimeout(() => {
+    const rec = { url, hidden: [], looping: [] };
+    try {
+      const d = f.contentDocument, w = f.contentWindow;
+      d.querySelectorAll('body *').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) return;
+        const cs = w.getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') return;
+        const text = (el.innerText || '').trim();
+        if (!text) return;
+        // Content that occupies space but cannot be seen.
+        if (parseFloat(cs.opacity) < 0.05) {
+          rec.hidden.push((el.className || el.tagName) + ' :: ' + text.slice(0, 40));
+        }
+        if (cs.animationIterationCount === 'infinite' && cs.animationName !== 'none') {
+          rec.looping.push(cs.animationName + ' on ' + (el.className || el.tagName));
+        }
+      });
+    } catch (e) { rec.err = String(e).slice(0, 60); }
+    out.push(rec); next();
+  }, 2500);
+  f.src = url;
+}
+next();
+</script>

@@ -1,0 +1,52 @@
+<!doctype html><meta charset="utf-8"><style>html,body{margin:0}iframe{border:0;display:block}</style>
+<body><script>
+const p = new URLSearchParams(location.search);
+const urls = p.get('urls').split(',');
+const w = Number(p.get('w'));
+const out = [];
+let i = 0;
+const f = document.createElement('iframe');
+f.width = w; f.height = 900;
+document.body.appendChild(f);
+
+function next() {
+  if (i >= urls.length) { document.title = '@@' + JSON.stringify(out) + '@@'; return; }
+  const url = urls[i++];
+  f.onload = () => setTimeout(() => {
+    let rec = { url, ok: false, doc: 0, win: 0 };
+    try {
+      const d = f.contentDocument;
+      rec.doc = d.documentElement.scrollWidth;
+      rec.win = f.contentWindow.innerWidth;
+      rec.ok = rec.doc <= rec.win + 1;
+      // ⚠️ Record where we ACTUALLY landed. An authenticated URL without a
+      // session redirects to /login and measures perfectly — a clean table of
+      // the login page thirteen times.
+      rec.landed = f.contentWindow.location.pathname;
+      rec.redirected = rec.landed !== url.split('?')[0];
+      rec.title = (d.querySelector('h1,h2') || {}).innerText || '';
+      /*
+       * ⚠️ THE TWO-COLUMN CHECK, MEASURED GEOMETRICALLY.
+       *
+       * Reading grid-template-columns only works for grid, and the profile
+       * builder is flex — it reported "1 column" at every width, which looked
+       * exactly like the regression this check exists to catch. Counting how
+       * many children actually share a row is true for flex, grid and float
+       * alike, and it is what a person means by "two columns".
+       */
+      const layout = d.querySelector('.rv-dash, .rv-builder, .rv-match-view, .rv-split');
+      if (layout) {
+        const kids = [...layout.children].filter(k => k.getBoundingClientRect().height > 40);
+        const tops = kids.map(k => Math.round(k.getBoundingClientRect().top));
+        const firstRow = tops.filter(t => Math.abs(t - Math.min(...tops)) < 24);
+        rec.cols = firstRow.length;
+        rec.layout = layout.className.split(' ')[0];
+            }
+    } catch (e) { rec.err = String(e).slice(0, 40); }
+    out.push(rec);
+    next();
+  }, 900);
+  f.src = url;
+}
+next();
+</script>

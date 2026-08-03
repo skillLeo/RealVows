@@ -30,28 +30,29 @@ is not decoration — it is a claim. Two rules follow from that:
 
 ---
 
-## Legacy images — TO BE REPLACED, NOT INVESTIGATED
+## Resolved — the four unsourced images, 3 August 2026
 
-Four of these have no recoverable source. **The decision is to replace them
-with model-released stock before launch rather than chase provenance on files
-that were never recorded.** Do not spend more time trying to identify them.
+⚠️ **These had no recorded source and no EXIF, and that is now closed.**
 
-| File | Used on | Source | Status |
-|---|---|---|---|
-| `hero-a.jpg` | no longer displayed | [unsplash.com/photos/1591604466107-ec97de577aff](https://unsplash.com/photos/1591604466107-ec97de577aff) | ID recovered from git history; photographer still unread |
-| `hero-b.jpg` | **not displayed — Hindu dress, must not ship** | [unsplash.com/photos/1599462616558-2b75fd26a283](https://unsplash.com/photos/1599462616558-2b75fd26a283) | Replace |
-| `login.jpg` | Sign in | no source in any commit, no EXIF | Replace before launch |
-| `signup.jpg` | Register | no source in any commit, no EXIF | Replace before launch |
-| `verify.jpg` | Verification | no source in any commit, no EXIF | Replace before launch |
-| `packages.jpg` | Packages | no source in any commit, no EXIF | Replace before launch |
+They were inherited with the project and no commit, filename or metadata
+recorded where they came from. "Almost certainly Pexels" is not a licence
+record — on a platform that will take payments, an image whose provenance
+nobody can state is a liability sitting on the sign-up page.
 
-⚠️ **Model releases.** A CC or free-stock licence covers the PHOTOGRAPH. It
-does not cover the right to use an identifiable person's likeness to advertise
-a service. On a marketing page the risk is low but it is not zero, and it stops
-being theoretical the day real members are paying. Budget for model-released
-stock (Adobe Stock or similar) for all six before launch.
+They were not investigated further. Three were **replaced** with photographs
+whose licence is recorded below, and the fourth was **deleted**, because it
+was referenced by nothing at all.
 
----
+| File | Was | Now |
+|---|---|---|
+| `login.jpg` | no source in any commit, no EXIF | cottonbro studio — [6284651](https://www.pexels.com/photo/6284651/) |
+| `signup.jpg` | no source in any commit, no EXIF | Ron Lach — [9652793](https://www.pexels.com/photo/9652793/) |
+| `packages.jpg` | no source in any commit, no EXIF | Gustavo Fring — [7155850](https://www.pexels.com/photo/7155850/) |
+| `verify.jpg` | no source in any commit, no EXIF | **Deleted.** Referenced by no stylesheet, view or component |
+
+All three replacements are Pexels License: free for commercial use, no
+attribution required, recorded here anyway because attribution not required is
+not the same as attribution unrecorded.
 
 ## The two couples — SOURCED BY THE CLIENT
 

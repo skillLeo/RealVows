@@ -129,6 +129,65 @@ function drain() {
     setTimeout(close, 4000);
 }
 
+/**
+ * ⚠️ THREE-TIER LOADING: nothing, then a skeleton, then an honest sentence.
+ *
+ * The tiers exist because the three cases feel completely different and only
+ * one of them is a "loading state":
+ *
+ *  · Under 300ms a spinner is WORSE than nothing. It appears and vanishes as
+ *    a flash, which reads as a glitch rather than as speed — the fastest
+ *    navigations are the ones that must show nothing at all.
+ *  · To 3s a skeleton says "this is arriving, and here is its shape".
+ *  · Beyond 3s a skeleton alone starts to look broken, so it is joined by one
+ *    plain line admitting it is slow. Never a spinner, never a percentage
+ *    nobody can verify, and never "almost there".
+ *
+ * ⚠️ THE SKELETON COMPONENT EXISTED AND WAS REFERENCED BY NOTHING. Same
+ * failure as the copy deck: a thing that looks finished in a file listing and
+ * does nothing. This is what actually puts it on screen.
+ */
+function threeTierLoading() {
+    let skeletonTimer = null;
+    let slowTimer = null;
+    let el = null;
+
+    const clear = () => {
+        clearTimeout(skeletonTimer);
+        clearTimeout(slowTimer);
+        skeletonTimer = slowTimer = null;
+        if (el) { el.remove(); el = null; }
+    };
+
+    router.on('start', () => {
+        clear();
+
+        // Tier 1: under 300ms, deliberately nothing.
+        skeletonTimer = setTimeout(() => {
+            // Tier 2: the shape of what is coming.
+            el = document.createElement('div');
+            el.className = 'rv-loading';
+            el.setAttribute('role', 'status');
+            el.setAttribute('aria-live', 'polite');
+            el.innerHTML =
+                '<span class="rv-skeleton rv-loading__bar"></span>' +
+                '<span class="rv-skeleton rv-loading__bar rv-loading__bar--short"></span>';
+            document.body.appendChild(el);
+
+            // Tier 3: past 3s, say so in words.
+            slowTimer = setTimeout(() => {
+                if (!el) return;
+                const line = document.createElement('p');
+                line.className = 'rv-loading__line';
+                line.textContent = 'This is taking longer than usual. Still working.';
+                el.appendChild(line);
+            }, 2700);
+        }, 300);
+    });
+
+    router.on('finish', clear);
+}
+
 /** Flash messages arrive as Inertia props; surface them as toasts. */
 function flashToasts() {
     router.on('finish', () => {
@@ -262,6 +321,7 @@ function longPress() {
 
 export function startAppBehaviours() {
     scrollRestoration();
+    threeTierLoading();
     themeColour();
     flashToasts();
     collapsingTopBar();

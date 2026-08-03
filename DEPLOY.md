@@ -1,5 +1,23 @@
 # Deploying RealVows
 
+## ⚠️ Authorship — one name on every commit
+
+This repository is authored by **skillLeo**. No co-author trailer, no
+"generated with" line, no second name of any kind appears on a commit.
+
+GitHub renders a `Co-Authored-By` trailer as "skillLeo and <name>" against
+every commit in the list, and this repository is shown to the client. The work
+is delivered under one name, and that is how the client understands who they
+are paying.
+
+`.githooks/commit-msg` enforces it and rejects the commit outright. Enable it
+in a fresh clone with:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+
 Target: **Hostinger shared hosting** · `realvows.skillleo.com`
 
 ---

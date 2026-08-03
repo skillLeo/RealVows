@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# ⚠️ THIS REPOSITORY IS AUTHORED BY skillLeo. NOBODY ELSE APPEARS ON A COMMIT.
+#
+# GitHub renders a Co-Authored-By trailer as "skillLeo and <name>" against every
+# commit in the list, and this repository is shown to a client. The work is
+# delivered under one name. That is not a stylistic preference — it is how the
+# client understands who they are paying.
+#
+# This hook exists because the trailer was added ten times after being asked
+# not to. A rule that depends on somebody remembering is not a rule.
+#
+# Install once:  git config core.hooksPath .githooks
+
+if grep -qiE '^Co-authored-by:.*(claude|anthropic|copilot|gpt|openai)' "$1"; then
+    echo "Commit blocked: a Co-Authored-By trailer naming an AI tool is present." >&2
+    echo "This repository is authored by skillLeo alone. Remove the trailer." >&2
+    exit 1
+fi
+
+if grep -qiE 'Generated with \[?(Claude|Copilot)' "$1"; then
+    echo "Commit blocked: a 'Generated with' line is present." >&2
+    echo "This repository is authored by skillLeo alone. Remove the line." >&2
+    exit 1
+fi
+
+exit 0

@@ -244,6 +244,37 @@ These cannot be automated and are genuinely outstanding:
 
 ---
 
+## ⚠️ Payment acceptance is not complete yet, and this is why
+
+Everything you can click in checkout works — but it has been working against a
+**stand-in gateway we wrote ourselves**, not against PowerTranz.
+
+A stand-in proves our own code is consistent with itself. It proves nothing
+about the things only the real system can settle: the format the currency has
+to be sent in, the two-step card-security handshake, the exact shape of the
+message the bank sends back when a payment finishes.
+
+**What Phase 2 agreed to is the payment and credit system working end to end
+in the PowerTranz *sandbox*.** Until that runs, this box is not ticked, however
+much of the rest is.
+
+**This does not wait on the bank.** Sandbox credentials are issued separately
+from the merchant application, and separately from registering the company.
+They can be requested now:
+
+1. Ask your PowerTranz contact for **sandbox (staging) credentials** — a
+   Merchant ID, a Terminal ID and an API key for `staging.ptranz.com`.
+2. Ask for the **test card pack** at the same time. It is the list of card
+   numbers that force an approval, a decline and a card-security challenge.
+3. Tell them the business is a **marriage introductions service**. The account
+   may sit under a company whose registered activity is something else, and an
+   underwriter finding that out later stalls the application. Better said
+   upfront.
+
+Send those three things over and the suite runs the same day.
+
+---
+
 ## What Phase 2 is not
 
 - **Match emails and WhatsApp** — Phase 3

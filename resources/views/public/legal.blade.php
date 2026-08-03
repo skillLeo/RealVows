@@ -17,6 +17,47 @@
             everything below before launch.
         </p>
 
+        {{--
+            ⚠️ WHO THE MEMBER IS CONTRACTING WITH, FROM THE SAME SETTING THE
+            RECEIPT USES.
+
+            "RealVows" is a trading name, not a legal person — the gateway
+            account sits under a different company entirely. If this page
+            names one party and the card statement names another, that is a
+            mismatch an acquirer's underwriting will flag, and it is also just
+            wrong.
+
+            Nothing is printed until the client's bank confirms the entity.
+            Naming an unconfirmed company in a contract is worse than naming
+            none, because a member would be agreeing to terms with a party
+            that may not be the one holding their money.
+        --}}
+        @if ($billing['legalEntity'])
+            <div class="rv-legal__entity rv-stack" style="gap: 8px">
+                <h2 class="rv-d3">Who you are contracting with</h2>
+                <p class="rv-body">
+                    {{ $billing['tradingName'] ? $billing['tradingAsLine'] ?? $billing['legalEntity'] : $billing['legalEntity'] }}
+                    @if ($billing['statementLine'])
+                        {{ $billing['statementLine'] }}
+                    @endif
+                </p>
+
+                @if ($billing['address'])
+                    <p class="rv-body">{{ $billing['address'] }}</p>
+                @endif
+
+                @if ($billing['supportEmail'])
+                    <p class="rv-body">Billing enquiries: {{ $billing['supportEmail'] }}</p>
+                @endif
+            </div>
+        @else
+            <p class="rv-legal__draft">
+                <strong>[PENDING — the contracting entity is not yet confirmed]</strong>
+                The registered company behind RealVows is being confirmed with the bank. This
+                section, and the receipt, will name it once it is.
+            </p>
+        @endif
+
         <div class="rv-stack" style="gap: 24px">
             <h2 class="rv-d3">Who this applies to</h2>
             <p class="rv-body">

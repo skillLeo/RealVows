@@ -46,6 +46,17 @@ class BillingIdentityTest extends TestCase
             'receipt controller' => app_path('Http/Controllers/ReceiptController.php'),
             'purchases controller' => app_path('Http/Controllers/PurchasesController.php'),
             'receipt mailable' => app_path('Mail/PurchaseReceipt.php'),
+
+            /*
+             * ⚠️ THE LEGAL PAGES COUNT AS BILLING SURFACES.
+             *
+             * The Terms state who a member is contracting with; the statement
+             * states who took the money. If those two disagree it is a
+             * mismatch an acquirer's underwriting will flag — so they must
+             * read the same setting, and neither may hardcode a name.
+             */
+            'legal pages' => resource_path('views/public/legal.blade.php'),
+            'legal controller' => app_path('Http/Controllers/LegalController.php'),
         ];
     }
 
@@ -127,18 +138,50 @@ class BillingIdentityTest extends TestCase
     }
 
     /**
-     * ⚠️ AN UNCONFIGURED RECEIPT SAYS NOTHING RATHER THAN GUESSING.
+     * ⚠️ AN UNCONFIGURED RECEIPT NAMES NO COMPANY, BUT STILL NAMES THE
+     * DESCRIPTOR — AND THE DIFFERENCE MATTERS.
      *
-     * A receipt naming the wrong company is worse than one naming none: it is
-     * a false statement about who holds somebody's money.
+     * Naming a company that has not been confirmed is a false statement about
+     * who is holding somebody's money. Naming the descriptor is not a claim
+     * about anybody: it is telling the member which string will appear on
+     * their statement, which is true as soon as the gateway is configured to
+     * send it and is the only fact that prevents a chargeback.
+     *
+     * So the descriptor ships with a default and the entity does not.
      */
-    public function test_an_unconfigured_receipt_makes_no_billing_claim(): void
+    public function test_an_unconfigured_receipt_names_no_company(): void
     {
         $billing = app(Billing::class);
 
-        $this->assertNull($billing->statementLine());
+        $this->assertFalse($billing->isConfigured());
+        $this->assertNull($billing->legalEntity(), 'A company is being named before the bank confirmed one.');
         $this->assertNull($billing->tradingAsLine());
-        $this->assertNull($billing->legalEntity());
+
+        // But the member is still told what to look for.
+        $this->assertSame('REALVOWS', $billing->statementDescriptor());
+        $this->assertSame(
+            'This charge appears on your statement as REALVOWS.',
+            $billing->statementLine()
+        );
+    }
+
+    /**
+     * ⚠️ THE DESCRIPTOR MUST BE WHAT CARD NETWORKS ACCEPT, and the default
+     * has to satisfy its own rule or it is a trap for the first person who
+     * saves the settings form without touching it.
+     */
+    public function test_the_default_descriptor_satisfies_the_card_network_rules(): void
+    {
+        $descriptor = app(Billing::class)->statementDescriptor();
+
+        $this->assertNotNull($descriptor);
+        $this->assertLessThanOrEqual(22, strlen($descriptor), 'Card networks truncate past 22.');
+        $this->assertMatchesRegularExpression(
+            '/^[A-Z0-9][A-Z0-9 ]*$/',
+            $descriptor,
+            'Lowercase or punctuation in a descriptor fails during acquirer underwriting, days '
+                .'later, as a stalled application nobody connects back to this field.'
+        );
     }
 
     /**
@@ -219,6 +262,45 @@ class BillingIdentityTest extends TestCase
         foreach ($this->billingSurfaces() as $what => $path) {
             $this->assertFileExists($path, "The {$what} surface has moved; the scan is not reading it.");
         }
+    }
+
+    /**
+     * ⚠️ THE CONTRACT AND THE STATEMENT MUST NAME THE SAME COMPANY.
+     *
+     * Two independent surfaces, one source. This is the check that would
+     * catch somebody "helpfully" typing the entity into the Terms while the
+     * receipt still reads it from settings.
+     */
+    public function test_the_legal_pages_and_the_receipt_name_the_same_entity(): void
+    {
+        $this->configure([
+            'billing_legal_entity' => 'Example Holdings Limited',
+            'billing_trading_name' => 'RealVows',
+            'statement_descriptor' => 'REALVOWS',
+            'billing_address' => '1 Example Way, Kingston',
+            'billing_support_email' => 'billing@example.test',
+        ]);
+
+        foreach (['/terms', '/privacy', '/community-guidelines'] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertSee('Example Holdings Limited', false)
+                ->assertSee('billing@example.test', false);
+        }
+    }
+
+    /**
+     * ⚠️ AND WHILE UNCONFIRMED, THE CONTRACT NAMES NOBODY.
+     *
+     * A member agreeing to terms with a company that turns out not to be the
+     * one holding their money is worse than a page that admits it is pending.
+     */
+    public function test_the_legal_pages_name_nobody_until_the_entity_is_confirmed(): void
+    {
+        $response = $this->get('/terms')->assertOk();
+
+        $response->assertSee('the contracting entity is not yet confirmed', false);
+        $response->assertDontSee('Who you are contracting with', false);
     }
 
     private function configure(array $values): void

@@ -105,7 +105,7 @@ class SettingsSeeder extends Seeder
                  */
                 ['key' => 'billing_legal_entity', 'label' => 'Billing — registered company', 'type' => 'text', 'description' => 'The company that actually receives the money. Leave empty until the bank confirms it.'],
                 ['key' => 'billing_trading_name', 'label' => 'Billing — trading name', 'type' => 'text', 'description' => 'The name the member knows. Normally RealVows.'],
-                ['key' => 'statement_descriptor', 'label' => 'Billing — statement descriptor', 'type' => 'text', 'description' => 'Exactly what appears on a card statement. Must match what the gateway is configured to send.'],
+                ['key' => 'statement_descriptor', 'label' => 'Billing — statement descriptor', 'type' => 'text', 'description' => 'Exactly what appears on a card statement. Uppercase letters, digits and spaces only, 22 characters maximum — that is what the card networks accept. Must match what the gateway is configured to send.'],
                 ['key' => 'billing_address', 'label' => 'Billing — registered address', 'type' => 'textarea', 'description' => 'The registered address of the company above.'],
                 ['key' => 'billing_support_email', 'label' => 'Billing — billing enquiries', 'type' => 'text', 'description' => 'Where a member writes about a charge they do not recognise.'],
             ],
@@ -160,6 +160,18 @@ class SettingsSeeder extends Seeder
             'storage.driver' => 'local',
             'payments.gateway' => 'powertranz',
             'payments.environment' => 'sandbox',
+
+            /*
+             * ⚠️ The one billing field with a sensible default. The legal
+             * entity cannot be guessed — it is whichever company the client's
+             * bank confirms — but the descriptor is what the MEMBER should
+             * see, and that is RealVows regardless of who settles the money.
+             *
+             * Already conformant: uppercase, alphanumeric, 22 characters or
+             * fewer. A descriptor the card networks reject is a silent
+             * failure at underwriting rather than a visible error.
+             */
+            'payments.statement_descriptor' => 'REALVOWS',
             'whatsapp.provider' => 'meta',
 
             'packages.single_label' => 'One introduction',

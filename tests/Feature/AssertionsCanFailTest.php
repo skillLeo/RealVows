@@ -26,16 +26,40 @@ use Tests\TestCase;
  *     site as `--arrive-scale`. The scan found ZERO scaling selectors in the
  *     entire stylesheet and passed everything. A refactor had quietly turned
  *     the guard off, and nothing said so.
+ *  5. Two MEASUREMENT HARNESSES reported confidently on things they
+ *     structurally could not see. The reduced-motion walker ran under virtual
+ *     time, so the animation clock never advanced: it read frame zero of every
+ *     arrival and reported the hero and every match card as invisible. The
+ *     width audit read `grid-template-columns` to count columns, and the
+ *     profile builder is flex — the property returns `none`, which it counted
+ *     as one column at every width, looking exactly like the regression it
+ *     existed to catch. Both produced a specific, plausible, wrong answer.
  *
  * Every one of them is an assertion whose passing condition did not depend
  * on the thing it claimed to check.
  *
  * ── RULE 5, WHICH THE FOURTH ONE EARNED ───────────────────────────────────
  *
- * Any test or guard that inspects source, output or structure must carry a
- * positive control proving it can still find what it looks for — and that
- * control must be re-verified whenever the thing being inspected is
- * refactored.
+ * Any test, guard OR MEASUREMENT HARNESS that inspects source, output,
+ * structure or a rendered page must carry a positive control proving it can
+ * still find what it looks for — and that control must be re-verified whenever
+ * the thing being inspected is refactored.
+ *
+ * ⚠️ "MEASUREMENT HARNESS" IS IN THAT SENTENCE DELIBERATELY.
+ *
+ * The rule was first written for tests, and the next two instances were not
+ * tests — they were throwaway browser scripts written to answer a question
+ * about the live product. Those are MORE dangerous than a test, not less: a
+ * test that goes blind fails silently in CI, but a harness that goes blind
+ * hands you a specific number and a table, and a number is believed. One of
+ * them nearly had me report a critical accessibility failure that did not
+ * exist; the other nearly had me "fix" a two-column layout that was correct.
+ *
+ * A harness must therefore prove itself against a KNOWN-GOOD and a KNOWN-BAD
+ * fixture before it is allowed to report on anything real, and it must refuse
+ * to emit results if that fails. `tools/width-audit.html` does this: it counts
+ * columns on a synthetic side-by-side fixture and a synthetic stacked one, and
+ * aborts rather than produce a table if it cannot tell them apart.
  *
  * The distinguishing symptom is always the same: SUCCESS REPORTED WHILE
  * NOTHING IS BEING CHECKED. A negative assertion over an empty result set is

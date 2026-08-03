@@ -1,5 +1,62 @@
 <!doctype html><meta charset="utf-8"><style>html,body{margin:0}iframe{border:0;display:block}</style>
 <body><script>
+
+/*
+ * ⚠️ RULE 5 FOR A HARNESS: PROVE IT CAN SEE BEFORE IT IS ALLOWED TO REPORT.
+ *
+ * The first version of this file counted columns by reading
+ * grid-template-columns. The profile builder is FLEX, so the property returns
+ * "none", which counted as one column at every width — indistinguishable from
+ * the exact single-column collapse this audit exists to catch. It produced a
+ * specific, plausible, wrong answer, and a number in a table is believed.
+ *
+ * So the counter is now geometric, and before it touches a real page it is
+ * run against two fixtures built here: one where children genuinely sit side
+ * by side, and one where they are genuinely stacked. If it cannot tell those
+ * apart it ABORTS rather than emit a table, because a harness that reports
+ * nothing is honest and a harness that reports the wrong number is not.
+ */
+function countColumns(layout) {
+  const kids = [...layout.children].filter(k => k.getBoundingClientRect().height > 4);
+  const tops = kids.map(k => Math.round(k.getBoundingClientRect().top));
+  if (!tops.length) return 0;
+  const top = Math.min(...tops);
+  return tops.filter(t => Math.abs(t - top) < 24).length;
+}
+
+function selfTest() {
+  const host = document.createElement('div');
+  host.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px';
+  document.body.appendChild(host);
+
+  // Known good: two children side by side, via flex — the layout the real
+  // reader got wrong.
+  const twoUp = document.createElement('div');
+  twoUp.style.cssText = 'display:flex;gap:20px';
+  twoUp.innerHTML = '<div style="width:380px;height:200px"></div>'
+                  + '<div style="width:380px;height:200px"></div>';
+  host.appendChild(twoUp);
+
+  // Known bad: the same children, collapsed into one stacked column.
+  const stacked = document.createElement('div');
+  stacked.style.cssText = 'display:block';
+  stacked.innerHTML = '<div style="width:100%;height:200px"></div>'
+                    + '<div style="width:100%;height:200px"></div>';
+  host.appendChild(stacked);
+
+  const good = countColumns(twoUp);
+  const bad = countColumns(stacked);
+  host.remove();
+
+  if (good !== 2 || bad !== 1) {
+    document.title = '@@ABORT: column counter failed its own control — '
+      + 'side-by-side read as ' + good + ' (expected 2), stacked read as '
+      + bad + ' (expected 1). Refusing to report.@@';
+    return false;
+  }
+  return true;
+}
+
 const p = new URLSearchParams(location.search);
 const urls = p.get('urls').split(',');
 const w = Number(p.get('w'));
@@ -36,10 +93,7 @@ function next() {
        */
       const layout = d.querySelector('.rv-dash, .rv-builder, .rv-match-view, .rv-split');
       if (layout) {
-        const kids = [...layout.children].filter(k => k.getBoundingClientRect().height > 40);
-        const tops = kids.map(k => Math.round(k.getBoundingClientRect().top));
-        const firstRow = tops.filter(t => Math.abs(t - Math.min(...tops)) < 24);
-        rec.cols = firstRow.length;
+        rec.cols = countColumns(layout);
         rec.layout = layout.className.split(' ')[0];
             }
     } catch (e) { rec.err = String(e).slice(0, 40); }
@@ -48,5 +102,5 @@ function next() {
   }, 900);
   f.src = url;
 }
-next();
+if (selfTest()) next();
 </script>

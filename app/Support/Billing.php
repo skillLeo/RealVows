@@ -28,9 +28,28 @@ use App\Services\Settings\SettingsService;
  * not. BillingIdentityTest fails the build if a company name reappears in any
  * billing surface.
  *
- * ⚠️ The five values are deliberately EMPTY until the client confirms the
- * entity with his bank. Empty is honest; a placeholder company name on a
- * receipt is a false statement about who holds the money.
+ * ⚠️ THE DESCRIPTOR DEFAULTS. THE ENTITY DOES NOT. DO NOT "FIX" THIS.
+ *
+ * This asymmetry is deliberate and it was reviewed and kept. It looks like an
+ * oversight — four empty fields and one filled in — so it will read as
+ * something to tidy up. It is not.
+ *
+ * `statement_descriptor` defaults to REALVOWS because it is not a claim about
+ * anybody. It tells a member which string will appear on their bank
+ * statement, which is true as soon as the gateway is configured to send it,
+ * and it is the single fact that prevents a chargeback.
+ *
+ * `billing_legal_entity` has no default because naming a company that has not
+ * been confirmed is a FALSE STATEMENT ABOUT WHO IS HOLDING SOMEBODY'S MONEY.
+ * It also appears in the Terms of Service, where it states who the member is
+ * contracting with — so a guessed value there is not a cosmetic placeholder,
+ * it is a contract naming the wrong party. While it is empty the receipt and
+ * the legal pages say the entity is pending, which is honest and costs
+ * nothing.
+ *
+ * Seeding a default for the entity, or copying the trading name into it, is
+ * the specific mistake this note exists to prevent. The value arrives when
+ * the client's bank confirms it and not before.
  */
 class Billing
 {

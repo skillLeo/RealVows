@@ -42,6 +42,31 @@ const links = computed(() => page.props.nav ?? []);
         <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
     </div>
 
+    <!--
+        ⚠️ WHICH GATEWAY IS BOUND, STATED RATHER THAN INFERRED.
+
+        Real-versus-fake is decided by whether an API key exists, which made
+        it invisible: the settings screen could read "PowerTranz" while every
+        checkout went to a stand-in. Unanswerable state on a screen that
+        handles money is the same failure class that has caught this project
+        four times.
+
+        ⚠️ LIVE IS ROSE, NOT BRASS, AND THAT IS THE POINT. The stand-in and
+        the sandbox are both brass because both are safe. Live is the one
+        state where a mistake costs somebody real money, so it must not
+        resemble the two that cannot.
+    -->
+    <div
+        v-if="$page.props.gateway"
+        class="rv-gatewaybar"
+        :class="{ 'rv-gatewaybar--live': $page.props.gateway.isLive }"
+        role="status"
+    >
+        <strong>{{ $page.props.gateway.label }}</strong>
+        <span class="rv-gatewaybar__class">{{ $page.props.gateway.className }}</span>
+        <span v-if="$page.props.gateway.host">{{ $page.props.gateway.host }}</span>
+    </div>
+
     <div class="rv-app">
         <header class="rv-app__bar">
             <div class="rv-shell rv-app__bar-inner">

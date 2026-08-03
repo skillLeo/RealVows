@@ -2359,6 +2359,51 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   text-align: center;
 }
 .rv-demobar strong { font-weight: 600; }
+
+/*
+ * The gateway banner. Same shape as the review-build bar so they stack
+ * without argument, and deliberately the same brass while the gateway is
+ * SAFE — a stand-in and a sandbox are both states where nothing can go
+ * wrong with somebody's money.
+ */
+.rv-gatewaybar {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  padding: 10px 20px;
+  background: var(--brass);
+  color: var(--oxblood-deep);
+  font-size: var(--fs-body-3);
+  font-weight: 500;
+}
+
+.rv-gatewaybar strong { font-weight: 600; }
+
+/* The class name, so the ground truth is on screen and not only a label. */
+.rv-gatewaybar__class {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  opacity: .8;
+}
+
+/*
+ * ⚠️ LIVE MUST NOT LOOK LIKE THE SAFE STATES.
+ *
+ * Rose rather than brass, cream text rather than oxblood, and a rule top and
+ * bottom. Somebody glancing at the top of the screen has to be able to tell
+ * "real money" from "sandbox" without reading a word of it.
+ */
+.rv-gatewaybar--live {
+  background: var(--rose);
+  color: var(--cream);
+  border-block: 2px solid var(--oxblood-deep);
+}
+
+.rv-gatewaybar--live .rv-gatewaybar__class { opacity: .9; }
 .rv-demobar span { opacity: .85; }
 
 /* ==========================================================================

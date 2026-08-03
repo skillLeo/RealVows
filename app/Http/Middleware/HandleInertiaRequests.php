@@ -51,6 +51,24 @@ class HandleInertiaRequests extends Middleware
             // the other way round.
             'isDemo' => (bool) config('realvows.is_demo'),
 
+            /*
+             * ⚠️ WHICH GATEWAY IS ACTUALLY BOUND, for anybody who can reach
+             * the settings screen.
+             *
+             * Real-versus-fake is inferred from whether an api_key exists, so
+             * it was previously unanswerable from the browser — the Gateway
+             * dropdown could read "PowerTranz" while every checkout went to a
+             * stand-in. A screen that handles money must not leave that to be
+             * worked out from what is absent.
+             *
+             * Lazy, so resolving the gateway costs nothing on a member
+             * request, and withheld entirely from members — which gateway is
+             * bound is operational detail they have no use for.
+             */
+            'gateway' => fn () => $user?->can('settings.view')
+                ? app(\App\Support\GatewayStatus::class)->forDisplay()
+                : null,
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

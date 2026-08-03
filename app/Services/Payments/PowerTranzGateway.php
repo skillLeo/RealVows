@@ -45,7 +45,7 @@ class PowerTranzGateway implements PaymentGateway
      */
     private const CURRENCY_USD = '840';
 
-    private const HOSTS = [
+    public const HOSTS = [
         'sandbox' => 'https://staging.ptranz.com/api',
         'live' => 'https://gateway.ptranz.com/api',
     ];

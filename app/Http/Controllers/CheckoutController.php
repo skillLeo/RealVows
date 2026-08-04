@@ -13,6 +13,19 @@ use Inertia\Response;
 
 class CheckoutController extends Controller
 {
+    /**
+     * ⚠️ THE ROUTE, NOT JUST THE BUTTON.
+     *
+     * Hiding the packages page removes the way in; this removes the destination.
+     * A member with an old link, a bookmark, or a back button would otherwise
+     * reach a checkout that cannot complete — which is worse than a paywall,
+     * because it takes their attention and then fails.
+     */
+    private function refuseDuringFreePeriod(): void
+    {
+        abort_if(app(\App\Support\FreePeriod::class)->isActive(), 404);
+    }
+
     public function __construct(
         private readonly PurchaseService $purchases,
         private readonly Packages $packages,
@@ -27,6 +40,8 @@ class CheckoutController extends Controller
      */
     public function show(Request $request, string $package): Response
     {
+        $this->refuseDuringFreePeriod();
+
         abort_unless(in_array($package, Packages::KEYS, true), 404);
 
         return Inertia::render('Checkout/Show', [
@@ -44,6 +59,8 @@ class CheckoutController extends Controller
      */
     public function start(Request $request, string $package): RedirectResponse
     {
+        $this->refuseDuringFreePeriod();
+
         abort_unless(in_array($package, Packages::KEYS, true), 404);
 
         $purchase = $this->purchases->initiate($request->user(), $package);

@@ -47,6 +47,14 @@ class SettingsSeeder extends Seeder
     {
         $rows = [
             'general' => [
+                /*
+                 * ⚠️ A REAL MODE, NOT A GATEWAY LEFT SWITCHED OFF. While this
+                 * is on, introductions arrive unlocked, every purchase surface
+                 * is HIDDEN rather than disabled, and the copy says so. See
+                 * App\Support\FreePeriod — particularly the note on the exit,
+                 * which is the direction that touches real members.
+                 */
+                ['key' => 'free_period', 'label' => 'Free period', 'type' => 'select', 'options' => ['1' => 'On — introductions are free', '0' => 'Off — introductions cost credits'], 'description' => 'While this is on, nothing is charged and no packages are shown. Members who receive introductions during it keep them permanently when it ends.'],
                 ['key' => 'site_name', 'label' => 'Site name', 'type' => 'text'],
                 ['key' => 'support_email', 'label' => 'Support email', 'type' => 'email', 'description' => 'Shown to members when they need help.'],
                 ['key' => 'admin_notification_email', 'label' => 'Admin notification email', 'type' => 'email', 'description' => 'Where new verification alerts are sent.'],

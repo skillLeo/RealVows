@@ -9,6 +9,20 @@ use Inertia\Response;
 
 class PackagesController extends Controller
 {
+    /**
+     * ⚠️ 404 DURING THE FREE PERIOD, NOT A DISABLED PAGE.
+     *
+     * A disabled button still tells a member there is something they are being
+     * denied, and a page that renders with everything greyed out reads as
+     * broken rather than free. While there is nothing to buy, the shop does not
+     * exist — which is also the only way to guarantee nobody reaches a checkout
+     * that cannot complete.
+     */
+    private function refuseDuringFreePeriod(): void
+    {
+        abort_if(app(\App\Support\FreePeriod::class)->isActive(), 404);
+    }
+
     public function __construct(private readonly Packages $packages) {}
 
     /**
@@ -21,6 +35,8 @@ class PackagesController extends Controller
      */
     public function index(Request $request): Response
     {
+        $this->refuseDuringFreePeriod();
+
         return Inertia::render('Packages', [
             'packages' => array_values($this->packages->all()),
             'credits' => $request->user()->creditBalance(),

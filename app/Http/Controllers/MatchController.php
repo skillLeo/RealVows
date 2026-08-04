@@ -9,6 +9,7 @@ use App\Jobs\AnnounceSomeoneInterested;
 use App\Models\MatchRecord;
 use App\Services\Credits\CreditService;
 use App\Services\Matching\MatchInterest;
+use App\Support\FreePeriod;
 use App\Support\MatchPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,7 +73,20 @@ class MatchController extends Controller
         $match = $this->ownedMatch($request, $match);
 
         try {
-            $this->credits->unlockMatch($request->user(), $match);
+            /*
+             * ⚠️ THE MODE IS CHECKED HERE, NOT IN THE SERVICE.
+             *
+             * The two paths write different ledger reasons and only one of
+             * them stamps the permanence marker, so they are genuinely
+             * different operations rather than one with a flag. Deciding at
+             * the edge keeps CreditService free of a branch that would have to
+             * be remembered by every future caller.
+             */
+            if (app(FreePeriod::class)->isActive()) {
+                $this->credits->unlockMatchFree($request->user(), $match);
+            } else {
+                $this->credits->unlockMatch($request->user(), $match);
+            }
         } catch (InsufficientCredits $e) {
             return back()->with('error', $e->getMessage());
         } catch (MatchAlreadyUnlocked $e) {

@@ -50,6 +50,12 @@ Route::controller(LegalController::class)->group(function () {
     Route::get('/terms', 'terms')->name('legal.terms');
     Route::get('/privacy', 'privacy')->name('legal.privacy');
     Route::get('/community-guidelines', 'guidelines')->name('legal.guidelines');
+
+    /*
+     * ⚠️ Required by a payment acquirer's underwriting, and absent until now.
+     * Its absence is a gap regardless of when payments switch on.
+     */
+    Route::get('/refunds', 'refunds')->name('legal.refunds');
 });
 
 /*

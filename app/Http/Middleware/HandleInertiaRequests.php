@@ -49,6 +49,9 @@ class HandleInertiaRequests extends Middleware
             // Drives the review-build banner. Same switch as the one-click
             // logins, so the banner cannot be showing while they are off, or
             // the other way round.
+            // ⚠️ Shared so every screen hides purchase CTAs from one source of
+            // truth. A page deciding for itself is a page that can disagree.
+            'freePeriod' => app(\App\Support\FreePeriod::class)->isActive(),
             'isDemo' => (bool) config('realvows.is_demo'),
 
             /*

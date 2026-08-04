@@ -106,11 +106,20 @@ class DemoSeeder extends Seeder
         ];
 
         return collect($rows)->map(function (array $row) {
+            /*
+             * ⚠️ The teardown marker is set with forceFill, not mass
+             * assignment. `is_demo` is deliberately outside the Fillable
+             * allow-list: a registration form that could post it would let an
+             * account mark ITSELF demo, and the teardown would then delete a
+             * real member on launch day.
+             */
             $user = User::create([
                 'name' => $row['name'],
                 'email' => $row['email'],
                 'password' => Hash::make(self::PASSWORD),
             ]);
+
+            $user->forceFill(['is_demo' => true])->save();
 
             $user->forceFill(['email_verified_at' => now()])->save();
             $user->assignRole($row['role']);
@@ -131,6 +140,13 @@ class DemoSeeder extends Seeder
             $person = $names[$i];
             $index = $i + 1;
 
+            /*
+             * ⚠️ The teardown marker is set with forceFill, not mass
+             * assignment. `is_demo` is deliberately outside the Fillable
+             * allow-list: a registration form that could post it would let an
+             * account mark ITSELF demo, and the teardown would then delete a
+             * real member on launch day.
+             */
             $user = User::create([
                 'name' => $person['first'],
                 'email' => "{$prefix}{$index}@".self::DOMAIN,
@@ -138,6 +154,8 @@ class DemoSeeder extends Seeder
                 'phone_country_code' => $person['cc'],
                 'phone_number' => $person['phone'],
             ]);
+
+            $user->forceFill(['is_demo' => true])->save();
 
             $user->forceFill([
                 'email_verified_at' => now(),

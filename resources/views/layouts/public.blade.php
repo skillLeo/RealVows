@@ -68,6 +68,7 @@
                 <a href="{{ route('legal.terms') }}">Terms of Service</a>
                 <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
                 <a href="{{ route('legal.guidelines') }}">Community Guidelines</a>
+                <a href="{{ route('legal.refunds') }}">Refunds</a>
             </nav>
         </div>
     </footer>

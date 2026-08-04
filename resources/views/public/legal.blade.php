@@ -18,6 +18,23 @@
         </p>
 
         {{--
+            Drafted sections, where a page has them.
+
+            ⚠️ The draft banner above stays regardless. These are our words,
+            not a lawyer's, and the client has to approve them before the
+            banner comes down — a page that reads as finished is a page nobody
+            checks.
+        --}}
+        @isset($sections)
+            @foreach ($sections as $section)
+                <h2 class="rv-d3">{{ $section['heading'] }}</h2>
+                @foreach ($section['body'] as $paragraph)
+                    <p>{{ $paragraph }}</p>
+                @endforeach
+            @endforeach
+        @endisset
+
+        {{--
             ⚠️ WHO THE MEMBER IS CONTRACTING WITH, FROM THE SAME SETTING THE
             RECEIPT USES.
 

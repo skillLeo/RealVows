@@ -107,6 +107,63 @@ class CreditService
      * unlock and one kind error — never two unlocks, and never a lost update
      * that gives away a free match.
      */
+    /**
+     * Open an introduction during the free period, charging nothing.
+     *
+     * ⚠️ IT STILL WRITES A LEDGER ROW, WITH A ZERO DELTA.
+     *
+     * Skipping the ledger because no money moved is the tempting shortcut and
+     * it breaks three things at once: `verify-ledger` starts reporting unlocked
+     * matches with no entry as drift, nobody can count how many introductions
+     * were given away, and after the cutover there is no way to tell a free
+     * introduction from a paid one — which is the distinction the permanence
+     * guarantee rests on.
+     *
+     * Zero because nothing was charged. Present because something happened.
+     *
+     * ⚠️ The stamp on the match is what makes the grant permanent. See
+     * FreePeriod::wasGrantedFree — it must be answerable from the row long
+     * after the mode has changed.
+     */
+    public function unlockMatchFree(User $user, MatchRecord $match): CreditLedgerEntry
+    {
+        if ($match->isUnlocked()) {
+            throw new MatchAlreadyUnlocked;
+        }
+
+        return DB::transaction(function () use ($user, $match) {
+            $this->lockUser($user->id);
+
+            $fresh = MatchRecord::whereKey($match->id)->firstOrFail();
+
+            if ($fresh->status === MatchRecord::STATUS_UNLOCKED) {
+                throw new MatchAlreadyUnlocked;
+            }
+
+            $balance = $this->balanceInTransaction($user->id);
+
+            $entry = CreditLedgerEntry::create([
+                'user_id' => $user->id,
+                'delta' => 0,
+                'balance_after' => $balance,
+                'reason' => \App\Support\FreePeriod::LEDGER_REASON,
+                'reference_type' => MatchRecord::class,
+                'reference_id' => $match->id,
+            ]);
+
+            $fresh->forceFill([
+                'status' => MatchRecord::STATUS_UNLOCKED,
+                'unlocked_at' => now(),
+                'free_period_granted_at' => now(),
+                'unlocked_by_ledger_id' => $entry->id,
+            ])->save();
+
+            $match->refresh();
+
+            return $entry;
+        });
+    }
+
     public function unlockMatch(User $user, MatchRecord $match): CreditLedgerEntry
     {
         if ($match->isUnlocked()) {

@@ -41,14 +41,26 @@ class UnsubscribeController extends Controller
     ];
 
     /**
-     * ⚠️ GET SHOWS A PAGE, IT DOES NOT UNSUBSCRIBE.
+     * ⚠️ GET SHOWS A PAGE, IT DOES NOT UNSUBSCRIBE. DO NOT "SIMPLIFY" THIS.
      *
-     * Mail clients and corporate security scanners follow every link in an
-     * email before a human ever sees it. A GET that acts would unsubscribe
-     * members who never clicked anything — silently, and in a way nobody would
-     * connect to the scanner that caused it.
+     * The two-step will read as friction — one click ought to be enough to
+     * stop emails, and a confirmation screen looks like a dark pattern meant
+     * to make leaving harder. It is the opposite, and the reason has nothing
+     * to do with the member.
      *
-     * The act is the POST from the button on this page.
+     * Mail clients, link-preview services and corporate security scanners
+     * follow EVERY link in an email before a human ever sees it. A GET that
+     * acted would unsubscribe members who never clicked anything — and that
+     * damage is invisible, because nobody complains about emails they stopped
+     * receiving. It would surface months later as an unexplained decline in
+     * engagement, with nothing left to connect it to the scanner that caused
+     * it.
+     *
+     * The confirmation page is what makes the act attributable to a person.
+     *
+     * ⚠️ Collapsing this to one step fails EmailDeliveryTest's
+     * "merely opening the link does not unsubscribe". That test is the record
+     * of this decision, not an obstacle to revisiting it.
      */
     public function show(Request $request, User $user, string $channel): View
     {

@@ -72,8 +72,23 @@ class MatchAuditController extends Controller
                 'timeline' => array_values(array_filter([
                     $match->generated_at ? ['label' => 'Generated', 'at' => $match->generated_at->format('j M Y, H:i')] : null,
                     $match->delivered_at ? ['label' => 'Delivered', 'at' => $match->delivered_at->format('j M Y, H:i')] : null,
-                    $match->unlocked_at ? ['label' => 'Opened', 'at' => $match->unlocked_at->format('j M Y, H:i')] : null,
+                    /*
+                     * ⚠️ THREE DISTINCT EVENTS, AND "Opened" USED TO MEAN TWO
+                     * OF THEM.
+                     *
+                     * Unlocked  — paid for it.
+                     * Viewed    — the unlocked contents were shown, on the
+                     *             dashboard or the match page. This is the one
+                     *             that was silently under-reported: only the
+                     *             match page stamped it, while the dashboard
+                     *             rendered the same payload and stamped
+                     *             nothing. The log told the client members were
+                     *             ignoring introductions they had read.
+                     * Read      — opened the full introduction page itself.
+                     */
+                    $match->unlocked_at ? ['label' => 'Unlocked', 'at' => $match->unlocked_at->format('j M Y, H:i')] : null,
                     $match->viewed_at ? ['label' => 'Viewed', 'at' => $match->viewed_at->format('j M Y, H:i')] : null,
+                    $match->opened_at ? ['label' => 'Read in full', 'at' => $match->opened_at->format('j M Y, H:i')] : null,
                     $match->responded_at ? ['label' => 'Responded', 'at' => $match->responded_at->format('j M Y, H:i')] : null,
                 ])),
                 'paidWithLedgerId' => $match->unlocked_by_ledger_id,

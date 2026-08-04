@@ -38,18 +38,24 @@ class MatchController extends Controller
         $match->load(['matched.photos', 'matched.preferences', 'matched.verification']);
 
         /*
-         * ⚠️ The payload is built BEFORE `viewed_at` is stamped.
+         * ⚠️ The payload is built BEFORE `opened_at` is stamped.
          *
          * `firstView` is derived from that column, and stamping it first
          * would make every visit look like a repeat — the ring would never
          * draw and the score would never count, including the one time it
          * should. Order matters here in a way that is easy to reverse by
          * accident while tidying.
+         *
+         * ⚠️ `viewed_at` IS NOT STAMPED HERE ANY MORE. It belongs to the
+         * presenter, because the presenter is the emission point and the
+         * dashboard emits the same payload through forCard(). Recording it
+         * here was the bug: one of two call sites remembered, and nothing made
+         * the other one fail.
          */
         $payload = $this->presenter->full($match);
 
-        if (! $match->viewed_at) {
-            $match->forceFill(['viewed_at' => now()])->save();
+        if (! $match->opened_at) {
+            $match->forceFill(['opened_at' => now()])->save();
         }
 
         return Inertia::render('Matches/Show', ['match' => $payload]);

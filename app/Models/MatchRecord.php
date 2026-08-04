@@ -49,6 +49,9 @@ class MatchRecord extends Model
             'unlocked_at' => 'datetime',
             'delivered_at' => 'datetime',
             'viewed_at' => 'datetime',
+            // Seen anywhere vs opened the full page. See the migration that
+            // separated them: one column was answering two questions.
+            'opened_at' => 'datetime',
             'responded_at' => 'datetime',
         ];
     }

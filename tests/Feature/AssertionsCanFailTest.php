@@ -40,10 +40,48 @@ use Tests\TestCase;
  *
  * ── RULE 5, WHICH THE FOURTH ONE EARNED ───────────────────────────────────
  *
- * Any test, guard OR MEASUREMENT HARNESS that inspects source, output,
- * structure or a rendered page must carry a positive control proving it can
- * still find what it looks for — and that control must be re-verified whenever
- * the thing being inspected is refactored.
+ * Any test, guard, MEASUREMENT HARNESS **or ONE-OFF AUDIT** that inspects
+ * source, output, structure, a rendered page or STORED DATA must carry a
+ * positive control proving it can still find what it looks for — and that
+ * control must be re-verified whenever the thing being inspected is
+ * refactored.
+ *
+ * ⚠️ "ONE-OFF AUDIT" WAS ADDED AFTER THE SEVENTH INSTANCE, WHICH FELL THROUGH
+ * THE RULE ON A LITERAL READING.
+ *
+ * An ad-hoc query written to answer a safety question — "was any real member
+ * exposed?" — is not a test, not a guard, and not a harness. It runs once,
+ * answers, and is never run again, so nobody holds it to the standard a
+ * permanent guard is held to. That exemption is exactly backwards: a permanent
+ * guard gets a thousand chances to be noticed as wrong, and a one-off audit
+ * gets none. Its single answer is acted on and then becomes what everybody
+ * believes.
+ *
+ * So: an audit is a guard that runs once, and gets the same treatment. Before
+ * it is run for real it must be pointed at a row constructed to trip it, and
+ * be seen to trip.
+ *
+ * ⚠️ AND THE SEVENTH FAILED DIFFERENTLY FROM THE FIRST SIX, WHICH IS WHY A
+ * POSITIVE CONTROL ALONE WOULD NOT HAVE SAVED IT.
+ *
+ * The first six were readers that looked at NOTHING, or could no longer see
+ * what they looked for. This one looked at the WRONG THING, correctly. It asked
+ * "which rows carry a viewed_at timestamp?" when the real question was "which
+ * code paths can emit this field?" — and `viewed_at` was written by one of the
+ * two paths that emitted it. The query was accurate about the data and wrong
+ * about the world.
+ *
+ * ⚠️ EXPOSURE QUESTIONS ARE ANSWERED FROM EMISSION POINTS, NOT FROM DATA.
+ *
+ * Database archaeology tells you what happened to be recorded. Enumerating the
+ * presenters, controllers and serialisers that can emit a field tells you what
+ * could ever have been sent — which is the actual question when somebody asks
+ * whether a member's details escaped.
+ *
+ * Where a stored proxy is genuinely unavoidable, the proxy's fidelity to the
+ * thing it stands for must be asserted in its own test. ViewRecordingTest is
+ * that assertion for `viewed_at`: it proves every path that emits an unlocked
+ * payload also records it, which is the property the audit had assumed.
  *
  * ⚠️ "MEASUREMENT HARNESS" IS IN THAT SENTENCE DELIBERATELY.
  *

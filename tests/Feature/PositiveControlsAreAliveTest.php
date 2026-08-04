@@ -274,6 +274,42 @@ class PositiveControlsAreAliveTest extends TestCase
     }
 
     /**
+     * ⚠️ POSITIVE CONTROL FOR THE STALE-ENTRY HALF — the half that only fires
+     * under a condition nobody creates on purpose.
+     *
+     * The "a third file gained the vocabulary" half is exercised constantly:
+     * every run of the affinity scan depends on it. The "an entry went stale"
+     * half fires only when somebody refactors the vocabulary out of an engine
+     * file and forgets the list, which may be never — so it could sit there
+     * broken for the life of the project and nothing would say so.
+     *
+     * A rotted entry is not harmless. It is a standing permission for whatever
+     * file next occupies that path, and a path is far easier to reoccupy than a
+     * file is to move.
+     */
+    public function test_the_stale_entry_detector_can_actually_see_a_stale_entry(): void
+    {
+        // A file that exists and contains none of the vocabulary — which is what
+        // a rotted allow-list entry looks like.
+        $innocent = base_path('composer.json');
+
+        $this->assertFileExists($innocent);
+
+        $this->assertSame(
+            [],
+            Scanners::forbiddenTerms(File::get($innocent)),
+            'The stale-entry detector cannot distinguish a file that carries the vocabulary from '
+                .'one that does not, so the freshness half of the allow-list check proves nothing.'
+        );
+
+        // And the detector genuinely fires on a real engine file, so the
+        // comparison above is not passing because the reader is dead.
+        $live = base_path(self::THE_ENGINE[0]);
+
+        $this->assertNotSame([], Scanners::forbiddenTerms(File::get($live)));
+    }
+
+    /**
      * ⚠️ AND THE SCAN ABOVE MUST HAVE SCANNED SOMETHING.
      *
      * This is the assertion whose absence caused the whole incident. It is

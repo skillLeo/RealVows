@@ -77,6 +77,31 @@ class MatchPresenter
          */
         $mutual = $this->interest->isMutual($match);
 
+        /*
+         * ⚠️ STAMPED HERE, AT THE EMISSION POINT, AND NOT AT THE CALL SITES.
+         *
+         * This used to be the show controller's job, and the dashboard — which
+         * calls this same method through forCard() — never did it. So a member
+         * could read an introduction in full and the admin log would report it
+         * as never viewed.
+         *
+         * Putting it at the call sites is what failed. There were two, one of
+         * them remembered, and nothing made the other fail. Here it is
+         * structural: this method IS the emission of the unlocked contents, so
+         * emitting without recording is no longer expressible.
+         *
+         * ⚠️ A WRITE IN A PRESENTER IS A SMELL AND IT IS THE LESSER ONE. The
+         * alternative is a rule somebody has to remember at every future call
+         * site, and this project has been caught six times by exactly that.
+         *
+         * `firstView` is read from `opened_at`, NOT from this, so recording a
+         * dashboard view can never suppress the arrival ceremony on the match
+         * page. That coupling is why the original conflation was load-bearing.
+         */
+        if ($match->isUnlocked() && $match->viewed_at === null) {
+            $match->forceFill(['viewed_at' => now()])->save();
+        }
+
         return [
             'id' => $match->id,
             'status' => $match->status,
@@ -101,10 +126,15 @@ class MatchPresenter
              *
              * The count and the ring drawing themselves are an arrival, and an
              * arrival that happens every time somebody revisits a page is not
-             * an arrival, it is a delay. `viewed_at` is set the first time
-             * this route is opened, so this is false on every visit after.
+             * an arrival, it is a delay.
+             *
+             * ⚠️ READ FROM `opened_at`, NOT `viewed_at`. They used to be one
+             * column, which meant the honest fix to the admin log — recording
+             * that the dashboard shows the unlocked contents — would have
+             * stamped the ceremony as already played and the ring would never
+             * have animated for anybody. Two questions, two columns.
              */
-            'firstView' => $match->viewed_at === null,
+            'firstView' => $match->opened_at === null,
 
             'sections' => $this->sections($them),
 

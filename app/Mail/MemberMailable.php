@@ -19,12 +19,22 @@ use Illuminate\Support\Facades\URL;
  * including receipts, which members are entitled to. Building it per template
  * means six chances to forget; building it here means none.
  *
- * ⚠️ THE LINK IS SIGNED AND NEVER EXPIRES.
+ * ⚠️ THE LINK IS SIGNED AND NEVER EXPIRES. DO NOT "HARDEN" THIS.
  *
- * A signed URL is normally short-lived. This one deliberately is not: people
- * unsubscribe from old email, frequently from the message that finally annoyed
- * them, which may be weeks down the inbox. An expired unsubscribe link sends
- * them to an error page and then to the spam button.
+ * Every other signed URL in this product is short-lived, so this one reads as
+ * an oversight and the fix looks like a one-line improvement: add an expiry,
+ * match the receipt, done.
+ *
+ * It is not an oversight. People unsubscribe from OLD email — usually the
+ * message that finally annoyed them, which may be weeks down the inbox. An
+ * expiring link sends exactly that person to an error page, and their next
+ * move is the spam button.
+ *
+ * Weigh the two failures honestly. A leaked unsubscribe link lets somebody
+ * switch off one channel for one member, who can switch it back on from their
+ * account in a click. A spam complaint damages the sending reputation of the
+ * whole domain — every message including receipts — and takes weeks to repair.
+ * An expiry guards the cheaper failure by causing the more expensive one.
  */
 abstract class MemberMailable extends Mailable implements ShouldQueue
 {

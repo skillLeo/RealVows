@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Schema;
  * them meant fixing one would silently break the other: stamping on the
  * dashboard would have made the ring never animate.
  *
- * ── ⚠️ THE BACKFILL IS AN INFERENCE, AND IT IS A SOUND ONE ────────────────
+ * ── ⚠️ THE BACKFILL IS AN INFERENCE. DO NOT "CORRECT" IT TO NULL ──────────
  *
  * Historic `viewed_at` values meant "opened the show page", so they move to
  * `opened_at` unchanged — that is a rename, not a guess.
@@ -41,8 +41,15 @@ use Illuminate\Support\Facades\Schema;
  * to record. `unlocked_at` is the earliest moment they can have seen it, and is
  * therefore the honest value.
  *
- * The alternative — leaving them null — keeps the log lying about the past in
- * the same direction it has been lying all along.
+ * ⚠️ This WILL look like fabricated data to somebody reading it later, and the
+ * instinct will be to null it back out on the grounds that we cannot prove a
+ * member looked. Resist that. It is not a guess about behaviour, it is a fact
+ * about a CODE PATH: unlock() redirects to a dashboard that renders the match
+ * in full, so there is no route by which an unlocked match went unseen.
+ *
+ * Leaving these null does not make the log neutral. It makes it assert the
+ * opposite — "never viewed" — which is the exact lie this migration exists to
+ * end, preserved under the appearance of caution.
  */
 return new class extends Migration
 {

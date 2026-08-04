@@ -23,6 +23,18 @@ class MessageDelivery extends Model
 
     public const STATUS_QUEUED = 'queued';
 
+    /**
+     * ⚠️ HANDED TO THE MAIL SERVER, AND NOTHING MORE IS KNOWN.
+     *
+     * The highest status an email can honestly reach on the current transport.
+     * Hostinger SMTP returns a 250 and tells us nothing afterwards: a hard
+     * bounce to a dead address, a silent drop into spam, and a message read
+     * twice are indistinguishable from here — and all three look like success.
+     *
+     * ⚠️ IT MUST NEVER BE DISPLAYED AS "DELIVERED". See label().
+     */
+    public const STATUS_ACCEPTED = 'accepted';
+
     public const STATUS_SENT = 'sent';
 
     public const STATUS_DELIVERED = 'delivered';
@@ -38,10 +50,29 @@ class MessageDelivery extends Model
      */
     private const RANK = [
         self::STATUS_QUEUED => 0,
-        self::STATUS_SENT => 1,
-        self::STATUS_DELIVERED => 2,
-        self::STATUS_READ => 3,
-        self::STATUS_FAILED => 4,
+        // Below `sent`: it is a weaker claim, not an equal one.
+        self::STATUS_ACCEPTED => 1,
+        self::STATUS_SENT => 2,
+        self::STATUS_DELIVERED => 3,
+        self::STATUS_READ => 4,
+        self::STATUS_FAILED => 5,
+    ];
+
+    /**
+     * ⚠️ THE CEILING EACH CHANNEL CAN HONESTLY REACH.
+     *
+     * WhatsApp earns its statuses — Meta posts back facts about a real handset.
+     * SMTP gives us a 250 and silence, so email stops at `accepted` until the
+     * transport can report a bounce. Anything above that would be the admin
+     * panel inventing knowledge it does not have.
+     *
+     * Raising email's ceiling is a deliberate act that belongs with the change
+     * that earns it: a sending provider with a delivery webhook, or a polled
+     * bounce mailbox. See docs/EMAIL-DELIVERABILITY.md.
+     */
+    private const CEILING = [
+        self::CHANNEL_WHATSAPP => self::STATUS_READ,
+        self::CHANNEL_EMAIL => self::STATUS_ACCEPTED,
     ];
 
     protected $guarded = ['id'];
@@ -85,8 +116,23 @@ class MessageDelivery extends Model
             return false;
         }
 
+        /*
+         * ⚠️ A CHANNEL CANNOT CLAIM MORE THAN IT CAN KNOW.
+         *
+         * `failed` is exempt: a bounce we DO learn about is real information,
+         * and refusing it would be the opposite mistake — suppressing a known
+         * failure to protect a rule about unknowable successes.
+         */
+        if ($status !== self::STATUS_FAILED) {
+            $ceiling = self::CEILING[$this->channel] ?? self::STATUS_READ;
+
+            if (self::RANK[$status] > self::RANK[$ceiling]) {
+                return false;
+            }
+        }
+
         $column = match ($status) {
-            self::STATUS_SENT => 'sent_at',
+            self::STATUS_ACCEPTED, self::STATUS_SENT => 'sent_at',
             self::STATUS_DELIVERED => 'delivered_at',
             self::STATUS_READ => 'read_at',
             self::STATUS_FAILED => 'failed_at',
@@ -102,6 +148,60 @@ class MessageDelivery extends Model
         $this->save();
 
         return true;
+    }
+
+    /**
+     * ⚠️ WHAT AN ADMINISTRATOR IS ALLOWED TO READ OFF THIS ROW.
+     *
+     * The wording is channel-specific because the same word means different
+     * things on the two transports, and the difference is the whole point.
+     *
+     * On WhatsApp, "Delivered" means Meta told us it reached a handset. On
+     * email there is no such fact available, so the label says what actually
+     * happened — the mail server took it — rather than borrowing a word that
+     * would imply somebody received something.
+     *
+     * ⚠️ NEVER SHORTEN THE EMAIL LABEL TO "Sent". The whole failure this
+     * guards against is a screen that looks green while a message bounced into
+     * a void, and "Sent" is exactly the word that would restore it.
+     */
+    public function label(): string
+    {
+        if ($this->channel === self::CHANNEL_EMAIL) {
+            return match ($this->status) {
+                self::STATUS_QUEUED => 'Waiting to send',
+                self::STATUS_ACCEPTED => 'Handed to the mail server',
+                self::STATUS_FAILED => 'Failed',
+                default => ucfirst($this->status),
+            };
+        }
+
+        return match ($this->status) {
+            self::STATUS_QUEUED => 'Waiting to send',
+            self::STATUS_SENT => 'Sent to WhatsApp',
+            self::STATUS_DELIVERED => 'Delivered to their phone',
+            self::STATUS_READ => 'Read',
+            self::STATUS_FAILED => 'Failed',
+            default => ucfirst($this->status),
+        };
+    }
+
+    /**
+     * ⚠️ THE HONEST CAVEAT, CARRIED WITH THE ROW RATHER THAN LEFT TO A README.
+     *
+     * Null when the status means what it says. A sentence when the status is
+     * the most we can establish and could still be hiding a failure — so the
+     * admin panel can print it beside the label and nobody has to remember
+     * that email is different.
+     */
+    public function uncertainty(): ?string
+    {
+        if ($this->channel !== self::CHANNEL_EMAIL || $this->status !== self::STATUS_ACCEPTED) {
+            return null;
+        }
+
+        return 'The mail server accepted this. We cannot tell whether it arrived, '
+            .'was rejected afterwards, or went to spam — this transport reports no bounces.';
     }
 
     public function hasFailed(): bool

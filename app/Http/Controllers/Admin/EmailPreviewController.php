@@ -65,6 +65,51 @@ class EmailPreviewController extends Controller
                         .'matter most. Neither of you is in a hurry, which is rarer than it sounds.',
                 ),
             ],
+            /*
+             * ⚠️ THE CASE THAT BREAKS OUTLOOK'S TABLE HANDLING.
+             *
+             * Word decides a table's width from its content and will happily
+             * push a 560px email out to 900 if one cell refuses to wrap. A long
+             * rationale with no early line break is the realistic way that
+             * happens here, and it is invisible in every other client.
+             */
+            'introduction-delivered-long' => [
+                'label' => 'Introduction delivered — long rationale (Outlook table-width case)',
+                'build' => fn () => new IntroductionDelivered(
+                    $recipient,
+                    count: 4,
+                    score: 92,
+                    rationale: 'You are both settled in Kingston and neither of you is planning to '
+                        .'leave, which matters more than it sounds when two people are deciding '
+                        .'whether to build something permanent. You each said you want children '
+                        .'within a few years rather than immediately, you both named family and '
+                        .'faith as the things that matter most to you, and you both described '
+                        .'wanting to talk a disagreement through straight away rather than let it '
+                        .'sit. Neither of you is in a hurry, and that is rarer than it sounds — '
+                        .'most people arrive here wanting something to have happened already.',
+                ),
+            ],
+
+            /*
+             * ⚠️ NO SURNAME, WHICH IS NOW THE NORMAL CASE.
+             *
+             * The presenter withholds the last name until mutual interest, so
+             * most emails go to somebody the template knows only a first name
+             * for — and a greeting that renders "Hello ," or a footer with a
+             * gap in it would be a permanent, visible fault in the commonest
+             * path rather than an edge case.
+             */
+            'introduction-delivered-no-surname' => [
+                'label' => 'Introduction delivered — member with no surname (empty-slot layout)',
+                'build' => fn () => new IntroductionDelivered(
+                    $this->sampleRecipientWithoutSurname(),
+                    count: 1,
+                    score: 74,
+                    rationale: 'You both put honesty first, and you are looking for the same thing '
+                        .'on the same timescale.',
+                ),
+            ],
+
             'introductions-unlocked' => [
                 'label' => 'Introductions unlocked — after payment',
                 'build' => fn () => new IntroductionsUnlocked($recipient, count: 3),
@@ -226,6 +271,23 @@ class EmailPreviewController extends Controller
 
         $profile = new Profile(['first_name' => 'Aisha', 'last_name' => 'Mohammed-Bakare']);
         $user->setRelation('profile', $profile);
+
+        return $user;
+    }
+
+    /**
+     * A member the product knows only a first name for — which, since the
+     * privacy guard was narrowed, is what most recipients look like.
+     */
+    private function sampleRecipientWithoutSurname(): User
+    {
+        $user = new User([
+            'name' => 'Kemar',
+            'email' => 'kemar@example.com',
+        ]);
+
+        $user->id = 2;
+        $user->setRelation('profile', new Profile(['first_name' => 'Kemar', 'last_name' => null]));
 
         return $user;
     }

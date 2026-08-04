@@ -29,6 +29,26 @@ Schedule::command('queue:work --stop-when-empty --tries=3 --max-time=50')
     ->withoutOverlapping();
 
 /*
+ * ⚠️ THE SITE MUST NOT BE ABLE TO STAY DOWN BECAUSE A DEPLOY DIED.
+ *
+ * The deploy takes the site down over SSH and brings it back over the same SSH
+ * session. The bring-back is marked `always()`, which looks like a safety net
+ * and is not one: if SSH is what failed, the repair fails for the same reason
+ * as the damage. On 4 August 2026 a deploy died on `ssh-keyscan` and the site
+ * survived only because the failure landed BEFORE `artisan down`.
+ *
+ * This runs on the server, from cron, over no network — so it cannot be taken
+ * out by the thing it exists to repair. `artisan down` gates HTTP and not the
+ * scheduler, so the one channel still working during an outage is this one.
+ *
+ * Every minute, because the cost of checking is a file_exists and the cost of
+ * not checking is a client-facing outage nobody is watching for at 3am.
+ */
+Schedule::command('realvows:maintenance-watchdog')
+    ->everyMinute()
+    ->withoutOverlapping();
+
+/*
  * Tops up introductions for anyone verified whose set has gone stale. Queues
  * jobs rather than doing the work, so the drain above does it a chunk at a
  * time and being killed mid-run costs at most one chunk.

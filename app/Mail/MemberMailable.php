@@ -69,7 +69,9 @@ abstract class MemberMailable extends Mailable implements ShouldQueue
     {
         return array_merge($this->payload(), [
             'recipient' => $this->recipient,
-            'firstName' => $this->recipient->profile?->first_name,
+            // Normalised, not read raw: a whitespace-only name is truthy and
+            // every greeting in the product is a ternary on truthiness.
+            'firstName' => $this->recipient->profile?->greetingName(),
             'unsubscribeUrl' => URL::signedRoute('unsubscribe', [
                 'user' => $this->recipient->id,
                 'channel' => 'email',

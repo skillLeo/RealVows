@@ -26,7 +26,7 @@ class VerificationApproved extends Mailable implements ShouldQueue
     {
         return new Content(
             view: 'emails.verification-approved',
-            with: ['firstName' => $this->verification->profile?->first_name],
+            with: ['firstName' => $this->verification->profile?->greetingName()],
         );
     }
 }

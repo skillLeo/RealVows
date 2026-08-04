@@ -27,7 +27,7 @@ class PurchaseReceipt extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.purchase-receipt',
             with: [
-                'firstName' => $this->purchase->user?->profile?->first_name,
+                'firstName' => $this->purchase->user?->profile?->greetingName(),
                 'reference' => $this->purchase->reference(),
                 'amount' => $this->purchase->amountFormatted(),
                 'credits' => $this->purchase->credits_granted,

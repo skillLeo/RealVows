@@ -33,7 +33,7 @@ class VerificationRejected extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.verification-rejected',
             with: [
-                'firstName' => $this->verification->profile?->first_name,
+                'firstName' => $this->verification->profile?->greetingName(),
                 'reason' => $this->reason,
                 'note' => $this->note,
                 'code' => $this->verification->code,

@@ -45,6 +45,29 @@ class Profile extends Model
         ];
     }
 
+    /**
+     * The first name, or null if there is not really one.
+     *
+     * ⚠️ A WHITESPACE-ONLY NAME IS TRUTHY IN PHP, AND EVERY GREETING IN THE
+     * PRODUCT IS A TERNARY ON TRUTHINESS.
+     *
+     * `$firstName ? "Hello $firstName," : 'Hello,'` looks safe and is not:
+     * a profile whose first name is "   " — which a copy-paste, an autofill,
+     * or a trimmed-to-nothing form field all produce — takes the first branch
+     * and renders "Hello    ,".
+     *
+     * The empty-string case is handled by the same ternary and the null case
+     * by the fallback, so this is the only gap, and it is invisible until a
+     * real person receives it. Normalising here means every surface gets it
+     * right without each one remembering to trim.
+     */
+    public function greetingName(): ?string
+    {
+        $name = trim((string) $this->first_name);
+
+        return $name === '' ? null : $name;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

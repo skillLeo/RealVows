@@ -43,8 +43,42 @@ class CandidatePool
         $this->dealBreakers($query, $seeker);        // 8. and 9.
         $this->noPriorPass($query, $seeker);         // 10.
         $this->noExistingRow($query, $seeker);       // 11.
+        $this->notBlocked($query, $seeker);          // 12.
 
         return $query;
+    }
+
+    /**
+     * ⚠️ BLOCKING IS A HARD FILTER, NOT A DISPLAY RULE.
+     *
+     * Filtering blocked people out at display time would mean the engine still
+     * scored them, still wrote a match row, and — on the paid product — still
+     * consumed one of the introductions a member is entitled to, on somebody
+     * they can never be shown. The member would simply receive fewer
+     * introductions than they paid for, with nothing anywhere saying why.
+     *
+     * ⚠️ IT LOOKS BOTH WAYS ROUND. A block hides the blocked from the blocker
+     * AND the blocker from the blocked. One-directional, the blocked party
+     * keeps receiving the blocker as an introduction and can express interest
+     * in them — and the silence that follows is itself a disclosure. On a
+     * platform this small, in a country this small, that is how a block turns
+     * into an escalation.
+     */
+    private function notBlocked(Builder $query, Profile $seeker): void
+    {
+        $query->whereNotExists(function ($q) use ($seeker) {
+            $q->selectRaw('1')
+                ->from('blocks')
+                ->where(function ($either) use ($seeker) {
+                    $either->where(function ($w) use ($seeker) {
+                        $w->where('blocker_profile_id', $seeker->id)
+                            ->whereColumn('blocked_profile_id', 'profiles.id');
+                    })->orWhere(function ($w) use ($seeker) {
+                        $w->whereColumn('blocker_profile_id', 'profiles.id')
+                            ->where('blocked_profile_id', $seeker->id);
+                    });
+                });
+        });
     }
 
     /**

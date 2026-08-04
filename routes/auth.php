@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PurchasesController;
@@ -126,6 +127,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/matches/{match}/respond', [MatchController::class, 'respond'])
             ->middleware('throttle:unlock')
             ->name('matches.respond');
+
+        /*
+         * ⚠️ NOT THROTTLED LIKE THE OTHERS.
+         *
+         * Every other action here is rate limited to stop a script working
+         * through ids. Blocking is the one thing a frightened member may need
+         * to do immediately and repeatedly, and a 429 in that moment is the
+         * product telling somebody to wait before protecting themselves.
+         *
+         * The abuse ceiling is generous rather than absent: the unique index
+         * makes a repeat block a no-op, and ownership is checked, so the worst
+         * a script achieves is emptying its own pool.
+         */
+        Route::post('/matches/{match}/block', [BlockController::class, 'store'])
+            ->middleware('throttle:60,1')
+            ->name('matches.block');
 
         /*
         |--------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ProcessWhatsAppWebhook;
 use App\Services\Settings\SettingsService;
 use App\Support\WhatsAppWebhook;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,14 +13,17 @@ use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 /**
- * ⚠️ THE HANDSHAKE, AND THE PROOF THAT IT IS STILL ONLY A HANDSHAKE.
+ * ⚠️ THE HANDSHAKE, AND WHAT A VERIFIED PAYLOAD IS ALLOWED TO CAUSE.
  *
- * This endpoint exists ahead of Phase 3 for one reason: Meta will not issue a
- * phone number ID until a callback URL answers a verification challenge, and
- * business verification is the longest lead time in the project. Nothing here
- * processes a message, and several of these tests exist specifically to keep
- * it that way — "we will wire it up later" turns into "it half works" without
- * something failing the build.
+ * The endpoint was built ahead of Phase 3 because Meta will not issue a phone
+ * number ID until a callback URL answers a verification challenge, and
+ * business verification is the longest lead time in the project.
+ *
+ * It now does real work, which changes what has to be true of it. The load
+ * bearing rule is no longer "it processes nothing" — it is that a payload
+ * whose signature cannot be verified processes nothing, because everything
+ * downstream changes state: a status marks a delivery failed and triggers an
+ * email fallback, an inbound STOP opts a member out of a channel.
  */
 class WhatsAppWebhookTest extends TestCase
 {
@@ -316,10 +320,19 @@ class WhatsAppWebhookTest extends TestCase
      * a job or writes a row, message handling has started — which is Phase 3
      * work, gated on the client's written acceptance of Phase 2.
      */
-    public function test_a_delivery_is_not_processed(): void
+    /**
+     * ⚠️ THE LOAD-BEARING RULE NOW THAT PAYLOADS DO SOMETHING.
+     *
+     * An unverifiable payload must queue nothing. Everything ProcessWhatsAppWebhook
+     * does is a state change on a member's account — marking a delivery
+     * failed, sending a fallback email, switching off a channel — and this
+     * URL is public by design.
+     */
+    public function test_an_unverifiable_delivery_queues_no_work(): void
     {
         Bus::fake();
 
+        // No app secret configured, so the signature cannot be checked.
         $this->postJson(self::URL, $this->delivery())->assertOk();
 
         Bus::assertNothingDispatched();
@@ -327,9 +340,39 @@ class WhatsAppWebhookTest extends TestCase
         $this->assertSame(
             0,
             \DB::table('jobs')->count(),
-            'A delivery queued work. This endpoint is the verification handshake only — handling '
-                .'messages is Phase 3, and Phase 3 is gated on written acceptance of Phase 2.'
+            'An unattributable payload queued work. Anyone who can POST to this URL could then '
+                .'mark a delivery failed or opt a member out of a channel.'
         );
+    }
+
+    /** A mis-signed payload is refused outright and queues nothing either. */
+    public function test_a_mis_signed_delivery_queues_no_work(): void
+    {
+        Bus::fake();
+
+        app(SettingsService::class)->set('whatsapp', 'app_secret', 'the-app-secret');
+
+        $this->call(
+            'POST', self::URL, [], [], [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_X_HUB_SIGNATURE_256' => 'sha256=deadbeef'],
+            json_encode($this->delivery())
+        )->assertForbidden();
+
+        Bus::assertNothingDispatched();
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL (Rule 5). The two tests above assert that nothing
+     * was queued, which passes just as well against a controller that queues
+     * nothing ever — including for a genuine, correctly signed Meta delivery.
+     */
+    public function test_a_verified_delivery_does_queue_work(): void
+    {
+        Bus::fake();
+
+        $this->signedPost($this->delivery())->assertOk();
+
+        Bus::assertDispatchedTimes(ProcessWhatsAppWebhook::class, 1);
     }
 
     public function test_an_unparseable_body_still_returns_200(): void
@@ -391,7 +434,7 @@ class WhatsAppWebhookTest extends TestCase
          * as processed — an anonymous POST that can mark a delivery failed or
          * opt a member out is the whole reason the drop exists.
          */
-        $this->assertStringNotContainsString('acknowledged, not processed', $log);
+        $this->assertStringNotContainsString('acknowledged, queued for processing', $log);
     }
 
     // ── The log ──────────────────────────────────────────────────────────────

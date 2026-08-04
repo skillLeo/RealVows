@@ -34,6 +34,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            // Meta's 24-hour customer service window. See ConversationWindow.
+            'whatsapp_last_inbound_at' => 'datetime',
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
             'password' => 'hashed',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessWhatsAppWebhook;
 use App\Support\WhatsAppWebhook;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,13 +25,19 @@ use Illuminate\Support\Facades\Log;
  * recorded here rather than silently corrected, because the next person to
  * read the brief will otherwise think this file wandered off it.
  *
- * ── ⚠️ WHAT THIS DOES NOT DO ──────────────────────────────────────────────
+ * ── ⚠️ IT ACKNOWLEDGES, IT DOES NOT PROCESS ───────────────────────────────
  *
- * It does not process messages. Phase 3 owns that, and Phase 3 is gated on
- * the client's written acceptance of Phase 2. `receive()` acknowledges and
- * logs. It dispatches no job, writes no row, and sends nothing. Meta requires
- * a fast 200 regardless of what we intend to do with the payload, so an
- * acknowledging stub is the correct shape for it to keep having anyway.
+ * Meta measures the RESPONSE, not the work: anything slower than a few
+ * hundred milliseconds is retried, and a subscription that keeps timing out
+ * is disabled. So `receive()` verifies, logs, queues, and answers 200. The
+ * work happens in ProcessWhatsAppWebhook — which on shared hosting with a
+ * one-minute cron is up to a couple of minutes later, and is never instant.
+ *
+ * ⚠️ ONLY A SIGNATURE-VERIFIED PAYLOAD IS QUEUED. An unverifiable one is
+ * acknowledged and dropped, loudly. Everything downstream changes state — a
+ * status marks a delivery failed and triggers an email fallback, an inbound
+ * STOP opts a member out — and none of that may be reachable by an anonymous
+ * POST to a URL that is public by design.
  */
 class WhatsAppWebhookController extends Controller
 {
@@ -150,8 +157,20 @@ class WhatsAppWebhookController extends Controller
             return response()->json(['status' => 'ok']);
         }
 
+        /*
+         * ⚠️ QUEUED, NOT HANDLED HERE. Meta measures the response, not the
+         * work: anything slower than a few hundred milliseconds is retried,
+         * and a subscription that keeps timing out is disabled.
+         *
+         * On shared hosting with a one-minute cron this means a status or an
+         * opt-out is applied within a couple of minutes, never instantly.
+         */
+        if (is_array($payload)) {
+            ProcessWhatsAppWebhook::dispatch($payload);
+        }
+
         $this->record($request, 'receive', 200, [
-            'outcome' => 'acknowledged, not processed',
+            'outcome' => 'acknowledged, queued for processing',
             'signature' => $signature,
             /*
              * ⚠️ ENCODED HERE, NOT HANDED OVER AS AN ARRAY.

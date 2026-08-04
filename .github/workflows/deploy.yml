@@ -16,6 +16,10 @@ on:
         description: 'WhatsApp verify token to store on the server (leave empty to keep the current one)'
         required: false
         default: ''
+      run_exposure_audit:
+        description: 'Run the read-only last-name exposure audit against production data'
+        required: false
+        default: 'false'
 
 concurrency:
   group: deploy-production
@@ -142,6 +146,21 @@ jobs:
           printf '%s\n' "$VERIFY_TOKEN" | \
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan whatsapp:verify-token --stdin --force"
+
+      # A one-off audit, run on demand against production data.
+      #
+      # ⚠️ READ-ONLY. It counts and reports; it changes nothing. Added because
+      # "no real members exist yet, so nobody was exposed" is a belief, and a
+      # belief is not something to report to a client as fact.
+      - name: Audit last-name exposure
+        if: ${{ github.event.inputs.run_exposure_audit == 'true' }}
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:audit-lastname-exposure"
 
       - name: Bring the site back
         if: always()

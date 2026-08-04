@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\File;
+use Tests\Support\Scanners;
 use Tests\TestCase;
 
 /**
@@ -107,22 +108,17 @@ class CopyDeckTest extends TestCase
             );
 
             /*
-             * Text that is the ENTIRE content of an element and reads like a
-             * sentence: starts with a capital, at least three words. That is
-             * what copy looks like; a label like "Save" or a class name is
-             * not caught, and neither is an interpolation.
+             * ⚠️ THE READER LIVES IN Tests\Support\Scanners, NOT HERE.
+             *
+             * It used to be an inlined regex, which meant nothing could
+             * exercise it — so if it ever stopped matching, this guard would
+             * find zero offences and pass, exactly as it would on a clean
+             * codebase. PositiveControlsAreAliveTest now runs it against a
+             * planted violation and a clean sample on every build, and fails
+             * if a guard copies it back out.
              */
-            preg_match_all('/>\s*([A-Z][^<>{}]{14,})\s*</', $template, $matches);
-
-            foreach ($matches[1] as $found) {
-                $text = trim($found);
-
+            foreach (Scanners::rawCopyStrings($template) as $text) {
                 if (in_array($text, self::NOT_COPY, true)) {
-                    continue;
-                }
-
-                // Needs at least three words to be a sentence rather than a label.
-                if (str_word_count($text) < 3) {
                     continue;
                 }
 
@@ -240,18 +236,21 @@ class CopyDeckTest extends TestCase
     {
         $offending = '<template><div><p>We could not find anyone for you today.</p></div></template>';
 
-        preg_match_all('/>\s*([A-Z][^<>{}]{14,})\s*</', $offending, $m);
+        $found = Scanners::rawCopyStrings($offending);
 
         $this->assertNotEmpty(
-            $m[1],
+            $found,
             'The reader cannot see a sentence sitting in a template, so it proves nothing about '
                 .'the real components.'
         );
 
-        $this->assertSame('We could not find anyone for you today.', trim($m[1][0]));
+        $this->assertSame('We could not find anyone for you today.', $found[0]);
 
         // And it does NOT flag an interpolated string or a short label.
-        preg_match_all('/>\s*([A-Z][^<>{}]{14,})\s*</', '<p>{{ $t(\'a.b\') }}</p><span>Save</span>', $clean);
-        $this->assertSame([], $clean[1], 'The reader flags migrated copy, which would make it unusable.');
+        $this->assertSame(
+            [],
+            Scanners::rawCopyStrings('<p>{{ $t(\'a.b\') }}</p><span>Save</span>'),
+            'The reader flags migrated copy, which would make it unusable.'
+        );
     }
 }

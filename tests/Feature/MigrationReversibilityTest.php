@@ -30,9 +30,26 @@ class MigrationReversibilityTest extends TestCase
      */
     private function phase2Steps(): int
     {
-        return count(glob(database_path('migrations/2026_08_0[2-9]*.php')))
-            + count(glob(database_path('migrations/2026_0[9]*.php')))
-            + count(glob(database_path('migrations/202[7-9]*.php')));
+        $matched = array_merge(
+            glob(database_path('migrations/2026_08_0[2-9]*.php')) ?: [],
+            glob(database_path('migrations/2026_0[9]*.php')) ?: [],
+            glob(database_path('migrations/202[7-9]*.php')) ?: [],
+        );
+
+        /*
+         * ⚠️ AN EMPTY GLOB WOULD MAKE THIS TEST PASS BY ROLLING BACK NOTHING.
+         *
+         * A wrong path, a renamed directory, or a date pattern that stops
+         * matching all produce zero — and zero steps means the reversibility
+         * check rolls back nothing, finds the schema unchanged, and agrees
+         * with itself. This is the same shape as the zodiac grep that printed
+         * CLEAN while scanning no files.
+         */
+        return count(\Tests\Support\ScannedFiles::of(
+            $matched,
+            'Phase 2 and later migrations',
+            atLeast: 2,
+        ));
     }
 
     private const RESHAPED = ['matches', 'credit_ledger', 'purchases'];

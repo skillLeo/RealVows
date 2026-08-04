@@ -23,12 +23,24 @@ use Illuminate\Console\Command;
  * dotfiles by default. Believing a thing and having checked it are different,
  * and only one of them is reportable to a client.
  *
- * ⚠️ THE TEST IS "DID AN UNLOCKED CARD EVER LOAD FOR A NON-DEMO ACCOUNT?"
+ * ⚠️ `viewed_at` IS THE WRONG MARKER, AND THE FIRST VERSION OF THIS COMMAND
+ * USED IT AND CONFIDENTLY REPORTED "NONE".
  *
- * `viewed_at` is the honest marker: it is stamped the first time the full
- * match page is opened, which is the only surface that carried the payload.
- * An unlocked-but-never-viewed match means the card was never rendered and
- * therefore no name was ever sent to a browser.
+ * `viewed_at` is stamped only by the match SHOW page. But the DASHBOARD
+ * renders the same full() payload for every unlocked card and stamps nothing —
+ * and unlock() redirects straight to the dashboard, so a member lands on a
+ * rendered unlocked card the instant they pay.
+ *
+ * "Unlocked but never viewed" therefore does NOT mean "never rendered". It
+ * means the member paid, was returned to a dashboard already showing the last
+ * name, and never clicked through to the full page afterwards.
+ *
+ * Reporting "none" from that marker would have been this project's recurring
+ * failure once more: a check answering confidently while measuring the wrong
+ * thing. It is recorded here rather than quietly corrected.
+ *
+ * ⚠️ THE HONEST TEST IS SIMPLY: DID A NON-DEMO ACCOUNT EVER HOLD AN UNLOCKED
+ * MATCH? If it did, the name was on screen.
  */
 class AuditLastNameExposure extends Command
 {
@@ -54,50 +66,54 @@ class AuditLastNameExposure extends Command
         $this->line('');
 
         /*
-         * The population that matters: an unlocked match whose SEEKER is not a
-         * demo account, that was actually opened.
+         * ⚠️ NO `viewed_at` FILTER. See the note on this class: the dashboard
+         * renders the full payload for every unlocked card and stamps nothing,
+         * and unlocking redirects the member straight onto it. Holding an
+         * unlocked match IS the exposure.
          */
         $exposed = MatchRecord::query()
             ->where('status', MatchRecord::STATUS_UNLOCKED)
-            ->whereNotNull('viewed_at')
             ->whereHas('seeker', fn ($q) => $q->whereNotIn('user_id', $demoEmails))
-            ->with('seeker.user')
+            ->with('seeker.user', 'matched')
             ->get();
 
-        $unlockedNeverViewed = MatchRecord::query()
-            ->where('status', MatchRecord::STATUS_UNLOCKED)
-            ->whereNull('viewed_at')
-            ->count();
-
         $this->line('  Unlocked matches        '.MatchRecord::where('status', MatchRecord::STATUS_UNLOCKED)->count());
-        $this->line('  …never opened           '.$unlockedNeverViewed.'  (payload never rendered)');
+        $this->line('  …held by demo accounts  '.(MatchRecord::where('status', MatchRecord::STATUS_UNLOCKED)->count() - $exposed->count()));
+        $this->line('');
+
+        // Shown for context: it is NOT the exposure test, only an indication
+        // of how many also opened the full match page.
+        $this->line('  (opened the full page   '.MatchRecord::where('status', MatchRecord::STATUS_UNLOCKED)->whereNotNull('viewed_at')->count().' — not the marker, see class note)');
         $this->line('');
 
         if ($exposed->isEmpty()) {
             $this->info('  RESULT: none.');
             $this->line('');
-            $this->line('  No non-demo account has ever opened an unlocked introduction, so no');
-            $this->line('  real member ever received a last name from the defective payload.');
+            $this->line('  No non-demo account has ever held an unlocked introduction, so no');
+            $this->line('  real member was ever shown a last name by the defective payload.');
             $this->line('');
 
             return self::SUCCESS;
         }
 
-        $this->error('  RESULT: '.$exposed->count().' unlocked introductions were opened by non-demo accounts.');
+        $this->error('  RESULT: '.$exposed->count().' unlocked introductions were held by non-demo accounts.');
         $this->line('');
 
         foreach ($exposed as $match) {
             $this->line(sprintf(
-                '    match #%d  seeker user #%s  opened %s',
+                '    match #%d  seeker user #%s <%s>  saw: %s  unlocked %s',
                 $match->id,
                 $match->seeker?->user_id ?? '?',
-                $match->viewed_at?->toDateTimeString() ?? '?',
+                $match->seeker?->user?->email ?? '?',
+                trim(($match->matched?->first_name ?? '?').' '.($match->matched?->last_name ?? '?')),
+                $match->unlocked_at?->toDateTimeString() ?? '?',
             ));
         }
 
         $this->line('');
-        $this->warn('  Each of these members was shown another member\'s last name before');
-        $this->warn('  mutual interest. Both sides of each pair need to be identified.');
+        $this->warn('  Each seeker above was shown the matched member\'s last name before mutual');
+        $this->warn('  interest. Judge the blast radius by WHO these accounts are: a developer or');
+        $this->warn('  the client testing is not a disclosure; a real member is.');
         $this->line('');
 
         return self::FAILURE;

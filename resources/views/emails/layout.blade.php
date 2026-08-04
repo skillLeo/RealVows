@@ -64,6 +64,55 @@
                                 RealVows · marriage-first · 18+<br>
                                 If you weren't expecting this, you can ignore it safely.
                             </p>
+
+                            {{--
+                                ⚠️ THE CONTRACTING ENTITY, READ FROM SETTINGS.
+
+                                Never a hardcoded string. "RealVows" could not be
+                                registered as a company in time, so the business
+                                that actually contracts with the member is a
+                                different one — and an email footer naming the
+                                wrong party is the same false statement as a
+                                receipt naming the wrong party.
+
+                                While it is unconfirmed this prints the pending
+                                line rather than a guess. See Billing.php, which
+                                explains at length why the entity has no default.
+                            --}}
+                            @php($billing = app(\App\Support\Billing::class))
+                            <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#8A7E81;">
+                                @if ($billing->isConfigured())
+                                    {{ $billing->tradingAsLine() ?? $billing->legalEntity() }}
+                                    @if ($billing->address())
+                                        <br>{{ $billing->address() }}
+                                    @endif
+                                @else
+                                    [PENDING — the contracting entity is not yet confirmed]
+                                @endif
+                            </p>
+
+                            {{--
+                                ⚠️ UNSUBSCRIBE MUST WORK WITHOUT SIGNING IN.
+
+                                A member who wants messages to stop is often one
+                                who cannot or will not log in. A link behind
+                                authentication is the commonest reason a
+                                legitimate sender gets marked as spam, and a spam
+                                complaint costs the whole domain's deliverability
+                                rather than one message.
+
+                                Absent rather than broken when no recipient is
+                                known — a dead unsubscribe link is worse than
+                                none, because it is the one link a annoyed member
+                                definitely clicks.
+                            --}}
+                            @isset($unsubscribeUrl)
+                                <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#8A7E81;">
+                                    <a href="{{ $unsubscribeUrl }}" style="color:#8A7E81;">
+                                        Stop receiving these emails
+                                    </a>
+                                </p>
+                            @endisset
                         </td>
                     </tr>
                 </table>

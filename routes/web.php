@@ -10,6 +10,7 @@ use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\UnsubscribeController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -226,6 +227,33 @@ Route::prefix('webhook')
         Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('verify');
         Route::post('/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('receive');
     });
+
+/*
+|--------------------------------------------------------------------------
+| Unsubscribing, without a session
+|--------------------------------------------------------------------------
+|
+| ⚠️ SIGNED RATHER THAN AUTHENTICATED, for the same reason as the receipt: it
+| opens from a mail client with no session. An unsubscribe link behind a login
+| is the commonest reason a legitimate sender gets marked as spam, and a spam
+| complaint costs the whole domain's deliverability rather than one message.
+|
+| ⚠️ THE GET DOES NOT ACT. Mail clients and corporate scanners follow every
+| link in an email before a human sees it, so a GET that unsubscribed would
+| silently switch off members who never clicked anything.
+|
+*/
+Route::middleware('signed')->group(function () {
+    Route::get('/unsubscribe/{user}/{channel}', [UnsubscribeController::class, 'show'])
+        ->name('unsubscribe');
+
+    Route::post('/unsubscribe/{user}/{channel}', [UnsubscribeController::class, 'update'])
+        ->withoutMiddleware([
+            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        ])
+        ->name('unsubscribe.confirm');
+});
 
 /*
  * The receipt.

@@ -76,10 +76,36 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # ⚠️ RETRIED, BECAUSE THIS IS THE FLAKIEST STEP IN THE DEPLOY.
+      #
+      # ssh-keyscan against this host has timed out twice (4 August 2026),
+      # failing the whole run. Both times it failed BEFORE `artisan down`, so
+      # the site stayed up — which was luck, not design. A transient failure
+      # one step later strands the site in maintenance until the watchdog
+      # clears it.
+      #
+      # ⚠️ THIS IS A CONNECTIVITY RETRY, NOT A SECURITY ONE. It retries
+      # reaching the host, exactly as WebRootExposureTest may retry "is the
+      # home page up". It does NOT retry any check on whether something is
+      # readable — see the retry asymmetry note in that test. Retrying
+      # connectivity tolerates a slow network; retrying a secrets check polls
+      # until it happens to answer safely.
       - name: Trust the host
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          for attempt in 1 2 3 4 5; do
+            if ssh-keyscan -T 10 -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
+              echo "Host key collected on attempt $attempt."
+              exit 0
+            fi
+            echo "::warning::ssh-keyscan attempt $attempt failed; retrying."
+            sleep 10
+          done
+          echo "::error::Could not reach the host after 5 attempts. Nothing was changed on the server."
+          exit 1
 
       - name: Put the site into maintenance
         run: |

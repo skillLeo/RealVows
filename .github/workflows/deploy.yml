@@ -105,6 +105,21 @@ jobs:
              $PHP artisan route:cache && \
              $PHP artisan view:cache"
 
+      # The WhatsApp verify token, if one has been set as a repository secret.
+      #
+      # ⚠️ PIPED, NOT PASSED AS AN ARGUMENT. On a shared host any other account
+      # can read a command line out of the process list, so a secret must never
+      # appear in argv. GitHub masks it in the log; ps would not.
+      #
+      # Skipped silently when the secret is absent, so a deploy never depends
+      # on it — the endpoint answers 503 and says so in its own log.
+      - name: Apply the WhatsApp verify token
+        if: ${{ secrets.WHATSAPP_VERIFY_TOKEN != '' }}
+        run: |
+          printf '%s\n' "${{ secrets.WHATSAPP_VERIFY_TOKEN }}" | \
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan whatsapp:verify-token --stdin --force"
+
       - name: Bring the site back
         if: always()
         run: |

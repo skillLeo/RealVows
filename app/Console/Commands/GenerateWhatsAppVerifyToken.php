@@ -33,12 +33,51 @@ class GenerateWhatsAppVerifyToken extends Command
      * already works.
      */
     protected $signature = 'whatsapp:verify-token
-                            {--force : Replace an existing token without asking}';
+                            {--force : Replace an existing token without asking}
+                            {--stdin : Read an existing token from standard input instead of generating one}';
 
     protected $description = 'Generate and store the WhatsApp webhook verify token';
 
     public function handle(SettingsService $settings, WhatsAppWebhook $webhook, RecordAuditLog $audit): int
     {
+        /*
+         * ⚠️ --stdin EXISTS SO A TOKEN NEVER REACHES A COMMAND LINE.
+         *
+         * When Meta already holds a token — because it was typed into the
+         * dashboard before this endpoint existed — the value has to travel to
+         * the server rather than be generated there. Passing it as an argument
+         * would put it in the remote shell's history and in the process list,
+         * where any other account on a shared host can read it with ps.
+         *
+         * Piped in, it exists only in the process's own memory.
+         */
+        if ($this->option('stdin')) {
+            $supplied = trim((string) fgets(STDIN));
+
+            if ($supplied === '') {
+                $this->error('Nothing arrived on stdin.');
+
+                return self::FAILURE;
+            }
+
+            if (! $settings->set('whatsapp', 'verify_token', $supplied)) {
+                $this->error('Could not store the token. Has the settings seeder been run?');
+
+                return self::FAILURE;
+            }
+
+            $audit->handle('settings.updated', null, [
+                'group' => 'whatsapp',
+                'changes' => ['verify_token' => ['from' => null, 'to' => $audit->fingerprint($supplied)]],
+            ]);
+
+            // Never the value, and never the length either — a length narrows
+            // a guess. Only the fingerprint, which is already in the audit log.
+            $this->info('Verify token stored from stdin.');
+
+            return self::SUCCESS;
+        }
+
         if ($webhook->verifyToken() !== null && ! $this->option('force')) {
             $this->warn('A verify token is already stored.');
             $this->line('');

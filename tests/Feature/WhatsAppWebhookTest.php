@@ -206,11 +206,90 @@ class WhatsAppWebhookTest extends TestCase
 
     // ── Delivery ─────────────────────────────────────────────────────────────
 
-    public function test_a_delivery_is_acknowledged_without_a_csrf_token(): void
+    public function test_a_delivery_is_acknowledged(): void
     {
         $this->postJson(self::URL, $this->delivery())
             ->assertOk()
             ->assertExactJson(['status' => 'ok']);
+    }
+
+    /**
+     * ⚠️ THIS CHECKS THE ROUTE'S MIDDLEWARE, NOT A REQUEST. RULE 5.
+     *
+     * The obvious test — POST without a CSRF token and assert 200 — proves
+     * nothing at all, because VerifyCsrfToken returns early when
+     * `runningUnitTests()` is true. It passes whether the middleware is
+     * excluded or not.
+     *
+     * It passed here while the live endpoint answered 419 to every delivery
+     * from Meta, because ->middleware() had been chained AFTER ->group() and
+     * applied to nothing. A green suite and a broken webhook, which is the
+     * exact shape Rule 5 exists to catch.
+     *
+     * The only honest question is what the router actually gathered.
+     */
+    public function test_the_route_really_is_outside_csrf_and_the_session(): void
+    {
+        $route = app('router')->getRoutes()->getByName('whatsapp.webhook.receive');
+
+        $this->assertNotNull($route, 'The delivery route is not registered.');
+
+        $excluded = $route->excludedMiddleware();
+
+        /*
+         * ⚠️ THE BASE CLASS, NOT THE SUBCLASS, IS WHAT HAS TO BE NAMED.
+         *
+         * VerifyCsrfToken still exists but now EXTENDS PreventRequestForgery,
+         * and the web group registers the parent. Excluding only the subclass
+         * removes nothing — which is precisely the bug that shipped.
+         */
+        $this->assertContains(
+            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+            $excluded,
+            'Only VerifyCsrfToken is excluded. It is a SUBCLASS of PreventRequestForgery, which '
+                .'is what the web group actually registers, so the route keeps full CSRF '
+                .'protection and answers 419 to every delivery from Meta.'
+        );
+
+        foreach ([
+            \Illuminate\Session\Middleware\StartSession::class => 'session startup, which mints a throwaway session row per delivery',
+            \App\Http\Middleware\HandleInertiaRequests::class => 'the Inertia middleware',
+        ] as $middleware => $what) {
+            $this->assertContains($middleware, $excluded, "The webhook still runs {$what}.");
+        }
+
+        /*
+         * ⚠️ POSITIVE CONTROL (Rule 5). Two of them, because the first version
+         * of this test read gatherRouteMiddleware() — which returns the
+         * unexpanded group name 'web' and therefore contains no middleware
+         * class at all. Every assertNotContains passed against a two-element
+         * array while the live endpoint returned 419.
+         *
+         * So: prove the list is non-empty, and prove it does NOT contain
+         * something that is genuinely still in the stack.
+         */
+        $this->assertNotEmpty($excluded, 'The exclusion list is empty, so nothing above proves anything.');
+
+        $this->assertNotContains(
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            $excluded,
+            'Everything is being excluded, so this reader cannot distinguish present from absent.'
+        );
+
+        $this->assertContains('throttle:whatsapp-webhook', $route->middleware());
+    }
+
+    /** And the same exclusions reach the GET, which is what Meta verifies. */
+    public function test_the_handshake_route_is_also_outside_the_session(): void
+    {
+        $route = app('router')->getRoutes()->getByName('whatsapp.webhook.verify');
+
+        $this->assertNotNull($route);
+
+        $this->assertContains(
+            \Illuminate\Session\Middleware\StartSession::class,
+            $route->excludedMiddleware()
+        );
     }
 
     /**

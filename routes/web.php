@@ -147,7 +147,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 */
 Route::match(['get', 'post'], '/payments/callback/{order}', PaymentCallbackController::class)
     ->middleware('signed')
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    /*
+     * ⚠️ PreventRequestForgery IS THE ONE THAT MATTERS. VerifyCsrfToken is now
+     * a subclass of it, and the web group registers the parent — so excluding
+     * only VerifyCsrfToken left this route fully CSRF-protected while reading
+     * as though it were exempt.
+     *
+     * That is exactly the failure this route cannot survive: the 3DS return is
+     * a cross-site POST from the issuing bank carrying no session cookie and no
+     * token, so it would have been rejected with 419 at the moment a member's
+     * money was in flight. It was never caught because CSRF disables itself
+     * under runningUnitTests(), so every test passed.
+     */
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    ])
     ->name('checkout.callback');
 
 /*
@@ -177,18 +192,40 @@ Route::match(['get', 'post'], '/payments/callback/{order}', PaymentCallbackContr
 | Phase 3 owns message handling. The POST here acknowledges and logs.
 |
 */
-Route::prefix('webhook')->name('whatsapp.webhook.')->group(function () {
-    Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('verify');
-    Route::post('/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('receive');
-})
+/*
+ * ⚠️ THE MIDDLEWARE GOES BEFORE ->group(), NOT AFTER IT.
+ *
+ * Chaining ->middleware() onto the result of ->group() reads perfectly and
+ * does nothing: group() registers the routes immediately, using the attributes
+ * present at that moment, so anything added afterwards applies to nothing.
+ * Written the wrong way round this route kept full CSRF protection and
+ * answered 419 to every delivery from Meta — while the test suite passed,
+ * because VerifyCsrfToken disables itself under runningUnitTests().
+ */
+Route::prefix('webhook')
+    ->name('whatsapp.webhook.')
     ->middleware('throttle:whatsapp-webhook')
     ->withoutMiddleware([
+        /*
+         * ⚠️ PreventRequestForgery, NOT VerifyCsrfToken.
+         *
+         * VerifyCsrfToken still exists but is now a SUBCLASS of
+         * PreventRequestForgery, and the web group registers the parent.
+         * Excluding the subclass excludes nothing — the route keeps full CSRF
+         * protection and answers 419 to every cross-site POST. Both are listed
+         * so this cannot silently reverse if the framework renames it back.
+         */
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
         \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         \App\Http\Middleware\HandleInertiaRequests::class,
-    ]);
+    ])
+    ->group(function () {
+        Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('verify');
+        Route::post('/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('receive');
+    });
 
 /*
  * The receipt.

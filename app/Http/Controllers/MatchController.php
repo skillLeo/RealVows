@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\InsufficientCredits;
 use App\Exceptions\MatchAlreadyUnlocked;
+use App\Jobs\AnnounceMutualInterest;
+use App\Jobs\AnnounceSomeoneInterested;
 use App\Models\MatchRecord;
 use App\Services\Credits\CreditService;
+use App\Services\Matching\MatchInterest;
 use App\Support\MatchPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,6 +80,74 @@ class MatchController extends Controller
          * land on an open card next time.
          */
         return redirect()->route('dashboard')->with('unsealed', [$match->id]);
+    }
+
+    /**
+     * The member's answer to an introduction: interested, or pass.
+     *
+     * ⚠️ THE RESPONSE TO BOTH ANSWERS IS DELIBERATELY THE SAME SHAPE.
+     *
+     * A pass is never disclosed to the other person — no notification, no
+     * change to their card, nothing they could infer an absence from. That
+     * promise is only worth as much as the quietest channel keeps it, so
+     * neither answer produces anything the other side can observe.
+     */
+    public function respond(Request $request, MatchRecord $match, MatchInterest $interest): RedirectResponse
+    {
+        $match = $this->ownedMatch($request, $match);
+
+        $validated = $request->validate([
+            'response' => ['required', 'in:'.MatchRecord::RESPONSE_INTERESTED.','.MatchRecord::RESPONSE_PASSED],
+        ]);
+
+        /*
+         * 404, not 403, and not a redirect with a message. A teaser answering
+         * anything other than "there is nothing here" would confirm the row
+         * exists and is worth paying to open.
+         */
+        abort_unless($interest->canRespond($match), 404);
+
+        if ($validated['response'] === MatchRecord::RESPONSE_PASSED) {
+            $interest->pass($match);
+
+            return redirect()->route('dashboard');
+        }
+
+        $mutual = $interest->express($match);
+
+        /*
+         * ⚠️ THE OTHER PERSON IS TOLD HERE AND NOWHERE ELSE, AND ONLY WHEN IT
+         * IS MUTUAL. `express()` returns that answer rather than being asked a
+         * second time, because two reads of the same question can disagree and
+         * the disagreement that matters sends contact details to one person
+         * before the other has agreed.
+         */
+        if ($mutual) {
+            AnnounceMutualInterest::dispatch($match->id);
+
+            return redirect()->route('matches.show', $match);
+        }
+
+        /*
+         * ⚠️ NOT MUTUAL YET — SO THE OTHER PERSON IS TOLD SOMEBODY IS
+         * INTERESTED, AND NOT WHO.
+         *
+         * This is the asymmetry that makes the product humane: a pass is
+         * silent, interest is not. The recipient learns there is a reason to
+         * come back and look, and learns nothing that identifies anybody or
+         * that would let them infer who passed on them.
+         *
+         * Only sent when the reciprocal row exists — without one there is no
+         * introduction on their side for them to answer, so a nudge would send
+         * them to a dashboard with nothing new on it.
+         */
+        $reciprocal = $interest->reciprocal($match);
+
+        if ($reciprocal && $reciprocal->response === null) {
+            AnnounceSomeoneInterested::dispatch((int) $reciprocal->seeker->user_id);
+        }
+
+        return redirect()->route('matches.show', $match);
     }
 
     /**

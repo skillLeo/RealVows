@@ -127,6 +127,29 @@ class WhatsAppWebhookController extends Controller
 
         $payload = json_decode((string) $request->getContent(), true);
 
+        /*
+         * ⚠️ AN UNVERIFIABLE PAYLOAD IS INERT. IT IS LOGGED AND DROPPED.
+         *
+         * Not rejected — Meta disables a subscription that keeps failing, and
+         * the callback has to stay configurable before the app secret exists.
+         * But nothing downstream may act on a payload we cannot attribute to
+         * Meta, because acting on one means an anonymous POST can mark a
+         * delivery failed or opt a member out of a channel.
+         *
+         * ⚠️ THE SKIP IS LOUD, AND COUNTED. A webhook that quietly does
+         * nothing is indistinguishable from a webhook that works.
+         */
+        if ($signature === 'unverifiable') {
+            Log::channel(self::CHANNEL)->warning('whatsapp webhook payload DROPPED — unverifiable', [
+                'reason' => 'No whatsapp.app_secret configured, so this payload cannot be attributed to Meta.',
+                'consequence' => 'Delivery statuses and inbound STOP messages are being ignored.',
+                'fix' => 'Settings → WhatsApp → Meta app secret.',
+                'bytes' => strlen((string) $request->getContent()),
+            ]);
+
+            return response()->json(['status' => 'ok']);
+        }
+
         $this->record($request, 'receive', 200, [
             'outcome' => 'acknowledged, not processed',
             'signature' => $signature,

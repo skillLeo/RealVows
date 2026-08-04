@@ -2,8 +2,10 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\PaymentServiceProvider;
+use App\Providers\WhatsAppServiceProvider;
 
 return [
     AppServiceProvider::class,
     PaymentServiceProvider::class,
+    WhatsAppServiceProvider::class,
 ];

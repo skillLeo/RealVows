@@ -31,6 +31,8 @@ use Illuminate\Support\Facades\URL;
  */
 class MatchPresenter
 {
+    public function __construct(private readonly \App\Services\Matching\MatchInterest $interest) {}
+
     /**
      * A locked introduction. Score, city, first name, rationale — the hook
      * at full strength, and nothing that costs money to see.
@@ -66,11 +68,19 @@ class MatchPresenter
     {
         $them = $match->matched;
 
+        /*
+         * ⚠️ ASKED ONCE, AND EVERY REVEAL BELOW HANGS OFF THIS ONE ANSWER.
+         *
+         * Not re-derived per field. Two separate checks are two chances to
+         * disagree, and the one that disagrees in the wrong direction hands
+         * out a phone number.
+         */
+        $mutual = $this->interest->isMutual($match);
+
         return [
             'id' => $match->id,
             'status' => $match->status,
             'firstName' => $them?->first_name,
-            'lastName' => $them?->last_name,
             'age' => $them?->age(),
             'city' => $them?->city,
             'country' => $them?->country,
@@ -99,10 +109,68 @@ class MatchPresenter
             'sections' => $this->sections($them),
 
             /*
+             * What this member may do about this introduction. The buttons and
+             * the endpoint read the same predicate, so they cannot disagree.
+             */
+            'interest' => [
+                'canRespond' => $this->interest->canRespond($match),
+                'response' => $match->response,
+                'mutual' => $mutual,
+            ],
+
+            /*
+             * ⚠️ THE LAST NAME AND THE CONTACT DETAILS ARE SPREAD IN, NOT SET
+             * TO NULL. THIS IS THE SAME RULE AS THE TEASER PHOTOS.
+             *
+             * Unlocking buys a profile, not a person's identity. A last name
+             * plus a city is enough to find somebody, so it waits for the same
+             * moment the phone number does: both people, independently, having
+             * said yes.
+             *
+             * `null` would be the easy version and it is the wrong one — it
+             * tells the browser the shape of what is being withheld and invites
+             * the next developer to populate it. Absent means there is nothing
+             * in the payload to recover and nothing obvious to fill in.
+             *
+             * ⚠️ ONE-SIDED INTEREST REVEALS NOTHING. If this member has said
+             * yes and the other has not answered, `$mutual` is false and this
+             * block does not run. That is the case worth testing, because it is
+             * the one a relaxed guard would quietly get wrong.
+             */
+            ...($mutual ? [
+                'lastName' => $them?->last_name,
+                'contact' => $this->contact($them),
+            ] : []),
+
+            /*
              * Still absent: score_breakdown, and anything derived from a date
              * of birth beyond the age the member volunteered.
              */
         ];
+    }
+
+    /**
+     * How to reach somebody, once both people have agreed to be reachable.
+     *
+     * ⚠️ THE ONLY METHOD IN THIS CLASS THAT TOUCHES A User RECORD. Everything
+     * else presents a Profile, which by design holds nothing that could
+     * contact anyone. Keeping the reach into `user` in one named method means
+     * a search for "who can leak an email address" has exactly one answer.
+     *
+     * @return array<string, string>
+     */
+    private function contact(?Profile $them): array
+    {
+        $user = $them?->user;
+
+        if (! $user) {
+            return [];
+        }
+
+        return array_filter([
+            'email' => $user->email,
+            'phone' => $user->fullPhone(),
+        ]);
     }
 
     /**

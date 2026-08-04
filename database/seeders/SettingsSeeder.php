@@ -77,7 +77,8 @@ class SettingsSeeder extends Seeder
                 ['key' => 'phone_number_id', 'label' => 'Phone number ID', 'type' => 'text'],
                 ['key' => 'business_account_id', 'label' => 'Business account ID', 'type' => 'text'],
                 ['key' => 'access_token', 'label' => 'Access token', 'type' => 'password', 'is_secret' => true],
-                ['key' => 'template_name', 'label' => 'Match template name', 'type' => 'text'],
+                ['key' => 'template_name', 'label' => 'Match template name', 'type' => 'text', 'description' => 'Only fill this in once the template is APPROVED, not merely submitted. An unapproved name fails permanently on every send.'],
+                ['key' => 'template_language', 'label' => 'Template language', 'type' => 'text', 'description' => 'The language code the template was approved under, e.g. en or en_US. A mismatch here fails the send even when the template name is right.'],
 
                 /*
                  * ⚠️ THESE TWO ARE NEEDED BEFORE ANY OF THE FOUR ABOVE.

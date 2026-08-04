@@ -116,6 +116,18 @@ Route::middleware('auth')->group(function () {
             ->name('matches.unlock');
 
         /*
+         * Interested, or pass.
+         *
+         * ⚠️ Throttled like the unlock rather than like a form. Interest is
+         * the only action in the product that can reveal a phone number, so a
+         * script working through ids must not be able to answer at speed —
+         * even though ownership is checked and every foreign id 404s.
+         */
+        Route::post('/matches/{match}/respond', [MatchController::class, 'respond'])
+            ->middleware('throttle:unlock')
+            ->name('matches.respond');
+
+        /*
         |--------------------------------------------------------------------
         | Checkout
         |--------------------------------------------------------------------

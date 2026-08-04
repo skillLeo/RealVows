@@ -112,7 +112,35 @@ class TeaserPhotoLeakTest extends TestCase
         // them everywhere.
         $this->assertStringContainsString('/photos/', $payload, 'The search cannot see a photo route.');
         $this->assertStringContainsString('signature=', $payload, 'The search cannot see a signed URL.');
-        $this->assertStringContainsString('Bakare', $payload, 'The search cannot see a last name.');
+
+        /*
+         * ⚠️ RE-VERIFIED AFTER THE PHASE 3 REFACTOR, WHICH IS THE PART OF RULE
+         * 5 THAT IS EASIEST TO SKIP.
+         *
+         * This control used to look for the last name in an UNLOCKED payload.
+         * Phase 3 moved the last name behind mutual interest, so it stopped
+         * being present — and the control began failing for the right reason:
+         * it can no longer prove the search sees a name, because there is no
+         * longer a name there to see.
+         *
+         * The tempting fix is to delete the line. That would leave every "the
+         * last name did not leak" assertion below passing against a search
+         * that was never shown to work. So the control now searches a string
+         * where the name genuinely is, proving the encoding does not hide it.
+         */
+        $encodedName = trim(json_encode(['lastName' => 'Bakare']), '{}');
+
+        $this->assertStringContainsString(
+            'Bakare',
+            $encodedName,
+            'json_encode is hiding a last name, so every leak assertion below is worthless.'
+        );
+
+        $this->assertStringNotContainsString(
+            'Bakare',
+            $payload,
+            'A last name reached an unlocked payload. It is revealed only on mutual interest.'
+        );
 
         // And the basename check the locked test relies on.
         $this->assertStringContainsString(
@@ -214,10 +242,32 @@ class TeaserPhotoLeakTest extends TestCase
         $this->assertArrayHasKey('photos', $card);
         $this->assertNotEmpty($card['photos']);
         $this->assertStringContainsString('signature=', $card['photos'][0]['url']);
-        $this->assertSame('Bakare', $card['lastName']);
+
+        /*
+         * ⚠️ NARROWED IN PHASE 3, NOT RELAXED. This assertion used to read
+         * `assertSame('Bakare', $card['lastName'])`.
+         *
+         * Unlocking buys the profile, not the person's identity. A last name
+         * plus a city is enough to find somebody, so it now waits for the same
+         * moment the phone number does — both people, independently, saying
+         * yes. The schema has said "private until mutual interest" since the
+         * Phase 2 reshape; the presenter had not caught up.
+         *
+         * The rule that reveals it is asserted from both sides in
+         * MutualInterestTest. Here we only prove it does NOT come early.
+         */
+        $this->assertArrayNotHasKey(
+            'lastName',
+            $card,
+            'A last name reached an unlocked card before mutual interest. Unlocking buys the '
+                .'profile, not the ability to find somebody.'
+        );
+
+        $payload = json_encode($card, JSON_UNESCAPED_SLASHES);
+
+        $this->assertStringNotContainsString('Bakare', $payload);
 
         // Even then, the internal breakdown does not travel.
-        $payload = json_encode($card, JSON_UNESCAPED_SLASHES);
         $this->assertStringNotContainsString('affinity', $payload);
     }
 

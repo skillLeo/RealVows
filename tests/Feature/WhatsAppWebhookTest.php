@@ -57,6 +57,23 @@ class WhatsAppWebhookTest extends TestCase
         return $token;
     }
 
+    /** A delivery signed the way Meta signs one, so it is acted on rather than dropped. */
+    private function signedPost(array $payload): \Illuminate\Testing\TestResponse
+    {
+        app(SettingsService::class)->set('whatsapp', 'app_secret', 'the-app-secret');
+
+        $body = json_encode($payload);
+
+        return $this->call(
+            'POST', self::URL, [], [], [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_X_HUB_SIGNATURE_256' => 'sha256='.hash_hmac('sha256', $body, 'the-app-secret'),
+            ],
+            $body
+        );
+    }
+
     private function logContents(): string
     {
         return File::exists($this->log) ? File::get($this->log) : '';
@@ -359,11 +376,22 @@ class WhatsAppWebhookTest extends TestCase
      * anybody. That is a deliberate, temporary trade — but it must be visible
      * in the log rather than inferred from an absent field.
      */
-    public function test_an_unsigned_delivery_is_accepted_but_recorded_as_unverifiable(): void
+    public function test_an_unsigned_delivery_is_acknowledged_but_dropped_loudly(): void
     {
         $this->postJson(self::URL, $this->delivery())->assertOk();
 
-        $this->assertStringContainsString('"signature":"unverifiable"', $this->logContents());
+        $log = $this->logContents();
+
+        // 200 so Meta does not disable the subscription, but inert.
+        $this->assertStringContainsString('DROPPED', $log);
+        $this->assertStringContainsString('warning', strtolower($log));
+
+        /*
+         * ⚠️ AND IT REALLY IS INERT. The payload must not have been recorded
+         * as processed — an anonymous POST that can mark a delivery failed or
+         * opt a member out is the whole reason the drop exists.
+         */
+        $this->assertStringNotContainsString('acknowledged, not processed', $log);
     }
 
     // ── The log ──────────────────────────────────────────────────────────────
@@ -379,7 +407,9 @@ class WhatsAppWebhookTest extends TestCase
      */
     public function test_the_log_does_not_contain_phone_numbers_or_message_text(): void
     {
-        $this->postJson(self::URL, $this->delivery())->assertOk();
+        // Signed, because an unverifiable payload is dropped before it is
+        // logged in full — so an unsigned request would prove nothing here.
+        $this->signedPost($this->delivery())->assertOk();
 
         $log = $this->logContents();
 

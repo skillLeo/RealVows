@@ -167,14 +167,22 @@ class WhatsAppWebhook
      *   'invalid'      — signed, and it does not. Refuse.
      *   'unverifiable' — no app secret configured, so nothing can be proved.
      *
-     * ⚠️ 'unverifiable' IS NOT 'valid', AND THE LOG SAYS SO ON EVERY LINE.
+     * ⚠️ 'unverifiable' IS NOT 'valid', AND NOTHING MAY ACT ON IT.
      *
-     * Until the app secret is filled in, this endpoint accepts a POST from
-     * anybody. That is a deliberate, temporary trade: refusing unsigned
-     * traffic before the secret exists would make the endpoint impossible to
-     * exercise during setup, and the handler currently does nothing but write
-     * a redacted log line. It stops being an acceptable trade the moment this
-     * endpoint does something — which is Phase 3, and is recorded there.
+     * With no app secret stored there is nothing to check a signature
+     * against. The endpoint still answers 200 — Meta disables a subscription
+     * that keeps failing, and refusing everything before the secret exists
+     * would make the callback impossible to configure in the first place —
+     * but an unverifiable payload is INERT. It is logged and dropped.
+     *
+     * This is the difference that matters now that deliveries do something.
+     * Status callbacks mark a delivery failed and trigger an email fallback;
+     * an inbound STOP opts a member out of a channel. Both are state changes,
+     * and both would otherwise be reachable by anyone who can POST to a URL
+     * that is, by design, public.
+     *
+     * The skip is LOUD — warning level, on every request — because a webhook
+     * quietly doing nothing looks exactly like a webhook working.
      */
     public function signatureState(Request $request): string
     {

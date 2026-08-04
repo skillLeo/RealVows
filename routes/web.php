@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CreditAdminController;
+use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\MatchAuditController;
 use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\ReportQueueController;
@@ -108,6 +109,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::middleware('admin:credits.adjust')->group(function () {
         Route::get('/users/{user}/credits', [CreditAdminController::class, 'show'])->name('credits');
         Route::post('/users/{user}/credits', [CreditAdminController::class, 'store'])->name('credits.store');
+    });
+
+    /*
+     * Email previews.
+     *
+     * ⚠️ Behind `settings.update` rather than a lower permission, because the
+     * send form will deliver a real message to any address typed into it. A
+     * reviewer brought in to check photographs has no business doing that.
+     */
+    Route::middleware('admin:settings.update')->group(function () {
+        Route::get('/emails', [EmailPreviewController::class, 'index'])->name('emails');
+        Route::post('/emails/send', [EmailPreviewController::class, 'send'])->name('emails.send');
+        Route::get('/emails/{key}', [EmailPreviewController::class, 'show'])->name('emails.show');
     });
 
     Route::post('/settings/test', [SettingsController::class, 'test'])

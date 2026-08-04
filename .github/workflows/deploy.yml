@@ -113,10 +113,17 @@ jobs:
       #
       # Skipped silently when the secret is absent, so a deploy never depends
       # on it — the endpoint answers 503 and says so in its own log.
+      #
+      # ⚠️ The secret is mapped to env first. The `secrets` context is not
+      # available inside a step-level `if:`, and referencing it there does not
+      # evaluate to false — it fails the whole workflow at parse time with
+      # "Unrecognized named-value: 'secrets'", so no deploy runs at all.
       - name: Apply the WhatsApp verify token
-        if: ${{ secrets.WHATSAPP_VERIFY_TOKEN != '' }}
+        env:
+          VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN }}
+        if: ${{ env.VERIFY_TOKEN != '' }}
         run: |
-          printf '%s\n' "${{ secrets.WHATSAPP_VERIFY_TOKEN }}" | \
+          printf '%s\n' "$VERIFY_TOKEN" | \
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan whatsapp:verify-token --stdin --force"
 

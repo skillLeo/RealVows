@@ -195,6 +195,29 @@ return [
         'verification_note' => 'Never shown on your profile',
     ],
 
+    /*
+     * The inbox. ⚠️ Note what is NOT here: no "search", no "filter by", no
+     * "refine". The vocabulary of a directory is absent on purpose, because
+     * copy is where a product's promises quietly change.
+     */
+    'inbox' => [
+        'heading' => 'Your introductions',
+        'chosen_for_you' => 'Everyone here was chosen for you. There is nothing to browse.',
+        'empty_all' => 'Your introductions will appear here as we find them. There is nothing to search — we do the looking.',
+        'empty_waiting' => 'Nothing waiting just now. New introductions arrive as we find them.',
+        'empty_open' => 'Nothing open at the moment.',
+        'empty_interested' => 'You have not said yes to anyone yet.',
+        'empty_passed' => 'You have not passed on anyone yet.',
+        'empty_closed' => 'Nothing has closed yet.',
+        'tab_all' => 'All',
+        'tab_waiting' => 'Waiting',
+        'tab_open' => 'Open',
+        'tab_interested' => 'Interested',
+        'tab_passed' => 'Passed',
+        'tab_closed' => 'Closed',
+        'filter_label' => 'Filter introductions by state',
+    ],
+
     'demo' => [
         'banner' => 'Everyone here is invented and the sign-in buttons are open — not the live platform.',
     ],

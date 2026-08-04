@@ -3705,3 +3705,47 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* The couples section frames are not positioned, so the panel needs to fill
    them rather than escape. */
 .rv-couples__frame { position: relative; aspect-ratio: 3 / 4; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   The inbox
+   ─────────────────────────────────────────────────────────────────────────
+   ⚠️ Tabs, never a search field. Filtering by state reorganises rows the
+   engine already chose; a text input on this screen would turn it into a
+   directory, which is the one thing the product promises never to be.
+   ───────────────────────────────────────────────────────────────────────── */
+.rv-inbox__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.rv-inbox__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid rgba(185, 145, 84, .4);
+    border-radius: 8px;
+    color: var(--rv-ink);
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.rv-inbox__tab.is-current {
+    background: var(--rv-oxblood);
+    border-color: var(--rv-oxblood);
+    color: var(--rv-parchment);
+}
+
+.rv-inbox__count {
+    /* Tabular so the counts do not shift the tab widths as they change. */
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    opacity: .75;
+}
+
+.rv-inbox__list {
+    display: grid;
+    gap: 16px;
+}

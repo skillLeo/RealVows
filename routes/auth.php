@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\BlockController;
+use App\Http\Controllers\InboxController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PurchasesController;
@@ -106,6 +107,16 @@ Route::middleware('auth')->group(function () {
         | their own dashboard — there is nothing to browse and no id to
         | enumerate, because every route below checks ownership.
         */
+        /*
+         * The inbox: every introduction this member has been given.
+         *
+         * ⚠️ NO INDEX OF MEMBERS — an index of THIS MEMBER'S introductions.
+         * The distinction is the whole product. Filtering by state reorganises
+         * rows the engine already chose; filtering by attribute would turn the
+         * same screen into a directory. See InboxController.
+         */
+        Route::get('/introductions', [InboxController::class, 'index'])->name('inbox');
+
         Route::get('/matches/{match}', [MatchController::class, 'show'])->name('matches.show');
 
         Route::post('/matches/{match}/report', [ReportController::class, 'store'])

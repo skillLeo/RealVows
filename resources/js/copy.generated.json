@@ -5,7 +5,7 @@
         "waiting_many": ":count people are waiting to meet you.",
         "yours": "Your introductions.",
         "chosen": "Chosen for you by our matching, not by browsing. Open one whenever you're ready.",
-        "no_browsing": "Chosen for you — RealVows has no profile browsing.",
+        "no_browsing": "Chosen for you \u2014 RealVows has no profile browsing.",
         "searching_heading": "We haven't found someone we'd stand behind yet.",
         "searching_body": "We would rather send you nobody than send you the wrong person. As soon as someone meets the bar, they will be here.",
         "all_open_heading": "You've opened all your introductions.",
@@ -16,7 +16,7 @@
     },
     "verification": {
         "pending_heading": "Your profile is with our team.",
-        "pending_body": "A real person is reviewing it — usually within a day. We will email you when it is done, and your introductions will be waiting.",
+        "pending_body": "A real person is reviewing it \u2014 usually within a day. We will email you when it is done, and your introductions will be waiting.",
         "rejected_heading": "We need one more look.",
         "incomplete_heading": "Finish your profile.",
         "incomplete_body": "You are :percent% of the way there. Once it is complete and verified, we start looking."
@@ -35,7 +35,7 @@
         "reassurance_label": "No rush",
         "reassurance": "Your profile is ready and it stays ready. Introductions do not expire, there is nothing recurring, and nobody is removed while you think about it.",
         "choose": "Choose",
-        "one_payment": "One payment. Nothing recurring, and nothing expires — open them whenever you are ready.",
+        "one_payment": "One payment. Nothing recurring, and nothing expires \u2014 open them whenever you are ready.",
         "card_safety": "Your card details go straight to the payment provider. They never touch RealVows."
     },
     "checkout": {
@@ -48,7 +48,7 @@
         "not_charged": "You have not been charged. There is nothing to cancel and nothing to claim back.",
         "try_again": "Try again",
         "untouched": "Your profile is untouched and your introductions are still waiting.",
-        "decline_generic": "The payment did not go through, and nothing was charged. It is worth trying again — if it happens twice, your bank will know why.",
+        "decline_generic": "The payment did not go through, and nothing was charged. It is worth trying again \u2014 if it happens twice, your bank will know why.",
         "decline_bank": "Your bank declined the payment. They did not say why, and nothing was charged. A different card usually works.",
         "decline_expired": "That card has expired. Nothing was charged.",
         "decline_unknown_card": "That card number was not recognised. Nothing was charged.",
@@ -100,7 +100,7 @@
         "terms": "Terms of Service",
         "have_account": "Already have an account?",
         "create_account": "Create a free account",
-        "secure": "Secure login · 18+",
+        "secure": "Secure login \u00b7 18+",
         "forgot_heading": "Reset your password",
         "forgot_body": "Enter the email you signed up with and we'll send you a link.",
         "forgot_sent_heading": "Check your email",
@@ -113,7 +113,7 @@
         "verify_restart": "Log out and start again"
     },
     "profile": {
-        "a_photo_of_you": "A photo of you holding a handwritten note with the code below. A real person checks this — it's how we keep every profile genuine.",
+        "a_photo_of_you": "A photo of you holding a handwritten note with the code below. A real person checks this \u2014 it's how we keep every profile genuine.",
         "these_are_absolute_anyone": "These are absolute. Anyone they apply to is removed before any scoring happens, so choose only what you genuinely could not live with.",
         "not_verified": "Not verified yet",
         "not_confirmed": "Not confirmed yet",
@@ -124,17 +124,34 @@
         "on_disagreement": "When you disagree with someone close to you",
         "on_affection": "How you show affection",
         "about_you": "A few words about you",
-        "prompts_are_hints": "Those prompts are only there to help you start — write it however you like.",
+        "prompts_are_hints": "Those prompts are only there to help you start \u2014 write it however you like.",
         "no_better_end": "There is no better end of any of these. Put the marker where it honestly falls.",
         "body_types": "Body types you are open to",
         "leave_unticked": "Leave them all unticked if you would rather not narrow this.",
         "verification_note": "Never shown on your profile"
     },
+    "inbox": {
+        "heading": "Your introductions",
+        "chosen_for_you": "Everyone here was chosen for you. There is nothing to browse.",
+        "empty_all": "Your introductions will appear here as we find them. There is nothing to search \u2014 we do the looking.",
+        "empty_waiting": "Nothing waiting just now. New introductions arrive as we find them.",
+        "empty_open": "Nothing open at the moment.",
+        "empty_interested": "You have not said yes to anyone yet.",
+        "empty_passed": "You have not passed on anyone yet.",
+        "empty_closed": "Nothing has closed yet.",
+        "tab_all": "All",
+        "tab_waiting": "Waiting",
+        "tab_open": "Open",
+        "tab_interested": "Interested",
+        "tab_passed": "Passed",
+        "tab_closed": "Closed",
+        "filter_label": "Filter introductions by state"
+    },
     "demo": {
-        "banner": "Everyone here is invented and the sign-in buttons are open — not the live platform."
+        "banner": "Everyone here is invented and the sign-in buttons are open \u2014 not the live platform."
     },
     "offline": {
         "heading": "You're offline.",
-        "body": "Your matches are safe — we'll bring them back when you reconnect."
+        "body": "Your matches are safe \u2014 we'll bring them back when you reconnect."
     }
 }

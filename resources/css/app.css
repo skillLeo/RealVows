@@ -3749,3 +3749,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     display: grid;
     gap: 16px;
 }
+
+/* The response actions. Stacked on a phone so neither is the easy accident. */
+.rv-respond__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+}

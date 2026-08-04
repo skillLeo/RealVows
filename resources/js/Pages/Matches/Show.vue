@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
@@ -42,6 +43,35 @@ const bioShown = computed(() =>
  * does nothing reads as broken software to a non-technical owner.
  */
 const reportOpen = ref(false);
+
+/*
+ * ⚠️ NOT OPTIMISTIC, AND THIS IS THE SECOND EXCEPTION TO OPTIMISTIC UI AFTER
+ * THE CREDIT BALANCE.
+ *
+ * A response can reveal a phone number and can notify another person. Showing
+ * a member "you are interested" before the server has agreed risks showing
+ * them a mutual match that did not happen, or a state the server rejected.
+ * The button disables, the request goes, the server re-renders.
+ */
+const responding = ref(false);
+
+const respond = (response) => {
+    if (responding.value) return;
+    responding.value = true;
+
+    router.post(`/matches/${props.match.id}/respond`, { response }, {
+        onFinish: () => { responding.value = false; },
+    });
+};
+
+const block = () => {
+    if (responding.value) return;
+    responding.value = true;
+
+    router.post(`/matches/${props.match.id}/block`, {}, {
+        onFinish: () => { responding.value = false; },
+    });
+};
 </script>
 
 <template>
@@ -131,9 +161,62 @@ const reportOpen = ref(false);
                     </div>
                 </BaseCard>
 
+                <!--
+                    ⚠️ THE DECISION. Both answers are final and the copy says so
+                    before either is pressed, not after — a confirmation that
+                    appears only once somebody has already clicked is a warning
+                    delivered too late to be one.
+
+                    There is no undo. An undo turns a considered decision into a
+                    swipe, and the other person may already have been told.
+                -->
+                <BaseCard v-if="match.interest && match.interest.canRespond">
+                    <h2 class="rv-display rv-display--sm">{{ $t('respond.heading') }}</h2>
+
+                    <div class="rv-respond__actions">
+                        <BaseButton :disabled="responding" @click="respond('interested')">
+                            {{ $t('respond.interested') }}
+                        </BaseButton>
+                        <BaseButton variant="secondary" :disabled="responding" @click="respond('passed')">
+                            {{ $t('respond.pass') }}
+                        </BaseButton>
+                    </div>
+
+                    <p class="rv-quiet">{{ $t('respond.final') }}</p>
+                </BaseCard>
+
+                <!-- Already answered: state it plainly rather than showing nothing. -->
+                <BaseCard v-else-if="match.interest && match.interest.response">
+                    <p v-if="match.interest.mutual">{{ $t('respond.mutual_state') }}</p>
+                    <p v-else-if="match.interest.response === 'interested'">{{ $t('respond.interested_state') }}</p>
+                    <p v-else>{{ $t('respond.passed_state') }}</p>
+                </BaseCard>
+
+                <!--
+                    ⚠️ CONTACT DETAILS ARE ABSENT FROM THE PAYLOAD UNTIL MUTUAL
+                    INTEREST — not null, absent. So this block cannot render
+                    early even if somebody removes the condition.
+                -->
+                <BaseCard v-if="match.contact">
+                    <h2 class="rv-display rv-display--sm">{{ $t('respond.contact_heading') }}</h2>
+                    <dl class="rv-facts">
+                        <template v-if="match.contact.email">
+                            <dt>Email</dt>
+                            <dd><a :href="`mailto:${match.contact.email}`">{{ match.contact.email }}</a></dd>
+                        </template>
+                        <template v-if="match.contact.phone">
+                            <dt>Phone</dt>
+                            <dd><a :href="`tel:${match.contact.phone.replace(/\\s+/g, '')}`">{{ match.contact.phone }}</a></dd>
+                        </template>
+                    </dl>
+                </BaseCard>
+
                 <div class="rv-payoff__quiet">
                     <BaseButton variant="ghost" @click="reportOpen = true">
                         {{ $t('report.heading') }}
+                    </BaseButton>
+                    <BaseButton variant="ghost" :disabled="responding" @click="block">
+                        {{ $t('respond.block') }}
                     </BaseButton>
                 </div>
             </div>

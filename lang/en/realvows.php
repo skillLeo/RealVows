@@ -106,6 +106,32 @@ return [
         'already_open' => 'That introduction is already open. You were not charged twice.',
     ],
 
+    /*
+     * ⚠️ THE WORDS FOR A DECISION THAT CANNOT BE UNDONE.
+     *
+     * Both answers are final, so the copy has to carry that weight without
+     * threatening anybody. "Yes, I'm interested" rather than "Like"; "Not for
+     * me" rather than "Reject" — a member is declining an introduction, not
+     * grading a person, and the difference shows in how it reads when it is
+     * you being declined.
+     *
+     * Note what is absent: no "match percentage", no "swipe", no streak, no
+     * count of how many people are waiting. The vocabulary of a dating app is
+     * kept out deliberately.
+     */
+    'respond' => [
+        'heading' => 'What would you like to do?',
+        'interested' => 'Yes, I am interested',
+        'pass' => 'Not for me',
+        'final' => 'Both answers are final, and we only tell someone when the interest is mutual.',
+        'passed_state' => 'You passed on this introduction.',
+        'interested_state' => 'You said you are interested. We will tell you if they say the same.',
+        'mutual_state' => 'You are both interested. Their details are below.',
+        'contact_heading' => 'How to get in touch',
+        'block' => 'Never show me this person',
+        'block_confirm' => 'We will not show you this person again, and they are never told.',
+    ],
+
     'report' => [
         'anything_you_want_to' => 'Anything you want to add',
         'action' => 'Report a concern',

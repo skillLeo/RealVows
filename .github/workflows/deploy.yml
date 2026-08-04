@@ -121,11 +121,14 @@ jobs:
       - name: Apply the WhatsApp verify token
         env:
           VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         if: ${{ env.VERIFY_TOKEN != '' }}
         run: |
           printf '%s\n' "$VERIFY_TOKEN" | \
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan whatsapp:verify-token --stdin --force"
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan whatsapp:verify-token --stdin --force"
 
       - name: Bring the site back
         if: always()

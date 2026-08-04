@@ -12,6 +12,10 @@ on:
         description: 'Type DEPLOY to confirm'
         required: true
         default: ''
+      whatsapp_verify_token:
+        description: 'WhatsApp verify token to store on the server (leave empty to keep the current one)'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -118,9 +122,18 @@ jobs:
       # available inside a step-level `if:`, and referencing it there does not
       # evaluate to false — it fails the whole workflow at parse time with
       # "Unrecognized named-value: 'secrets'", so no deploy runs at all.
+      #
+      # ⚠️ A DISPATCH INPUT IS VISIBLE IN THE ACTIONS UI. It is offered because
+      # it is the only way to place this value on the server without either
+      # committing it — which puts a shared secret in the history permanently —
+      # or holding SSH credentials locally. Anything set this way should be
+      # treated as known to every repository collaborator and rotated with
+      # `php artisan whatsapp:verify-token` once Meta has verified.
+      #
+      # The repository secret is the better path and wins when both are set.
       - name: Apply the WhatsApp verify token
         env:
-          VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN }}
+          VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN || github.event.inputs.whatsapp_verify_token }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}

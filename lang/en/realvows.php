@@ -244,6 +244,25 @@ return [
         'filter_label' => 'Filter introductions by state',
     ],
 
+    /*
+     * ⚠️ THE FREE-PERIOD PROMISE, WHERE A MEMBER ACTUALLY SEES IT.
+     *
+     * The same sentence is in the refund policy, which is correct and which
+     * nobody reads. A promise has to reach somebody at the moment they act on
+     * it — signing up, and opening their first introduction — or it is a
+     * defence we can point at later rather than a commitment they relied on.
+     *
+     * ⚠️ The wording matches the refund policy deliberately. If the two ever
+     * drift, the page is the contract and this is marketing, which is exactly
+     * the gap a complaint lives in.
+     */
+    'free_period' => [
+        'badge' => 'Free right now',
+        'signup' => 'Introductions are free while we are getting started — no card needed.',
+        'kept' => 'Anything you receive during this period is yours to keep permanently, and stays open when charging begins.',
+        'dashboard' => 'Your introductions are free at the moment. Open as many as you like.',
+    ],
+
     'demo' => [
         'banner' => 'Everyone here is invented and the sign-in buttons are open — not the live platform.',
     ],

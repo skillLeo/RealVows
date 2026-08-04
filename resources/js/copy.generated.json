@@ -159,6 +159,12 @@
         "tab_closed": "Closed",
         "filter_label": "Filter introductions by state"
     },
+    "free_period": {
+        "badge": "Free right now",
+        "signup": "Introductions are free while we are getting started \u2014 no card needed.",
+        "kept": "Anything you receive during this period is yours to keep permanently, and stays open when charging begins.",
+        "dashboard": "Your introductions are free at the moment. Open as many as you like."
+    },
     "demo": {
         "banner": "Everyone here is invented and the sign-in buttons are open \u2014 not the live platform."
     },

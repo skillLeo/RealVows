@@ -72,18 +72,47 @@ class FreePeriod
         try {
             return $this->settings->bool(self::SETTING_GROUP, self::SETTING_KEY, false);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('free period unreadable, assuming off', [
+            /*
+             * ⚠️ ALERTED, NOT ONLY LOGGED.
+             *
+             * "Visible and refundable" only holds if somebody NOTICES. A
+             * member charged during a free period does not think "that must be
+             * a bug" — they think the free period was a lie, and they tell
+             * people that. A log line nobody reads for a week is not the
+             * safety net the fail-closed decision assumed.
+             */
+            \Illuminate\Support\Facades\Log::critical('free period unreadable, charging members', [
                 'error' => $e->getMessage(),
                 'consequence' => 'Introductions are being charged for. If the free period is '
-                    .'meant to be running, this is a live billing fault.',
+                    .'meant to be running, this is a live billing fault happening right now.',
+                'action' => 'Check the settings table and the cache, then refund anybody charged '
+                    .'since this started.',
             ]);
+
+            $this->alertOnce($e);
 
             return false;
         }
     }
 
     /**
-     * ⚠️ ASKED OF THE MATCH, NOT OF THE CLOCK.
+     * ⚠️ ASKED OF THE MATCH, NOT OF THE CLOCK. DO NOT "HARDEN" THIS.
+     *
+     * This will look like duplicated state. There is a free-period setting and
+     * a free-period start date, so a stamp on every row reads as denormalised
+     * — and deriving it instead ("granted before the cutover date") looks like
+     * a tidy-up that removes redundancy. The diff would be small and would
+     * pass every test that does not change the setting mid-run.
+     *
+     * It is not redundancy. A derived answer is computed against a value
+     * somebody can EDIT, so the moment the cutover date moves, every free
+     * member's introduction silently becomes "paid" — or worse, "not yet
+     * granted" — and the permanence guarantee evaporates without a single
+     * error. That is the retroactive re-terms bug wearing a different costume,
+     * and it is the exact thing this whole design exists to prevent.
+     *
+     * A stamp is a fact about what happened. A derivation is an opinion about
+     * what happened, recalculated every time somebody touches a setting.
      *
      * "Was this granted during the free period?" must be answerable long after
      * the free period ends, and must not change when it does. Reading the
@@ -94,6 +123,54 @@ class FreePeriod
     public function wasGrantedFree(MatchRecord $match): bool
     {
         return $match->free_period_granted_at !== null;
+    }
+
+    /**
+     * ⚠️ THROTTLED TO ONE ALERT AN HOUR.
+     *
+     * This fires from a code path that runs on EVERY request. Without a
+     * throttle a settings outage sends thousands of identical emails, which
+     * gets the sending domain marked as spam — so the alert about a billing
+     * fault would take out the channel that delivers introductions.
+     *
+     * The cache key is deliberately not the error message: a changing message
+     * would defeat the throttle.
+     */
+    private function alertOnce(\Throwable $e): void
+    {
+        try {
+            $cache = \Illuminate\Support\Facades\Cache::class;
+
+            if (! $cache::add('realvows.free-period-alert', true, now()->addHour())) {
+                return;
+            }
+
+            $to = $this->settings->get('general', 'admin_notification_email');
+
+            if (! $to) {
+                return;
+            }
+
+            \Illuminate\Support\Facades\Mail::raw(
+                "The free-period setting could not be read, so RealVows is charging for "
+                    ."introductions.\n\n"
+                    ."If the free period is supposed to be running, members are being charged "
+                    ."right now for something that should be free.\n\n"
+                    ."Error: ".$e->getMessage()."\n\n"
+                    ."Check the settings table and the cache, then refund anybody charged since "
+                    ."this began.",
+                fn ($m) => $m->to($to)->subject('RealVows: free period unreadable — members are being charged'),
+            );
+        } catch (\Throwable) {
+            /*
+             * ⚠️ SWALLOWED ON PURPOSE, AND ONLY HERE.
+             *
+             * If mail is also down, an exception thrown while reporting a
+             * settings failure would turn a billing fault into a total
+             * outage — the alert taking down the site it is warning about.
+             * The critical log line above has already been written.
+             */
+        }
     }
 
     /**

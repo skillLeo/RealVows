@@ -215,6 +215,81 @@ class FreePeriodTest extends TestCase
     }
 
     /**
+     * ⚠️ THE PROMISE REACHES A MEMBER WHERE THEY ACT ON IT.
+     *
+     * The same sentence is in the refund policy, which is the contract and
+     * which nobody reads. A promise only in a page we can point at later is a
+     * defence, not something a member relied on when they signed up.
+     */
+    public function test_the_registration_page_states_the_promise_during_the_free_period(): void
+    {
+        $this->setMode(true);
+
+        $props = $this->get('/register')->viewData('page')['props'];
+
+        $this->assertTrue($props['freePeriod']);
+    }
+
+    /** ⚠️ POSITIVE CONTROL: and does not claim it when the period is over. */
+    public function test_the_registration_page_makes_no_such_claim_afterwards(): void
+    {
+        $this->setMode(false);
+
+        $this->assertFalse($this->get('/register')->viewData('page')['props']['freePeriod']);
+    }
+
+    /**
+     * ⚠️ THE WORDING MUST MATCH THE REFUND POLICY EXACTLY.
+     *
+     * If the two drift, the page is the contract and the sign-up line is
+     * marketing — and the gap between them is precisely where a complaint
+     * lives.
+     */
+    public function test_the_promise_matches_the_refund_policy_word_for_word(): void
+    {
+        $promise = trans('realvows.free_period.kept');
+
+        $this->assertStringContainsString('yours to keep permanently', $promise);
+
+        $this->assertStringContainsString(
+            'yours to keep permanently',
+            $this->get('/refunds')->getContent(),
+            'The sign-up promise and the refund policy have drifted apart. The page is the '
+                .'contract; the sign-up line is what the member actually read.'
+        );
+    }
+
+    /**
+     * ⚠️ A BROKEN READ ALERTS, IT DOES NOT ONLY LOG.
+     *
+     * Failing closed charges for something that should be free. That is
+     * "visible and refundable" only if somebody NOTICES — and a member charged
+     * during a free period does not think "that must be a bug", they think the
+     * free period was a lie.
+     */
+    public function test_an_unreadable_setting_is_logged_at_critical(): void
+    {
+        \Illuminate\Support\Facades\Log::spy();
+
+        $broken = new class(app(SettingsService::class)) extends FreePeriod
+        {
+            public function __construct(private $unused)
+            {
+                parent::__construct(app(SettingsService::class));
+            }
+        };
+
+        // Drop the table the read depends on, so the failure is real rather
+        // than mocked — a mocked failure proves the catch block compiles.
+        \Illuminate\Support\Facades\Schema::drop('settings');
+
+        $this->assertFalse($broken->isActive(), 'A broken read must fail CLOSED — charging, not giving away.');
+
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('critical')
+            ->withArgs(fn ($message) => str_contains($message, 'charging members'));
+    }
+
+    /**
      * ⚠️ THE STAMP ANSWERS FROM THE ROW, NOT FROM THE CLOCK.
      *
      * Reading the current mode, or comparing dates against a settings value

@@ -3757,3 +3757,15 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     gap: 8px;
     margin: 16px 0;
 }
+
+/* The free-period promise. Brass rule, never a badge — a badge reads as a
+   marketing flash, and this is a commitment. */
+.rv-free-note {
+    margin: 16px 0 0;
+    padding: 16px;
+    border-left: 2px solid var(--brass);
+    background: color-mix(in srgb, var(--brass) 8%, transparent);
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.55;
+}

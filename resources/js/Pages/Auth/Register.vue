@@ -44,6 +44,23 @@ const submit = () =>
 
             <div class="rv-split__copy rv-stack" style="gap: 32px">
                 <h1 class="rv-d1" style="max-width: 20ch">{{ $t('auth.register_heading') }}</h1>
+
+                <!--
+                    ⚠️ THE FREE-PERIOD PROMISE, AT THE MOMENT SOMEBODY ACTS ON
+                    IT.
+
+                    The same sentence is in the refund policy, which is the
+                    contract and which nobody reads. A promise has to reach a
+                    member where they are deciding, or it is a defence we point
+                    at later rather than something they relied on.
+
+                    Silence where a price used to be reads as broken. Saying it
+                    plainly reads as generous.
+                -->
+                <p v-if="$page.props.freePeriod" class="rv-free-note">
+                    <strong>{{ $t('free_period.signup') }}</strong>
+                    {{ $t('free_period.kept') }}
+                </p>
                 <p class="rv-lead" style="max-width: 46ch">
                     {{ $t('auth.register_free') }}
                 </p>

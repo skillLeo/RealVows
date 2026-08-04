@@ -101,6 +101,35 @@ class WebRootExposureTest extends TestCase
         }
     }
 
+    /**
+     * The same request, allowed a short settle window before it is believed.
+     *
+     * ⚠️ ONLY FOR THE LIVENESS CONTROL, NEVER FOR THE SECRETS.
+     *
+     * Retrying "is the home page up?" tolerates a deploy that has not finished
+     * settling. Retrying "is .env readable?" would be the opposite: it would
+     * poll a secret until it happened to come back 404, which is how a real
+     * exposure gets averaged away into a pass.
+     */
+    private function statusForSettled(string $path, int $attempts = 5, int $waitSeconds = 3): int
+    {
+        $status = 0;
+
+        for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+            $status = $this->statusFor($path);
+
+            if ($status === 200) {
+                return $status;
+            }
+
+            if ($attempt < $attempts) {
+                sleep($waitSeconds);
+            }
+        }
+
+        return $status;
+    }
+
     /** ⚠️ THE CHECK THIS CLASS EXISTS FOR. */
     public function test_no_application_file_is_readable_over_http(): void
     {
@@ -146,11 +175,36 @@ class WebRootExposureTest extends TestCase
      */
     public function test_the_reader_can_tell_a_readable_file_from_a_blocked_one(): void
     {
+        /*
+         * ⚠️ RETRIED, BECAUSE THIS RUNS SECONDS AFTER `artisan up` AND RACES
+         * THE WEB SERVER PICKING THE SITE BACK UP.
+         *
+         * Observed on 4 August 2026: a deploy that succeeded in every step
+         * failed here on a 403, and the site answered 200 moments later.
+         * LiteSpeed re-reads .htaccess and clears its 503 on its own schedule,
+         * so there is a brief window after the deploy where the rewrite is not
+         * yet in force and the front controller is unreachable.
+         *
+         * ⚠️ THIS IS A SETTLE WINDOW, NOT A RELAXED GUARD. The retry is short
+         * and bounded, and a site that is genuinely broken still fails — it
+         * simply fails fifteen seconds later. Nothing about which paths must be
+         * unreadable has been weakened, and the secrets are re-checked
+         * afterwards regardless.
+         *
+         * ⚠️ AND A PERSISTENT 403 HERE IS THE 2 AUGUST SIGNATURE. A 403 on the
+         * home page means the rewrite into public/ is gone — which is the same
+         * failure that made composer.json publicly readable. If this ever fails
+         * after exhausting its attempts, treat it as an exposure, not a flake.
+         */
+        $status = $this->statusForSettled('/');
+
         $this->assertSame(
             200,
-            $this->statusFor('/'),
-            'The home page did not answer 200, so every other assertion in this class is '
-                .'meaningless — an unreachable site returns 404 for the secrets too.'
+            $status,
+            "The home page answered {$status} after repeated attempts, so every other assertion "
+                .'in this class is meaningless — an unreachable site returns 404 for the secrets '
+                .'too. A 403 here specifically means the rewrite into public/ is missing, which '
+                .'is the 2 August 2026 exposure.'
         );
 
         // And a public asset really is served, so "404 everywhere" cannot pass.

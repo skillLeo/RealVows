@@ -10,6 +10,7 @@ use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -148,6 +149,46 @@ Route::match(['get', 'post'], '/payments/callback/{order}', PaymentCallbackContr
     ->middleware('signed')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->name('checkout.callback');
+
+/*
+|--------------------------------------------------------------------------
+| WhatsApp webhook — the handshake only
+|--------------------------------------------------------------------------
+|
+| ⚠️ BOTH VERBS ARE REQUIRED, AND THE VERIFICATION IS THE **GET**.
+|
+| Meta verifies a callback URL with a GET carrying hub.challenge, and only
+| sends real deliveries as POST. Registering POST alone answers 405 to the
+| verification attempt, and Meta reports that as an unhelpful "could not
+| verify" with no mention of the method.
+|
+| ⚠️ NO SESSION, AND NOT ONLY BECAUSE OF CSRF. This is a server-to-server
+| call from Meta with no cookie and no user. Leaving StartSession in place
+| would mint and store a throwaway session row for every delivery, which on
+| a shared host with a database session driver is a table that grows for no
+| reason at all.
+|
+| ⚠️ THE THROTTLE IS A TRADE-OFF, NOT A FREE SAFETY NET. Meta delivers in
+| bursts and treats a 429 as a failure: it retries with backoff and disables
+| a subscription that keeps refusing. 100/minute per IP was specified and is
+| comfortably above anything this product will generate, but if deliveries
+| ever start going missing, this line is the first place to look.
+|
+| Phase 3 owns message handling. The POST here acknowledges and logs.
+|
+*/
+Route::prefix('webhook')->name('whatsapp.webhook.')->group(function () {
+    Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('verify');
+    Route::post('/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('receive');
+})
+    ->middleware('throttle:whatsapp-webhook')
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \App\Http\Middleware\HandleInertiaRequests::class,
+    ]);
 
 /*
  * The receipt.

@@ -47,6 +47,8 @@ class WebRootExposureTest extends TestCase
         'package.json',
         'artisan',
         'storage/logs/laravel.log',
+        // Redacted, but it still records who messaged us and when.
+        'storage/logs/whatsapp-webhook.log',
         'app/Models/User.php',
         'config/database.php',
         '.git/config',

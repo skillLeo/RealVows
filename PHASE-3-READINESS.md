@@ -62,15 +62,54 @@ stay that way until you confirm it.
 | `billing_address` | **empty** | Registered address of the settling company. |
 | `billing_support_email` | **empty** | Where a member writes about a charge they do not recognise. |
 
-### `whatsapp` — 4 of 5 empty
+### `whatsapp` — 6 of 7 empty
 
 | Key | State | Needs |
 |---|---|---|
 | `provider` | `meta` | — |
+| `verify_token` | **empty** | ⚠️ **Needed first, before all the others.** Meta will not issue a phone number ID until the callback URL answers a verification challenge. Generate with `php artisan whatsapp:verify-token`. Never given a default — see below. |
+| `app_secret` | **empty** | Proves an incoming delivery really came from Meta. **Not** the access token — different value, different page in the dashboard. Until it is set, deliveries are accepted unverified and every log line says `"signature":"unverifiable"`. |
 | `phone_number_id` | **empty** | Meta issues this once the number is verified. It is **not** the phone number. |
 | `business_account_id` | **empty** | The WABA ID from Meta Business Manager. |
 | `access_token` | **empty** | A permanent System User token, not the 24-hour development token. |
 | `template_name` | **empty** | Cannot be filled until a template is **approved**, not merely submitted. |
+
+⚠️ **`verify_token` must never gain a seeded default**, for the same reason
+`billing_legal_entity` has none, though the failure is different. A shared
+secret with a value in the repository is identical on every deployment, sits
+in the git history permanently — so rotating it later does not remove it from
+where it has already been — and it is the single value deciding whether an
+unknown caller gets to complete Meta verification against our number.
+
+Note `statement_descriptor` in `payments` **does** carry a default, and that is
+not an inconsistency: a descriptor is a statement about what a member will see,
+not a credential.
+
+### The callback endpoint itself — built ahead of Phase 3, deliberately
+
+`/webhook/whatsapp` exists and is live. It was built out of order because
+Meta's verification is the longest lead time in the project and cannot begin
+without a URL that answers, so leaving it until Phase 3 would have made the
+whole phase wait on a clock that could have been started weeks earlier.
+
+**It is the handshake only.** The GET answers Meta's challenge; the POST
+acknowledges, writes one redacted line to `storage/logs/whatsapp-webhook.log`,
+and does nothing else — no job, no row, no notification. `WhatsAppWebhookTest`
+asserts that with `Bus::assertNothingDispatched()` and a check that the `jobs`
+table stays empty, so message handling cannot quietly begin ahead of the gate.
+
+Three things Phase 3 inherits from it:
+
+- **The app secret becomes mandatory.** Accepting unsigned deliveries is fine
+  while the handler does nothing; it stops being fine the moment a delivery
+  causes an action. That switch is a one-line change in `WhatsAppWebhook`, from
+  tolerating `unverifiable` to refusing it.
+- **The log channel is `single`, so it never rotates.** Fine for setup, wrong
+  once deliveries are routine. Move it to `daily` with a retention.
+- **The redaction is deliberate and reversible.** Phone numbers are masked to
+  their last four digits and message text is replaced with a length, because
+  `storage/` sits inside the served directory on this host. Reverse it by
+  emptying the two key lists in `WhatsAppWebhook`, not by removing the call.
 
 ### `mail` — 7 of 8 effectively empty
 

@@ -78,6 +78,29 @@ class SettingsSeeder extends Seeder
                 ['key' => 'business_account_id', 'label' => 'Business account ID', 'type' => 'text'],
                 ['key' => 'access_token', 'label' => 'Access token', 'type' => 'password', 'is_secret' => true],
                 ['key' => 'template_name', 'label' => 'Match template name', 'type' => 'text'],
+
+                /*
+                 * ⚠️ THESE TWO ARE NEEDED BEFORE ANY OF THE FOUR ABOVE.
+                 *
+                 * Meta will not issue a phone number ID until the callback URL
+                 * has answered a verification challenge, so the verify token is
+                 * the first WhatsApp value that has to exist — earlier than the
+                 * access token, and earlier than Phase 3.
+                 *
+                 * ⚠️ SEEDED EMPTY, AND THE VERIFY TOKEN MUST NEVER GAIN A
+                 * DEFAULT. A shared secret with a value in the repository is
+                 * the same secret on every deployment, is in the git history
+                 * for good, and is the single value deciding whether an unknown
+                 * caller gets to claim to be Meta. Generate one instead:
+                 *
+                 *     php artisan whatsapp:verify-token
+                 *
+                 * Note the descriptor in `payments` DOES carry a default, and
+                 * that is not an inconsistency — a descriptor is a statement
+                 * about what a member will see, not a credential.
+                 */
+                ['key' => 'verify_token', 'label' => 'Webhook verify token', 'type' => 'password', 'is_secret' => true, 'description' => 'The shared secret Meta echoes back when verifying the callback URL. Generate with: php artisan whatsapp:verify-token'],
+                ['key' => 'app_secret', 'label' => 'Meta app secret', 'type' => 'password', 'is_secret' => true, 'description' => 'Proves an incoming delivery really came from Meta. This is NOT the access token — different value, different page in the Meta dashboard. Until it is set, deliveries are accepted unverified and every log line says so.'],
             ],
             // Consumed in Phase 2.
             'payments' => [

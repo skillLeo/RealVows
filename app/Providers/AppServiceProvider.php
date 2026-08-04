@@ -72,5 +72,25 @@ class AppServiceProvider extends ServiceProvider
          */
         RateLimiter::for('unlock', fn (Request $request) => Limit::perMinute(10)
             ->by('user:'.$request->user()?->id));
+
+        /*
+         * ⚠️ THIS LIMIT PROTECTS US FROM A STRANGER AND CAN ALSO CUT OFF META.
+         *
+         * Every other limiter here guards something expensive. This one guards
+         * an endpoint that writes a log line — so the thing it really prevents
+         * is an unknown caller filling the disk, not load.
+         *
+         * The cost of getting it wrong runs the other way. Meta delivers in
+         * bursts, counts a 429 as a failed delivery, retries with backoff, and
+         * disables a subscription that keeps failing. A limit set too low
+         * therefore does not slow WhatsApp down, it silently switches it off,
+         * and the symptom is members not being told about their matches.
+         *
+         * 100/minute was specified and is far above anything this product will
+         * produce. Raise it before suspecting anything else if deliveries ever
+         * start going missing.
+         */
+        RateLimiter::for('whatsapp-webhook', fn (Request $request) => Limit::perMinute(100)
+            ->by('ip:'.$request->ip()));
     }
 }

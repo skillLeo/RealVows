@@ -73,6 +73,32 @@ return [
             'replace_placeholders' => true,
         ],
 
+        /*
+         * The WhatsApp webhook's own log.
+         *
+         * Separate from laravel.log because Meta's deliveries are frequent,
+         * uninteresting when they succeed, and would bury a real exception
+         * inside a wall of routine acknowledgements.
+         *
+         * ⚠️ WHAT REACHES THIS FILE IS REDACTED. WhatsAppWebhook::redact()
+         * masks phone numbers to their last four digits and replaces message
+         * text with a length. On this host storage/ sits inside the served
+         * directory behind one .htaccess, and that .htaccess has been deleted
+         * by a deploy once already — a plaintext file of members' numbers and
+         * messages is the worst thing that could have been sitting there.
+         *
+         * ⚠️ SINGLE, NOT DAILY, SO IT NEVER ROTATES ITSELF. That is what the
+         * brief asked for and it is the right shape for a file somebody
+         * greps during setup, but it grows without limit. Phase 3 should move
+         * it to `daily` with a retention once deliveries are routine.
+         */
+        'whatsapp-webhook' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/whatsapp-webhook.log'),
+            'level' => 'debug',
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

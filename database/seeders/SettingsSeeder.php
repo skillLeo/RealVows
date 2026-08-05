@@ -69,6 +69,17 @@ class SettingsSeeder extends Seeder
                 ['key' => 'encryption', 'label' => 'Encryption', 'type' => 'select', 'options' => ['tls' => 'TLS', 'ssl' => 'SSL', '' => 'None']],
                 ['key' => 'from_address', 'label' => 'From address', 'type' => 'email'],
                 ['key' => 'from_name', 'label' => 'From name', 'type' => 'text'],
+
+                /*
+                 * ⚠️ NOT THE API KEY. The API key authorises us to send; this
+                 * proves an incoming delivery event really came from Resend.
+                 * Different values, different pages in the dashboard, and
+                 * conflating them produces a webhook that rejects everything.
+                 *
+                 * Until it is set, delivery events are dropped and every email
+                 * stays at "accepted" — see docs/EMAIL-DELIVERABILITY.md.
+                 */
+                ['key' => 'webhook_secret', 'label' => 'Webhook signing secret', 'type' => 'password', 'is_secret' => true, 'description' => 'From Resend → Webhooks → Signing secret. Starts whsec_. This is NOT the API key.'],
             ],
             'storage' => [
                 ['key' => 'driver', 'label' => 'Storage driver', 'type' => 'select', 'options' => ['local' => 'This server', 's3' => 'Amazon S3', 'r2' => 'Cloudflare R2']],

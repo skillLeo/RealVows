@@ -11,6 +11,7 @@ use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ResendWebhookController;
 use App\Http\Controllers\UnsubscribeController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -247,6 +248,31 @@ Route::prefix('webhook')
         Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify'])->name('verify');
         Route::post('/whatsapp', [WhatsAppWebhookController::class, 'receive'])->name('receive');
     });
+
+/*
+|--------------------------------------------------------------------------
+| Resend delivery events
+|--------------------------------------------------------------------------
+|
+| ⚠️ Same shape as the WhatsApp webhook and for the same reasons: no session,
+| no CSRF, acknowledge fast, queue the work, and treat an unverifiable payload
+| as inert rather than rejecting it.
+|
+| This endpoint is what lets the ledger stop saying "accepted" and start saying
+| "delivered" — see docs/EMAIL-DELIVERABILITY.md.
+|
+*/
+Route::post('/webhook/resend', ResendWebhookController::class)
+    ->middleware('throttle:whatsapp-webhook')
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \App\Http\Middleware\HandleInertiaRequests::class,
+    ])
+    ->name('webhook.resend');
 
 /*
 |--------------------------------------------------------------------------

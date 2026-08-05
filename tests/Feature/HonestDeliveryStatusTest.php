@@ -10,17 +10,22 @@ use Tests\TestCase;
 /**
  * ⚠️ THE LEDGER MAY NOT CLAIM KNOWLEDGE IT DOES NOT HAVE.
  *
- * Hostinger SMTP returns a 250 at handover and reports nothing afterwards. A
- * hard bounce to a dead address, a silent drop into spam, and a message read
- * twice are indistinguishable from here — and all three look like success.
+ * Each channel may claim exactly what its provider tells us, and no more.
  *
- * A row that said `delivered` on the strength of a 250 would be the vacuous
- * assertion pattern at the infrastructure level: reporting success while
- * checking nothing. The difference from the six code instances is that the
- * thing lying would be an admin screen the client uses to decide whether a
- * member was told about an introduction they paid for.
+ * ⚠️ THIS FILE CHANGED WHEN RESEND LANDED, AND THAT IS THE POINT OF IT.
  *
- * See docs/EMAIL-DELIVERABILITY.md for what it would take to lift the ceiling.
+ * Under bare SMTP a 250 at handover was the last fact available: a hard bounce
+ * and a message read twice were indistinguishable, and both looked like
+ * success. Email therefore stopped at `accepted`.
+ *
+ * Resend posts back delivered, bounced and complained, so `delivered` became a
+ * fact we are TOLD rather than one we assume, and the ceiling rose to match.
+ * The tests were rewritten rather than deleted — a guard left asserting a
+ * condition that has stopped applying fires on something correct, somebody
+ * overrides it, and the habit of overriding guards is what gets established.
+ *
+ * What remains unknowable is `read`, and that is a decision rather than a
+ * limit: it needs a tracking pixel, and this product sends no images at all.
  */
 class HonestDeliveryStatusTest extends TestCase
 {
@@ -38,22 +43,44 @@ class HonestDeliveryStatusTest extends TestCase
 
     // ── The ceiling ──────────────────────────────────────────────────────────
 
-    /** ⚠️ An email may reach `accepted` and no further. */
-    public function test_an_email_cannot_be_marked_delivered(): void
+    /**
+     * ⚠️ AN EMAIL MAY NOW REACH `delivered`, AND MUST STILL NEVER REACH `read`.
+     *
+     * This test used to assert the ceiling was `accepted`. That stopped being
+     * true on 5 August 2026 when the Resend webhook landed and earned the
+     * raise — Resend posts back delivery confirmations, so `delivered` is a
+     * fact we are told rather than one we assume.
+     *
+     * ⚠️ THE TEST WAS REWRITTEN RATHER THAN DELETED, because the remaining
+     * half is the one that still matters. A guard left asserting a condition
+     * that no longer applies is its own failure: it fires on something
+     * correct, somebody overrides it, and the habit of overriding guards is
+     * what gets established.
+     *
+     * `read` requires a tracking pixel. This product sends no images at all —
+     * an inbox is a preview pane on a shared laptop and a lock screen at a
+     * family dinner — so we do not know when an email was opened and are not
+     * going to start knowing.
+     */
+    public function test_an_email_can_reach_delivered_but_never_read(): void
     {
         $email = $this->delivery(MessageDelivery::CHANNEL_EMAIL);
 
         $this->assertTrue($email->applyStatus(MessageDelivery::STATUS_ACCEPTED));
 
-        $this->assertFalse(
+        $this->assertTrue(
             $email->applyStatus(MessageDelivery::STATUS_DELIVERED),
-            'An email was marked delivered. SMTP returns a 250 at handover and nothing '
-                .'afterwards, so this is the panel inventing a fact.'
+            'The email ceiling is still at accepted even though the Resend webhook is live, so '
+                .'the ledger is refusing a fact the provider is telling us.'
         );
 
-        $this->assertFalse($email->applyStatus(MessageDelivery::STATUS_READ));
+        $this->assertFalse(
+            $email->applyStatus(MessageDelivery::STATUS_READ),
+            'An email was marked read. That requires a tracking pixel, and this product sends no '
+                .'images — so "read" would be an invented fact.'
+        );
 
-        $this->assertSame(MessageDelivery::STATUS_ACCEPTED, $email->fresh()->status);
+        $this->assertSame(MessageDelivery::STATUS_DELIVERED, $email->fresh()->status);
     }
 
     /**
@@ -124,7 +151,7 @@ class HonestDeliveryStatusTest extends TestCase
         $email = $this->delivery(MessageDelivery::CHANNEL_EMAIL, MessageDelivery::STATUS_ACCEPTED);
 
         $this->assertNotNull($email->uncertainty());
-        $this->assertStringContainsString('cannot tell', $email->uncertainty());
+        $this->assertStringContainsString('not yet confirmed delivered', $email->uncertainty());
     }
 
     /** And a status that means what it says carries no caveat. */
@@ -140,26 +167,24 @@ class HonestDeliveryStatusTest extends TestCase
     }
 
     /**
-     * ⚠️ THE CEILING MUST NOT BE RAISED WITHOUT THE WEBHOOK THAT EARNS IT.
+     * ⚠️ THE TRIPWIRE, POINTED AT WHAT IS STILL UNKNOWABLE.
      *
-     * It is one constant and it will look like a one-line improvement. This
-     * test is the tripwire, and its message is where the reasoning lives.
+     * It used to guard the whole ceiling. Now it guards the half the provider
+     * cannot tell us: opens. Raising it further would need a tracking pixel,
+     * and the reason there is none is a decision about members rather than a
+     * technical limit — an email is read in a preview pane on a shared laptop.
      */
-    public function test_the_email_ceiling_is_still_accepted(): void
+    public function test_the_email_ceiling_stops_at_delivered(): void
     {
-        $email = $this->delivery(MessageDelivery::CHANNEL_EMAIL);
+        $fresh = $this->delivery(MessageDelivery::CHANNEL_EMAIL);
 
-        foreach ([MessageDelivery::STATUS_DELIVERED, MessageDelivery::STATUS_READ] as $status) {
-            $fresh = $this->delivery(MessageDelivery::CHANNEL_EMAIL);
+        $this->assertFalse(
+            $fresh->applyStatus(MessageDelivery::STATUS_READ),
+            'The email ceiling has been raised to allow "read". That requires a tracking pixel, '
+                .'and this product deliberately sends no images at all — so this would be the '
+                .'panel inventing a fact about a member.'
+        );
 
-            $this->assertFalse(
-                $fresh->applyStatus($status),
-                "The email ceiling has been raised to allow [{$status}] without a transport that "
-                    .'reports bounces. See docs/EMAIL-DELIVERABILITY.md — raising this constant '
-                    .'restores exactly the lie it was added to prevent.'
-            );
-        }
-
-        $this->assertTrue($email->applyStatus(MessageDelivery::STATUS_ACCEPTED));
+        $this->assertTrue($this->delivery(MessageDelivery::CHANNEL_EMAIL)->applyStatus(MessageDelivery::STATUS_DELIVERED));
     }
 }

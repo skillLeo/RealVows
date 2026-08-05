@@ -20,6 +20,14 @@ on:
         description: 'Run the read-only last-name exposure audit against production data'
         required: false
         default: 'false'
+      resend_api_key:
+        description: 'Resend API key (re_...). Stored in settings; empty keeps the current one.'
+        required: false
+        default: ''
+      resend_webhook_secret:
+        description: 'Resend webhook signing secret (whsec_...). Empty keeps the current one.'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -187,6 +195,28 @@ jobs:
         run: |
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan realvows:audit-lastname-exposure"
+
+      # Mail credentials, applied to the settings table.
+      #
+      # ⚠️ PIPED, NOT PASSED AS ARGUMENTS. On a shared host any other account
+      # can read a command line out of the process list.
+      #
+      # ⚠️ Resend is used over SMTP rather than its API, so no new dependency
+      # enters the project and the existing settings-driven mail configurator
+      # works unchanged. The webhook — the part that gives us bounce data — is
+      # independent of how the message is handed over.
+      - name: Apply the Resend credentials
+        env:
+          API_KEY: ${{ github.event.inputs.resend_api_key }}
+          WEBHOOK_SECRET: ${{ github.event.inputs.resend_webhook_secret }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.API_KEY != '' || env.WEBHOOK_SECRET != '' }}
+        run: |
+          printf '%s\n%s\n' "$API_KEY" "$WEBHOOK_SECRET" | \
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:configure-resend --stdin"
 
       - name: Bring the site back
         if: always()

@@ -72,7 +72,25 @@ class MessageDelivery extends Model
      */
     private const CEILING = [
         self::CHANNEL_WHATSAPP => self::STATUS_READ,
-        self::CHANNEL_EMAIL => self::STATUS_ACCEPTED,
+
+        /*
+         * ⚠️ RAISED FROM `accepted` TO `delivered` ON 5 AUGUST 2026, WHEN THE
+         * RESEND WEBHOOK LANDED AND EARNED IT.
+         *
+         * It sat at `accepted` because SMTP returns a 250 at handover and
+         * reports nothing afterwards — a hard bounce and a message read twice
+         * were indistinguishable, and both looked like success.
+         *
+         * Resend posts back delivered, bounced and complained, so `delivered`
+         * is now a fact we are told rather than one we assume.
+         *
+         * ⚠️ IT STOPS AT `delivered`, NOT `read`. Reading requires a tracking
+         * pixel, and this product deliberately sends no images at all — an
+         * inbox is a preview pane on a shared laptop and a lock screen at a
+         * family dinner. We do not know when an email was opened and we are
+         * not going to start knowing.
+         */
+        self::CHANNEL_EMAIL => self::STATUS_DELIVERED,
     ];
 
     protected $guarded = ['id'];
@@ -200,8 +218,14 @@ class MessageDelivery extends Model
             return null;
         }
 
-        return 'The mail server accepted this. We cannot tell whether it arrived, '
-            .'was rejected afterwards, or went to spam — this transport reports no bounces.';
+        /*
+         * ⚠️ NARROWER THAN IT WAS. `accepted` used to be the ceiling and now
+         * it is a waypoint: Resend confirms delivery, so a row still sitting
+         * at accepted means we are waiting for that confirmation rather than
+         * unable to ever get one.
+         */
+        return 'Handed over and not yet confirmed delivered. Resend usually confirms within '
+            .'seconds — a row still here after an hour is worth looking at.';
     }
 
     public function hasFailed(): bool

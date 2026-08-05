@@ -28,6 +28,10 @@ on:
         description: 'Resend webhook signing secret (whsec_...). Empty keeps the current one.'
         required: false
         default: ''
+      show_webhook_log:
+        description: 'Print recent webhook activity (read-only). e.g. resend'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -217,6 +221,20 @@ jobs:
           printf '%s\n%s\n' "$API_KEY" "$WEBHOOK_SECRET" | \
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan realvows:configure-resend --stdin"
+
+      # Read-only. Prints the tail of the already-redacted webhook log so
+      # "has an event ever arrived?" is answerable without an SSH session —
+      # otherwise "nothing arrived" and "I cannot see" are the same output.
+      - name: Show webhook log
+        env:
+          FILTER: ${{ github.event.inputs.show_webhook_log }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.FILTER != '' }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:webhook-log --lines=40 --filter='$FILTER'"
 
       - name: Bring the site back
         if: always()

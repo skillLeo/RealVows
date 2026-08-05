@@ -27,6 +27,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicPageController::class, 'home'])->name('home');
 
 /*
+ * ⚠️ REAL PAGES, NOT ANCHORS INTO THE HOME PAGE.
+ *
+ * The client's complaint was having to "scroll all the way down an entire
+ * page" — an anchor link is the same scroll with a shortcut, and it leaves the
+ * site feeling like one long document rather than a site. These are what the
+ * navigation points at.
+ *
+ * `how-it-works` shares its three-step section with the home page through
+ * public.partials.how-it-works, so there is one copy of that writing.
+ */
+Route::get('/how-it-works', [PublicPageController::class, 'howItWorks'])->name('how-it-works');
+Route::get('/about', [PublicPageController::class, 'about'])->name('about');
+
+/*
  * Served rather than static, because it must answer differently on the review
  * build. While the one-click sign-in is open, nothing here should be indexed —
  * a search result pointing at a page with an admin button on it is a door

@@ -42,6 +42,7 @@ pass, reach mutual interest, see contact details, and block. **Not a dead end.**
 | ⏳ | **Verify the domain in Resend** — DNS is correct, button unpressed | **Client** | Blocks real sends |
 | ⏳ | Scope webhook to `email.*` events only | **Client** | 2 minutes |
 | ⏳ | Seven Meta templates approved | **Client** | **The only long pole left** |
+| ⬜ | **Remove the "awaiting Meta review" line** from `partials/what-arrives.blade.php` the day the templates are approved | Hassam | Tied to the row above — the previous version of that line was stale for weeks and nothing could tell |
 | ⬜ | Demo members actually removed | Hassam | Run on launch day |
 | ⬜ | Five real-device checks | **Client** | |
 | ⬜ | Backup taken and restore tested | Hassam | |

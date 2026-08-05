@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A1220">
 
     <title>@yield('title', 'RealVows') · RealVows</title>
-    <meta name="description" content="@yield('description', 'Find someone ready for marriage. Free to join, every profile verified by a real person, matches delivered to your email and WhatsApp.')">
+    <meta name="description" content="@yield('description', 'Find your true soul mate. Free to join, every profile verified by a real person, introductions brought to your email and WhatsApp.')">
 
     {{-- The one-click sign-in is open on the review build, so it must
          not be indexed. Removed automatically when it goes live. --}}
@@ -42,19 +42,7 @@
         </div>
     @endif
 
-    <header class="rv-panel">
-        <div class="rv-shell rv-pubhead">
-            <a href="{{ route('home') }}" class="rv-logo" aria-label="RealVows home">
-                <span class="rv-logo__mark" aria-hidden="true">RV</span>
-                <span class="rv-logo__word">RealVows</span>
-            </a>
-
-            <nav class="rv-pubhead__nav" aria-label="Account">
-                <a href="{{ route('login') }}" class="rv-pubhead__link">Log in</a>
-                <a href="{{ route('register') }}" class="rv-btn rv-btn--outline-brass">Create free account</a>
-            </nav>
-        </div>
-    </header>
+    @include('public.partials.nav')
 
     <main id="rv-main">
         @yield('content')
@@ -65,6 +53,8 @@
             <span class="rv-logo__word rv-pubfoot__word">RealVows</span>
 
             <nav class="rv-pubfoot__nav" aria-label="Legal">
+                <a href="{{ route('how-it-works') }}">How it works</a>
+                <a href="{{ route('about') }}">About</a>
                 <a href="{{ route('legal.terms') }}">Terms of Service</a>
                 <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
                 <a href="{{ route('legal.guidelines') }}">Community Guidelines</a>

@@ -109,10 +109,21 @@ class ProfileOptions
         'outlook' => ['left' => 'Traditional', 'right' => 'Progressive'],
     ];
 
+    /**
+     * ⚠️ THE KEYS NEVER MOVE. THE LABELS DID.
+     *
+     * These keys are stored on every profile and `marriage_timeline` below is a
+     * member of MatchingFieldsHash::FIELDS. Renaming a key would change the
+     * hash, invalidate every stored profile hash and re-match the whole
+     * platform — for a copy change. Only the right-hand side is copy.
+     *
+     * The register follows the client: soul mate leads, marriage stays as the
+     * destination in the third option, which is his own phrasing.
+     */
     public const RELATIONSHIP_GOAL = [
-        'marriage_soon' => 'Marriage, as soon as I meet the right person',
-        'marriage_eventually' => 'Marriage, without rushing it',
-        'serious_first' => 'A serious relationship leading to marriage',
+        'marriage_soon' => 'My soul mate, as soon as I meet them',
+        'marriage_eventually' => 'My soul mate, without rushing it',
+        'serious_first' => 'A lasting relationship, leading to marriage',
     ];
 
     public const DISTANCE_PREFERENCE = [

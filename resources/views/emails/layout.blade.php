@@ -61,7 +61,7 @@
                         <td style="padding:0 32px 32px;">
                             <div style="height:1px;background:rgba(185,145,84,.2);font-size:0;line-height:1px;">&nbsp;</div>
                             <p style="margin:24px 0 0;font-size:14px;line-height:1.55;color:#6B5F62;">
-                                RealVows · marriage-first · 18+<br>
+                                RealVows · soul mate first · 18+<br>
                                 If you weren't expecting this, you can ignore it safely.
                             </p>
 

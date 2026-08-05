@@ -5,7 +5,7 @@
         : '[PENDING — the contracting entity is not yet confirmed]';
 @endphp
 --
-RealVows · marriage-first · 18+
+RealVows · soul mate first · 18+
 {{ $entity }}
 
 To stop receiving these emails: {{ $unsubscribeUrl }}

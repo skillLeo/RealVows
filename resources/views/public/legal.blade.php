@@ -77,24 +77,59 @@
 
         <div class="rv-stack" style="gap: 24px">
             <h2 class="rv-d3">Who this applies to</h2>
+
+            {{-- ⚠️ THE CLIENT'S OWN SENTENCE, VERBATIM, INCLUDING THE LAST FOUR
+                 WORDS. He wrote it out himself. Marriage is the destination and
+                 it belongs at the end — do not "tidy" it away, and do not move
+                 it forward. --}}
             <p class="rv-body">
-                RealVows is for people aged 18 and over who are seriously seeking marriage.
-                Creating an account and building a full profile is free.
+                RealVows is for people aged 18 and over, who are seeking to find their true soul
+                mate. Their synergy will help them develop that bond and a lasting relationship,
+                leading to marriage. Creating an account and building a full profile is free.
             </p>
 
+            {{--
+                ⚠️ THE VERIFICATION METHOD IS NOT DESCRIBED HERE. DO NOT
+                "COMPLETE" THIS SECTION.
+
+                This paragraph used to explain exactly how identity is checked,
+                down to the handwritten code. The client circled it and wrote
+                "this is private information", and he is right for a stronger
+                reason than presentation: publishing the anti-fraud method
+                publishes what somebody needs in order to prepare for it. A
+                check is more effective when its exact shape is not documented
+                on a page anyone can read without signing in.
+
+                The full explanation still exists, in the one place it belongs —
+                inside the verification step itself, where it is an instruction
+                to the person doing it rather than a disclosure to everyone
+                else. See lang/en/realvows.php `profile.a_photo_of_you`.
+
+                The outcome may be stated publicly. The mechanism may not.
+            --}}
             <h2 class="rv-d3">Verification</h2>
             <p class="rv-body">
-                Every member is reviewed by a real person before they can be matched. We ask for
-                four photographs and one further photograph of you holding a handwritten note
-                with a code we generate. That last photograph is used only to confirm you are
-                who you say you are. It is never shown on your profile and never shown to
-                another member.
+                Every member is reviewed by a real person before they can be matched. Nobody
+                enters the matching pool unverified. We ask for four photographs as part of
+                building a profile.
             </p>
 
-            <h2 class="rv-d3">How matches reach you</h2>
+            {{--
+                ⚠️ WHAT ARRIVES IS NOT DESCRIBED HERE EITHER.
+
+                From the client: "we should not tell them anything about what
+                the email will say or what the WhatsApp message will say. Just
+                tell them they will receive an email and a WhatsApp, but do not
+                give them an idea what it will say or what it will look like."
+
+                The no-browsing sentence stays. That is product framing rather
+                than delivery mechanics, and it is load-bearing.
+            --}}
+            <h2 class="rv-d3">How introductions reach you</h2>
             <p class="rv-body">
-                RealVows chooses your matches and delivers them to you by email and WhatsApp.
-                There is no directory to browse and no way to search for other members.
+                RealVows chooses who you are introduced to, and introductions reach you by email
+                and WhatsApp. There is no directory to browse and no way to search for other
+                members.
             </p>
 
             <h2 class="rv-d3">Your data</h2>

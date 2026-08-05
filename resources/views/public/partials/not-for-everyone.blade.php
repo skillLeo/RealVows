@@ -9,7 +9,13 @@
     <div class="rv-shell rv-notforeveryone__grid" data-reveal>
         <div class="rv-stack" style="gap: 16px">
             <p class="rv-eyebrow">Plainly</p>
-            <h2 class="rv-d2" style="max-width: 18ch">RealVows is for people ready to marry.</h2>
+
+            {{-- ⚠️ THE CLIENT'S OWN SENTENCE. He wrote it out himself after
+                 seeing this band read "RealVows is for people ready to marry."
+                 Keep his words; the register of this whole page is set here. --}}
+            <h2 class="rv-d2" style="max-width: 20ch">
+                RealVows is for people looking to find their true soul mate.
+            </h2>
         </div>
 
         <div class="rv-stack" style="gap: 20px">

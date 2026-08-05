@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\WhatsAppTemplates;
+use Tests\Support\Scanners;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,41 @@ use Tests\TestCase;
  */
 class WhatsAppTemplateTest extends TestCase
 {
+    /**
+     * ⚠️ DOES THE REPOSITIONING FORCE A RESUBMISSION TO META?
+     *
+     * All seven templates are in review with Meta. Editing one means
+     * resubmitting and losing days, so "do any of them lead with marriage?" is
+     * a question with a real cost attached to the answer.
+     *
+     * ⚠️ IT IS ANSWERED HERE RATHER THAN IN A REPORT, and that is the point.
+     * A figure that appears in a second document is re-derived, never carried
+     * across — a human reading seven strings and writing "all clean" is exactly
+     * the kind of claim this project has been wrong about before. This asserts
+     * it against the templates themselves, and keeps asserting it when somebody
+     * edits one in six months and does not remember the constraint.
+     */
+    public function test_no_template_carries_marriage_forward_language(): void
+    {
+        $offences = [];
+
+        foreach (WhatsAppTemplates::TEMPLATES as $name => $template) {
+            $found = Scanners::marriageForwardTerms($template['body']);
+
+            if ($found !== []) {
+                $offences[] = "{$name} contains [".implode(', ', $found).']';
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offences,
+            "A WhatsApp template carries marriage-forward language. Changing it means "
+                ."RESUBMITTING TO META and waiting for review again — report before "
+                ."editing:\n  ".implode("\n  ", $offences)
+        );
+    }
+
     /** All seven exist, and nobody has quietly dropped one. */
     public function test_all_seven_templates_are_defined(): void
     {

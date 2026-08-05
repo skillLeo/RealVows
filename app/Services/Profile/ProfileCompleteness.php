@@ -132,7 +132,7 @@ class ProfileCompleteness
             'has_children' => 'Whether you have children',
             'wants_children' => 'Whether you want children',
             'relationship_goal' => 'What you are looking for',
-            'marriage_timeline' => 'Your marriage timeline',
+            'marriage_timeline' => 'Your timeframe for a lasting relationship',
             'core_values' => 'Your five core values',
             'conflict_style' => 'How you handle disagreement',
             'bio' => 'A few words about you',

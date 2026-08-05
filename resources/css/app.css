@@ -1102,6 +1102,16 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    Public chrome (Blade marketing pages)
    ========================================================================== */
 
+/* ⚠️ STICKY, because the client's complaint was having to scroll an entire
+   page to reach anything. `position: sticky` rather than `fixed` so it does
+   not overlay content on a short viewport, and the demo bar above it — when
+   present — scrolls away as it should. */
+.rv-pubhead__bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 .rv-pubhead {
   display: flex;
   flex-wrap: wrap;
@@ -1112,6 +1122,131 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 .rv-pubhead__nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+
+/* ── The three lines, and the sheet they open ─────────────────────────────
+   Inline links on anything wide enough to hold them; the hamburger below
+   that. One of the two is always present, never both. */
+
+.rv-navtoggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--brass-bright);
+  cursor: pointer;
+}
+
+.rv-navtoggle__lines { display: block; width: 20px; }
+.rv-navtoggle__lines span {
+  display: block;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 1px;
+}
+.rv-navtoggle__lines span + span { margin-top: 5px; }
+
+@media (min-width: 768px) {
+  .rv-navtoggle { display: none; }
+}
+
+@media (max-width: 767px) {
+  .rv-pubhead__nav--wide { display: none; }
+}
+
+.rv-navsheet {
+  width: min(88vw, 380px);
+  max-width: 100%;
+  margin: 0 0 0 auto;
+  height: 100%;
+  max-height: 100%;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--hairline);
+  background: var(--oxblood);
+  color: var(--on-dark);
+}
+
+/* ⚠️ #8 THE SETTLE, AND IT IS A TRANSITION — NOT A KEYFRAME.
+   The catalogue lists it as "(transition) sheets and toasts", and the first
+   attempt at this menu wrote it as a keyframe instead. MotionCatalogueTest
+   rejected it twice over: once as an unregistered keyframe, and once as The
+   Arrival at a different distance, which is the drift that produced nine names
+   for one primitive. The guard was right; the animation is a transition on a
+   class the script adds after showModal(). */
+.rv-navsheet {
+  opacity: 0;
+  transform: translateX(12px);
+  transition: opacity 240ms var(--ease-settle), transform 240ms var(--ease-settle);
+}
+
+.rv-navsheet.is-open { opacity: 1; transform: none; }
+
+.rv-navsheet::backdrop { background: rgba(20, 6, 10, .55); }
+
+/* ⚠️ Reduced motion degrades to opacity under 200ms rather than merely
+   slowing down. Nothing translates when this is set. */
+@media (prefers-reduced-motion: reduce) {
+  .rv-navsheet {
+    transform: none;
+    transition: opacity 160ms linear;
+  }
+  .rv-navsheet.is-open { transform: none; }
+}
+
+.rv-navsheet__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  height: 100%;
+  padding: 24px;
+}
+
+.rv-navsheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rv-navsheet__close {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--brass-bright);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rv-navsheet__nav { display: flex; flex-direction: column; gap: 8px; }
+
+.rv-navsheet__nav a {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  color: var(--cream);
+  text-decoration: none;
+  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
+}
+.rv-navsheet__nav a:hover { color: var(--brass-bright); }
+
+.rv-navsheet__note {
+  margin: 0;
+  font-size: var(--fs-body-2);
+  color: var(--brass-bright);
+}
+
+.rv-navsheet__cta { margin-top: auto; }
 
 .rv-pubhead__link {
   min-height: var(--tap-min);
@@ -3335,73 +3470,21 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   background: var(--card);
 }
 
-.rv-arrives__from {
+/* ⚠️ The mock-up rules — __subject, __score, __cta, __bubble, __url, __stamp,
+   __from and the --chat variant — were deleted with the mock-ups themselves.
+   They styled a preview of the email and the WhatsApp message, which the
+   client asked to be removed from the public page. Leaving the rules behind
+   would be an invitation to put the markup back. */
+
+.rv-arrives__body {
   margin: 0;
-  font-size: var(--fs-body-3);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--brass-ink);
-}
-
-.rv-arrives__subject {
-  margin: 8px 0 0;
-  font-family: var(--display);
-  font-size: var(--fs-display-3);
-  line-height: 1.25;
-  color: var(--oxblood);
-  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
-}
-
-.rv-arrives__rule {
-  display: block;
-  height: 1px;
-  margin: 20px 0;
-  background: var(--hairline);
-}
-
-.rv-arrives__score {
-  margin: 0;
-  font-family: var(--display);
-  font-size: var(--fs-display-1);
-  line-height: 1;
-  color: var(--oxblood);
-  font-variation-settings: 'opsz' 144, 'SOFT' 20, 'WONK' 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.rv-arrives__body { margin: 12px 0 0; font-size: var(--fs-body-2); color: var(--ink); }
-
-.rv-arrives__cta {
-  margin: 20px 0 0;
-  font-weight: 600;
-  color: var(--brass-ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-size: var(--fs-body-2);
+  line-height: 1.6;
+  color: var(--ink);
+  padding-right: 56px; /* clears the seal */
 }
 
 .rv-arrives__seal { position: absolute; right: 20px; bottom: 20px; }
-
-/* The chat variant */
-.rv-arrives__mock--chat { background: var(--cream); }
-
-.rv-arrives__bubble {
-  margin: 0;
-  padding: 16px 20px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--r);
-  background: var(--card);
-  font-size: var(--fs-body-2);
-  line-height: 1.6;
-}
-
-.rv-arrives__url { color: var(--brass-ink); }
-
-.rv-arrives__stamp {
-  margin: 8px 0 0;
-  text-align: right;
-  font-size: var(--fs-body-3);
-  color: var(--ink-soft);
-}
 
 .rv-arrives__note { margin-top: 24px; text-align: center; }
 

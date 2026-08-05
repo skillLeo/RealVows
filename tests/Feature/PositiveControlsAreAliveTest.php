@@ -123,6 +123,39 @@ class PositiveControlsAreAliveTest extends TestCase
                 'planted' => 'Open it here: realvows.leo.com/dashboard',
                 'clean' => 'Open it here: realvows.skillleo.com/dashboard',
             ],
+
+            /*
+             * The clean sample is the client's own approved sentence. It is
+             * deliberately the hardest case: it CONTAINS the word and must not
+             * be flagged as a lead, because he wrote it and it ends on the
+             * destination rather than opening on it.
+             */
+            'marriage-forward phrasing' => [
+                'reader' => fn (string $t) => Scanners::marriageForwardTerms($t),
+                'planted' => 'Find someone ready for marriage.',
+                'clean' => 'RealVows is for people looking to find their true soul mate.',
+            ],
+
+            /*
+             * ⚠️ The clean sample is `synastry` — the term this reader must NOT
+             * claim, because a different guard owns it. If the two lists are
+             * ever merged, or either is widened to a `syn` prefix, this fails
+             * rather than silently banning the client's own word.
+             */
+            'mechanism-adjacent vocabulary in generated copy' => [
+                'reader' => fn (string $t) => Scanners::mechanismAdjacentTerms($t),
+                'planted' => 'Your synergy with them is unusually strong.',
+                'clean' => 'Their synastry is not something we would ever mention.',
+            ],
+
+            'a host outside the allow-list' => [
+                'reader' => fn (string $t) => array_values(array_filter(
+                    Scanners::hosts($t),
+                    fn (string $h) => ! in_array($h, ['realvows.skillleo.com', 'www.w3.org', 'example.com'], true),
+                )),
+                'planted' => '<span class="rv-arrives__url">realvows.com/m/8f2a…</span>',
+                'clean' => '<a href="https://realvows.skillleo.com/dashboard">Open</a>',
+            ],
         ];
     }
 

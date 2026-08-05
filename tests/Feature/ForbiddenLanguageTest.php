@@ -10,6 +10,7 @@ use App\Services\Matching\Copy\CommonalityFinder;
 use App\Services\Matching\Copy\RationaleWriter;
 use App\Services\Matching\MatchGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\Scanners;
 use Tests\TestCase;
 
 /**
@@ -69,6 +70,20 @@ class ForbiddenLanguageTest extends TestCase
                 $term, $text, "Tier 2 term [{$term}] appeared in generated copy in {$where}: \"{$text}\""
             );
         }
+
+        /*
+         * ⚠️ TIER 3 — PERMITTED IN MARKETING, BANNED HERE. The list and the
+         * full reasoning live in Scanners::MECHANISM_ADJACENT so there is one
+         * copy of it and one place to argue with.
+         */
+        $this->assertSame(
+            [],
+            Scanners::mechanismAdjacentTerms($text),
+            "Mechanism-adjacent vocabulary appeared in {$where}. It is allowed on the marketing "
+                ."pages — the client wrote it himself — but inside generated match copy it reads "
+                ."as the name of a mechanism, and it is one letter-cluster from the term for the "
+                ."thing we are concealing: \"{$text}\""
+        );
     }
 
     /**
@@ -93,6 +108,8 @@ class ForbiddenLanguageTest extends TestCase
             'a glyph' => 'Your sign ♌ suggests warmth',
             'a tier 2 phrase' => 'A fire sign paired with an air sign',
             'modality language' => 'Both cardinal, which explains the friction',
+            'mechanism-adjacent vocabulary' => 'Your synergy is unusually strong',
+            'the same word capitalised' => 'Synergy between you two is rare',
         ];
 
         foreach ($mustTrip as $why => $text) {
@@ -132,6 +149,40 @@ class ForbiddenLanguageTest extends TestCase
         foreach ($mustPass as $text) {
             $this->assertClean($text, 'ordinary copy');
         }
+    }
+
+    /**
+     * ⚠️ THE CLIENT'S OWN SENTENCE MUST SURVIVE THE ZODIAC READER.
+     *
+     * "Their synergy will help them develop that bond" is his wording for the
+     * legal pages. The banned term is `synastry`. The two are one letter-cluster
+     * apart, and the obvious "tighten the reader" move — matching a `syn`
+     * prefix — would fail the build on the client's own approved copy and look,
+     * from the failure message, like a genuine zodiac leak.
+     *
+     * This asserts the distinction in both directions so nobody has to
+     * rediscover it under time pressure.
+     */
+    public function test_the_clients_wording_is_not_mistaken_for_the_banned_term(): void
+    {
+        $his = 'RealVows is for people aged 18 and over, who are seeking to find their true soul '
+            .'mate. Their synergy will help them develop that bond and a lasting relationship, '
+            .'leading to marriage.';
+
+        $this->assertSame(
+            [],
+            Scanners::forbiddenTerms($his),
+            'The zodiac reader flagged the client\'s own approved sentence. Check it has not been '
+                .'widened to a prefix: "synergy" is his word, "synastry" is the banned one.'
+        );
+
+        // And the narrower reader, which is applied only to generated copy,
+        // does see it — otherwise the ban in assertClean() is decorative.
+        $this->assertSame(
+            ['synergy'],
+            Scanners::mechanismAdjacentTerms($his),
+            'The mechanism-adjacent reader cannot see the word it exists for.'
+        );
     }
 
     /**

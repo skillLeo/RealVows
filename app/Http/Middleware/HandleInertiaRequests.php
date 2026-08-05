@@ -49,9 +49,25 @@ class HandleInertiaRequests extends Middleware
             // Drives the review-build banner. Same switch as the one-click
             // logins, so the banner cannot be showing while they are off, or
             // the other way round.
-            // ⚠️ Shared so every screen hides purchase CTAs from one source of
-            // truth. A page deciding for itself is a page that can disagree.
-            'freePeriod' => app(\App\Support\FreePeriod::class)->isActive(),
+            /*
+             * ⚠️ Shared so every screen hides purchase CTAs from one source of
+             * truth. A page deciding for itself is a page that can disagree.
+             *
+             * ⚠️ A CLOSURE, NOT A VALUE, AND THAT IS A BUG FIX RATHER THAN A
+             * MICRO-OPTIMISATION.
+             *
+             * This middleware is appended to the `web` group, so it runs on
+             * every web request — including the Blade marketing pages, which
+             * are not Inertia and never read this prop. Evaluating it eagerly
+             * put a settings query on the public home page, which is precisely
+             * how an unmigrated settings table turned that page into a 500.
+             *
+             * Inertia only resolves a closure when it actually renders an
+             * Inertia response, so the marketing pages now touch no database
+             * at all. They read App\Support\PublicState instead, which is a
+             * file.
+             */
+            'freePeriod' => fn () => app(\App\Support\FreePeriod::class)->isActive(),
             'isDemo' => (bool) config('realvows.is_demo'),
 
             /*

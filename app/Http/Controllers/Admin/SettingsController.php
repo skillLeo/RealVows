@@ -91,6 +91,20 @@ class SettingsController extends Controller
 
         if ($changed) {
             $audit->handle('settings.updated', null, ['group' => $group, 'changes' => $changed]);
+
+            /*
+             * ⚠️ THE PUBLIC PAGES READ A PROJECTION, NOT THIS TABLE.
+             *
+             * Switching the free period off here and leaving the projection
+             * alone would mean the marketing pages went on hiding the Pricing
+             * link after payments were live. Rewritten on every save — cheap,
+             * and it makes the change visible immediately rather than at the
+             * next scheduler tick.
+             *
+             * A failed write is not fatal and is not swallowed either: the
+             * scheduler rewrites it every minute, and PublicState logs.
+             */
+            \App\Support\PublicState::write(app(\App\Support\FreePeriod::class)->isActive());
         }
 
         return back()->with('success', $changed

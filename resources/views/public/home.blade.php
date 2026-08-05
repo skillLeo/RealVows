@@ -1,7 +1,20 @@
 @extends('layouts.public')
 
-@section('title', 'Find someone ready for marriage')
-@section('description', 'RealVows is a marriage-focused matchmaking platform for people 18 and over. Free to join, every profile verified by a real person, matches delivered to your email and WhatsApp.')
+{{--
+    ⚠️ SOUL MATE LEADS. MARRIAGE IS THE DESTINATION, NOT THE DOOR.
+
+    From the client, after walking the live site: "the word you want to use is
+    not marriage, because marriage frightens a lot of people. It is more about
+    finding your soul mate — that resonates especially with women and also with
+    men."
+
+    He has not banned the word. His own sentence ends with it. He has DEMOTED
+    it: marriage is where this is going, mentioned last and softly; soul mate is
+    the frame and the first thing anyone reads. MarriageLeadTest holds that line
+    over rendered output and keeps the allow-list of legitimate uses current.
+--}}
+@section('title', 'Find your true soul mate')
+@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every profile verified by a real person, introductions brought to your email and WhatsApp.')
 
 @section('content')
 
@@ -14,13 +27,13 @@
             <div class="rv-hero__copy-inner rv-stack" style="gap: 28px">
                 <p class="rv-eyebrow rv-hero__eyebrow-line rv-arrive-step">For those who mean it</p>
 
-                <h1 class="rv-d1" data-arrival-words>Find someone ready for marriage.</h1>
+                <h1 class="rv-d1" data-arrival-words>Find your true soul mate.</h1>
 
                 <span class="rv-hero__flourish rv-arrive-step"></span>
 
                 <p class="rv-lead" style="max-width: 44ch">
-                    Free to join. Every profile verified by a real person. Matches delivered to your
-                    email and WhatsApp.
+                    Free to join. Every profile verified by a real person. Introductions brought to
+                    you by email and WhatsApp.
                 </p>
 
                 <div>
@@ -28,7 +41,7 @@
                 </div>
 
                 <p class="rv-hero__eyebrow">
-                    <span>Marriage-first</span>
+                    <span>Soul mate first</span>
                     <span>18+</span>
                     <span>Verified members</span>
                 </p>
@@ -79,8 +92,8 @@
             @include('public.partials.ornament')
 
             <p class="rv-vow">
-                Nobody here is passing the time. Everyone on RealVows is looking for the person
-                they are going to marry.
+                Nobody here is passing the time. Everyone on RealVows is looking for their soul
+                mate, and for the lasting relationship that follows.
             </p>
 
             @include('public.partials.ornament')
@@ -108,29 +121,9 @@
     {{-- ── 4 · Two people, properly introduced ─────────────────────────── --}}
     @include('public.partials.couples-rail')
 
-    {{-- ── How it works ────────────────────────────────────────────────── --}}
-    <section class="rv-shell rv-section rv-paper">
-        <div class="rv-stack rv-section__head" data-reveal>
-            <p class="rv-eyebrow">Three steps, then we take over</p>
-            <h2 class="rv-d2">How it works</h2>
-            <span class="rv-underline" style="max-width: 220px"></span>
-        </div>
-
-        <div class="rv-grid rv-grid--3" data-stagger>
-            @foreach ([
-                ['01', 'Build your profile', 'Seven guided steps, saved as you go'],
-                ['02', 'Get verified', "A real person checks you're you, usually within a day"],
-                ['03', 'Receive your matches', 'Chosen for you and delivered to your inbox — there is nothing to search through'],
-            ] as [$number, $title, $body])
-                <div class="rv-card rv-card--lift rv-step rv-stack" style="gap: 20px" data-reveal>
-                    <span class="rv-numeral rv-step__number">{{ $number }}</span>
-                    <h3 class="rv-d3">{{ $title }}</h3>
-                    <span class="rv-rule rv-rule--soft"></span>
-                    <p class="rv-body">{{ $body }}</p>
-                </div>
-            @endforeach
-        </div>
-    </section>
+    {{-- ── How it works ──────────────────────────────────────────────────
+         Shared with /how-it-works. Edit the partial, never a copy of it. --}}
+    @include('public.partials.how-it-works')
 
     {{--
         ── Compatibility ────────────────────────────────────────────────────

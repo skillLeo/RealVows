@@ -65,7 +65,7 @@ const submit = () =>
                     {{ $t('auth.register_free') }}
                 </p>
                 <p class="rv-hero__eyebrow">
-                    <span>Marriage-first</span>
+                    <span>{{ $t('auth.register_badge') }}</span>
                     <span>18+</span>
                     <span>Verified members</span>
                 </p>

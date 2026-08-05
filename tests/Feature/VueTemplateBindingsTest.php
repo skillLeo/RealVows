@@ -37,6 +37,9 @@ class VueTemplateBindingsTest extends TestCase
         // Common JS globals used inline.
         'Object', 'Array', 'String', 'Number', 'Boolean', 'Math', 'JSON', 'Date',
         'parseInt', 'parseFloat', 'isNaN', 'console', 'route', 'window',
+        // Language, not calls. `if (` and `return (` are not helpers.
+        'if', 'else', 'return', 'typeof', 'instanceof', 'new', 'in', 'of',
+        'for', 'while', 'switch', 'catch', 'function', 'await', 'delete', 'void',
     ];
 
     /**
@@ -58,14 +61,7 @@ class VueTemplateBindingsTest extends TestCase
                 continue;
             }
 
-            /*
-             * Calls that look like a helper: an identifier immediately
-             * followed by `(`. Deliberately not method calls (`a.b(`), which
-             * belong to whatever object they hang off.
-             */
-            preg_match_all('/(?<![\w.$])([a-zA-Z_$][\w$]*)\s*\(/', $template, $matches);
-
-            foreach (array_unique($matches[1]) as $name) {
+            foreach ($this->calledNames($template) as $name) {
                 if (in_array($name, self::PROVIDED, true)) {
                     continue;
                 }
@@ -108,6 +104,24 @@ class VueTemplateBindingsTest extends TestCase
 
         $this->assertTrue($this->hasUndefinedCall($broken), 'The scan cannot see the bug it exists for.');
         $this->assertFalse($this->hasUndefinedCall($fixed), 'The scan flags a correctly defined helper.');
+
+        /*
+         * ⚠️ THE OVER-EAGER HALF. These are the three real false positives the
+         * first version of this scan produced, kept as fixtures so a future
+         * widening of the pattern fails here rather than in somebody's inbox.
+         */
+        $noise = "<script setup>\nconst x = 1;\n</script>\n"
+            .'<template>'
+            .'<span style="color: var(--rose)">a</span>'
+            .'<label>Anything to add (optional)</label>'
+            .'<input label="Shortest height (cm)">'
+            .'</template>';
+
+        $this->assertFalse(
+            $this->hasUndefinedCall($noise),
+            'The scan flags CSS functions and ordinary prose. An over-eager reader is as useless '
+                .'as a blind one — it produces noise that trains people to ignore the guard.'
+        );
     }
 
     private function hasUndefinedCall(string $source): bool
@@ -115,19 +129,88 @@ class VueTemplateBindingsTest extends TestCase
         $template = $this->sectionBetween($source, '<template>', '</template>');
         $script = $this->sectionBetween($source, '<script setup>', '</script>');
 
-        preg_match_all('/(?<![\w.$])([a-zA-Z_$][\w$]*)\s*\(/', $template, $matches);
-
-        foreach (array_unique($matches[1]) as $name) {
-            if (in_array($name, self::PROVIDED, true)) {
-                continue;
-            }
-
+        foreach ($this->calledNames($template) as $name) {
             if (preg_match('/(?:const|let|var|function)\s+'.preg_quote($name, '/').'\b/', $script) !== 1) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * ⚠️ ONLY WHAT VUE ACTUALLY EVALUATES.
+     *
+     * The first version of this scan ran the identifier-call pattern over the
+     * whole template and produced three false positives on the first run:
+     *
+     *   · `style="color: var(--rose)"`      — a CSS function in a STATIC
+     *                                          attribute. Vue never evaluates
+     *                                          it; it is a string.
+     *   · `label="Shortest height (cm)"`     — English prose. The word "height"
+     *                                          happens to be followed by a
+     *                                          bracket.
+     *   · `>Anything to add (optional)<`     — the same thing, in body text.
+     *
+     * ⚠️ AN OVER-EAGER READER IS AS DEAD AS A BLIND ONE, and worse in
+     * practice: a blind guard fails silently, whereas a noisy one trains people
+     * to skim its output and eventually to delete it. Three false positives on
+     * a first run is how a guard earns a reputation it never recovers from.
+     *
+     * So the scan reads expressions rather than markup: the inside of `{{ }}`,
+     * and the values of bound attributes — `:prop`, `v-if`, `@click`. A static
+     * `style` or `label` attribute is not evaluated by Vue and cannot contain
+     * an undefined helper, by definition.
+     *
+     * @return list<string>
+     */
+    private function calledNames(string $template): array
+    {
+        $expressions = [];
+
+        // Interpolations: {{ anything }}
+        preg_match_all('/\{\{(.+?)\}\}/s', $template, $curly);
+        $expressions = array_merge($expressions, $curly[1]);
+
+        /*
+         * Bound attributes only. The leading `:`, `v-` or `@` is what marks an
+         * attribute value as an expression rather than a string — that single
+         * character is the whole difference between `style="var(--rose)"` and
+         * `:style="tint(row)"`.
+         */
+        preg_match_all(
+            '/(?:^|\s)(?::|v-|@)[A-Za-z@:.\[\]_-][\w@:.\[\]_-]*\s*=\s*"([^"]*)"/s',
+            $template,
+            $doubleQuoted,
+        );
+        $expressions = array_merge($expressions, $doubleQuoted[1]);
+
+        preg_match_all(
+            "/(?:^|\s)(?::|v-|@)[A-Za-z@:.\[\]_-][\w@:.\[\]_-]*\s*=\s*'([^']*)'/s",
+            $template,
+            $singleQuoted,
+        );
+        $expressions = array_merge($expressions, $singleQuoted[1]);
+
+        $names = [];
+
+        foreach ($expressions as $expression) {
+            /*
+             * An identifier immediately followed by `(`. Deliberately NOT
+             * method calls (`a.b(`), which belong to whatever object they hang
+             * off, and no `\s*` before the bracket — inside an expression a
+             * space before the paren is grouping, not a call.
+             */
+            preg_match_all('/(?<![\w.$])([a-zA-Z_$][\w$]*)\(/', $expression, $matches);
+
+            foreach ($matches[1] as $name) {
+                if (! in_array($name, self::PROVIDED, true)) {
+                    $names[$name] = true;
+                }
+            }
+        }
+
+        return array_keys($names);
     }
 
     private function sectionBetween(string $source, string $open, string $close): string

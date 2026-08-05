@@ -169,9 +169,41 @@ class Billing
     }
 
     /** Empty strings are unset, not set-to-nothing. */
+    /**
+     * ⚠️ AN UNREADABLE SETTING IS "NOT CONFIGURED", NOT AN EXCEPTION.
+     *
+     * The Terms, Privacy, Community Guidelines and Refunds pages are PUBLIC and
+     * are linked from the registration form. They call forDisplay(), so before
+     * this catch a settings table that could not be read returned a 500 on all
+     * four — a database fault taking out the pages a member is legally required
+     * to be able to read. It was found by taking the database away and asking
+     * for every public page.
+     *
+     * Returning null here is not a softening of the "do not default the legal
+     * entity" rule; it is that rule. Unreadable and unset both mean WE CANNOT
+     * NAME THE COMPANY, and the view already handles that correctly by printing
+     * the pending notice instead of a name. The one thing that must never
+     * happen — naming a party the member is not actually contracting with —
+     * remains impossible.
+     *
+     * Logged rather than swallowed, because "the legal pages are showing the
+     * pending notice" has two very different causes and only one of them is
+     * expected.
+     */
     private function value(string $key): ?string
     {
-        $value = trim((string) $this->settings->get('payments', $key, ''));
+        try {
+            $value = trim((string) $this->settings->get('payments', $key, ''));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('billing settings unreadable', [
+                'key' => $key,
+                'error' => $e->getMessage(),
+                'consequence' => 'The legal pages and the receipt will show the pending-entity '
+                    .'notice as though nothing had been configured.',
+            ]);
+
+            return null;
+        }
 
         return $value === '' ? null : $value;
     }

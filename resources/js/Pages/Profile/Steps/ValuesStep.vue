@@ -81,7 +81,7 @@ function setScale(key, value) {
 
                 <SegmentedControl
                     v-model="model.marriage_timeline"
-                    label="Your marriage timeline"
+                    label="Your timeframe for a lasting relationship"
                     :options="options.marriageTimeline"
                 />
             </div>

@@ -48,7 +48,7 @@ class RationaleWriter
         'values' => [
             'high' => [
                 'You put the same things first, and in nearly the same order.',
-                'A shared sense of what a marriage is actually for.',
+                'A shared sense of what a lasting relationship is actually for.',
                 'Your priorities are closely aligned, right down to the ranking.',
                 'The things you each said matter most are the same things.',
                 'Aligned on faith, family and the pace you want to move at.',

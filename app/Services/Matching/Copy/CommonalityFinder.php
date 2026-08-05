@@ -90,10 +90,21 @@ class CommonalityFinder
             return null;
         }
 
+        /*
+         * ⚠️ ANSWERED IN THE REGISTER THE MEMBER WAS ASKED IN.
+         *
+         * The question on the profile builder no longer leads with marriage —
+         * it asks for "your timeframe for a lasting relationship". If these
+         * sentences still told somebody "you're both hoping to marry within the
+         * year", we would be asking in one register and answering in another,
+         * inside the one piece of writing a member reads most carefully.
+         *
+         * The stored keys are untouched. Only the language on both ends moved.
+         */
         return match ($a->marriage_timeline) {
-            'within_year' => "You're both hoping to marry within the year.",
-            'one_to_two' => "You're both looking to marry within two years.",
-            'two_plus' => "Neither of you is in a hurry — you both see marriage a couple of years out.",
+            'within_year' => "You're both hoping to settle down within the year.",
+            'one_to_two' => "You're both looking to settle down within two years.",
+            'two_plus' => "Neither of you is in a hurry — you both see this building over a couple of years.",
             default => null,
         };
     }

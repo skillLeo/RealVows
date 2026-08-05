@@ -104,7 +104,8 @@
     },
     "auth": {
         "one_click_signs_you": "One click signs you straight in. Password for every account is",
-        "register_heading": "Join people who are serious about marriage.",
+        "register_heading": "Join people looking for their true soul mate.",
+        "register_badge": "Soul mate first",
         "register_free": "Sign up is completely free. Build your entire profile without paying anything.",
         "register_submit": "Create your account",
         "age_confirm": "I confirm I am 18 years of age or older",

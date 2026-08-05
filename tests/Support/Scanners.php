@@ -43,6 +43,29 @@ class Scanners
     public const GLYPHS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 
     /**
+     * ⚠️ PERMITTED IN MARKETING PROSE. BANNED IN GENERATED MATCH COPY.
+     *
+     * This is the only term in this file with a different answer depending on
+     * where it appears, so the reasoning has to be written down — the next
+     * person will see "synergy" on the home page, assume it is approved, and
+     * put it in a rationale.
+     *
+     * The client wrote the word himself: "Their synergy will help them develop
+     * that bond and a lasting relationship." In a marketing paragraph it is a
+     * warm generic word about two people fitting, and it is his, so it stays.
+     *
+     * In the sentence explaining WHY THIS PARTICULAR PERSON WAS CHOSEN FOR YOU
+     * it stops being generic and starts reading as the name of a mechanism —
+     * and it is one letter-cluster from `synastry`, which is the actual term
+     * for the thing the whole zodiac constraint exists to conceal. A member who
+     * reads "your synergy" on a match screen is one search away from it.
+     *
+     * ⚠️ DO NOT FOLD THIS INTO PHRASES, and do not widen either list toward a
+     * `syn` prefix — that bans the client's own sentence on his own home page.
+     */
+    public const MECHANISM_ADJACENT = ['synergy', 'synergies', 'synergistic'];
+
+    /**
      * Affinity vocabulary found in a piece of text.
      *
      * ⚠️ "cancer" and "leo" are in SIGN_NAMES and are also ordinary English.
@@ -149,6 +172,95 @@ class Scanners
     }
 
     /**
+     * ⚠️ THE WORD IS NOT BANNED. LEADING WITH IT IS.
+     *
+     * From the client: "the word you want to use is not marriage, because
+     * marriage frightens a lot of people. It is more about finding your soul
+     * mate." He did not ban it — his own approved sentence ends "…and a lasting
+     * relationship, leading to marriage."
+     *
+     * So the constraint is positional and contextual, not lexical: marriage is
+     * the destination, named late and softly, in a small number of places that
+     * are listed and justified. MarriageLeadTest owns that list.
+     */
+    public const MARRIAGE_FORWARD = [
+        'marriage', 'marriages', 'marry', 'marries', 'marrying', 'married',
+    ];
+
+    /**
+     * Marriage-forward vocabulary in a piece of text, whole words only.
+     *
+     * @return list<string>
+     */
+    public static function marriageForwardTerms(string $text): array
+    {
+        $found = [];
+
+        foreach (self::MARRIAGE_FORWARD as $term) {
+            if (preg_match('/\b'.preg_quote($term, '/').'\b/i', $text) === 1) {
+                $found[] = $term;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
+     * What a person actually reads on a rendered page: markup, scripts, styles
+     * and Blade comments removed, entities decoded, whitespace collapsed.
+     *
+     * ⚠️ SCRIPT AND STYLE ARE STRIPPED WITH THEIR CONTENTS, not just their
+     * tags. `strip_tags` alone leaves the body of a <script> in place, so a
+     * reader built on it scans minified JavaScript and reports matches nobody
+     * can see — noise, which is how a guard gets switched off.
+     */
+    public static function visibleText(string $html): string
+    {
+        $withoutCode = preg_replace(
+            ['#<script\b[^>]*>.*?</script>#is', '#<style\b[^>]*>.*?</style>#is', '#<!--.*?-->#s'],
+            ' ',
+            $html,
+        );
+
+        $text = html_entity_decode(strip_tags((string) $withoutCode), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim((string) preg_replace('/\s+/u', ' ', $text));
+    }
+
+    /**
+     * Split prose into sentences, keeping the terminator.
+     *
+     * @return list<string>
+     */
+    public static function sentences(string $text): array
+    {
+        $parts = preg_split('/(?<=[.!?])\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return array_values(array_filter(array_map('trim', $parts), fn ($s) => $s !== ''));
+    }
+
+    /**
+     * Mechanism-adjacent vocabulary found in generated match copy.
+     *
+     * ⚠️ WHOLE WORDS. `synergy` must not match inside a longer word, and the
+     * list must never be reduced to a prefix — see MECHANISM_ADJACENT.
+     *
+     * @return list<string>
+     */
+    public static function mechanismAdjacentTerms(string $text): array
+    {
+        $found = [];
+
+        foreach (self::MECHANISM_ADJACENT as $term) {
+            if (preg_match('/\b'.preg_quote($term, '/').'\b/i', $text) === 1) {
+                $found[] = $term;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
      * URLs in a body, so they can be checked as hostnames rather than prose.
      *
      * @return list<string>
@@ -164,5 +276,55 @@ class Scanners
     public static function prose(string $text): string
     {
         return preg_replace('#\bhttps?://\S+|\b[a-z0-9.-]+\.(?:com|io|app)\S*#i', ' ', $text);
+    }
+
+    /**
+     * Every hostname a piece of rendered output points at, lowercased and
+     * de-duplicated.
+     *
+     * ⚠️ THIS EXISTS BECAUSE THE MARKETING PAGE SHIPPED A DOMAIN WE DO NOT OWN.
+     *
+     * `realvows.com` was rendered inside a mock-up on the live home page for
+     * weeks. It is not a typo with cosmetic consequences: a domain that appears
+     * in a real product's marketing is precisely the signal a squatter watches
+     * for, and the day somebody registers it, the client's own site carries a
+     * link to whatever they choose to put there.
+     *
+     * ⚠️ IT TAKES RENDERED OUTPUT, NOT SOURCE, and that is not a preference.
+     * Scanning the source of `WhatsAppTemplates.php` reports the host
+     * `nrealvows.skillleo.com`, because the two characters before it in the
+     * file are `\` and `n` and only PHP's parser knows that is a newline. A
+     * source reader sees a hostname that does not exist and misses the one that
+     * does.
+     *
+     * @return list<string>
+     */
+    public static function hosts(string $text): array
+    {
+        /*
+         * Scheme-relative and absolute URLs, plus bare hosts written as text —
+         * `realvows.skillleo.com/dashboard` in a WhatsApp body is a link the
+         * moment it reaches a phone, whether or not it carries a scheme.
+         */
+        preg_match_all(
+            '#(?:https?:)?//([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+)'
+            .'|(?<![a-z0-9@.\\\\-])([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*'
+            .'\.(?:com|net|org|io|co|uk|jm|dev|app|test|info|biz|me|ai))\b#i',
+            $text,
+            $matches,
+            PREG_SET_ORDER,
+        );
+
+        $hosts = [];
+
+        foreach ($matches as $match) {
+            $host = strtolower($match[1] !== '' ? $match[1] : ($match[2] ?? ''));
+
+            if ($host !== '') {
+                $hosts[$host] = true;
+            }
+        }
+
+        return array_keys($hosts);
     }
 }

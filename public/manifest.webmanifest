@@ -1,7 +1,7 @@
 {
     "name": "RealVows",
     "short_name": "RealVows",
-    "description": "Find someone ready for marriage. Free to join, every profile verified by a real person.",
+    "description": "Find your true soul mate. Free to join, every profile verified by a real person.",
     "start_url": "/dashboard",
     "scope": "/",
     "display": "standalone",

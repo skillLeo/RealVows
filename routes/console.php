@@ -49,6 +49,23 @@ Schedule::command('realvows:maintenance-watchdog')
     ->withoutOverlapping();
 
 /*
+ * ⚠️ KEEPS THE PUBLIC PAGES OUT OF THE DATABASE.
+ *
+ * The marketing pages need one fact — is the free period on — to decide
+ * whether a Pricing link would point at a 404. Reading it per request would
+ * put a query on the one page that otherwise touches no database, on shared
+ * hosting, and that exact shape has already turned the home page into a 500
+ * once. Caching it changes nothing here, because CACHE_STORE is `database`.
+ *
+ * So it is projected to a file, and rewritten here every minute. The admin
+ * screen writes it on save; this is what makes a failed write self-repair
+ * instead of leaving a projection that is confidently out of date.
+ */
+Schedule::command('realvows:project-public-state --quiet-if-unchanged')
+    ->everyMinute()
+    ->withoutOverlapping();
+
+/*
  * Tops up introductions for anyone verified whose set has gone stale. Queues
  * jobs rather than doing the work, so the drain above does it a chunk at a
  * time and being killed mid-run costs at most one chunk.

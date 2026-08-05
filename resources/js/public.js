@@ -267,10 +267,84 @@ function initIntroDemo() {
     if (again) again.addEventListener('click', reset);
 }
 
+/**
+ * The menu behind the three lines.
+ *
+ * ⚠️ A NATIVE <dialog>, AND showModal() RATHER THAN show().
+ *
+ * showModal() is what makes the browser trap focus, mark the rest of the page
+ * inert for assistive technology, and close on Escape. Reimplementing those by
+ * hand is where hamburger menus go wrong — the tab key walks out of the open
+ * sheet and into the page behind it, and nobody using a mouse ever notices.
+ *
+ * What is left for us: reflecting state in aria-expanded, closing on a
+ * backdrop tap, returning focus to the trigger, and closing on navigation.
+ */
+function initNav() {
+    const toggle = document.querySelector('[data-nav-toggle]');
+    const sheet = document.querySelector('[data-nav-sheet]');
+
+    if (!toggle || !sheet) return;
+
+    // Very old browsers without <dialog>. Leave the header links in place and
+    // hide a control that would do nothing — a dead button is worse than none.
+    if (typeof sheet.showModal !== 'function') {
+        toggle.hidden = true;
+        return;
+    }
+
+    const open = () => {
+        sheet.showModal();
+        toggle.setAttribute('aria-expanded', 'true');
+
+        /*
+         * #8 The Settle is a transition, not a keyframe animation — the motion
+         * catalogue is explicit about that and the build enforces it. A
+         * transition needs a frame at the starting values before the class
+         * lands, or the browser coalesces both into the end state and nothing
+         * moves.
+         */
+        requestAnimationFrame(() => sheet.classList.add('is-open'));
+    };
+
+    const close = () => {
+        if (sheet.open) sheet.close();
+    };
+
+    toggle.addEventListener('click', open);
+
+    sheet.querySelector('[data-nav-close]')?.addEventListener('click', close);
+
+    /*
+     * Backdrop tap. The backdrop is not a separate element — a click on it
+     * targets the <dialog> itself, so anything landing on the dialog rather
+     * than on its contents is outside.
+     */
+    sheet.addEventListener('click', (event) => {
+        if (event.target === sheet) close();
+    });
+
+    /*
+     * ⚠️ ON ROUTE CHANGE. These are full page loads rather than a client-side
+     * router, so "route change" is a link being followed — but the page can be
+     * restored from the back/forward cache with the dialog still open, which
+     * looks like the menu opened itself.
+     */
+    window.addEventListener('pagehide', close);
+
+    // Covers Escape and the close button alike, because both fire this.
+    sheet.addEventListener('close', () => {
+        sheet.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+    });
+}
+
 function boot() {
     init();
     initScoreCount();
     initIntroDemo();
+    initNav();
 }
 
 if (document.readyState === 'loading') {

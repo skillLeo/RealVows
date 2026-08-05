@@ -117,8 +117,8 @@
 
             {{-- ⚠️ What they share, never how it was weighed. --}}
             <p class="rv-match__rationale">
-                You both put faith at the centre, you both want children, and you are both
-                looking to marry within the year.
+                You both put faith at the centre, you both want children, and neither of you is
+                looking for anything casual.
             </p>
         </article>
 

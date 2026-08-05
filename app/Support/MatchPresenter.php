@@ -246,7 +246,7 @@ class MatchPresenter
                 'Pets' => $this->pets($them->pets),
             ],
             'Values' => [
-                'Hoping to marry' => ProfileOptions::MARRIAGE_TIMELINE[$them->marriage_timeline] ?? null,
+                'Hoping to settle down' => ProfileOptions::MARRIAGE_TIMELINE[$them->marriage_timeline] ?? null,
                 'Wants children' => ProfileOptions::WANTS_CHILDREN[$them->wants_children] ?? null,
                 'What matters most' => $this->coreValues($them->core_values),
                 'When there is a disagreement' => ProfileOptions::CONFLICT_STYLE[$them->conflict_style] ?? null,

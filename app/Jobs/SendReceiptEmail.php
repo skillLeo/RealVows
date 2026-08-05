@@ -31,7 +31,7 @@ class SendReceiptEmail implements ShouldBeUnique, ShouldQueue
         return (string) $this->purchaseId;
     }
 
-    public function handle(RuntimeMailConfigurator $mail): void
+    public function handle(RuntimeMailConfigurator $mail, \App\Services\Mail\ResendMailer $mailer): void
     {
         $purchase = Purchase::with('user')->find($this->purchaseId);
 
@@ -46,6 +46,16 @@ class SendReceiptEmail implements ShouldBeUnique, ShouldQueue
          */
         $mail->apply();
 
-        Mail::to($purchase->user->email)->send(new PurchaseReceipt($purchase));
+        /*
+         * ⚠️ THROUGH THE LEDGER, NOT STRAIGHT TO Mail::send.
+         *
+         * A receipt sent directly leaves no row, so Resend's delivery webhook
+         * has nothing to attach a `delivered` event to and the message is
+         * invisible in the delivery log forever. For a receipt that matters
+         * more than for anything else: it is the document a member reaches for
+         * when they do not recognise a charge, and "did it arrive?" has to be
+         * answerable months later.
+         */
+        $mailer->send($purchase->user, new PurchaseReceipt($purchase), 'receipt');
     }
 }

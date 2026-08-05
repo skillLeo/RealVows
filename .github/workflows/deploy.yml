@@ -32,6 +32,14 @@ on:
         description: 'Print recent webhook activity (read-only). e.g. resend'
         required: false
         default: ''
+      redispatch_receipts:
+        description: 'Held receipts: "dry" to list them, "execute" to send them'
+        required: false
+        default: ''
+      show_deliveries:
+        description: 'Print the delivery ledger (read-only). Set to any value.'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -235,6 +243,32 @@ jobs:
         run: |
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan realvows:webhook-log --lines=40 --filter='$FILTER'"
+
+      - name: Re-dispatch held receipts
+        env:
+          MODE: ${{ github.event.inputs.redispatch_receipts }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.MODE != '' }}
+        run: |
+          FLAG=""
+          [ "$MODE" = "execute" ] && FLAG="--execute"
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:redispatch-receipts $FLAG"
+
+      # Read-only. The delivery ledger, so "did it arrive?" is answerable
+      # without an SSH session.
+      - name: Show the delivery ledger
+        env:
+          SHOW: ${{ github.event.inputs.show_deliveries }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.SHOW != '' }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:deliveries"
 
       - name: Bring the site back
         if: always()

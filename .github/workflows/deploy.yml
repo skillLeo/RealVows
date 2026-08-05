@@ -40,6 +40,10 @@ on:
         description: 'Print the delivery ledger (read-only). Set to any value.'
         required: false
         default: ''
+      teardown_demo:
+        description: 'Demo teardown: "dry" to count, "execute" to delete (irreversible)'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -269,6 +273,22 @@ jobs:
         run: |
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan realvows:deliveries"
+
+      # ⚠️ IRREVERSIBLE ON "execute". Defaults to nothing; "dry" only counts.
+      # The purchase guard still applies — the override has to be typed into
+      # the command, not into this input.
+      - name: Demo teardown
+        env:
+          MODE: ${{ github.event.inputs.teardown_demo }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.MODE != '' }}
+        run: |
+          FLAGS=""
+          [ "$MODE" = "execute" ] && FLAGS="--execute --force --clear-demo-purchases"
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:teardown-demo $FLAGS"
 
       - name: Bring the site back
         if: always()

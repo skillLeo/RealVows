@@ -68,6 +68,57 @@ class DemoTeardownTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $demo->id]);
     }
 
+    /**
+     * ⚠️ THE OVERRIDE IS EXPLICIT, TYPED, AND STILL WARNS.
+     *
+     * The guard cannot tell a seeded purchase from a real one, so the way past
+     * it is a flag whose name says what it does — not a --force, and not a
+     * quieter code path. It never looks like a clean run.
+     */
+    public function test_the_override_clears_demo_purchases_but_says_so(): void
+    {
+        $demo = $this->user(demo: true);
+
+        Purchase::create([
+            'user_id' => $demo->id,
+            'package_key' => 'single',
+            'credits_granted' => 1,
+            'amount_cents' => 2000,
+            'currency' => 'USD',
+            'status' => 'completed',
+            'order_identifier' => 'RV-SEEDED-0001',
+        ]);
+
+        $this->artisan('realvows:teardown-demo --execute --force --clear-demo-purchases')
+            ->expectsOutputToContain('will be deleted with these accounts')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseMissing('users', ['id' => $demo->id]);
+        $this->assertSame(0, Purchase::count());
+    }
+
+    /** ⚠️ POSITIVE CONTROL: --force alone is NOT enough to get past the guard. */
+    public function test_force_alone_does_not_bypass_the_purchase_guard(): void
+    {
+        $demo = $this->user(demo: true);
+
+        Purchase::create([
+            'user_id' => $demo->id,
+            'package_key' => 'single',
+            'credits_granted' => 1,
+            'amount_cents' => 2000,
+            'currency' => 'USD',
+            'status' => 'completed',
+            'order_identifier' => 'RV-SEEDED-0002',
+        ]);
+
+        $this->artisan('realvows:teardown-demo --execute --force')
+            ->expectsOutputToContain('REFUSING')
+            ->assertExitCode(1);
+
+        $this->assertDatabaseHas('users', ['id' => $demo->id]);
+    }
+
     /** ⚠️ POSITIVE CONTROL: it does proceed when no money is involved. */
     public function test_it_proceeds_when_no_completed_purchase_exists(): void
     {

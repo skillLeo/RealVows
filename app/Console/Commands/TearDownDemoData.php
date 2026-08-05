@@ -44,7 +44,8 @@ class TearDownDemoData extends Command
 {
     protected $signature = 'realvows:teardown-demo
                             {--execute : Actually delete. Without this it is a dry run.}
-                            {--force : Skip the confirmation prompt (for CI only)}';
+                            {--force : Skip the confirmation prompt (for CI only)}
+                            {--clear-demo-purchases : Also delete completed purchases belonging to demo accounts}';
 
     protected $description = 'Remove demo members, their photographs, introductions and ledger rows';
 
@@ -73,15 +74,40 @@ class TearDownDemoData extends Command
             ->where('status', 'completed')
             ->count();
 
-        if ($paid > 0) {
+        if ($paid > 0 && ! $this->option('clear-demo-purchases')) {
             $this->error("REFUSING: {$paid} completed purchase(s) belong to accounts marked demo.");
             $this->line('');
             $this->line('  Money having changed hands is the definitive signal that an account is');
             $this->line('  real. Either a real member is flagged demo, or a demo account took a');
-            $this->line('  live payment. Resolve that by hand before running this.');
+            $this->line('  live payment.');
+            $this->line('');
+            $this->line('  Look at them first:');
+            $this->line('      php artisan realvows:redispatch-receipts');
+            $this->line('');
+            $this->line('  If they really are seeded test transactions, say so explicitly:');
+            $this->line('      --clear-demo-purchases');
             $this->line('');
 
             return self::FAILURE;
+        }
+
+        /*
+         * ⚠️ THE OVERRIDE IS A SEPARATE, TYPED FLAG — NOT A --force.
+         *
+         * The guard exists because the command cannot tell a seeded purchase
+         * from a real one, and neither can anybody reading a summary at speed.
+         * So the way past it is not "try harder", it is a flag whose name says
+         * what it does, typed by somebody who has looked at the rows.
+         *
+         * ⚠️ IT DOES NOT SUPPRESS THE WARNING. Routing around a guard silently
+         * is how a guard becomes decoration; the count is printed every time,
+         * so an override never looks like a clean run.
+         */
+        if ($paid > 0) {
+            $this->warn("  ⚠️  {$paid} completed purchase(s) will be deleted with these accounts.");
+            $this->warn('  Overridden with --clear-demo-purchases. Money records are not');
+            $this->warn('  recoverable after this, so be certain none of them is real.');
+            $this->line('');
         }
 
         $counts = [

@@ -44,6 +44,10 @@ on:
         description: 'Demo teardown: "dry" to count, "execute" to delete (irreversible)'
         required: false
         default: ''
+      settings_status:
+        description: 'Show which settings are filled in (never their values). e.g. mail'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -289,6 +293,18 @@ jobs:
           [ "$MODE" = "execute" ] && FLAGS="--execute --force --clear-demo-purchases"
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
             "cd '$DEPLOY_PATH' && $PHP artisan realvows:teardown-demo $FLAGS"
+
+      # Read-only, and never prints a secret — only set / EMPTY.
+      - name: Show settings status
+        env:
+          GROUP: ${{ github.event.inputs.settings_status }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        if: ${{ env.GROUP != '' }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_TARGET" \
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:settings-status '$GROUP'"
 
       - name: Bring the site back
         if: always()

@@ -61,7 +61,18 @@ class SettingsSeeder extends Seeder
                 ['key' => 'maintenance_mode', 'label' => 'Maintenance mode', 'type' => 'toggle', 'description' => 'Shows a holding page to members. Admins keep access.'],
             ],
             'mail' => [
-                ['key' => 'driver', 'label' => 'Mail driver', 'type' => 'select', 'options' => ['smtp' => 'SMTP', 'log' => 'Log only (no sending)']],
+                /*
+                 * ⚠️ THREE DRIVERS, AND THE FIRST IS THE ONE IN USE.
+                 *
+                 * Resend is not "SMTP with different settings" as far as this
+                 * screen is concerned: choosing it fills in the host, port and
+                 * username automatically, and the only thing anybody types is
+                 * the API key. Presenting it as SMTP meant four fields somebody
+                 * had to know the right answers for, and three of them have the
+                 * same answer for every Resend account in the world.
+                 */
+                ['key' => 'driver', 'label' => 'Mail driver', 'type' => 'select', 'options' => ['resend' => 'Resend (recommended)', 'smtp' => 'Custom SMTP', 'log' => 'Log only (no sending)'], 'description' => 'Resend fills in the connection for you — you only need the API key. Custom SMTP is for any other provider.'],
+                ['key' => 'resend_api_key', 'label' => 'Resend API key', 'type' => 'password', 'is_secret' => true, 'description' => 'From resend.com → API Keys. Starts re_. Only needed when the driver is Resend.'],
                 ['key' => 'host', 'label' => 'SMTP host', 'type' => 'text'],
                 ['key' => 'port', 'label' => 'SMTP port', 'type' => 'text'],
                 ['key' => 'username', 'label' => 'SMTP username', 'type' => 'text'],

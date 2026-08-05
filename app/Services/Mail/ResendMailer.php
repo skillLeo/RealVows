@@ -178,15 +178,26 @@ class ResendMailer
         return "{$name} <{$address}>";
     }
 
-    /**
-     * ⚠️ THE API KEY IS THE SMTP PASSWORD. Resend uses one credential for both,
-     * so there is no second field to forget to fill in — and no way for the two
-     * to disagree.
-     */
     private function apiKey(): ?string
     {
-        $value = trim((string) $this->settings->get('mail', 'password', ''));
+        /*
+         * ⚠️ THE DEDICATED FIELD FIRST, THE SMTP PASSWORD AS A FALLBACK.
+         *
+         * The API key had been living in the SMTP password field, because
+         * Resend uses one credential for both. That worked and read as a
+         * mistake — somebody looking at "SMTP password: ••••3jIF" has no way
+         * to know it is an API key. It now has its own labelled field, and the
+         * fallback stays so an installation configured the old way keeps
+         * working rather than silently stopping.
+         */
+        foreach (['resend_api_key', 'password'] as $key) {
+            $value = trim((string) $this->settings->get('mail', $key, ''));
 
-        return str_starts_with($value, 're_') ? $value : null;
+            if (str_starts_with($value, 're_')) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 }

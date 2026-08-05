@@ -29,6 +29,36 @@ class RuntimeMailConfigurator
             return;
         }
 
+        /*
+         * ⚠️ RESEND IS CONFIGURED HERE, NOT TYPED IN BY HAND.
+         *
+         * smtp.resend.com / 587 / username "resend" are the same for every
+         * Resend account that has ever existed. Asking the client to enter
+         * them is three chances to get a fixed value wrong, and the failure
+         * mode is silent — mail simply stops.
+         *
+         * The transport is still SMTP, so nothing else in the application
+         * changes. Only the API key is a real question.
+         */
+        if ($driver === 'resend') {
+            Config::set('mail.default', 'smtp');
+
+            Config::set('mail.mailers.smtp', [
+                'transport' => 'smtp',
+                'host' => 'smtp.resend.com',
+                'port' => 587,
+                'username' => 'resend',
+                'password' => $this->settings->get('mail', 'resend_api_key')
+                    ?: $this->settings->get('mail', 'password'),
+                'encryption' => 'tls',
+                'timeout' => null,
+            ]);
+
+            $this->applyFrom();
+
+            return;
+        }
+
         Config::set('mail.default', $driver);
 
         if ($driver === 'smtp') {

@@ -41,7 +41,18 @@ class ConfigureResend extends Command
              * string "resend" for every account — it is not the API key and
              * not an address.
              */
-            $settings->set('mail', 'driver', 'smtp');
+            $settings->set('mail', 'driver', 'resend');
+            $settings->set('mail', 'resend_api_key', $apiKey);
+
+            /*
+             * ⚠️ THE SMTP FIELDS ARE STILL WRITTEN, and that is deliberate.
+             *
+             * The `resend` driver fills the connection in at runtime, so these
+             * are not read. But somebody who later switches the driver to
+             * Custom SMTP to debug something would otherwise find four empty
+             * boxes and no way to get back — so the working values are left
+             * where that person will look for them.
+             */
             $settings->set('mail', 'host', 'smtp.resend.com');
             $settings->set('mail', 'port', '587');
             $settings->set('mail', 'username', 'resend');

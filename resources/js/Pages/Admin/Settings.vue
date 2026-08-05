@@ -131,6 +131,7 @@ const asOptions = (options) =>
                         <h2 class="rv-d3">{{ activeLabel }}</h2>
 
                         <template v-for="field in fields" :key="field.key">
+                            <template v-if="isRelevant(field)">
                             <!-- Toggles read as a single considered choice, not a checkbox grid -->
                             <div v-if="field.type === 'toggle'" class="rv-field">
                                 <BaseCheckbox
@@ -193,6 +194,7 @@ const asOptions = (options) =>
                                 :error="form.errors[`values.${field.key}`]"
                                 autocomplete="off"
                             />
+                            </template>
                         </template>
                     </div>
                 </BaseCard>

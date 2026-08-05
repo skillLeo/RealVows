@@ -48,6 +48,10 @@ on:
         description: 'Show which settings are filled in (never their values). e.g. mail'
         required: false
         default: ''
+      mail_from:
+        description: 'From address. Must be on a domain verified in Resend.'
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -229,14 +233,17 @@ jobs:
         env:
           API_KEY: ${{ github.event.inputs.resend_api_key }}
           WEBHOOK_SECRET: ${{ github.event.inputs.resend_webhook_secret }}
+          MAIL_FROM: ${{ github.event.inputs.mail_from }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         if: ${{ env.API_KEY != '' || env.WEBHOOK_SECRET != '' }}
         run: |
+          FROM_FLAG=""
+          [ -n "$MAIL_FROM" ] && FROM_FLAG="--from=$MAIL_FROM"
           printf '%s\n%s\n' "$API_KEY" "$WEBHOOK_SECRET" | \
           ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:configure-resend --stdin"
+            "cd '$DEPLOY_PATH' && $PHP artisan realvows:configure-resend --stdin ${FROM_FLAG}"
 
       # Read-only. Prints the tail of the already-redacted webhook log so
       # "has an event ever arrived?" is answerable without an SSH session —

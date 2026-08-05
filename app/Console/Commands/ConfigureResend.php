@@ -20,7 +20,8 @@ use Illuminate\Console\Command;
 class ConfigureResend extends Command
 {
     protected $signature = 'realvows:configure-resend
-                            {--stdin : Read the API key then the webhook secret, one per line}';
+                            {--stdin : Read the API key then the webhook secret, one per line}
+                            {--from= : The from address. Must be on a domain verified in Resend.}';
 
     protected $description = 'Point the mail settings at Resend';
 
@@ -60,16 +61,49 @@ class ConfigureResend extends Command
             $settings->set('mail', 'encryption', 'tls');
 
             /*
-             * ⚠️ ONLY SET IF EMPTY. The client may have chosen a from-address
-             * already, and overwriting it on every deploy would silently
-             * change what members see in their inbox.
+             * ⚠️ THE FROM ADDRESS MUST BE ON A DOMAIN VERIFIED IN RESEND, AND
+             * A WRONG ONE REJECTS EVERY SINGLE SEND.
+             *
+             * This is not a cosmetic setting. Resend refuses any message whose
+             * from-domain it has not verified, with a 403 — so an address left
+             * over from the Hostinger SMTP era (contact@skillleo.com) means
+             * mail silently stops the moment the provider changes, and the
+             * error appears nowhere a member or the client would look.
+             *
+             * It is set when given, and only defaulted when empty. Overwriting
+             * a deliberate choice on every deploy would silently change what
+             * members see in their inbox.
              */
-            if (! $settings->get('mail', 'from_address')) {
+            if ($from = $this->option('from')) {
+                $settings->set('mail', 'from_address', $from);
+                $this->info("From address set to {$from}.");
+            } elseif (! $settings->get('mail', 'from_address')) {
                 $settings->set('mail', 'from_address', 'introductions@realvows.skillleo.com');
             }
 
             if (! $settings->get('mail', 'from_name')) {
                 $settings->set('mail', 'from_name', 'RealVows');
+            }
+
+            /*
+             * ⚠️ WARN WHEN THE FROM DOMAIN LOOKS UNVERIFIABLE.
+             *
+             * We cannot ask Resend which domains are verified — a send-only
+             * key is refused on that endpoint. What we CAN do is notice when
+             * the from-domain is not one we would have configured, and say so
+             * rather than let the first real send fail.
+             */
+            $address = (string) $settings->get('mail', 'from_address');
+            $domain = substr(strrchr($address, '@') ?: '', 1);
+
+            if ($domain !== '' && ! str_contains($domain, 'realvows')) {
+                $this->line('');
+                $this->warn("  ⚠️  From address is {$address}.");
+                $this->warn('  Resend rejects any message whose from-domain is not verified in');
+                $this->warn('  YOUR Resend account, with a 403 — every send would fail. If this');
+                $this->warn('  domain is not verified there, change it:');
+                $this->warn('      --from=introductions@realvows.skillleo.com');
+                $this->line('');
             }
 
             $this->info('Mail settings pointed at Resend over SMTP.');

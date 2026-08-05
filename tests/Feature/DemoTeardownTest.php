@@ -267,6 +267,40 @@ class DemoTeardownTest extends TestCase
     }
 
     /**
+     * ⚠️ THE FALSE-CLEAN CASE, WHICH ACTUALLY HAPPENED ON PRODUCTION.
+     *
+     * The first backfill matched the wrong domain, so zero accounts carried
+     * the marker and the command reported a clean run over a database holding
+     * thirty-two invented members. From the output alone that is
+     * indistinguishable from a database that really was clean.
+     */
+    public function test_it_refuses_to_report_clean_when_unmarked_lookalikes_exist(): void
+    {
+        $unmarked = User::factory()->create(['email' => 'girl9@realvows.test']);
+        $unmarked->forceFill(['is_demo' => false])->save();
+
+        $this->artisan('realvows:teardown-demo --execute --force')
+            ->expectsOutputToContain('REFUSING TO REPORT CLEAN')
+            ->assertExitCode(1);
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL: a genuinely clean database still reports clean.
+     *
+     * Without this, the check above is satisfied by a command that refuses
+     * every time — which would block the launch-day run entirely.
+     */
+    public function test_a_genuinely_clean_database_reports_clean(): void
+    {
+        $real = User::factory()->create(['email' => 'member@gmail.com']);
+        $real->forceFill(['is_demo' => false])->save();
+
+        $this->artisan('realvows:teardown-demo --execute --force')
+            ->expectsOutputToContain('none on the demo domain either')
+            ->assertExitCode(0);
+    }
+
+    /**
      * ⚠️ THE MARKER, NOT A PATTERN.
      *
      * Matching on `@example.com` is how a real member at `x@example.com.jm`

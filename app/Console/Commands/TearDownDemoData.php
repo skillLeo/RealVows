@@ -75,7 +75,38 @@ class TearDownDemoData extends Command
             ->pluck('id');
 
         if ($demoUserIds->isEmpty()) {
-            $this->info('No demo members found. Nothing to do.');
+            /*
+             * ⚠️ "NOTHING TO DO" MUST NEVER BE SAID WHILE ACCOUNTS LOOK LIKE
+             * DEMO ACCOUNTS BUT ARE NOT MARKED.
+             *
+             * The first backfill matched the wrong domain, so zero accounts
+             * carried the marker and this command reported a clean run over a
+             * database holding thirty-two invented members. Success while
+             * doing nothing — indistinguishable, from the output alone, from a
+             * database that really was clean.
+             *
+             * So it counts the lookalikes too and refuses to call that clean.
+             * The pattern is a DIAGNOSTIC here, never an eligibility rule: it
+             * decides what to WARN about, never what to delete.
+             */
+            $lookalikes = User::query()
+                ->where('email', 'like', '%@'.\Database\Seeders\DemoSeeder::demoDomain())
+                ->count();
+
+            if ($lookalikes > 0) {
+                $this->error("REFUSING TO REPORT CLEAN: {$lookalikes} account(s) are on the demo");
+                $this->error('domain but carry no is_demo marker, so this command would delete none');
+                $this->error('of them and report success.');
+                $this->line('');
+                $this->line('  The marker is set by the seeder and by the backfill migration.');
+                $this->line('  If those accounts predate both, re-run:');
+                $this->line('      php artisan migrate --force');
+                $this->line('');
+
+                return self::FAILURE;
+            }
+
+            $this->info('No demo members found, and none on the demo domain either. Nothing to do.');
 
             return self::SUCCESS;
         }

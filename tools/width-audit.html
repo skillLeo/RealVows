@@ -80,7 +80,18 @@ function next() {
       // session redirects to /login and measures perfectly — a clean table of
       // the login page thirteen times.
       rec.landed = f.contentWindow.location.pathname;
-      rec.redirected = rec.landed !== url.split('?')[0];
+      /*
+       * ⚠️ COMPARE A PATH WITH A PATH.
+       *
+       * This read `rec.landed !== url.split('?')[0]`, comparing a pathname
+       * against the WHOLE url. Given an absolute url — which is how the audit
+       * is actually invoked — the two can never be equal, so every row came
+       * back `redirected: true`. The flag exists to stop us measuring the
+       * login page thirteen times and calling it a table; firing on all
+       * thirteen is the same failure as firing on none, because either way it
+       * carries no information.
+       */
+      rec.redirected = rec.landed !== new URL(url, location.href).pathname;
       rec.title = (d.querySelector('h1,h2') || {}).innerText || '';
       /*
        * ⚠️ THE TWO-COLUMN CHECK, MEASURED GEOMETRICALLY.

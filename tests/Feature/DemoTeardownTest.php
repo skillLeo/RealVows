@@ -119,6 +119,58 @@ class DemoTeardownTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $demo->id]);
     }
 
+    /**
+     * ⚠️ AN ADMINISTRATOR IS NEVER DELETED, EVEN MARKED AS DEMO.
+     *
+     * The seeder creates admin@ and reviewer@ on the same domain as the
+     * invented members and stamps everything it makes, so the marker alone put
+     * the SUPER ADMIN inside the blast radius. That is not lost test data — it
+     * is the client locked out of his own product on launch day, recoverable
+     * only over SSH.
+     */
+    public function test_a_privileged_account_is_never_deleted(): void
+    {
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+
+        $admin = $this->user(demo: true);
+        $admin->assignRole('super_admin');
+
+        $ordinary = $this->user(demo: true);
+
+        $this->artisan('realvows:teardown-demo --execute --force')->assertExitCode(0);
+
+        $this->assertNotNull(
+            User::find($admin->id),
+            'The super admin was deleted by the teardown. The client is now locked out of his own '
+                .'product with no way back except SSH.'
+        );
+
+        $this->assertNull(User::find($ordinary->id), 'The ordinary demo member survived, so this proves nothing.');
+    }
+
+    /**
+     * ⚠️ THE BUG THIS CAUGHT: the marker was never set on production.
+     *
+     * The first backfill matched @example.com; the seeder uses realvows.test.
+     * Zero accounts were marked, so the teardown reported "No demo members
+     * found. Nothing to do." — success while deleting nothing.
+     */
+    public function test_the_backfill_domain_matches_the_seeders_own(): void
+    {
+        $migration = \Illuminate\Support\Facades\File::get(
+            database_path('migrations/2026_08_05_000800_backfill_is_demo_correctly.php')
+        );
+
+        $this->assertStringContainsString(
+            'DemoSeeder::demoDomain()',
+            $migration,
+            'The backfill hardcodes a domain instead of reading the seeder\'s. That is exactly how '
+                .'it came to match nothing at all.'
+        );
+
+        $this->assertSame('realvows.test', \Database\Seeders\DemoSeeder::demoDomain());
+    }
+
     /** ⚠️ POSITIVE CONTROL: it does proceed when no money is involved. */
     public function test_it_proceeds_when_no_completed_purchase_exists(): void
     {

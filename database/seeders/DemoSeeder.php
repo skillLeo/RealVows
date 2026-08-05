@@ -40,6 +40,17 @@ class DemoSeeder extends Seeder
 
     private const DOMAIN = 'realvows.test';
 
+    /**
+     * ⚠️ EXPOSED so the is_demo backfill reads the same value rather than
+     * repeating it. The first backfill hardcoded a different domain and marked
+     * nothing at all, which made the teardown report success while deleting
+     * none of the thirty-two invented accounts.
+     */
+    public static function demoDomain(): string
+    {
+        return self::DOMAIN;
+    }
+
     /** Slot 1 is their own portrait; the rest are scenes, never faces. */
     private const SCENE_SLOTS = ['full_length', 'social', 'open'];
 

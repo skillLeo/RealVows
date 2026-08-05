@@ -51,7 +51,28 @@ class TearDownDemoData extends Command
 
     public function handle(): int
     {
-        $demoUserIds = User::query()->where('is_demo', true)->pluck('id');
+        /*
+         * ⚠️ NEVER AN ADMINISTRATOR, WHATEVER THE MARKER SAYS.
+         *
+         * The seeder creates admin@ and reviewer@ on the same domain as the
+         * invented members and stamps everything it makes, so a marker alone
+         * would put the SUPER ADMIN inside the blast radius. Deleting it is
+         * not "some test data went missing" — it is the client locked out of
+         * his own product on launch day, recoverable only over SSH.
+         *
+         * This is the second of two independent guards. The other lives in the
+         * backfill migration, which excludes privileged accounts from being
+         * marked at all. Two, because the first is a data condition that
+         * somebody could edit.
+         */
+        $privileged = \DB::table('model_has_roles')
+            ->where('model_type', User::class)
+            ->pluck('model_id');
+
+        $demoUserIds = User::query()
+            ->where('is_demo', true)
+            ->whereNotIn('id', $privileged)
+            ->pluck('id');
 
         if ($demoUserIds->isEmpty()) {
             $this->info('No demo members found. Nothing to do.');

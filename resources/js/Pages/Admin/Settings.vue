@@ -61,6 +61,43 @@ function runTest() {
     );
 }
 
+/**
+ * ⚠️ HIDDEN, NOT DISABLED — AND ONLY WHERE A FIELD IS GENUINELY IRRELEVANT.
+ *
+ * Choosing Resend fills the host, port and username in at runtime, because
+ * those three have the same answer for every Resend account that has ever
+ * existed. Leaving them on screen, empty, invites somebody to fill them in
+ * with something plausible and wrong, and the failure mode is silent: mail
+ * simply stops.
+ *
+ * ⚠️ IT DEFAULTS TO SHOWING. Every branch that is not a deliberate hide
+ * returns true, so a typo in a key name, an unknown group, or an undefined
+ * driver leaves the field visible. The first version of this function was
+ * never actually inserted into the file — the template called an undefined
+ * name and EVERY field vanished from the live admin screen. Defaulting to
+ * visible means the worst case of a future mistake is clutter rather than a
+ * screen the client cannot use.
+ */
+const isRelevant = (field) => {
+    if (props.activeGroup !== 'mail') {
+        return true;
+    }
+
+    const driver = form.values.driver;
+
+    if (field.key === 'resend_api_key') {
+        return driver === 'resend';
+    }
+
+    if (['host', 'port', 'username', 'password', 'encryption'].includes(field.key)) {
+        // Shown for custom SMTP, and shown when the driver is somehow unset —
+        // an empty screen is worse than an irrelevant field.
+        return driver !== 'resend' && driver !== 'log';
+    }
+
+    return true;
+};
+
 const asOptions = (options) =>
     Object.entries(options ?? {}).map(([value, label]) => ({ value, label }));
 </script>

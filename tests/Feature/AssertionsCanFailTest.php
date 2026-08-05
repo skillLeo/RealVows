@@ -71,6 +71,26 @@ use Tests\TestCase;
  * two paths that emitted it. The query was accurate about the data and wrong
  * about the world.
  *
+ * ⚠️ A FIGURE THAT APPEARS IN MORE THAN ONE REPORT IS RE-DERIVED, NEVER
+ * REPEATED. THIS IS THE EIGHTH INSTANCE AND IT IS THE CHEAPEST TO PREVENT.
+ *
+ * "Seven held receipts" appeared in a brief, then in a status report, then in
+ * a launch checklist, then in a plan — cited four times by two people, and
+ * never once queried against the database it described. There were three, all
+ * belonging to demo accounts at `.test` addresses that cannot resolve. Acting
+ * on it would have hard-bounced 100% of a sending domain's first messages.
+ *
+ * The mechanism is identical to the `viewed_at` audit: a plausible number
+ * enters circulation, gets copied forward because it is already written down,
+ * and accumulates authority purely from repetition. Nobody re-checks a figure
+ * that has "always" been true, and by the third citation it reads as
+ * established fact rather than as an unverified claim.
+ *
+ * So: any number cited in a second report is re-derived at the moment of
+ * citing. If it cannot be re-derived cheaply, that is itself worth saying —
+ * "three, counted just now" and "seven, as previously reported" are different
+ * claims and must not be written the same way.
+ *
  * ⚠️ EXPOSURE QUESTIONS ARE ANSWERED FROM EMISSION POINTS, NOT FROM DATA.
  *
  * Database archaeology tells you what happened to be recorded. Enumerating the

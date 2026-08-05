@@ -65,32 +65,35 @@ documentation and handover.
 
 | | |
 |---|---|
-| ✅ | **511 tests, 0 failures**, 9 skipped (PowerTranz, loudly) |
+| ✅ | **521 tests, 0 failures**, 9 skipped (PowerTranz, loudly) |
 | ✅ | `PositiveControlsAreAliveTest` green |
 | ✅ | Zodiac reader green over 60+ source files **and rendered output** |
 | ✅ | Web root exposure green against production, in the deploy pipeline |
 | ✅ | Cron confirmed firing (queue drains, watchdog armed) |
-| ⬜ | Maintenance watchdog verified by deliberately stranding a staging deploy |
+| ✅ | Maintenance watchdog verified by deliberately stranding the app (`MaintenanceWatchdogTest`) |
 
 ---
 
 ## ⚠️ The three that will bite if forgotten
 
-**1 · The demo teardown is built but has never been run.** It defaults to a dry
-run, so the first real execution is on launch day under time pressure. Run
-`php artisan realvows:teardown-demo` (no flags) against production **now** and
-read the counts. If the numbers surprise you, that is the moment to find out —
-not with `--execute` typed.
+**1 · The demo teardown is built and dry-run, and it will REFUSE until the
+three demo purchases are cleared.** That refusal is the guard working: money
+having changed hands is its signal that an account is real, and it cannot tell
+a seeded purchase from a genuine one. Clearing those three rows is a deliberate
+act that belongs to launch day, with somebody watching.
 
 **2 · Meta template approval is the only long external pole left.** Everything
 else on the free-launch list is hours of work or a client decision. Template
 review is days, and rejection on the first attempt is normal.
 
-**3 · Resend still has the domain unverified, so real sends are blocked.** All
-four DNS records are correct and resolving — DKIM, the `send.` SPF, the
-return-path MX and DMARC. The account is simply still in test mode, which means
-only `realvows@gmail.com` can receive anything.
+**3 · There were never seven held receipts.** There are **three**, all belonging
+to demo accounts at `.test` addresses, which is a reserved TLD that cannot
+resolve. Sending them would have hard-bounced 100% of a sending domain's first
+messages, on a domain with no reputation to spend.
 
-Until that button is pressed the seven held receipts cannot go out, because
-they are addressed to real members. Bounce detection itself is **working** and
-verified against live events.
+The figure had been repeated across four documents without once being queried
+against the database it described. Rule 5 now covers exactly this: a number
+cited in a second report is re-derived, never repeated.
+
+Resend is verified and live, and bounce detection is confirmed working against
+real events. The three are closed by the demo teardown, not by dispatch.

@@ -45,8 +45,8 @@
 
             <div class="rv-arrives__mock">
                 <p class="rv-arrives__body">
-                    An introduction arrives in your inbox, privately, the moment it is ready for
-                    you. Nobody else sees it and nothing is announced.
+                    An introduction arrives in your inbox, privately, as soon as it is ready.
+                    Nobody else sees it and nothing is announced.
                 </p>
 
                 <span class="rv-seal rv-seal--sm rv-arrives__seal">RV</span>
@@ -58,8 +58,8 @@
 
             <div class="rv-arrives__mock">
                 <p class="rv-arrives__body">
-                    So it reaches you wherever you are, without you sitting at a screen waiting
-                    for it. Open it when the time is right.
+                    So it reaches you wherever you are. You do not have to sit at a screen waiting.
+                    Open it when the time is right.
                 </p>
             </div>
         </figure>

@@ -32,7 +32,7 @@ function submit() {
                 <h1 class="rv-d2">{{ member.name || member.email }}</h1>
                 <span class="rv-balance">{{ balance }}</span>
                 <p class="rv-small" style="margin: 0">
-                    Introductions available. This figure is the sum of the ledger below — there is no
+                    Introductions available. This figure is the sum of the ledger below. There is no
                     balance field to edit, by design.
                 </p>
             </header>

@@ -3,7 +3,7 @@
     'preheader' => 'Confirm your email and your RealVows account is ready.',
 ])
     <p style="margin:0 0 16px;">
-        Welcome to RealVows. Confirm this address and your account is ready — then you can start
+        Welcome to RealVows. Confirm this address and your account is ready. Then you can start
         building your profile whenever you have a quiet ten minutes.
     </p>
 

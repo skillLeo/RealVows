@@ -34,18 +34,18 @@ return [
         'waiting_one' => 'One person is waiting to meet you.',
         'waiting_many' => ':count people are waiting to meet you.',
         'yours' => 'Your introductions.',
-        'chosen' => 'Chosen for you by our matching, not by browsing. Open one whenever you\'re ready.',
-        'no_browsing' => 'Chosen for you — RealVows has no profile browsing.',
+        'chosen' => 'Chosen for you by our matching rather than by browsing. Open one whenever you are ready.',
+        'no_browsing' => 'Chosen for you. RealVows has no profile browsing.',
 
         // The empty state is doing real work. A marriage platform that says
         // "no results" has failed the person reading it.
-        'searching_heading' => 'We haven\'t found someone we\'d stand behind yet.',
+        'searching_heading' => 'We have not yet found someone we would stand behind.',
         'searching_body' => 'We would rather send you nobody than send you the wrong person. As soon as someone meets the bar, they will be here.',
 
-        'all_open_heading' => 'You\'ve opened all your introductions.',
+        'all_open_heading' => 'You have opened all your introductions.',
         'all_open_body' => 'When you would like more, they are here. There is no rush, and nothing expires.',
 
-        'unsealed' => 'They\'re yours to meet.',
+        'unsealed' => 'They are yours to meet.',
         'credits_label' => 'Introductions to open',
         'ready' => 'Your profile is ready, and it stays ready.',
     ],
@@ -53,7 +53,7 @@ return [
     'verification' => [
         // Never "instantly". Shared hosting batches work by cron.
         'pending_heading' => 'Your profile is with our team.',
-        'pending_body' => 'A real person is reviewing it — usually within a day. We will email you when it is done, and your introductions will be waiting.',
+        'pending_body' => 'A real person is reviewing it now. We will email you the moment it is done, and your introductions will be waiting.',
         'rejected_heading' => 'We need one more look.',
         'incomplete_heading' => 'Finish your profile.',
         'incomplete_body' => 'You are :percent% of the way there. Once it is complete and verified, we start looking.',
@@ -74,7 +74,7 @@ return [
         'reassurance_label' => 'No rush',
         'reassurance' => 'Your profile is ready and it stays ready. Introductions do not expire, there is nothing recurring, and nobody is removed while you think about it.',
         'choose' => 'Choose',
-        'one_payment' => 'One payment. Nothing recurring, and nothing expires — open them whenever you are ready.',
+        'one_payment' => 'One payment. Nothing recurring and nothing expires. Open them whenever you are ready.',
         'card_safety' => 'Your card details go straight to the payment provider. They never touch RealVows.',
     ],
 
@@ -84,7 +84,7 @@ return [
         'confirming' => 'Confirming with your bank.',
         'do_not_close' => 'This can take a moment. Please do not close this window or press back.',
         'thanks' => 'Thank you.',
-        'failed_heading' => 'That didn\'t go through.',
+        'failed_heading' => 'That did not go through.',
 
         // The most important sentence on the failure screen.
         'not_charged' => 'You have not been charged. There is nothing to cancel and nothing to claim back.',
@@ -93,7 +93,7 @@ return [
 
         // Gateway codes mean nothing to a member. What they need is whether
         // they were charged and what to try next.
-        'decline_generic' => 'The payment did not go through, and nothing was charged. It is worth trying again — if it happens twice, your bank will know why.',
+        'decline_generic' => 'The payment did not go through and nothing was charged. It is worth trying again. If it happens twice, your bank will be able to tell you why.',
         'decline_bank' => 'Your bank declined the payment. They did not say why, and nothing was charged. A different card usually works.',
         'decline_expired' => 'That card has expired. Nothing was charged.',
         'decline_unknown_card' => 'That card number was not recognised. Nothing was charged.',
@@ -155,7 +155,7 @@ return [
         'notifications' => 'When we have news',
         'email_matches' => 'Email me when there is someone new',
         'whatsapp_matches' => 'Message me on WhatsApp',
-        'whatsapp_note' => 'We\'ll use this once WhatsApp delivery is switched on.',
+        'whatsapp_note' => 'We will use this once WhatsApp delivery is switched on.',
         'receipts' => 'Receipts',
         'receipts_note' => 'Always sent. A receipt for money you have paid is a record you are entitled to, so there is nothing to switch off here.',
     ],
@@ -187,21 +187,22 @@ return [
         'secure' => 'Secure login · 18+',
 
         'forgot_heading' => 'Reset your password',
-        'forgot_body' => 'Enter the email you signed up with and we\'ll send you a link.',
+        'forgot_body' => 'Enter the email you signed up with and we will send you a link.',
         'forgot_sent_heading' => 'Check your email',
-        'forgot_sent_body' => 'We\'ve sent a reset link to your address. It expires in one hour.',
+        'forgot_sent_body' => 'We have sent a reset link to your address. It expires in one hour.',
+        'forgot_not_arrived' => 'Did not arrive?',
         'send_again' => 'Send it again',
 
         'reset_heading' => 'Choose a new password',
-        'reset_body' => 'Pick something you haven\'t used here before.',
+        'reset_body' => 'Choose something you have not used here before.',
 
         'verify_heading' => 'One quick confirmation',
-        'verify_sent' => 'We\'ve sent a link to',
+        'verify_sent' => 'We have sent a link to',
         'verify_restart' => 'Log out and start again',
     ],
 
     'profile' => [
-        'a_photo_of_you' => 'A photo of you holding a handwritten note with the code below. A real person checks this — it\'s how we keep every profile genuine.',
+        'a_photo_of_you' => 'A photo of you holding a handwritten note with the code below. A real person checks it. This is how we keep every profile genuine.',
         'these_are_absolute_anyone' => 'These are absolute. Anyone they apply to is removed before any scoring happens, so choose only what you genuinely could not live with.',
         'not_verified' => 'Not verified yet',
         'not_confirmed' => 'Not confirmed yet',
@@ -213,7 +214,7 @@ return [
         'on_disagreement' => 'When you disagree with someone close to you',
         'on_affection' => 'How you show affection',
         'about_you' => 'A few words about you',
-        'prompts_are_hints' => 'Those prompts are only there to help you start — write it however you like.',
+        'prompts_are_hints' => 'Those prompts are only there to help you start. Write it however you like.',
         'no_better_end' => 'There is no better end of any of these. Put the marker where it honestly falls.',
 
         'body_types' => 'Body types you are open to',
@@ -230,7 +231,7 @@ return [
     'inbox' => [
         'heading' => 'Your introductions',
         'chosen_for_you' => 'Everyone here was chosen for you. There is nothing to browse.',
-        'empty_all' => 'Your introductions will appear here as we find them. There is nothing to search — we do the looking.',
+        'empty_all' => 'Your introductions will appear here as we find them. There is nothing to search. We do the looking.',
         'empty_waiting' => 'Nothing waiting just now. New introductions arrive as we find them.',
         'empty_open' => 'Nothing open at the moment.',
         'empty_interested' => 'You have not said yes to anyone yet.',
@@ -259,17 +260,17 @@ return [
      */
     'free_period' => [
         'badge' => 'Free right now',
-        'signup' => 'Introductions are free while we are getting started — no card needed.',
+        'signup' => 'Introductions are free while we are getting started. No card needed.',
         'kept' => 'Anything you receive during this period is yours to keep permanently, and stays open when charging begins.',
         'dashboard' => 'Your introductions are free at the moment. Open as many as you like.',
     ],
 
     'demo' => [
-        'banner' => 'Everyone here is invented and the sign-in buttons are open — not the live platform.',
+        'banner' => 'This is not the live platform. Every member shown here is invented, and the sign-in buttons are open to anyone.',
     ],
 
     'offline' => [
-        'heading' => 'You\'re offline.',
-        'body' => 'Your matches are safe — we\'ll bring them back when you reconnect.',
+        'heading' => 'You are offline.',
+        'body' => 'Your introductions are safe. We will bring them back when you reconnect.',
     ],
 ];

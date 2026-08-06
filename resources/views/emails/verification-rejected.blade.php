@@ -1,6 +1,6 @@
 @component('emails.layout', [
     'heading' => 'One more try on your photos.',
-    'preheader' => 'A small problem with your verification photo — it takes two minutes to fix.',
+    'preheader' => 'A small problem with your verification photo. It takes two minutes to fix.',
 ])
     <p style="margin:0 0 16px;">
         {{ $firstName ? "Hello $firstName," : 'Hello,' }}
@@ -8,7 +8,7 @@
 
     <p style="margin:0 0 16px;">
         We could not confirm your verification photo this time. Nothing is wrong with your
-        account and nothing you have written has been lost — this is usually a two-minute fix.
+        account and nothing you have written has been lost. This takes about two minutes to put right.
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"

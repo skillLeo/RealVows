@@ -70,7 +70,9 @@ class MarriageLeadTest extends TestCase
             'surfaces' => ['/terms', '/privacy', '/community-guidelines', '/refunds'],
         ],
 
-        'nobody can promise you a marriage' => [
+        // Case-insensitive by construction: the fragment starts mid-sentence so
+        // it matches whether the clause opens the sentence or closes one.
+        'can promise you a marriage' => [
             'reason' => 'The honest-limits clause in the refund policy. It exists to say what '
                 .'we are NOT selling, and softening the word here would make the sentence '
                 .'stop doing its job.',
@@ -227,9 +229,45 @@ class MarriageLeadTest extends TestCase
      * ⚠️ THE READER MUST NOT MATCH INSIDE A LONGER WORD, or the guard becomes
      * noise the first time somebody writes about a merry or a marred anything.
      */
+    /**
+     * ⚠️ THE READER MUST SEE THE WHOLE REGISTER, NOT ONE WORD OF IT.
+     *
+     * It originally read for "marriage" and its inflections only. That is the
+     * false-pass shape: clean report, thing walks past. The client objected to
+     * a register, and "wife", "wedding" and "settle down" land on the same
+     * instinct as "marriage" does.
+     *
+     * "Settle down" is in here specifically because the previous pass
+     * INTRODUCED it, as the replacement for "hoping to marry", and nothing
+     * noticed for a week.
+     */
+    public function test_the_reader_covers_the_whole_register_not_just_one_word(): void
+    {
+        $mustCatch = [
+            'settle down' => 'You are both hoping to settle down within the year.',
+            'wife' => 'Find a wife who shares your values.',
+            'husband' => 'The husband you have been waiting for.',
+            'wedding' => 'Start planning the wedding.',
+            'spouse' => 'Your future spouse is on RealVows.',
+            'bride' => 'Meet your bride.',
+            'matrimony' => 'A platform built for matrimony.',
+            'tie the knot' => 'People here are ready to tie the knot.',
+        ];
+
+        foreach ($mustCatch as $term => $sentence) {
+            $this->assertNotSame(
+                [],
+                Scanners::marriageForwardTerms($sentence),
+                "The reader does not see [{$term}]. It carries the same weight as the word the "
+                    ."client objected to, and a guard that catches one spelling reports clean "
+                    ."while the register walks past it."
+            );
+        }
+    }
+
     public function test_the_reader_matches_whole_words_only(): void
     {
-        foreach (['merrymaking', 'marred', 'summary', 'marginal'] as $innocent) {
+        foreach (['merrymaking', 'marred', 'summary', 'marginal', 'groomed', 'unsettled'] as $innocent) {
             $this->assertSame(
                 [],
                 Scanners::marriageForwardTerms("A sentence containing {$innocent} and nothing else."),

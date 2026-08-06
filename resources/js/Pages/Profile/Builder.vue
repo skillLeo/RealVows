@@ -82,7 +82,7 @@ const saveMessage = computed(
             idle: 'Saved automatically as you type.',
             saving: 'Saving…',
             saved: 'Saved automatically as you type.',
-            error: 'We could not save just then. Your answers are still here — we will try again.',
+            error: 'We could not save just then. Your answers are still here and we will try again.',
         })[status.value]
 );
 

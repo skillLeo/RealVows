@@ -168,7 +168,7 @@ class EmailDeliveryTest extends TestCase
             'slot' => 'Body',
         ])->render();
 
-        $this->assertStringContainsString('[PENDING — the contracting entity is not yet confirmed]', $rendered);
+        $this->assertStringContainsString('The contracting entity is not yet confirmed.', $rendered);
     }
 
     /** ⚠️ POSITIVE CONTROL: once configured, the real entity appears. */
@@ -184,7 +184,7 @@ class EmailDeliveryTest extends TestCase
 
         $this->assertStringContainsString('Gemini Security Limited, trading as RealVows', $rendered);
         $this->assertStringContainsString('12 Harbour Street, Kingston', $rendered);
-        $this->assertStringNotContainsString('[PENDING', $rendered);
+        $this->assertStringNotContainsString('contracting entity is not yet confirmed', $rendered);
     }
 
     /**

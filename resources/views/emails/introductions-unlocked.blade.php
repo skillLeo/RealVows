@@ -8,7 +8,7 @@
     <p style="margin:0 0 16px;">
         Your payment is complete, and
         @if ($count === 1) one introduction is @else {{ $count }} introductions are @endif
-        now open to read in full — names, photographs, and everything they chose to share.
+        now open to read in full, with names, photographs and everything they chose to share.
     </p>
 
     <p style="margin:0 0 24px;color:#6B5F62;font-size:15px;">

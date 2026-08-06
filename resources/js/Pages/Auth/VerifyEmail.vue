@@ -28,7 +28,7 @@ const logout = () => router.post('/logout');
                     <h1 class="rv-d3">{{ $t('auth.verify_heading') }}</h1>
                     <p class="rv-body">
                         {{ $t('auth.verify_sent') }} <strong>{{ email }}</strong>. Open it and your account
-                        is ready — then you can start building your profile.
+                        is ready. Then you can start building your profile.
                     </p>
                 </div>
 

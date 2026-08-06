@@ -28,7 +28,7 @@ const FILTERS = [
                 <h1 class="rv-d2">Verification queue</h1>
                 <p class="rv-lead" style="max-width: 56ch">
                     {{ counts.pending }} {{ counts.pending === 1 ? 'profile is' : 'profiles are' }} waiting.
-                    Oldest first — whoever has waited longest is at the top.
+                    Oldest first. Whoever has waited longest is at the top.
                 </p>
             </header>
 

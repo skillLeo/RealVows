@@ -87,7 +87,7 @@
                                         <br>{{ $billing->address() }}
                                     @endif
                                 @else
-                                    [PENDING — the contracting entity is not yet confirmed]
+                                    The contracting entity is not yet confirmed.
                                 @endif
                             </p>
 

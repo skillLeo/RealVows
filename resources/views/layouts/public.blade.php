@@ -37,8 +37,17 @@
 
     @if (config('realvows.is_demo'))
         <div class="rv-demobar" role="status">
+            {{-- ⚠️ THIS SENTENCE WAS BROKEN, AND IT IS THE FIRST THING ANYONE
+                 READS. It ended "the sign-in buttons are open — not the live
+                 platform", and "not the live platform" modified nothing: there
+                 was no noun for it to attach to. The sentence promised a
+                 contrast and never supplied one.
+
+                 The client's whole complaint is that a serious reader will
+                 decide the site was rigged up in a few days. The first line
+                 they met was ungrammatical. --}}
             <strong>Review build</strong>
-            <span>Everyone here is invented and the sign-in buttons are open — not the live platform.</span>
+            <span>This is not the live platform. Every member shown here is invented, and the sign-in buttons are open to anyone.</span>
         </div>
     @endif
 

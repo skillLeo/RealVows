@@ -34,8 +34,8 @@ const bioMessage = computed(
     () =>
         ({
             empty: `${props.options.bioMinWords} to ${props.options.bioMaxWords} words. Take your time with this one.`,
-            short: `${bioWords.value} words — a little more, up to ${props.options.bioMinWords}.`,
-            long: `${bioWords.value} words — slightly over ${props.options.bioMaxWords}. Trim it a touch.`,
+            short: `${bioWords.value} words. A little more, up to ${props.options.bioMinWords}.`,
+            long: `${bioWords.value} words, slightly over ${props.options.bioMaxWords}. Trim it a touch.`,
             good: `${bioWords.value} words. That reads well.`,
         })[bioState.value]
 );
@@ -58,7 +58,7 @@ function setScale(key, value) {
 <template>
     <StepShell
         heading="What you value."
-        lead="The part that does the most work. Say what is true rather than what sounds good — it is what you will be matched on."
+        lead="The part that does the most work. Say what is true rather than what sounds good. It is what you will be matched on."
     >
         <BaseCard>
             <div class="rv-stack" style="gap: 24px">

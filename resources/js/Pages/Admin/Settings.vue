@@ -110,7 +110,7 @@ const asOptions = (options) =>
                 <h1 class="rv-d2">Settings</h1>
                 <p class="rv-lead" style="max-width: 56ch">
                     Everything RealVows connects to lives here. Change a value, save, and the next
-                    email or upload uses it — nothing needs to be deployed.
+                    email or upload uses it. Nothing needs to be deployed.
                 </p>
             </header>
 
@@ -121,7 +121,7 @@ const asOptions = (options) =>
                 exercise it. The warning goes away with the review build.
             -->
             <p v-if="$page.props.isDemo" class="rv-flash rv-flash--error" role="alert">
-                <strong>Review build — do not store real credentials yet.</strong>
+                <strong>Review build. Do not store real credentials yet.</strong>
                 One-click sign-in is open on this URL, so anyone who finds it can reach this
                 page. Add real mail, storage and gateway keys only after this goes live.
             </p>

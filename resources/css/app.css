@@ -1171,6 +1171,30 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--on-dark);
 }
 
+/* ⚠️ THE FOUNDING OFFER. The client wrote it in capitals; capitals shout, and
+   this design system is built on restraint. Same emphasis, carried by the
+   brass accent and a rule rather than by volume. */
+.rv-founding {
+  margin: 0;
+  padding: 16px 20px;
+  border-left: 2px solid var(--brass);
+  font-size: var(--fs-body-2);
+  line-height: 1.6;
+  color: var(--on-dark);
+  max-width: 44ch;
+}
+
+.rv-founding__mark {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--fs-body-3);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--brass-bright);
+}
+
+.rv-founding strong { color: var(--brass-bright); font-weight: 600; }
+
 /* ⚠️ #8 THE SETTLE, AND IT IS A TRANSITION — NOT A KEYFRAME.
    The catalogue lists it as "(transition) sheets and toasts", and the first
    attempt at this menu wrote it as a keyframe instead. MotionCatalogueTest

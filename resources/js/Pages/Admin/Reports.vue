@@ -37,7 +37,7 @@ const TABS = [
                 <span class="rv-underline" aria-hidden="true" />
                 <p class="rv-lead" style="max-width: 60ch">
                     Members can report someone they were introduced to. The person reported is
-                    never told — not that a report exists, not who raised it, and not what you
+                    never told, and not that a report exists, not who raised it, and not what you
                     decide.
                 </p>
             </header>

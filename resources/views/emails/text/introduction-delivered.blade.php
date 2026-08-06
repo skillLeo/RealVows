@@ -18,7 +18,7 @@ Compatibility: {{ $score }} out of 100.
 {{ $rationale }}
 @endif
 
-Their name and photographs are waiting behind this link — we have kept them out
+Their name and photographs are waiting behind this link. We have kept them out
 of this email, because an inbox is not a private place.
 
 {{ route('dashboard') }}

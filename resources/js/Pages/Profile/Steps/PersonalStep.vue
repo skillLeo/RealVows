@@ -28,7 +28,7 @@ const YES_NO = [
 <template>
     <StepShell
         heading="Tell us about you."
-        lead="Seven steps, saved as you go. Nothing here is public until you're verified."
+        lead="Seven steps, saved as you go. Nothing here is public until you are verified."
     >
         <BaseCard>
             <div class="rv-stack" style="gap: 24px">
@@ -52,7 +52,7 @@ const YES_NO = [
                     v-model="model.date_of_birth"
                     label="Date of birth"
                     type="date"
-                    help="Used to confirm you're 18 or over"
+                    help="Used to confirm you are 18 or over"
                     :error="errors.date_of_birth?.[0]"
                 />
 

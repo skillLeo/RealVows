@@ -148,6 +148,33 @@ class PositiveControlsAreAliveTest extends TestCase
                 'clean' => 'Their synastry is not something we would ever mention.',
             ],
 
+            /*
+             * The planted string is the review banner that was live. The clean
+             * sample is its replacement.
+             */
+            'punctuation that reads as machine-written' => [
+                'reader' => fn (string $t) => Scanners::aiPunctuation($t),
+                'planted' => 'the sign-in buttons are open — not the live platform.',
+                'clean' => 'This is not the live platform. Every member here is invented.',
+            ],
+
+            /*
+             * ⚠️ The clean sample is two possessives. They broke the first
+             * version of this reader, and a reader that flags them is switched
+             * off within a day.
+             */
+            'contractions on a formal surface' => [
+                'reader' => fn (string $t) => Scanners::contractions($t),
+                'planted' => "A real person checks you're you, usually within a day",
+                'clean' => "a match is never one person's wishes imposed on another's",
+            ],
+
+            'vocabulary no person chooses' => [
+                'reader' => fn (string $t) => Scanners::bannedVocabulary($t),
+                'planted' => 'Begin your journey with a seamless, curated experience.',
+                'clean' => 'You will not spend your evenings scrolling.',
+            ],
+
             'a host outside the allow-list' => [
                 'reader' => fn (string $t) => array_values(array_filter(
                     Scanners::hosts($t),

@@ -185,7 +185,45 @@ class Scanners
      */
     public const MARRIAGE_FORWARD = [
         'marriage', 'marriages', 'marry', 'marries', 'marrying', 'married',
+
+        /*
+         * ⚠️ THE REST OF THE REGISTER, ADDED BEFORE THE COPY REWRITE RATHER
+         * THAN AFTER IT.
+         *
+         * The first version of this list read for the word "marriage" and its
+         * inflections and nothing else. That is the false-pass shape this
+         * project keeps hitting: a reader that catches one spelling of the
+         * thing and reports clean while the thing itself walks past.
+         *
+         * The client's objection was never to a single word. He said the word
+         * marriage frightens people and asked for soul mate instead. "Wife",
+         * "wedding" and "tie the knot" carry identical weight and land on the
+         * identical instinct. A guard blind to them is a guard that lets the
+         * old framing back in through a side door, and a full copy rewrite is
+         * exactly when a writer reaches for familiar vocabulary.
+         *
+         * ⚠️ THIS ALREADY CAUGHT SOMETHING. "Settle down" was introduced BY the
+         * previous pass, as the replacement for "hoping to marry" in
+         * CommonalityFinder and MatchPresenter. It is the same register wearing
+         * a softer coat, and the narrow reader had no opinion about it.
+         */
+        'wife', 'wives', 'husband', 'husbands', 'spouse', 'spouses', 'spousal',
+        'wedding', 'weddings', 'bride', 'brides', 'bridal', 'groom', 'grooms',
+        'matrimony', 'matrimonial', 'nuptial', 'nuptials', 'betrothed',
+        'settle down', 'settling down', 'tie the knot', 'walk down the aisle',
+        'mr and mrs', 'till death do us part', 'til death do us part',
     ];
+
+    /**
+     * ⚠️ `engagement` IS DELIBERATELY ABSENT, AND THIS NOTE IS THE REASON.
+     *
+     * It carries the marital sense only sometimes. In a product that also has
+     * an admin panel, "engagement" is an ordinary analytics word, and a reader
+     * that fires on both produces exactly the noise that trains people to
+     * override guards. If the marital sense ever appears in member copy it
+     * will be as "engaged to", which the reviewer reading the page will catch;
+     * a machine cannot tell the two apart and should not pretend to.
+     */
 
     /**
      * Marriage-forward vocabulary in a piece of text, whole words only.
@@ -237,6 +275,71 @@ class Scanners
         $parts = preg_split('/(?<=[.!?])\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         return array_values(array_filter(array_map('trim', $parts), fn ($s) => $s !== ''));
+    }
+
+    /**
+     * ⚠️ THE MARKS THAT MAKE PROSE READ AS MACHINE-WRITTEN.
+     *
+     * From the client, after reading the site properly for the first time:
+     * "the people who read this, who will be serious, they will look at the
+     * grammar and they would think somebody just came up with this and tried
+     * to rig this up in a few days."
+     *
+     * He is right, and the reasoning is sharper than it looks. On a product
+     * whose entire claim is that it takes this seriously, prose that reads as
+     * generated undermines the proposition more than a missing feature would.
+     * A reader deciding whether to hand over their photographs reads the
+     * writing as evidence of care.
+     *
+     * The em dash is the strongest single tell and the one he named. It is
+     * banned outright rather than swapped for a comma: a sentence that needs a
+     * dash to hold together is two sentences.
+     */
+    public const AI_PUNCTUATION = ['—', '–', ';'];
+
+    /** Vocabulary that never appears in writing a person did on purpose. */
+    public const BANNED_VOCABULARY = [
+        'journey', 'seamless', 'seamlessly', 'curated', 'elevate', 'elevated',
+        'unlock your potential', 'tailored', 'bespoke experience', 'world-class',
+        'cutting-edge', 'leverage', 'empower', 'delve', 'at the end of the day',
+        "in today's world", 'more than just',
+    ];
+
+    /**
+     * Contractions, for the surfaces that hold a formal register.
+     *
+     * ⚠️ POSSESSIVE `'s` IS NOT A CONTRACTION and must never match. The first
+     * version of this reader flagged "one person's wishes" and "another's",
+     * which is the over-eager half of the same failure: a guard producing
+     * noise gets overridden, and then it is not a guard.
+     */
+    public static function contractions(string $text): array
+    {
+        preg_match_all(
+            "/\b(?:\w+n't|\w+'(?:re|ve|ll|m)|(?:it|that|here|there|what|who|let|he|she|we|you|they|this)'s)\b/i",
+            $text,
+            $matches,
+        );
+
+        return array_values(array_unique($matches[0]));
+    }
+
+    /** @return list<string> */
+    public static function aiPunctuation(string $text): array
+    {
+        return array_values(array_filter(
+            self::AI_PUNCTUATION,
+            fn (string $mark) => str_contains($text, $mark),
+        ));
+    }
+
+    /** @return list<string> */
+    public static function bannedVocabulary(string $text): array
+    {
+        return array_values(array_filter(
+            self::BANNED_VOCABULARY,
+            fn (string $word) => preg_match('/\b'.preg_quote($word, '/').'\b/i', $text) === 1,
+        ));
     }
 
     /**

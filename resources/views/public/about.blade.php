@@ -26,10 +26,18 @@
     <section class="rv-shell rv-section">
         <div class="rv-stack" style="gap: 16px" data-reveal>
             <span class="rv-label rv-label--brass">RealVows</span>
-            <h1 class="rv-d1" style="max-width: 22ch">Built for people who are serious.</h1>
+            {{-- ⚠️ "Built for people who are serious" opened on a past
+                 participle with no subject, which is a shape generated text
+                 reaches for constantly. A full clause with a subject reads as
+                 though a person wrote it, because a person would have.
+
+                 The lead also carried a dash and a broken comparison: "the
+                 person they build a life with, not the next conversation" set
+                 a person against a conversation, which does not hold. --}}
+            <h1 class="rv-d1" style="max-width: 22ch">We built this for people who are serious.</h1>
             <p class="rv-lead" style="max-width: 54ch">
-                RealVows is for people looking to find their true soul mate — the person they
-                build a life with, not the next conversation.
+                RealVows is for people looking to find their true soul mate. It is built for the
+                person you spend your life with.
             </p>
         </div>
     </section>
@@ -40,13 +48,13 @@
 
             <p class="rv-body">
                 Most platforms are built to keep you on them. The longer you scroll, the better
-                they do. That is a reasonable way to build a game and a poor way to help somebody
-                find the person they are going to spend their life with.
+                they do. That is a reasonable way to build a game. It is a poor way to help
+                somebody find the person they build a life with.
             </p>
             <p class="rv-body">
-                So this one is built the other way round. There is no feed, nobody to browse and
-                nothing to swipe. You are introduced to a small number of people who genuinely
-                fit, and the intention is that you stop needing us.
+                RealVows is built the other way round. You are introduced to a small number of
+                people who genuinely fit, a few at a time, and we would rather you stopped needing
+                us. A platform for finding your soul mate should be trying to lose you.
             </p>
 
             @include('public.partials.ornament', ['tone' => 'dark'])
@@ -64,7 +72,7 @@
             @foreach ([
                 ['Real people only', 'Every member is reviewed by a real person before they can be matched. Nobody enters the matching pool unverified.'],
                 ['Privacy by default', 'Your photographs are held privately and your last name stays yours until you and someone else have both said yes.'],
-                ['No games', 'No feed, no browsing, no ranking you against strangers. You are introduced, or you are not.'],
+                ['No games', 'Nobody is ranked against strangers and nothing is scored in public. You are introduced, or you are not.'],
             ] as [$title, $body])
                 <div class="rv-card rv-stack" style="gap: 16px" data-reveal>
                     <h3 class="rv-d3">{{ $title }}</h3>
@@ -79,8 +87,9 @@
         <div class="rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
             <h2 class="rv-d2">Who it is for</h2>
             <p class="rv-body">
-                Anyone 18 or over who is seeking to find their true soul mate, and who would
-                rather be introduced to three people who fit than shown three hundred who do not.
+                Anyone 18 or over who is seeking to find their true soul mate. If you would rather
+                be introduced to three people who fit than shown three hundred who do not, you are
+                in the right place.
             </p>
             <p class="rv-body">
                 If you are here to pass the time, this will be a disappointing place to spend it.

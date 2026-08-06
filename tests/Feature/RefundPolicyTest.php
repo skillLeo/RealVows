@@ -64,14 +64,29 @@ class RefundPolicyTest extends TestCase
     }
 
     /**
-     * ⚠️ THE DRAFT BANNER STAYS UNTIL THE CLIENT APPROVES THE WORDING.
+     * ⚠️ THE DRAFT BANNER IS GONE, AND THAT WAS THE CLIENT'S CALL.
      *
-     * A page that reads as finished is a page nobody checks. These are our
-     * words, not a lawyer's.
+     * It said the page was a placeholder awaiting his legal wording. He then
+     * told us to write the policies ourselves: "the AI can give you a policy,
+     * ask Grok or somebody, they can give you the legal word for the policy."
+     * A placeholder notice on a page that is no longer a placeholder is its own
+     * small dishonesty, and this page is read by exactly the sceptical person
+     * who notices that sort of thing.
+     *
+     * ⚠️ WHAT REPLACED IT IS NOT NOTHING. The policy is now a full document
+     * with six sections, asserted above. What has NOT changed is that no lawyer
+     * in Jamaica has reviewed it, which is recorded in LegalController's header
+     * and carried in LAUNCH-CHECKLIST.md as a fact the client has been told.
      */
-    public function test_it_still_declares_itself_a_draft(): void
+    public function test_it_no_longer_calls_itself_a_placeholder(): void
     {
-        $this->get('/refunds')->assertSee('[DRAFT', false);
+        $body = $this->get('/refunds')->getContent();
+
+        $this->assertStringNotContainsString('[DRAFT', $body);
+        $this->assertStringNotContainsString('placeholder', $body);
+
+        // And the pending-entity notice, which only the bank can clear, stays.
+        $this->assertStringContainsString('contracting entity is not yet confirmed', $body);
     }
 
     /** ⚠️ It names the contracting party from settings, never hardcoded. */

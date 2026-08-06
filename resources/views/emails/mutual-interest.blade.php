@@ -15,7 +15,7 @@
     </p>
 
     <p style="margin:0 0 24px;">
-        You can now see how to reach each other. Whatever happens next is yours to decide —
+        You can now see how to reach each other. Whatever happens next is yours to decide.
         we have done our part.
     </p>
 

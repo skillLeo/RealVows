@@ -17,17 +17,31 @@
 @endphp
 
 <section class="rv-shell rv-section rv-paper">
+    {{-- ⚠️ THE CLIENT'S FRAMING. He wrote "Here's what we require from your
+         end" against this section, meaning he wants it read as what is being
+         asked of the member rather than as a list of features.
+
+         "Require" is the language of a form. This is the moment somebody
+         decides whether to begin, so "need" is the warmer and more accurate
+         word, and the contraction goes because the marketing pages do not use
+         them. --}}
     <div class="rv-stack rv-section__head" data-reveal>
-        <p class="rv-eyebrow">Three steps, then we take over</p>
+        <p class="rv-eyebrow">Here is what we need from you</p>
         <{{ $heading }} class="rv-d2">How it works</{{ $heading }}>
         <span class="rv-underline" style="max-width: 220px"></span>
     </div>
 
+    {{-- ⚠️ Every description is a full sentence ending in a full stop. They
+         used to be unpunctuated fragments sitting beside punctuated prose.
+
+         Step 02 read "A real person checks you're you, usually within a day".
+         That is a tautology, a contraction against register, and a hedge on a
+         promise, in nine words. --}}
     <div class="rv-grid rv-grid--3" data-stagger>
         @foreach ([
-            ['01', 'Build your profile', 'Seven guided steps, saved as you go'],
-            ['02', 'Get verified', "A real person checks you're you, usually within a day"],
-            ['03', 'Receive your introductions', 'Chosen for you and brought to you — there is nothing to search through'],
+            ['01', 'Build your free profile', 'Seven guided steps, saved as you go. It costs nothing.'],
+            ['02', 'Get verified', 'A real person confirms your identity before anyone is introduced to you.'],
+            ['03', 'Receive your introductions', 'We choose them and bring them to you. There is nothing to search.'],
         ] as [$number, $title, $body])
             <div class="rv-card rv-card--lift rv-step rv-stack" style="gap: 20px" data-reveal>
                 <span class="rv-numeral rv-step__number">{{ $number }}</span>

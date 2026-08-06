@@ -21,7 +21,7 @@ function toggleIn(field, value, on) {
 
 <template>
     <StepShell
-        heading="Who you're hoping to meet."
+        heading="Who you are hoping to meet."
         lead="This shapes who we bring you. Both sides are weighed, so a match is never one person's wishes imposed on another's."
     >
         <BaseCard>

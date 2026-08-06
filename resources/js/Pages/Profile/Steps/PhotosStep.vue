@@ -101,8 +101,8 @@ const newCode = () => router.post('/verification/code', {}, { preserveScroll: tr
 
 <template>
     <StepShell
-        heading="Four photos, that's all."
-        lead="Enough to be real, not so many it's a chore. JPEG, PNG or WebP, up to 8 MB each."
+        heading="Four photos and nothing more."
+        lead="Enough to show who you are, few enough to finish in one sitting. JPEG, PNG or WebP, up to 8 MB each."
     >
         <p v-if="problem" class="rv-photos__problem" role="alert">{{ problem }}</p>
 

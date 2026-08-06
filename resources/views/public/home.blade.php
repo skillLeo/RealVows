@@ -31,10 +31,43 @@
 
                 <span class="rv-hero__flourish rv-arrive-step"></span>
 
+                {{-- The client's own line, corrected only for person so that it
+                     addresses the reader. He sent "The person to build a life
+                     with." --}}
                 <p class="rv-lead" style="max-width: 44ch">
-                    Free to join. Every profile verified by a real person. Introductions brought to
-                    you by email and WhatsApp.
+                    The person you build a life with. Joining is free, and a real person checks
+                    every profile before anyone is introduced.
                 </p>
+
+                {{--
+                    ⚠️ THE FOUNDING OFFER IS COUNTED, NOT TYPED.
+
+                    The client asked for "be one of the first 100 people to
+                    create your account and get matched for free". Written into
+                    this template as a sentence, it is true until the hundred
+                    and first person joins and then it is a lie on the home
+                    page, with nothing in the product aware of it.
+
+                    App\Support\FoundingOffer counts verified members and the
+                    scheduler projects the remainder into PublicState. When the
+                    places run out this band disappears and the general free
+                    period wording below carries on. An unreadable projection
+                    reads as CLOSED, because a promise must never be made on a
+                    guess.
+
+                    ⚠️ HIS EMPHASIS, IN THE DESIGN SYSTEM'S OWN VOICE. He wrote
+                    MATCHED and FREE in capitals. Shouting is the register of a
+                    discount site and this one is built on restraint, so the
+                    weight lands through the brass accent instead. The emphasis
+                    is his; the way it is expressed is ours.
+                --}}
+                @if (\App\Support\PublicState::foundingOfferOpen())
+                    <p class="rv-founding">
+                        <span class="rv-founding__mark">Founding members</span>
+                        Be one of the first {{ \App\Support\FoundingOffer::PLACES }} people to join
+                        and every introduction you receive is <strong>free, permanently</strong>.
+                    </p>
+                @endif
 
                 <div>
                     <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
@@ -103,11 +136,14 @@
     {{-- ── Trust strip ─────────────────────────────────────────────────── --}}
     <section class="rv-trust rv-paper">
         <div class="rv-shell rv-trust__grid" data-stagger>
+            {{-- ⚠️ Every description ends with a full stop. They used to end
+                 four different ways on one row, which is the sort of thing a
+                 reader feels without being able to name. --}}
             @foreach ([
-                ['diamond', 'Free to join', 'Sign up and build your full profile at no cost'],
-                ['check', 'Verified identity', 'Every member reviewed by a person before they can be matched'],
-                ['four', 'Four photos', "Enough to be real, not so many it's a chore"],
-                ['envelope', 'Email and WhatsApp', 'Your matches come to you, wherever you are'],
+                ['diamond', 'Free to join', 'Build your entire profile without paying anything.'],
+                ['check', 'Verified identity', 'A real person reviews every member before they can be matched.'],
+                ['four', 'Four photos', 'Enough to show who you are, few enough to finish in one sitting.'],
+                ['envelope', 'Email and WhatsApp', 'Your introductions come to you, wherever you are.'],
             ] as [$icon, $title, $body])
                 <div class="rv-trust__item rv-stack" style="gap: 16px" data-reveal>
                     <span class="rv-icon-box">@include('public.partials.icon', ['name' => $icon])</span>
@@ -140,11 +176,10 @@
                 <h2 class="rv-d2" style="max-width: 22ch">Compatibility, measured properly.</h2>
                 <span class="rv-underline" style="max-width: 200px"></span>
                 <p class="rv-lead" style="max-width: 54ch">
-                    Every introduction begins with a compatibility score out of 100, built from what
-                    you tell us about yourself — the values you rank highest, the life you are
-                    working towards, how you actually live, and what you are looking for in
-                    somebody else. Both sides are weighed, so a match is never one person's wishes
-                    imposed on another's.
+                    Every introduction begins with a compatibility score out of 100. It is built
+                    from what you tell us: the values you rank highest, the life you are working
+                    towards, and what you are looking for in somebody else. Both sides are weighed.
+                    A match is never one person's wishes imposed on another.
                 </p>
             </div>
 
@@ -186,11 +221,15 @@
 
             <p class="rv-eyebrow">No card, no catch</p>
 
-            <h2 class="rv-d1 rv-invitation__line">Sign up is 100% free</h2>
+            <h2 class="rv-d1 rv-invitation__line">Joining is free.</h2>
 
+            {{-- ⚠️ TRUE IN BOTH STATES. This used to say "choose a match package
+                 when you are ready", which is a sentence about a page that
+                 returns 404 during the free period. It now describes what
+                 actually happens now, and stays true when payments arrive. --}}
             <p class="rv-lead" style="max-width: 46ch">
-                Build your whole profile without paying anything. Choose a match package only when
-                you're ready to be introduced.
+                Build your whole profile without paying anything. Your introductions are free while
+                we are getting started, and anything you receive in that time stays yours.
             </p>
 
             <div>

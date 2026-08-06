@@ -94,8 +94,19 @@
             @unless ($pricingVisible)
                 {{-- ⚠️ NOT A LINK. During the free period there is no pricing
                      page to point at, and silence where a price used to be
-                     reads as broken while a sentence reads as a gift. --}}
-                <p class="rv-navsheet__note">Joining and being introduced are free right now.</p>
+                     reads as broken while a sentence reads as a gift.
+
+                     The founding offer is shown here too when places remain,
+                     because this panel is where he asked for "how to make
+                     payment" to live and it is the honest answer today. --}}
+                <p class="rv-navsheet__note">
+                    @if (\App\Support\PublicState::foundingOfferOpen())
+                        Joining is free, and the first {{ \App\Support\FoundingOffer::PLACES }}
+                        members keep every introduction they receive at no cost.
+                    @else
+                        Joining and being introduced are free right now.
+                    @endif
+                </p>
             @endunless
 
             <a href="{{ route('login') }}">Sign in</a>

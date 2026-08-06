@@ -28,15 +28,16 @@ class ProjectPublicState extends Command
 
     protected $description = 'Write the free-period projection the public pages read';
 
-    public function handle(FreePeriod $freePeriod): int
+    public function handle(FreePeriod $freePeriod, \App\Support\FoundingOffer $founding): int
     {
         /*
-         * ⚠️ THE DATABASE READ HAPPENS HERE, IN A CONSOLE PROCESS, where a
+         * ⚠️ THE DATABASE READS HAPPEN HERE, IN A CONSOLE PROCESS, where a
          * failure costs a log line rather than a member's home page.
          */
         $active = $freePeriod->isActive();
+        $placesLeft = $founding->remaining();
 
-        if (! PublicState::write($active)) {
+        if (! PublicState::write($active, $placesLeft)) {
             $this->error('Could not write '.PublicState::path().'.');
             $this->warn('The public pages will hide the pricing link until this succeeds.');
 
@@ -45,8 +46,10 @@ class ProjectPublicState extends Command
 
         if (! $this->option('quiet-if-unchanged')) {
             $this->info(sprintf(
-                'Public state written: free period is %s.',
-                $active ? 'ON — pricing link hidden' : 'OFF — pricing link shown',
+                'Public state written. Free period %s, pricing link %s. Founding places left: %d.',
+                $active ? 'ON' : 'OFF',
+                $active ? 'hidden' : 'shown',
+                $placesLeft,
             ));
         }
 

@@ -56,7 +56,7 @@
     @endif
 
     <p style="margin:0 0 24px;color:#6B5F62;font-size:15px;">
-        Their name and photographs are waiting behind the link — we have kept them
+        Their name and photographs are waiting behind the link. We have kept them
         out of this email, because an inbox is not a private place.
     </p>
 

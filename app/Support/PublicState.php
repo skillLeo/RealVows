@@ -71,7 +71,7 @@ class PublicState
      * a busy page that is a white screen for whoever asked first. `rename()`
      * is atomic on the same filesystem.
      */
-    public static function write(bool $freePeriodActive): bool
+    public static function write(bool $freePeriodActive, ?int $foundingPlacesLeft = null): bool
     {
         $contents = "<?php\n\n"
             ."/*\n"
@@ -84,6 +84,7 @@ class PublicState
             ." */\n\n"
             .'return '.var_export([
                 'free_period' => $freePeriodActive,
+                'founding_places_left' => $foundingPlacesLeft,
                 'written_at' => now()->toIso8601String(),
             ], true).";\n";
 
@@ -158,7 +159,29 @@ class PublicState
         return self::read()['free_period'] ?? true;
     }
 
-    /** @return array{free_period: bool, written_at: string}|null */
+    /**
+     * ⚠️ IS THE FOUNDING OFFER STILL TRUE?
+     *
+     * A missing or unreadable projection means NO, and that direction is the
+     * opposite of freePeriodActive() above on purpose. "Joining is free" is a
+     * standing statement about how the product runs and is safe to assume.
+     * "You can be one of the first hundred" is a specific promise about a
+     * specific number, and a promise must never be made on a guess.
+     */
+    public static function foundingOfferOpen(): bool
+    {
+        return self::foundingPlacesLeft() > 0;
+    }
+
+    /** Zero when unknown, so a template can only ever under-promise. */
+    public static function foundingPlacesLeft(): int
+    {
+        $left = self::read()['founding_places_left'] ?? null;
+
+        return is_int($left) && $left > 0 ? $left : 0;
+    }
+
+    /** @return array{free_period: bool, founding_places_left: ?int, written_at: string}|null */
     private static function read(): ?array
     {
         $path = self::path();
@@ -177,8 +200,11 @@ class PublicState
             return null;
         }
 
+        $left = $state['founding_places_left'] ?? null;
+
         return [
             'free_period' => (bool) $state['free_period'],
+            'founding_places_left' => is_numeric($left) ? (int) $left : null,
             'written_at' => (string) ($state['written_at'] ?? ''),
         ];
     }

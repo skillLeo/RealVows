@@ -299,7 +299,9 @@ class BillingIdentityTest extends TestCase
     {
         $response = $this->get('/terms')->assertOk();
 
-        $response->assertSee('the contracting entity is not yet confirmed', false);
+        // Matched without the leading article, so the assertion survives the
+        // notice being reworded from a bracketed label into a sentence.
+        $response->assertSee('contracting entity is not yet confirmed', false);
         $response->assertDontSee('Who you are contracting with', false);
     }
 

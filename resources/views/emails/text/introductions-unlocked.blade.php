@@ -4,7 +4,7 @@
 @endphp
 {{ $opening }}
 
-Your payment is complete, and {{ $what }} now open to read in full — names,
+Your payment is complete, and {{ $what }} now open to read in full, with names,
 photographs, and everything they chose to share.
 
 Take your time. Nothing expires while it is open, and there is no queue behind you.

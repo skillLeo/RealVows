@@ -13,7 +13,7 @@
 
     <p style="margin:0 0 24px;">
         From here, we do the looking. RealVows chooses the people you are most compatible with
-        and brings them to you — there is nothing to search through.
+        and brings them to you. There is nothing to search through.
     </p>
 
     @include('emails.partials.button', [

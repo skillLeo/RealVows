@@ -101,10 +101,23 @@ class CommonalityFinder
          *
          * The stored keys are untouched. Only the language on both ends moved.
          */
+        /*
+         * ⚠️ "SETTLE DOWN" WAS ALSO THE WRONG REGISTER, and it took a widened
+         * reader to see it.
+         *
+         * The previous pass replaced "hoping to marry within the year" with
+         * "hoping to settle down within the year" and called that done. It is
+         * the same idea in a softer coat, and the guard had no opinion because
+         * it only knew the word "marry". The client asked for soul mate
+         * language, which is about the person, not about the milestone.
+         *
+         * These now describe the PACE two people want, which is what the
+         * stored field actually records.
+         */
         return match ($a->marriage_timeline) {
-            'within_year' => "You're both hoping to settle down within the year.",
-            'one_to_two' => "You're both looking to settle down within two years.",
-            'two_plus' => "Neither of you is in a hurry — you both see this building over a couple of years.",
+            'within_year' => "You are both hoping to build something lasting within the year.",
+            'one_to_two' => "You are both looking a year or two ahead, at the same pace.",
+            'two_plus' => "Neither of you is in a hurry. You both see this building over a couple of years.",
             default => null,
         };
     }

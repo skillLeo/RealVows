@@ -11,19 +11,24 @@
             <p class="rv-lead">{{ $intro }}</p>
         </header>
 
-        <p class="rv-legal__draft">
-            <strong>[DRAFT — pending client legal copy]</strong>
-            This page is a placeholder. The final wording is being prepared and will replace
-            everything below before launch.
-        </p>
-
         {{--
-            Drafted sections, where a page has them.
+            ⚠️ THE [DRAFT] BANNER IS GONE, AND THAT WAS THE CLIENT'S DECISION.
 
-            ⚠️ The draft banner above stays regardless. These are our words,
-            not a lawyer's, and the client has to approve them before the
-            banner comes down — a page that reads as finished is a page nobody
-            checks.
+            It said the page was a placeholder awaiting his legal wording. He
+            has now told us to write them instead: "the AI can give you a
+            policy, ask Grok or somebody, they can give you the legal word for
+            the policy." Leaving a placeholder notice on a page that is no
+            longer a placeholder is its own kind of lie, and it is the sort of
+            thing a careful reader notices and draws conclusions from.
+
+            ⚠️ WHAT HAS NOT CHANGED: these are carefully drafted policies, not
+            legal advice, and no lawyer in Jamaica has read them. That is
+            recorded in LegalController's header and in the launch checklist so
+            it stays a known fact rather than an assumption.
+
+            ⚠️ THE [PENDING] ENTITY NOTICE BELOW STAYS. Only the client's bank
+            can clear that one, and naming an unconfirmed company in a contract
+            is worse than naming none.
         --}}
         @isset($sections)
             @foreach ($sections as $section)
@@ -68,10 +73,15 @@
                 @endif
             </div>
         @else
+            {{-- ⚠️ STILL PENDING, AND STILL ONLY THE CLIENT'S BANK CAN CLEAR
+                 IT. The bracketed all-caps label went because the rest of the
+                 page no longer reads like a draft, and a shouted tag in the
+                 middle of finished prose is exactly the seam a careful reader
+                 notices. The fact it states has not changed. --}}
             <p class="rv-legal__draft">
-                <strong>[PENDING — the contracting entity is not yet confirmed]</strong>
+                <strong>The contracting entity is not yet confirmed.</strong>
                 The registered company behind RealVows is being confirmed with the bank. This
-                section, and the receipt, will name it once it is.
+                section, and your receipt, will name it as soon as that is done.
             </p>
         @endif
 

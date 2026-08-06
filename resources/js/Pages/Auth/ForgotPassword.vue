@@ -37,7 +37,7 @@ const submit = () => form.post('/forgot-password', { preserveScroll: true });
                 <div class="rv-stack" style="gap: 20px">
                     <BaseButton href="/login" variant="secondary" block>Back to log in</BaseButton>
                     <p class="rv-small" style="text-align: center">
-                        Didn't arrive?
+                        {{ $t('auth.forgot_not_arrived') }}
                         <button type="button" class="rv-link-brass rv-link-inline" @click="form.post('/forgot-password', { preserveScroll: true })">
                             {{ $t('auth.send_again') }}
                         </button>

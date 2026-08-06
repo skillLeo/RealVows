@@ -17,7 +17,7 @@
     </p>
 
     <p style="margin:0 0 24px;">
-        We are not saying who — that is theirs to tell you, and it happens the moment
+        We are not saying who. That is theirs to tell you, and it happens the moment
         you say yes too. Open your introductions whenever you are ready.
     </p>
 

@@ -1,6 +1,6 @@
 @component('emails.layout', [
     'heading' => 'Thank you.',
-    'preheader' => 'Your receipt from RealVows — '.$reference,
+    'preheader' => 'Your receipt from RealVows, reference '.$reference,
 ])
     <p style="margin:0 0 16px;">
         {{ $firstName ? "Hello $firstName," : 'Hello,' }}

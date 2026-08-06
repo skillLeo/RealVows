@@ -36,8 +36,8 @@ pass, reach mutual interest, see contact details, and block. **Not a dead end.**
 | ✅ | Free-period permanence guarantee asserted across the cutover | Hassam | Live |
 | ✅ | Refund and cancellation policy written and linked | Hassam | Live, draft banner up |
 | ✅ | Demo teardown built, dry-run default, real-purchase guard | Hassam | Built, **not yet run** |
-| ⏳ | Legal copy — Terms, Privacy, Guidelines | **Client** | Draft banners up |
-| ⏳ | Refund policy wording approved | **Client** | Drafted, awaiting approval |
+| ✅ | Legal copy — Terms, Privacy, Guidelines, Refunds | Hassam | **Written in full.** Client released this: "the AI can give you a policy". Draft banner removed. |
+| ⚠️ | **No lawyer in Jamaica has read the policies** | **Client** | Told him plainly. Not a reason to delay launch; a reason to get them reviewed after. |
 | ✅ | Resend switch + webhook receiving live events | Hassam | Live, verified |
 | ⏳ | **Verify the domain in Resend** — DNS is correct, button unpressed | **Client** | Blocks real sends |
 | ⏳ | Scope webhook to `email.*` events only | **Client** | 2 minutes |

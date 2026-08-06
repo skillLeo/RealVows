@@ -38,7 +38,7 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'group.exists' => 'That settings group does not exist.',
             'values.statement_descriptor.regex' => 'The statement descriptor must be uppercase '
-                .'letters, digits and spaces only — that is all the card networks accept.',
+                .'letters, digits and spaces only. That is all the card networks accept.',
             'values.statement_descriptor.max' => 'The statement descriptor cannot be longer than '
                 .'22 characters. Card networks truncate anything longer.',
         ];

@@ -230,23 +230,80 @@ class MailableContentTest extends TestCase
      * this one has not answered — naming them discloses a one-sided interest
      * that was never consented to, and lets the recipient work out who passed.
      */
+    /**
+     * ⚠️ IT READS THE VISIBLE TEXT, NOT THE RAW HTML, AND THE REASON IS A REAL
+     * FAILURE RATHER THAN A PREFERENCE.
+     *
+     * This searched the whole rendered document for the bare substring "87".
+     * The document contains a signed unsubscribe URL, whose signature is a
+     * 64-character hex hash, and roughly a quarter of those hashes contain the
+     * characters 8 and 7 side by side. Measured: 118 of 500.
+     *
+     * So this test had about a one in four chance of failing on any run, for a
+     * reason that had nothing to do with what it was checking. It passed
+     * locally and failed in CI on the same commit, which is the shape that
+     * teaches a team to re-run a red build instead of reading it.
+     *
+     * ⚠️ AND THE OTHER DIRECTION IS WORSE. A guard that fires at random also
+     * passes at random. Had the score genuinely leaked into this email, three
+     * runs in four would have said nothing was wrong.
+     *
+     * Fixed by reading what a member reads, and by matching a number as a
+     * number rather than as two characters that might turn up in a hash.
+     */
     public function test_the_someone_interested_email_identifies_nobody(): void
     {
         $user = $this->member();
 
         $html = (new SomeoneInterested($user))->render();
+        $visible = Scanners::visibleText($html);
 
-        foreach (['Omar', 'Kingston', '87', 'out of 100'] as $detail) {
+        foreach (['Omar', 'Kingston', 'out of 100'] as $detail) {
             $this->assertStringNotContainsString(
                 $detail,
-                $html,
+                $visible,
                 "The someone-interested email carries [{$detail}], which identifies or "
                     .'characterises the other member.'
             );
         }
 
-        // It does address the recipient by name — that is their own.
-        $this->assertStringContainsString('Aisha', $html);
+        $this->assertDoesNotMatchRegularExpression(
+            '/\b87\b/',
+            $visible,
+            'The someone-interested email shows the compatibility score, which characterises '
+                .'the other member.'
+        );
+
+        // It does address the recipient by name. That name is their own.
+        $this->assertStringContainsString('Aisha', $visible);
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL (Rule 5) FOR THE READER ABOVE.
+     *
+     * Narrowing a guard is exactly when it can be narrowed into uselessness,
+     * so the narrowed reader is shown catching the leak it exists for and
+     * ignoring the hash that was making it flap.
+     */
+    public function test_the_narrowed_reader_still_sees_a_real_leak(): void
+    {
+        $leaked = Scanners::visibleText(
+            '<p>Someone is interested. Your compatibility is 87 out of 100.</p>'
+        );
+
+        $this->assertMatchesRegularExpression('/\b87\b/', $leaked);
+        $this->assertStringContainsString('out of 100', $leaked);
+
+        // A signature hash carrying the same two characters must NOT trip it.
+        $innocent = Scanners::visibleText(
+            '<p>Nothing here.</p><a href="/unsubscribe/12/email?signature=a87f3c">Stop</a>'
+        );
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/\b87\b/',
+            $innocent,
+            'The reader still fires on a hash, which is what made it flaky in the first place.'
+        );
     }
 
     /** ⚠️ Only the mutual-interest email may name another member. */

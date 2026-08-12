@@ -89,25 +89,21 @@
         </div>
 
         {{--
-            ⚠️ SEVEN PHOTOGRAPHS, MIXED SIGNALS, NEVER AI-GENERATED PEOPLE.
+            ⚠️ THE SEVEN PHOTOGRAPHS ARE GONE, AND THE ARGUMENT FOR THEM WAS
+            GOOD.
 
-            Two tiles are visibly Muslim and two are visibly Western, so both
-            audiences see at a glance that the platform is for them. That is a
-            market decision from the client, not decoration, and it is the
-            reason the manifest records a signal per tile rather than leaving
-            it to whoever picks the files.
+            Two tiles were visibly Muslim and two visibly Western, so both
+            audiences saw at a glance that the platform was for them. That was
+            a market decision from the client, not decoration.
 
-            The whole pitch is verified real humans, so no image here may ever
-            be generated. Two of the seven are deliberately NOT people — a
-            detail shot cannot be got wrong, and a grid of seven faces reads
-            as a stock library where five faces and two quiet details read as
-            a designed page.
-
-            Everything else — placement, arrival, the mount — is in
-            App\Support\Mosaic and the .rv-mosaic block.
+            It is replaced anyway. A page about people who have not met yet
+            should not open with the faces of strangers, and every photograph
+            of a person on a marketing page is a promise about who is inside.
+            "The Meeting" says the same thing with light, line and type: two
+            paths converging under a doorway.
         --}}
         <div class="rv-hero__art">
-            @include('public.partials.hero-mosaic')
+            @include('public.partials.the-meeting')
         </div>
     </section>
 
@@ -154,8 +150,23 @@
         </div>
     </section>
 
-    {{-- ── 4 · Two people, properly introduced ─────────────────────────── --}}
-    @include('public.partials.couples-rail')
+    {{-- ⚠️ THE COUPLES RAIL IS REMOVED, AND THIS IS THE ONE I WOULD ARGUE
+         ABOUT.
+
+         Twelve photographs of real couples, running as #16 The Ticker. It was
+         doing genuine work: proof that people like the reader have come out of
+         this the other side, which is the single hardest thing for a new
+         platform to claim.
+
+         It is gone because §G is unambiguous — "no photographs of people
+         anywhere on the home page" — and because the same argument that
+         removed the hero mosaic applies to it: every photograph of a person on
+         a marketing page is a promise about who is inside, and stock couples
+         are a promise nobody can keep.
+
+         The partial still exists at public.partials.couples-rail and is a
+         one-line change to restore. This is flagged in R3-PROGRESS for the
+         client rather than left as an absence he notices later. --}}
 
     {{-- ── How it works ──────────────────────────────────────────────────
          Shared with /how-it-works. Edit the partial, never a copy of it. --}}

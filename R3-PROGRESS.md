@@ -126,7 +126,17 @@ not simply returning nothing.
   exists to disclose data handling; stripping it would make it a worse legal
   document, and it is the one page where explaining how the product works is
   the point. Reverse it if he disagrees.
-- **Part G** — home banner ("The Meeting")
+- ~~**Part G** — home banner~~ **done.** "The Meeting" is pure SVG and CSS at
+  **7.4kb** against a 25kb limit, three parallax layers, two brass lines meeting
+  under a keystone on a 20s cycle at deliberately different speeds. Full stop
+  under `prefers-reduced-motion` — final state, nothing moving. Keyframes
+  registered as marketing-only and may-loop. **Zero `<img>` elements on the home
+  page.** Measured clean at 375, 834 and 1440.
+  **⚠️ THE COUPLES RAIL WAS REMOVED TOO** — twelve photographs of real couples
+  running as #16 The Ticker. §G says no photographs of people anywhere on the
+  home page. It was doing real work (proof that people come out the other side),
+  the partial still exists at `public.partials.couples-rail`, and restoring it is
+  one line. Client's call.
 - **Part H** — premium and mobile pass + device walk-list
 - **Part I** — FAQ and support
 
@@ -157,7 +167,7 @@ not simply returning nothing.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 629 tests, 620 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 629 tests, 620 passing, 9 skipped** (banner 7.4kb; breakpoints clean) (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

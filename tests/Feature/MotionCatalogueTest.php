@@ -49,16 +49,30 @@ class MotionCatalogueTest extends TestCase
         'rv-marquee-slide',
         // The hero mosaic's scroll-driven ambient drift, part of 14.
         'rv-mosaic-drift', 'rv-mosaic-drift-reverse',
+        /*
+         * "The Meeting" — the hero composition. Marketing only, and it loops on
+         * the same argument as 15 and 16: a marketing page has no task for a
+         * loop to compete with. Two lines converging under a keystone, roughly
+         * every twenty seconds.
+         */
+        'rv-meet-left', 'rv-meet-right', 'rv-keystone-warm',
     ];
 
     /**
      * ⚠️ These may loop. Nothing else may, because inside the product a loop
      * competes with whatever the member is trying to do.
      */
-    private const MAY_LOOP = ['rv-shimmer', 'rv-drift', 'rv-arch-gleam', 'rv-marquee-slide'];
+    private const MAY_LOOP = [
+        'rv-shimmer', 'rv-drift', 'rv-arch-gleam', 'rv-marquee-slide',
+        // "The Meeting". Marketing only, twenty-second cycle.
+        'rv-meet-left', 'rv-meet-right', 'rv-keystone-warm',
+    ];
 
     /** ⚠️ These may never appear on an authenticated route. */
-    private const MARKETING_ONLY = ['rv-arch-gleam', 'rv-marquee-slide'];
+    private const MARKETING_ONLY = [
+        'rv-arch-gleam', 'rv-marquee-slide',
+        'rv-meet-left', 'rv-meet-right', 'rv-keystone-warm',
+    ];
 
     private function css(): string
     {

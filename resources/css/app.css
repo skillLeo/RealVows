@@ -3876,3 +3876,150 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     font-size: 15px;
     line-height: 1.55;
 }
+
+/* --------------------------------------------------------------------------
+   "The Meeting" — the hero composition
+   --------------------------------------------------------------------------
+   Two brass lines travel inward along a colonnade at slightly different speeds
+   and meet beneath the keystone, which warms. Then it rests. Roughly 20s.
+
+   ⚠️ TRANSFORM AND OPACITY ONLY. Nothing here may cause a layout pass: this is
+   the first thing painted on a mid-range Android over 4G, and a hero that
+   janks is worse than a hero that is still.
+
+   ⚠️ THE TWO LINES ARE NOT SYMMETRICAL ON PURPOSE. Different durations, so one
+   arrives fractionally before the other and waits. Two people are not
+   symmetrical either.
+
+   Motion catalogue: registered as marketing-only. It may loop, on the same
+   argument as #15 and #16 — a marketing page has no task for a loop to compete
+   with.
+   -------------------------------------------------------------------------- */
+
+.rv-meeting {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Reserves the space so nothing shifts when the SVG paints. */
+  contain: paint;
+}
+
+.rv-meeting__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.rv-meeting__arch {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: .18;
+}
+
+.rv-meeting__arch--central {
+  opacity: .42;
+  stroke-width: 1.5;
+}
+
+.rv-meeting__floor {
+  stroke: var(--brass);
+  stroke-width: 1;
+  opacity: .22;
+}
+
+.rv-meeting__keystone {
+  fill: var(--brass);
+  opacity: .55;
+}
+
+.rv-meeting__bloom {
+  opacity: 0;
+}
+
+/* ── Parallax. Three layers, three rates. Driven by a scroll-linked custom
+   property set in public.js, with a static fallback when it is absent. ── */
+.rv-meeting__layer {
+  transform: translate3d(calc(var(--rv-scroll, 0) * var(--rate, 0px)), 0, 0);
+  will-change: transform;
+}
+
+.rv-meeting__layer--far { --rate: 14px; opacity: .7; }
+.rv-meeting__layer--mid { --rate: 30px; opacity: .85; }
+.rv-meeting__layer--near { --rate: 52px; }
+
+/* ── The convergence. ──────────────────────────────────────────────────── */
+.rv-meeting__path {
+  stroke: var(--brass-bright);
+  stroke-width: 1.5;
+  opacity: .8;
+  stroke-dasharray: 600;
+}
+
+.rv-meeting__path--left {
+  stroke-dashoffset: 600;
+  animation: rv-meet-left 20s cubic-bezier(.33, 0, .2, 1) infinite;
+}
+
+.rv-meeting__path--right {
+  stroke-dashoffset: -600;
+  animation: rv-meet-right 20s cubic-bezier(.33, 0, .2, 1) infinite;
+}
+
+.rv-meeting__bloom {
+  animation: rv-keystone-warm 20s ease-in-out infinite;
+}
+
+@keyframes rv-meet-left {
+  0%   { stroke-dashoffset: 600; opacity: 0; }
+  8%   { opacity: .8; }
+  /* Arrives first, then holds while the other closes the gap. */
+  38%  { stroke-dashoffset: 0; opacity: .8; }
+  72%  { stroke-dashoffset: 0; opacity: .8; }
+  88%  { stroke-dashoffset: 0; opacity: 0; }
+  100% { stroke-dashoffset: 600; opacity: 0; }
+}
+
+@keyframes rv-meet-right {
+  0%   { stroke-dashoffset: -600; opacity: 0; }
+  10%  { opacity: .8; }
+  44%  { stroke-dashoffset: 0; opacity: .8; }
+  72%  { stroke-dashoffset: 0; opacity: .8; }
+  88%  { stroke-dashoffset: 0; opacity: 0; }
+  100% { stroke-dashoffset: -600; opacity: 0; }
+}
+
+/* ⚠️ 4% ABOVE AMBIENT AND NO MORE. A bloom that reads as a glow belongs on a
+   different product; this one should be noticed only if you were watching. */
+@keyframes rv-keystone-warm {
+  0%, 40%   { opacity: 0; }
+  46%       { opacity: .04; }
+  60%       { opacity: .02; }
+  72%, 100% { opacity: 0; }
+}
+
+/* ── Mobile: three arches and one keystone. The convergence still reads. ── */
+@media (max-width: 767px) {
+  .rv-meeting__layer--far { display: none; }
+  .rv-meeting__layer--mid { opacity: .6; }
+}
+
+/* ⚠️ A FULL STOP, NOT A SLOWDOWN. The composition renders in its final state:
+   lines already met, keystone already warm, nothing moving at all. */
+@media (prefers-reduced-motion: reduce) {
+  .rv-meeting__path--left,
+  .rv-meeting__path--right,
+  .rv-meeting__bloom {
+    animation: none;
+  }
+
+  .rv-meeting__path--left,
+  .rv-meeting__path--right {
+    stroke-dashoffset: 0;
+    opacity: .8;
+  }
+
+  .rv-meeting__bloom { opacity: .03; }
+  .rv-meeting__layer { transform: none; }
+}

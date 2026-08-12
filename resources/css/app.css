@@ -174,6 +174,13 @@
   --ease-veil:   cubic-bezier(0.65, 0, 0.35, 1);   /* symmetric, for reveals and covers */
   --ease-settle: cubic-bezier(0.34, 1.2, 0.64, 1); /* the ONLY overshoot allowed, and never above 1.2 */
 
+  /*
+   * Entrance curve: arrive quickly, decelerate to a soft stop. Asymmetric
+   * ease-out is what separates premium motion from cheap — the eye reads a
+   * long settle as weight. Used for the hero draw-on.
+   */
+  --ease-entrance: cubic-bezier(0, 0.4, 0, 1);
+
   --dur-quick:    200ms;   /* hovers, toggles, the tab indicator */
   --dur-move:     320ms;   /* sheets, page transitions */
   --dur-ceremony: 900ms;   /* the unsealing. Nothing else. */
@@ -3910,6 +3917,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: block;
 }
 
+/*
+ * ⚠️ THE GRAIN IS STATIC AND MUST STAY STATIC.
+ *
+ * feTurbulence is CPU-bound and not hardware accelerated. Animating
+ * baseFrequency, or chaining it into feDisplacementMap, brings a mid-range
+ * Android to a crawl — it is a documented trap, not a theoretical one. Rendered
+ * once at numOctaves 2 and never touched again.
+ *
+ * It exists because shadows are banned and depth has to come from somewhere.
+ * Tone, hairlines and a little film grain are what is left, and grain is what
+ * stops a flat oxblood field reading as a coloured rectangle.
+ */
+.rv-meeting__grain {
+  position: absolute;
+  inset: 0;
+  opacity: .05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
 .rv-meeting__arch {
   fill: none;
   stroke: var(--brass);
@@ -3942,8 +3969,25 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    property set in public.js, with a static fallback when it is absent. ── */
 .rv-meeting__layer {
   transform: translate3d(calc(var(--rv-scroll, 0) * var(--rate, 0px)), 0, 0);
-  will-change: transform;
 }
+
+/*
+ * ⚠️ NO will-change HERE, AND THAT IS DELIBERATE.
+ *
+ * It was declared permanently on all three layers. Each promoted layer is a
+ * full-resolution GPU texture, and three of them held for the life of the page
+ * — on a device chosen for being mid-range — is memory spent on an
+ * optimisation that only matters while something is moving.
+ *
+ * The first fix was a keyframe that flipped will-change to auto after ten
+ * seconds. MotionCatalogueTest rejected it, correctly: that is a memory
+ * lifecycle wearing an animation's clothes, and the registry exists so every
+ * name in it is a real motion primitive somebody chose.
+ *
+ * It is simply gone. `translate3d` already promotes these layers to their own
+ * compositing layer, so will-change was asking twice for something the browser
+ * had already done.
+ */
 
 .rv-meeting__layer--far { --rate: 14px; opacity: .7; }
 .rv-meeting__layer--mid { --rate: 30px; opacity: .85; }
@@ -3959,12 +4003,12 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-meeting__path--left {
   stroke-dashoffset: 600;
-  animation: rv-meet-left 20s cubic-bezier(.33, 0, .2, 1) infinite;
+  animation: rv-meet-left 20s var(--ease-entrance) infinite;
 }
 
 .rv-meeting__path--right {
   stroke-dashoffset: -600;
-  animation: rv-meet-right 20s cubic-bezier(.33, 0, .2, 1) infinite;
+  animation: rv-meet-right 20s var(--ease-entrance) infinite;
 }
 
 .rv-meeting__bloom {

@@ -121,6 +121,19 @@ class SaveStepRequest extends FormRequest
             'love_languages.*' => ['distinct', Rule::in(array_keys(ProfileOptions::LOVE_LANGUAGES))],
 
             'bio' => ['nullable', 'string', 'max:4000'],
+
+            /*
+             * ⚠️ WHAT THE MEMBER TYPED, WHEN THEY ACCEPTED A REWRITE.
+             *
+             * Sent by the profile builder only when the AI suggestion was
+             * accepted, and never shown to anybody. Its only purpose is that if
+             * a member is later accused of misrepresenting themselves, the
+             * question "what did THEY say" has an answer — otherwise an
+             * accepted rewrite is indistinguishable from their own words and
+             * the platform cannot tell whether a false claim came from the
+             * member or from a model it ran on their behalf.
+             */
+            'bio_original' => ['nullable', 'string', 'max:4000'],
             'interests' => ['nullable', 'array', 'max:12'],
             'interests.*' => ['string', 'max:40'],
 

@@ -101,4 +101,22 @@
         <rect class="rv-meeting__veil" x="0" y="0" width="1200" height="560"
               fill="url(#rv-meeting-fade)" />
     </svg>
+
+    {{-- ⚠️ STATIC GRAIN, IN ITS OWN SVG SO THE FILTER IS NEVER RE-EVALUATED
+         ALONGSIDE THE ANIMATED ONE.
+
+         Shadows are banned by the design system, so depth has to come from
+         tone, hairlines and a little film grain. numOctaves is 2: the cost of
+         feTurbulence rises with octaves and there is no visible gain past that
+         at 5% opacity.
+
+         ⚠️ NOTHING HERE MAY EVER BE ANIMATED. Animating baseFrequency, or
+         feeding this into feDisplacementMap, is a documented way to bring a
+         mid-range Android to a crawl. --}}
+    <svg class="rv-meeting__grain" focusable="false">
+        <filter id="rv-grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#rv-grain)" />
+    </svg>
 </div>

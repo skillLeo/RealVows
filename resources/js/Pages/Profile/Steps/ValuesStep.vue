@@ -75,6 +75,12 @@ async function suggest() {
  * button was pressed.
  */
 function accept() {
+    /*
+     * ⚠️ THEIR OWN WORDS ARE CARRIED ALONGSIDE, not discarded. The server
+     * writes it once and never overwrites, so editing the rewrite afterwards
+     * cannot replace what they originally typed.
+     */
+    model.value.bio_original = model.value.bio;
     model.value.bio = suggestion.value;
     suggestion.value = null;
 }

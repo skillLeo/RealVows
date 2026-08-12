@@ -37,6 +37,29 @@ class SaveProfileStep
             if ($profileData !== []) {
                 $profile->fill($profileData);
             }
+
+            /*
+             * ⚠️ THE MEMBER'S OWN WORDS, KEPT WHEN THEY ACCEPT A REWRITE.
+             *
+             * `bio_original` existed as a column for a session with nothing
+             * writing to it, which is worse than not having it: the audit trail
+             * looked present and was empty. If a member is ever accused of
+             * misrepresenting themselves, the only fair question is what THEY
+             * said, and an accepted rewrite is otherwise indistinguishable from
+             * their own typing.
+             *
+             * ⚠️ IT IS WRITTEN ONCE AND NEVER OVERWRITTEN. A member who accepts
+             * a rewrite, edits it, and saves again must not have their original
+             * replaced by the rewrite they have since edited — that would
+             * quietly record the machine's words as theirs.
+             */
+            if (($profileData['bio_original'] ?? null) && ! $profile->getOriginal('bio_original')) {
+                $profile->bio_rewritten_at = now();
+                $profile->bio_rewritten_by = 'profile_writer';
+            } elseif (array_key_exists('bio_original', $profileData)) {
+                // Do not let a later save clear or replace what they typed.
+                $profile->bio_original = $profile->getOriginal('bio_original') ?: $profileData['bio_original'];
+            }
             /*
              * ⚠️ DATE OF BIRTH IS NOW ONLY AN AGE.
              *

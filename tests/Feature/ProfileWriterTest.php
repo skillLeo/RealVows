@@ -188,4 +188,57 @@ class ProfileWriterTest extends TestCase
         $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('profiles', 'bio_original'));
         $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('profiles', 'bio_rewritten_by'));
     }
+
+    /**
+     * ⚠️ A COLUMN NOTHING WRITES TO IS WORSE THAN NO COLUMN.
+     *
+     * `bio_original` existed for a session with no save path populating it. The
+     * audit trail looked present and was empty, which is the shape that answers
+     * "can we prove what she typed?" with a confident yes right up until
+     * somebody checks.
+     */
+    public function test_accepting_a_rewrite_records_what_the_member_typed(): void
+    {
+        $member = $this->member();
+
+        $this->actingAs($member)->putJson('/profile/values', [
+            'bio' => 'I am a teacher in Kingston and I enjoy cooking.',
+            'bio_original' => 'i am teacher in Kingston. i like cooking.',
+        ])->assertOk();
+
+        $profile = $member->profile->fresh();
+
+        $this->assertSame('i am teacher in Kingston. i like cooking.', $profile->bio_original);
+        $this->assertSame('profile_writer', $profile->bio_rewritten_by);
+        $this->assertNotNull($profile->bio_rewritten_at);
+    }
+
+    /**
+     * ⚠️ WRITTEN ONCE, NEVER OVERWRITTEN.
+     *
+     * A member who accepts a rewrite, edits it, and saves again must not have
+     * their original replaced by the rewrite they have since edited. That would
+     * quietly record the machine's words as theirs, which is the exact opposite
+     * of what the column is for.
+     */
+    public function test_a_later_save_cannot_replace_the_original(): void
+    {
+        $member = $this->member();
+
+        $this->actingAs($member)->putJson('/profile/values', [
+            'bio' => 'A tidied version.',
+            'bio_original' => 'the words she actually typed',
+        ])->assertOk();
+
+        $this->actingAs($member)->putJson('/profile/values', [
+            'bio' => 'A tidied version, edited a bit.',
+            'bio_original' => 'A tidied version.',
+        ])->assertOk();
+
+        $this->assertSame(
+            'the words she actually typed',
+            $member->profile->fresh()->bio_original,
+            'A second save replaced the member\'s own words with a rewrite.'
+        );
+    }
 }

@@ -220,6 +220,22 @@ const logout = () => router.post('/logout');
                 </div>
             </BaseCard>
 
+            <!-- ⚠️ Support is on the account page rather than the tab bar, same
+                 argument as the trusted-contact card: four tabs, never five.
+                 Without a link it is reachable only by typing the URL, which is
+                 how a support route goes unused by the people who need it. -->
+            <BaseCard>
+                <div class="rv-stack" style="gap: 16px">
+                    <span class="rv-label rv-label--brass">{{ $t('support.heading') }}</span>
+                    <p class="rv-body">{{ $t('support.lead') }}</p>
+                    <div class="rv-actions">
+                        <BaseButton href="/support" variant="secondary">
+                            {{ $t('support.heading') }}
+                        </BaseButton>
+                    </div>
+                </div>
+            </BaseCard>
+
             <BaseCard v-if="adminLinks.length" accent>
                 <div class="rv-stack" style="gap: 16px">
                     <span class="rv-label rv-label--brass">Administration</span>

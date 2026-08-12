@@ -12,6 +12,7 @@ const props = defineProps({
     state: { type: Object, required: true },
     relationships: { type: Array, required: true },
     current: { type: Object, default: null },
+    offerSupport: { type: Boolean, default: false },
 });
 
 const page = usePage();
@@ -60,6 +61,21 @@ function submit() {
                  stops with no visible reason reads as the product being
                  broken, and nobody can chase a person they were never told
                  they were waiting on. -->
+            <!-- ⚠️ B9. She cannot see the decisions at all, so she has no way
+                 of knowing this route exists. Telling her is the whole point;
+                 waiting for her to ask is waiting for somebody to complain
+                 about a process nobody showed her. -->
+            <BaseCard v-if="offerSupport" accent>
+                <div class="rv-stack" style="gap: 16px">
+                    <p class="rv-body">{{ $t('support.unfair_prompt') }}</p>
+                    <div class="rv-actions">
+                        <BaseButton href="/support" variant="secondary">
+                            {{ $t('support.heading') }}
+                        </BaseButton>
+                    </div>
+                </div>
+            </BaseCard>
+
             <BaseCard v-if="state.message">
                 <div class="rv-stack" style="gap: 8px">
                     <span class="rv-label rv-label--brass">{{ $t('trusted_contact.where_this_stands') }}</span>

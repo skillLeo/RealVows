@@ -4122,3 +4122,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 @media (prefers-reduced-motion: reduce) {
   .rv-faq__q::after { transition: none; }
 }
+
+/* The profile writer's two-column comparison. */
+.rv-writer {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  padding: 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+@media (min-width: 768px) {
+  .rv-writer { grid-template-columns: 1fr 1fr; }
+  .rv-writer__actions { grid-column: 1 / -1; }
+}
+
+.rv-writer__col { display: flex; flex-direction: column; gap: 8px; }
+.rv-writer__col--suggested { border-left: 2px solid var(--brass); padding-left: 16px; }

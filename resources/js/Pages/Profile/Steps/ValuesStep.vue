@@ -1,5 +1,5 @@
 <script setup>
-import { computed, useId } from 'vue';
+import { computed, ref, useId } from 'vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseCheckbox from '@/Components/BaseCheckbox.vue';
 import SegmentedControl from '@/Components/SegmentedControl.vue';
@@ -8,6 +8,8 @@ import TagInput from '@/Components/TagInput.vue';
 import ValueRanker from '@/Components/ValueRanker.vue';
 import PersonalityScale from '@/Components/PersonalityScale.vue';
 import StepShell from './StepShell.vue';
+import BaseButton from '@/Components/BaseButton.vue';
+import { usePage } from '@inertiajs/vue3';
 
 const model = defineModel({ type: Object, required: true });
 
@@ -17,6 +19,65 @@ const props = defineProps({
 });
 
 const bioId = useId();
+const page = usePage();
+
+/*
+ * ⚠️ THE BUTTON IS ABSENT WHEN NO KEY IS CONFIGURED, NOT DISABLED.
+ *
+ * A greyed-out "tidy my English" advertises a feature the member cannot have
+ * and invites them to ask why. With no key it simply does not exist.
+ */
+const writerEnabled = computed(() => page.props.writerEnabled === true);
+
+const suggestion = ref(null);
+const writing = ref(false);
+const writerNote = ref(null);
+
+async function suggest() {
+    writing.value = true;
+    suggestion.value = null;
+    writerNote.value = null;
+
+    try {
+        const response = await fetch('/profile/rewrite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+            body: JSON.stringify({ bio: model.value.bio ?? '' }),
+        });
+
+        const data = await response.json();
+
+        /*
+         * ⚠️ A NULL REWRITE IS NOT AN ERROR. The service discards anything that
+         * invented a fact, and the member is told their own words are fine
+         * rather than that a model misbehaved.
+         */
+        if (!data.rewrite) {
+            writerNote.value = data.message ?? null;
+            return;
+        }
+
+        suggestion.value = data.rewrite;
+    } catch {
+        writerNote.value = null;
+    } finally {
+        writing.value = false;
+    }
+}
+
+/*
+ * ⚠️ ACCEPTING ONLY CHANGES THE FIELD. It is saved by the ordinary profile
+ * save, like anything else the member typed, so nothing is written because a
+ * button was pressed.
+ */
+function accept() {
+    model.value.bio = suggestion.value;
+    suggestion.value = null;
+}
 
 const bioWords = computed(() => {
     const text = (model.value.bio ?? '').trim();
@@ -152,6 +213,44 @@ function setScale(key, value) {
                     <span class="rv-help">
                         {{ $t('profile.prompts_are_hints') }}
                     </span>
+
+                    <!-- ⚠️ Absent, not disabled, when no key is configured. -->
+                    <div v-if="writerEnabled && bioWords >= 12" class="rv-stack" style="gap: 12px">
+                        <div class="rv-actions">
+                            <BaseButton
+                                variant="secondary"
+                                :disabled="writing"
+                                @click="suggest"
+                            >
+                                {{ writing ? $t('writer.working') : $t('writer.offer') }}
+                            </BaseButton>
+                        </div>
+                        <span class="rv-help">{{ $t('writer.promise') }}</span>
+                    </div>
+
+                    <p v-if="writerNote" class="rv-help">{{ writerNote }}</p>
+
+                    <!-- ⚠️ BOTH VERSIONS, SIDE BY SIDE. The member chooses; the
+                         rewrite never replaces anything on its own. -->
+                    <div v-if="suggestion" class="rv-writer">
+                        <div class="rv-writer__col">
+                            <span class="rv-label">{{ $t('writer.yours') }}</span>
+                            <p class="rv-body">{{ model.bio }}</p>
+                        </div>
+                        <div class="rv-writer__col rv-writer__col--suggested">
+                            <span class="rv-label rv-label--brass">{{ $t('writer.ours') }}</span>
+                            <p class="rv-body">{{ suggestion }}</p>
+                        </div>
+
+                        <div class="rv-actions rv-writer__actions">
+                            <BaseButton variant="primary" @click="accept">
+                                {{ $t('writer.use_theirs') }}
+                            </BaseButton>
+                            <BaseButton variant="secondary" @click="suggestion = null">
+                                {{ $t('writer.keep_mine') }}
+                            </BaseButton>
+                        </div>
+                    </div>
                 </div>
 
                 <TagInput

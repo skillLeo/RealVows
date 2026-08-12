@@ -46,6 +46,9 @@ class TrustedContactController extends Controller
 
         return Inertia::render('TrustedContact/Show', [
             'required' => $this->policy->isRequiredFor($member->profile?->gender),
+
+            // ⚠️ B9. Five declines with no reason is a pattern she cannot see.
+            'offerSupport' => $this->gate->shouldOfferSupport($member),
             'state' => $this->gate->stateFor($member),
             'relationships' => collect(Guardian::RELATIONSHIPS)
                 // `appointed` is set by staff on the no-contact path, never

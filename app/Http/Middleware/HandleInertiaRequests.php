@@ -96,6 +96,19 @@ class HandleInertiaRequests extends Middleware
                 ? app(\App\Support\AiProviderStatus::class)->forDisplay()
                 : null,
 
+            /*
+             * ⚠️ A BARE BOOLEAN FOR MEMBERS, SEPARATE FROM THE STAFF BANNER.
+             *
+             * The banner above carries the provider name and model, which is
+             * operational detail a member has no use for. This is only "does
+             * the button exist", which they need in order for the button to
+             * exist. Two props rather than one, because the alternative is
+             * either members learning which model we use or the button never
+             * appearing.
+             */
+            'writerEnabled' => fn () => $user !== null
+                && app(\App\Services\Ai\ProfileWriter::class)->isEnabled(),
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

@@ -341,6 +341,18 @@ return [
         'open_heading' => 'Open with us',
     ],
 
+    'writer' => [
+        'offer' => 'Tidy up my English',
+        'working' => 'Reading what you wrote',
+        'heading' => 'Two versions',
+        'yours' => 'What you wrote',
+        'ours' => 'A tidier version',
+        'keep_mine' => 'Keep mine',
+        'use_theirs' => 'Use this one',
+        'nothing' => 'We could not improve on what you wrote. Your version is good as it is.',
+        'promise' => 'It only tidies the English. It never adds anything you did not say.',
+    ],
+
     'demo' => [
         'banner' => 'This is not the live platform. Every member shown here is invented, and the sign-in buttons are open to anyone.',
     ],

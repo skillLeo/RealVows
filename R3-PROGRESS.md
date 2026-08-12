@@ -113,9 +113,11 @@ not simply returning nothing.
   `TrustedContact/Show` does not yet render the offer or a way to raise it);
   no link from admin to an individual message thread — `/admin/messages/{user}`
   is reachable only by typing it
-- **Part D** — the member-facing accept/reject UI in the profile builder (the
-  endpoint returns both versions; nothing renders them yet), and writing
-  `bio_original` on save when a rewrite is accepted
+- **Part D** — writing `bio_original` on save when a rewrite is accepted (the
+  column exists; the save path does not populate it yet). The accept/reject UI
+  is built: both versions side by side, absent rather than disabled when no key
+  is configured, and accepting only changes the field so the ordinary profile
+  save is still what writes it.
 - ~~**Part F** — public copy reduction~~ **done for the marketing pages.**
   Verification steps, message-content descriptions and the safety-feature list
   are out of home, how-it-works, about and the shared legal preamble. A whole
@@ -159,8 +161,9 @@ not simply returning nothing.
   decline pattern is present. The admin inbox sorts unfair-contact first and
   then oldest, and replies go through the existing message thread rather than a
   second reply box without the relay prohibition on it.
-  **Not built:** tests for the support flow itself, and no nav link to
-  `/support` from inside the product.
+  `SupportFlowTest` 7/7, including that a trusted contact cannot raise the
+  route that exists to challenge them, and that unfair-contact tickets sort
+  above an older billing question. Linked from `/account`.
 
 ## Carried debt
 
@@ -189,7 +192,7 @@ not simply returning nothing.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 633 tests, 624 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean)
+- **Suite: 640 tests, 631 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean)
 - **All ten R3 parts have been started; A, C, D, E, F, G, I are complete** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 

@@ -41,7 +41,20 @@ class OutboundLinkTest extends TestCase
      * turns into an ignore-list.
      */
     private const ALLOWED = [
-        // The live site.
+        /*
+         * ⚠️ THE DOMAIN THIS GUARD WAS WRITTEN ABOUT IS NOW OURS.
+         *
+         * `realvows.com` appeared on the live marketing page inside a mock-up,
+         * pointing at a domain nobody involved owned, and this test exists
+         * because of it. The client has since bought it. That is the best
+         * possible outcome and it is also exactly the change this list was
+         * designed to absorb: one line, with a reason.
+         */
+        'realvows.com',
+        'www.realvows.com',
+
+        // The staging host. Six WhatsApp templates still name it and they are
+        // in review with Meta, so it stays resolvable until they are resubmitted.
         'realvows.skillleo.com',
 
         // The XML namespace on inline SVG. Declared, never fetched, never
@@ -136,13 +149,24 @@ class OutboundLinkTest extends TestCase
      */
     public function test_the_reader_sees_a_stray_host_and_leaves_our_own_alone(): void
     {
-        $planted = '<span class="rv-arrives__url">realvows.com/m/8f2a…</span>';
+        /*
+         * ⚠️ THE PLANTED HOST CHANGED, AND THE CONTROL IS WHY WE NOTICED.
+         *
+         * This used to plant `realvows.com`, the domain that actually shipped
+         * on the live page. The client has since bought it, so it moved to the
+         * allow-list and the control immediately failed: the thing it plants
+         * was no longer catchable. That is precisely the job. A control that
+         * had quietly kept passing would have been vouching for nothing.
+         *
+         * Replanted with a near-miss nobody here owns.
+         */
+        $planted = '<span class="rv-arrives__url">realvows.net/m/8f2a…</span>';
         $clean = '<a href="https://realvows.skillleo.com/dashboard">Open</a>'
             .'<svg xmlns="http://www.w3.org/2000/svg"></svg>'
             .'<input placeholder="you@example.com">';
 
         $this->assertSame(
-            ['realvows.com'],
+            ['realvows.net'],
             $this->strayHosts($planted),
             'The reader cannot see the host that actually shipped.'
         );

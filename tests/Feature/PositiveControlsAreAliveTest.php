@@ -178,9 +178,9 @@ class PositiveControlsAreAliveTest extends TestCase
             'a host outside the allow-list' => [
                 'reader' => fn (string $t) => array_values(array_filter(
                     Scanners::hosts($t),
-                    fn (string $h) => ! in_array($h, ['realvows.skillleo.com', 'www.w3.org', 'example.com'], true),
+                    fn (string $h) => ! in_array($h, ['realvows.com', 'realvows.skillleo.com', 'www.w3.org', 'example.com'], true),
                 )),
-                'planted' => '<span class="rv-arrives__url">realvows.com/m/8f2a…</span>',
+                'planted' => '<span class="rv-arrives__url">realvows.net/m/8f2a…</span>',
                 'clean' => '<a href="https://realvows.skillleo.com/dashboard">Open</a>',
             ],
         ];

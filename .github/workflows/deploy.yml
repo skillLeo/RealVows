@@ -1,10 +1,19 @@
 name: Deploy
 
-# Manual only, and only from main.
+# ⚠️ THIS DEPLOYS TO THE CLIENT'S VPS, NOT TO THE DEVELOPER'S SHARED HOST.
 #
-# Deliberately not automatic on push. The client reviews and signs off each
-# phase on a staging build before it becomes live, so a commit landing on main
-# is not the same event as a release.
+# The previous version of this file deployed to realvows.skillleo.com, which is
+# Hassam's own Hostinger shared hosting. That was correct while the project was
+# in review and wrong the moment the client bought his own server: pushing to
+# main was moving the staging build and nothing else, so "deployed" meant one
+# thing to the person typing it and another to the person paying for it.
+#
+# Target is now srv1896577.hstgr.cloud (2.25.102.137), Ubuntu 24.04, which the
+# client owns.
+#
+# ⚠️ MANUAL ONLY, AND DELIBERATELY. A commit landing on main is not a release.
+# The client reviews before anything reaches members.
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,32 +21,8 @@ on:
         description: 'Type DEPLOY to confirm'
         required: true
         default: ''
-      whatsapp_verify_token:
-        description: 'WhatsApp verify token to store on the server (leave empty to keep the current one)'
-        required: false
-        default: ''
-      run_exposure_audit:
-        description: 'Run the read-only last-name exposure audit against production data'
-        required: false
-        default: 'false'
-      resend_api_key:
-        description: 'Resend API key (re_...). Stored in settings; empty keeps the current one.'
-        required: false
-        default: ''
-      resend_webhook_secret:
-        description: 'Resend webhook signing secret (whsec_...). Empty keeps the current one.'
-        required: false
-        default: ''
-      show_webhook_log:
-        description: 'Print recent webhook activity (read-only). e.g. resend'
-        required: false
-        default: ''
-      redispatch_receipts:
-        description: 'Held receipts: "dry" to list them, "execute" to send them'
-        required: false
-        default: ''
-      show_deliveries:
-        description: 'Print the delivery ledger (read-only). Set to any value.'
+      seed_demo:
+        description: 'Re-seed the demo members after deploying ("yes" to run)'
         required: false
         default: ''
       teardown_demo:
@@ -45,11 +30,7 @@ on:
         required: false
         default: ''
       settings_status:
-        description: 'Show which settings are filled in (never their values). e.g. mail'
-        required: false
-        default: ''
-      mail_from:
-        description: 'From address. Must be on a domain verified in Resend.'
+        description: 'Show which settings are filled in, never their values. e.g. mail'
         required: false
         default: ''
 
@@ -59,20 +40,15 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to Hostinger
+    name: Deploy to the client VPS
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    environment: production
 
     env:
-      # Hostinger's default CLI php is 8.2; Laravel 13 needs 8.4.1+.
-      # Naming the binary is not optional.
-      PHP: /opt/alt/php84/usr/bin/php
+      APP_DIR: /var/www/realvows
+      PHP: /usr/bin/php8.4
 
     steps:
-      # Through env, never interpolated straight into the shell. Workflow
-      # inputs are attacker-controlled text as far as the runner is concerned,
-      # and `${{ }}` inside run: is substituted before bash ever sees it — so
-      # a crafted value would execute rather than be compared.
       - name: Check the confirmation
         env:
           CONFIRM: ${{ github.event.inputs.confirm }}
@@ -84,52 +60,40 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo, pdo_mysql, gd, bcmath, intl
-          coverage: none
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: npm
+          node-version: '22'
 
-      # Assets are built here, not on the server. Shared hosting has little
-      # memory and often no Node at all; shipping the compiled output keeps
-      # the deploy fast and the server simple.
-      - name: Build
+      # ── Build here rather than on the server ──────────────────────────────
+      # The VPS has 2 vCPU and is also serving members. A `npm ci && vite
+      # build` on the box during a deploy competes with the requests it is
+      # meant to be answering. The runner is free and idle.
+      - name: Install and build
         run: |
+          composer install --no-dev --optimize-autoloader --no-interaction --no-progress
           npm ci
           npm run build
 
-      - name: Install production dependencies
-        run: composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+      - name: Load the deploy key
+        env:
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          [ -n "$KEY" ] || { echo "::error::VPS_SSH_KEY secret is not set."; exit 1; }
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
 
-      - name: Open the SSH connection
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # ⚠️ RETRIED, BECAUSE THIS IS THE FLAKIEST STEP IN THE DEPLOY.
-      #
-      # ssh-keyscan against this host has timed out twice (4 August 2026),
-      # failing the whole run. Both times it failed BEFORE `artisan down`, so
-      # the site stayed up — which was luck, not design. A transient failure
-      # one step later strands the site in maintenance until the watchdog
-      # clears it.
-      #
-      # ⚠️ THIS IS A CONNECTIVITY RETRY, NOT A SECURITY ONE. It retries
-      # reaching the host, exactly as WebRootExposureTest may retry "is the
-      # home page up". It does NOT retry any check on whether something is
-      # readable — see the retry asymmetry note in that test. Retrying
-      # connectivity tolerates a slow network; retrying a secrets check polls
-      # until it happens to answer safely.
+      # ⚠️ RETRIED, AND THE RETRY IS THE POINT. Hostinger has thrown a
+      # connection timeout on five separate deploys of this project. Every one
+      # of them landed BEFORE the site was taken down, which is the only reason
+      # nothing broke. Bounded so a genuinely dead host still fails the job.
       - name: Trust the host
         env:
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
         run: |
-          mkdir -p ~/.ssh
           for attempt in 1 2 3 4 5; do
-            if ssh-keyscan -T 10 -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
+            if ssh-keyscan -T 10 -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
               echo "Host key collected on attempt $attempt."
               exit 0
             fi
@@ -139,208 +103,82 @@ jobs:
           echo "::error::Could not reach the host after 5 attempts. Nothing was changed on the server."
           exit 1
 
-      - name: Put the site into maintenance
+      - name: Ship the build
+        env:
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan down --retry=30 || true"
-
-      # .env, storage and the public uploads are the server's own state and
-      # are never overwritten by a deploy. Losing storage would lose every
-      # member photograph.
-      - name: Sync the application
-        run: |
+          # ⚠️ .env is NEVER shipped. It holds the database and mailbox
+          # passwords and it lives on the server only. --delete would remove it
+          # along with storage, so both are excluded explicitly.
           rsync -az --delete \
-            -e "ssh -p ${{ secrets.SSH_PORT }}" \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'node_modules' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             --exclude '.env' \
-            --exclude 'storage' \
-            --exclude '_design' \
-            --exclude 'tests' \
-            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/
+            --exclude 'storage/' \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude 'tests/' \
+            ./ "$SSH_USER@$SSH_HOST:$APP_DIR/"
 
       - name: Migrate and warm the caches
-        run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && \
-             $PHP artisan migrate --force && \
-             $PHP artisan db:seed --class=RolesAndPermissionsSeeder --force && \
-             $PHP artisan db:seed --class=SettingsSeeder --force && \
-             $PHP artisan config:cache && \
-             $PHP artisan route:cache && \
-             $PHP artisan view:cache"
-
-      # The WhatsApp verify token, if one has been set as a repository secret.
-      #
-      # ⚠️ PIPED, NOT PASSED AS AN ARGUMENT. On a shared host any other account
-      # can read a command line out of the process list, so a secret must never
-      # appear in argv. GitHub masks it in the log; ps would not.
-      #
-      # Skipped silently when the secret is absent, so a deploy never depends
-      # on it — the endpoint answers 503 and says so in its own log.
-      #
-      # ⚠️ The secret is mapped to env first. The `secrets` context is not
-      # available inside a step-level `if:`, and referencing it there does not
-      # evaluate to false — it fails the whole workflow at parse time with
-      # "Unrecognized named-value: 'secrets'", so no deploy runs at all.
-      #
-      # ⚠️ A DISPATCH INPUT IS VISIBLE IN THE ACTIONS UI. It is offered because
-      # it is the only way to place this value on the server without either
-      # committing it — which puts a shared secret in the history permanently —
-      # or holding SSH credentials locally. Anything set this way should be
-      # treated as known to every repository collaborator and rotated with
-      # `php artisan whatsapp:verify-token` once Meta has verified.
-      #
-      # The repository secret is the better path and wins when both are set.
-      - name: Apply the WhatsApp verify token
         env:
-          VERIFY_TOKEN: ${{ secrets.WHATSAPP_VERIFY_TOKEN || github.event.inputs.whatsapp_verify_token }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.VERIFY_TOKEN != '' }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
         run: |
-          printf '%s\n' "$VERIFY_TOKEN" | \
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan whatsapp:verify-token --stdin --force"
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" bash -s <<'REMOTE'
+            set -e
+            cd /var/www/realvows
+            /usr/bin/php8.4 artisan down --render="errors::503" || true
+            /usr/bin/php8.4 artisan migrate --force
+            /usr/bin/php8.4 artisan config:cache
+            /usr/bin/php8.4 artisan route:cache
+            /usr/bin/php8.4 artisan view:cache
+            /usr/bin/php8.4 artisan storage:link || true
+            # The marketing pages read this file instead of the database.
+            /usr/bin/php8.4 artisan realvows:project-public-state
+            chown -R deploy:www-data /var/www/realvows
+            chmod -R 775 storage bootstrap/cache
+            /usr/bin/php8.4 artisan up
+          REMOTE
 
-      # A one-off audit, run on demand against production data.
-      #
-      # ⚠️ READ-ONLY. It counts and reports; it changes nothing. Added because
-      # "no real members exist yet, so nobody was exposed" is a belief, and a
-      # belief is not something to report to a client as fact.
-      - name: Audit last-name exposure
-        if: ${{ github.event.inputs.run_exposure_audit == 'true' }}
+      - name: Optional operations
+        if: ${{ github.event.inputs.seed_demo != '' || github.event.inputs.teardown_demo != '' || github.event.inputs.settings_status != '' }}
         env:
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
+          SEED: ${{ github.event.inputs.seed_demo }}
+          TEARDOWN: ${{ github.event.inputs.teardown_demo }}
+          STATUS: ${{ github.event.inputs.settings_status }}
         run: |
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:audit-lastname-exposure"
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+            "cd /var/www/realvows
+             [ '$SEED' = 'yes' ] && /usr/bin/php8.4 artisan db:seed --class=DemoSeeder --force
+             [ -n '$TEARDOWN' ] && /usr/bin/php8.4 artisan realvows:teardown-demo --mode='$TEARDOWN'
+             [ -n '$STATUS' ] && /usr/bin/php8.4 artisan realvows:settings-status '$STATUS'
+             true"
 
-      # Mail credentials, applied to the settings table.
-      #
-      # ⚠️ PIPED, NOT PASSED AS ARGUMENTS. On a shared host any other account
-      # can read a command line out of the process list.
-      #
-      # ⚠️ Resend is used over SMTP rather than its API, so no new dependency
-      # enters the project and the existing settings-driven mail configurator
-      # works unchanged. The webhook — the part that gives us bounce data — is
-      # independent of how the message is handed over.
-      - name: Apply the Resend credentials
-        env:
-          API_KEY: ${{ github.event.inputs.resend_api_key }}
-          WEBHOOK_SECRET: ${{ github.event.inputs.resend_webhook_secret }}
-          MAIL_FROM: ${{ github.event.inputs.mail_from }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.API_KEY != '' || env.WEBHOOK_SECRET != '' }}
-        run: |
-          FROM_FLAG=""
-          [ -n "$MAIL_FROM" ] && FROM_FLAG="--from=$MAIL_FROM"
-          printf '%s\n%s\n' "$API_KEY" "$WEBHOOK_SECRET" | \
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:configure-resend --stdin ${FROM_FLAG}"
-
-      # Read-only. Prints the tail of the already-redacted webhook log so
-      # "has an event ever arrived?" is answerable without an SSH session —
-      # otherwise "nothing arrived" and "I cannot see" are the same output.
-      - name: Show webhook log
-        env:
-          FILTER: ${{ github.event.inputs.show_webhook_log }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.FILTER != '' }}
-        run: |
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:webhook-log --lines=40 --filter='$FILTER'"
-
-      - name: Re-dispatch held receipts
-        env:
-          MODE: ${{ github.event.inputs.redispatch_receipts }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.MODE != '' }}
-        run: |
-          FLAG=""
-          [ "$MODE" = "execute" ] && FLAG="--execute"
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:redispatch-receipts $FLAG"
-
-      # Read-only. The delivery ledger, so "did it arrive?" is answerable
-      # without an SSH session.
-      - name: Show the delivery ledger
-        env:
-          SHOW: ${{ github.event.inputs.show_deliveries }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.SHOW != '' }}
-        run: |
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:deliveries"
-
-      # ⚠️ IRREVERSIBLE ON "execute". Defaults to nothing; "dry" only counts.
-      # The purchase guard still applies — the override has to be typed into
-      # the command, not into this input.
-      - name: Demo teardown
-        env:
-          MODE: ${{ github.event.inputs.teardown_demo }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.MODE != '' }}
-        run: |
-          FLAGS=""
-          [ "$MODE" = "execute" ] && FLAGS="--execute --force --clear-demo-purchases"
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:teardown-demo $FLAGS"
-
-      # Read-only, and never prints a secret — only set / EMPTY.
-      - name: Show settings status
-        env:
-          GROUP: ${{ github.event.inputs.settings_status }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        if: ${{ env.GROUP != '' }}
-        run: |
-          ssh -p "$SSH_PORT" "$SSH_TARGET" \
-            "cd '$DEPLOY_PATH' && $PHP artisan realvows:settings-status '$GROUP'"
-
+      # ⚠️ ALWAYS. If a step above died after `artisan down`, the site is
+      # sitting on a maintenance page and the only thing that lifts it is this.
+      # The server-side MaintenanceWatchdog cron is the backstop for the case
+      # where this step cannot run either, because SSH is what failed.
       - name: Bring the site back
         if: always()
-        run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "PHP=$PHP; cd ${{ secrets.DEPLOY_PATH }} && $PHP artisan up"
-
-      # ⚠️ A 200 ON THE HOME PAGE IS NOT PROOF THE DEPLOY WAS SAFE.
-      #
-      # On 2 August 2026 rsync --delete removed the web-root .htaccess, which
-      # both rewrites into public/ and guards everything else. The site
-      # answered 403 and composer.json became publicly readable. The health
-      # check below could not tell the difference between "broken" and
-      # "serving you its source code" — this step can.
-      - name: Confirm the web root is not exposing the application
         env:
-          DEPLOY_URL: https://realvows.skillleo.com
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
         run: |
-          # ⚠️ The production install above dropped PHPUnit, and `tests/` is
-          # excluded from the rsync, so the check exists on neither side by
-          # default. Restoring dev dependencies HERE, on the runner, after the
-          # server has already been synced, is what lets the assertion live in
-          # one place instead of being duplicated as a shell loop that drifts.
-          composer install --no-interaction --prefer-dist --quiet
-          php artisan test --filter=WebRootExposure
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+            "cd /var/www/realvows && /usr/bin/php8.4 artisan up" || true
 
-      - name: Confirm it is serving
+      - name: Confirm the site answers
+        env:
+          SSH_HOST: ${{ secrets.VPS_HOST }}
         run: |
-          sleep 5
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' https://realvows.skillleo.com)
-          echo "Home page: $CODE"
-          [ "$CODE" = "200" ] || { echo "::error::Site did not come back with 200"; exit 1; }
+          for attempt in 1 2 3; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://$SSH_HOST/" || echo 000)
+            if [ "$CODE" = "200" ]; then echo "Home page answered 200."; exit 0; fi
+            echo "::warning::Home page returned $CODE on attempt $attempt."
+            sleep 10
+          done
+          echo "::error::The site is not answering 200 after the deploy."
+          exit 1

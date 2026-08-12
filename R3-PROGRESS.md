@@ -45,16 +45,15 @@
   or request an appointed contact (404s while the requirement is off),
   `/trusted-contact/accept/{token}` public so an invited person can create
   their account. `TrustedContactInvitation` mailable plus HTML and text views.
-  `TrustedContactFlowTest` 8/8.
+  `TrustedContactFlowTest` 8/8. Both Vue pages are written, compiled and in the
+  manifest; every string went through the copy deck under `trusted_contact`.
 
 ## Not started
 
 - **Part B**: joint-photo upload with the generated code; no-guardian admin
   queue; 3/7/14 reminders; unfair-guardian path; admin messaging with the relay
-  prohibition in the UI. The two Vue pages (`TrustedContact/Show` and
-  `TrustedContact/Accept`) are referenced by the controllers and **not yet
-  written** — the routes and tests pass because Inertia does not resolve the
-  component server-side.
+  prohibition in the UI. Nothing links to `/trusted-contact` from the product
+  navigation yet — the pages exist and are reachable only by typing the URL.
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test

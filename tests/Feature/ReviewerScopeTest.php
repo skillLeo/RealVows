@@ -210,16 +210,35 @@ class ReviewerScopeTest extends TestCase
         }
     }
 
-    public function test_non_binary_members_are_reviewed_by_the_female_reviewer(): void
+    /**
+     * ⚠️ NEITHER REVIEWER SEES A NON-BINARY MEMBER, BY DESIGN.
+     *
+     * The gender enum permits it and the profile request validates it, so a
+     * member can choose it. Nobody has yet. The first version of this test
+     * asserted they were reviewed by the female reviewer, which was my
+     * assumption rather than anybody's decision.
+     *
+     * On a platform whose premise is that a member chooses who may look at
+     * their photographs, the code must not guess. These records queue for the
+     * owner instead.
+     */
+    public function test_neither_reviewer_sees_a_non_binary_member(): void
     {
         $verification = $this->memberWithPhotos('non_binary');
 
-        $this->actingAs($this->reviewer(ReviewerScope::FEMALE))
+        foreach ([ReviewerScope::FEMALE, ReviewerScope::MALE] as $role) {
+            $this->actingAs($this->reviewer($role))
+                ->get("/admin/verifications/{$verification->id}")
+                ->assertNotFound();
+        }
+
+        // ⚠️ CONTROL: and it is genuinely reachable by the owner, so the two
+        // refusals above mean "queued for super admin" rather than "lost".
+        $owner = User::factory()->create();
+        $owner->assignRole('super_admin');
+
+        $this->actingAs($owner->fresh())
             ->get("/admin/verifications/{$verification->id}")
             ->assertOk();
-
-        $this->actingAs($this->reviewer(ReviewerScope::MALE))
-            ->get("/admin/verifications/{$verification->id}")
-            ->assertNotFound();
     }
 }

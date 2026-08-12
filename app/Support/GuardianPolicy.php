@@ -48,13 +48,45 @@ class GuardianPolicy
     public function __construct(private readonly SettingsService $settings) {}
 
     /**
-     * ⚠️ UNREADABLE SETTINGS MEAN `off`, NOT `required_all`.
+     * ══════════════════════════════════════════════════════════════════════
+     * ⚠️ DO NOT "HARDEN" THIS. IT FAILS OPEN ON PURPOSE.
+     * ══════════════════════════════════════════════════════════════════════
      *
-     * Failing closed sounds right and is wrong here. Defaulting to required
-     * during a database fault would lock every member out of the matching pool
-     * until somebody noticed, which is a worse outcome than the system being
-     * briefly less strict than intended. The failure is logged so it is not
-     * silent.
+     * An unreadable setting returns `off`, which means the trusted-contact
+     * requirement is not enforced. That is fail-OPEN on what is fundamentally
+     * a compliance control, and it will look like a bug to the next person who
+     * reads it. It is not. It is the considered answer and the reasoning is
+     * here so nobody has to reconstruct it under pressure.
+     *
+     * The tempting change is `return self::REQUIRED_ALL` in the catch block:
+     * if we cannot tell whether the requirement applies, assume it does. That
+     * is the right instinct for most controls and the wrong one for this one.
+     *
+     * ── WHAT FAILING CLOSED WOULD ACTUALLY DO ─────────────────────────────
+     *
+     * This is read on the path that decides whether a member enters the
+     * matching pool. A database fault, a settings table mid-migration, a cache
+     * driver hiccup — any of them would make every member on the platform
+     * suddenly require a verified trusted contact they have not been asked for
+     * and cannot supply in the moment. Nobody would be matched. Nobody would
+     * see an error, because from the member's side the product would simply
+     * have gone quiet. It would be discovered days later, and every
+     * introduction not made in between is gone.
+     *
+     * Failing open costs the opposite: for the duration of the fault, members
+     * enter the pool who should have been gated. That is recoverable. The
+     * gate is re-applied the moment settings are readable, the affected
+     * accounts are identifiable, and nothing irreversible has happened —
+     * introductions still require the guardian's approval at the other two
+     * gates in B5, which read the same setting and will hold once it is back.
+     *
+     * One failure mode is silent and permanent; the other is loud, brief and
+     * reversible. That is the whole argument.
+     *
+     * ⚠️ AND IT IS LOGGED AT WARNING, NOT SWALLOWED. A control that quietly
+     * stops applying is indistinguishable from one that was never configured.
+     * If this line appears in the log, the requirement is not being enforced
+     * right now and somebody needs to know today rather than at the next audit.
      */
     public function level(): string
     {

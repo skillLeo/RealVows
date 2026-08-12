@@ -41,18 +41,21 @@
 
 ## Carried debt
 
-- `DO NOT "HARDEN" THIS` note for the `guardian_requirement` fail-open. A future
-  reader will see fail-open on a compliance setting and try to invert it. The
-  argument: failing closed would lock every member out of the matching pool
-  during a database fault, which is worse than being briefly less strict.
-- **Non-binary reviewer branch** — currently routes `non_binary` to the female
-  reviewer, which is my assumption and not a decision anybody made. Resolve from
-  the real gender enum: if it only permits man/woman, delete the branch rather
-  than leave dead code implying a policy. If it permits more, route those records
-  to the super-admin queue instead of assigning by assumption.
-- **False-range sweep** — `0[2-9]` reads as a range and is a set. It hid the
-  10th to the 31st of a month from `MigrationReversibilityTest`. Sweep every
-  regex, glob and date pattern of that shape.
+*(cleared 13 Aug 2026 — kept here as the record of what was decided)*
+
+- ~~`DO NOT "HARDEN" THIS` note for `guardian_requirement`~~ — written into
+  `GuardianPolicy::level()`. One failure mode is silent and permanent (nobody
+  matched, discovered days later); the other is loud, brief and reversible.
+- ~~Non-binary reviewer branch~~ — the enum permits `non_binary` and the profile
+  request validates it, so it is genuinely selectable; zero members have chosen
+  it. Neither reviewer now sees those records. They queue for super admin rather
+  than being handed to whoever the code assumed. The decision is the client's to
+  make and is one branch when he makes it.
+- ~~False-range sweep~~ — no live instances remained. Turned into
+  `FalseRangePatternTest` rather than left as a grep nobody can re-run, with a
+  control that exercises the real extraction path. `AssertionsCanFailTest`
+  caught the first version, whose control asserted on the regex without running
+  the sweep.
 
 ## Facts
 
@@ -63,7 +66,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 534 tests, 525 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 537 tests, 528 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Needs the client, not the developer

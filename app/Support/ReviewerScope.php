@@ -38,6 +38,28 @@ class ReviewerScope
     public const MALE = 'reviewer_male';
 
     /**
+     * ⚠️ `non_binary` IS DELIBERATELY UNASSIGNED, AND THAT IS NOT AN OVERSIGHT.
+     *
+     * ProfileOptions::GENDER permits man, woman and non_binary, and the profile
+     * request validates against all three, so a member can genuinely choose it.
+     * No member has: the count is currently zero. But "nobody has yet" is not a
+     * reason to leave the case undefined, because the first person who does
+     * would land in whichever branch happened to catch them.
+     *
+     * The first version of this routed non-binary members to the female
+     * reviewer. That was my assumption and nobody had made that decision. On a
+     * platform whose entire premise is that a member chooses who may look at
+     * their photographs, guessing is the one thing the code must not do.
+     *
+     * So neither reviewer sees them. The records fall through to the empty
+     * array below and are visible only to super admin, which means they queue
+     * for the owner rather than being silently handed to whoever the code
+     * assumed. When the client decides, it becomes one branch here and a line
+     * in the changelog — a decision somebody made, not one a WHERE clause
+     * implied.
+     */
+
+    /**
      * The genders this user may review, or null for unrestricted.
      *
      * ── ⚠️ WHICH ROLES ARE UNRESTRICTED, AND WHY THAT IS NOT FAILING OPEN ──
@@ -68,13 +90,7 @@ class ReviewerScope
         }
 
         if ($user->hasRole(self::FEMALE)) {
-            /*
-             * Non-binary members are reviewed by the female reviewer. This is
-             * a judgement rather than a fact, and it is written down here so
-             * it is visible and arguable rather than implicit. The client can
-             * change it; nobody should have to infer it from a WHERE clause.
-             */
-            return ['woman', 'non_binary'];
+            return ['woman'];
         }
 
         if ($user->hasRole(self::MALE)) {

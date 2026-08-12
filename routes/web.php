@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MatchAuditController;
 use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\ReportQueueController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TrustedContactQueueController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\GuardianDashboardController;
 use App\Http\Controllers\TrustedContactAcceptanceController;
@@ -153,6 +154,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
      * Concerns members have raised. Sits with the verification queue because
      * it is the same job — a person deciding whether somebody belongs here.
      */
+    /*
+     * Trusted contacts awaiting review, and members waiting for us to appoint
+     * one. Same permission as verification because it is the same job.
+     */
+    Route::middleware('admin:verifications.review')->group(function () {
+        Route::get('/trusted-contacts', [TrustedContactQueueController::class, 'index'])
+            ->name('trusted-contacts');
+        Route::post('/trusted-contacts/{guardian}', [TrustedContactQueueController::class, 'review'])
+            ->name('trusted-contacts.review');
+        Route::get('/trusted-contacts/{guardian}/photo', [TrustedContactQueueController::class, 'photo'])
+            ->name('trusted-contacts.photo');
+    });
+
     Route::middleware('admin:verifications.review')->group(function () {
         Route::get('/reports', [ReportQueueController::class, 'index'])->name('reports');
         Route::post('/reports/{report}', [ReportQueueController::class, 'resolve'])->name('reports.resolve');

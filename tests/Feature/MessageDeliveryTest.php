@@ -268,8 +268,26 @@ class MessageDeliveryTest extends TestCase
     /** UNSUBSCRIBE and CANCEL mean the same thing, and case does not matter. */
     public function test_the_other_opt_out_words_are_honoured(): void
     {
-        foreach (['UNSUBSCRIBE', 'cancel', ' Stop '] as $word) {
-            $user = $this->member('87655502'.random_int(10, 99));
+        /*
+         * ⚠️ THE PHONE NUMBERS ARE DETERMINISTIC AND WERE RANDOM.
+         *
+         * This built each number as '87655502'.random_int(10, 99) — three draws
+         * from ninety values, which collide in about 3.4% of runs. On a
+         * collision the second member is created with a number already
+         * belonging to the first, the webhook handler resolves the inbound
+         * message to the WRONG user, and the assertion reads a preference row
+         * that was never written: null, not false.
+         *
+         * So it failed roughly one run in thirty, for a reason that had nothing
+         * to do with opt-out handling. And the same coin decides the other way:
+         * a genuine regression in the ' Stop ' branch would be masked in about
+         * the same proportion of runs.
+         *
+         * Same shape as the compatibility-score flake in MailableContentTest: a
+         * fixture that leaves uniqueness to chance.
+         */
+        foreach ([' Stop ', 'UNSUBSCRIBE', 'cancel'] as $index => $word) {
+            $user = $this->member('8765550'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT));
 
             (new ProcessWhatsAppWebhook($this->inboundPayload(
                 preg_replace('/\D+/', '', '1'.$user->phone_number),

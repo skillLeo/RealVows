@@ -86,6 +86,31 @@ class RemindTrustedContacts extends Command
             }
 
             if (! $dry) {
+                /*
+                 * ⚠️ THE LINK IS RE-ISSUED, NOT RECOVERED.
+                 *
+                 * Invitation tokens are stored hashed, so the plaintext from
+                 * the original email cannot be read back — that is the whole
+                 * point of hashing them. A reminder therefore carries a FRESH
+                 * token, and issuing one invalidates the previous.
+                 *
+                 * The consequence is real and acceptable: somebody who kept the
+                 * first email and clicks it after a reminder has been sent will
+                 * find a dead link, and the working one is in the newer message
+                 * sitting above it in their inbox. The alternative is storing
+                 * live credentials in plaintext so that an old email keeps
+                 * working, which is a worse trade.
+                 */
+                ['token' => $token] = \App\Models\GuardianInvitation::issue($guardian);
+
+                \Illuminate\Support\Facades\Mail::to($guardian->email)->send(
+                    new \App\Mail\TrustedContactReminder(
+                        $guardian,
+                        $token,
+                        isFinal: $due === self::SECOND_REMINDER,
+                    )
+                );
+
                 // Email only. There is no approved WhatsApp template for a
                 // trusted-contact reminder — see GuardianService.
                 $guardian->forceFill(['last_reminded_at' => now()])->save();

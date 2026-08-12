@@ -56,15 +56,19 @@
   plus the two member pages), strings in the deck under `guardian_area`.
   Reminders at 3 and 7 days with a per-stage stamp so a daily cron cannot nag;
   at 14 days we stop chasing and leave the record alone rather than marking
-  somebody rejected who has done nothing wrong. `TrustedContactReminderTest` 6/6.
+  somebody rejected who has done nothing wrong. Reminders now actually send,
+  re-issuing the link because tokens are hashed and cannot be read back.
+  `TrustedContactReminderTest` 7/7. Admin queue built at
+  `/admin/trusted-contacts`: contacts awaiting review AND members waiting for us
+  to appoint one, gender-separated like verification, rejection requires a
+  reason. `TrustedContactQueueTest` 6/6.
 
 ## Not started
 
-- **Part B**: no-guardian admin queue (records are created with `is_appointed`
-  but no admin screen lists them); the member-facing "offer a replacement at 14
-  days" prompt (the command identifies stale cases, nothing tells her yet);
-  unfair-guardian path; admin messaging with the relay prohibition in the UI;
-  the reminder command stamps but does not yet SEND an email
+- **Part B**: the `Admin/TrustedContacts/Index` Vue page (route, controller and
+  tests exist; component not written); the member-facing "offer a replacement at
+  14 days" prompt (the command identifies stale cases, nothing tells her yet);
+  unfair-guardian path; admin messaging with the relay prohibition in the UI
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -100,7 +104,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 580 tests, 571 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 587 tests, 578 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

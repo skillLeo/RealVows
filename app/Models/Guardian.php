@@ -55,6 +55,9 @@ class Guardian extends Model
             'risk_reasons' => 'array',
             'verified_at' => 'datetime',
             'last_reminded_at' => 'datetime',
+            // ⚠️ Without this cast the column comes back as a string and every
+            // ->format() call on it is a 500. Added after exactly that.
+            'joint_photo_uploaded_at' => 'datetime',
         ];
     }
 

@@ -6,7 +6,9 @@ use App\Console\Commands\RemindTrustedContacts;
 use App\Models\Guardian;
 use App\Models\Profile;
 use App\Models\User;
+use App\Mail\TrustedContactReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /**
@@ -25,6 +27,7 @@ class TrustedContactReminderTest extends TestCase
         parent::setUp();
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Database\Seeders\SettingsSeeder::class);
+        Mail::fake();
     }
 
     private function guardianInvitedDaysAgo(int $days): Guardian
@@ -61,6 +64,41 @@ class TrustedContactReminderTest extends TestCase
             ->expectsOutputToContain('Sent 1 reminder');
 
         $this->assertNotNull($guardian->fresh()->last_reminded_at);
+
+        Mail::assertSent(TrustedContactReminder::class, 1);
+    }
+
+    /**
+     * ⚠️ THE REMINDER CARRIES A FRESH TOKEN, AND THE OLD ONE STOPS WORKING.
+     *
+     * Invitation tokens are stored hashed, so the plaintext from the first
+     * email cannot be read back. A reminder therefore has to issue a new one,
+     * which invalidates the previous. Somebody who kept the first email will
+     * find a dead link and the working one directly above it. The alternative
+     * is storing live credentials in plaintext, which is a worse trade.
+     */
+    public function test_a_reminder_issues_a_fresh_link_and_kills_the_old_one(): void
+    {
+        $member = User::factory()->create();
+        Profile::factory()->woman()->create(['user_id' => $member->id]);
+
+        $result = app(\App\Services\Guardian\GuardianService::class)->nominate($member, [
+            'name' => 'Yusuf Adeyemi', 'relationship' => 'father', 'email' => 'yusuf@example.com',
+        ]);
+
+        $original = $result['token'];
+        $this->assertNotNull(\App\Models\GuardianInvitation::findByToken($original));
+
+        $result['guardian']->forceFill([
+            'created_at' => now()->subDays(RemindTrustedContacts::FIRST_REMINDER),
+        ])->save();
+
+        $this->artisan('realvows:remind-trusted-contacts')->expectsOutputToContain('Sent 1 reminder');
+
+        $this->assertNull(
+            \App\Models\GuardianInvitation::findByToken($original),
+            'The original link still works after a reminder issued a new one.'
+        );
     }
 
     /**
@@ -137,5 +175,10 @@ class TrustedContactReminderTest extends TestCase
             $guardian->fresh()->last_reminded_at,
             'A dry run wrote to the record.'
         );
+
+        // ⚠️ Sent AND queued. Queued mail is never "sent", so the first
+        // assertion alone passes while an email is on its way.
+        Mail::assertNothingSent();
+        Mail::assertNothingQueued();
     }
 }

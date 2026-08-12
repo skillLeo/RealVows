@@ -24,13 +24,19 @@
 
 ## In progress
 
-- Part B remainder
+- **Part B remainder.** Built since the last handoff: `GuardianInvitation`
+  (hashed single-use token, plaintext returned once, re-issue invalidates the
+  previous), `GuardianGate` (the three B5 gates, each reading the policy first),
+  and the `guardian` settings group seeded with the requirement unset.
+  `GuardianGateTest` 8/8 covering all four levels.
 
 ## Not started
 
-- **Part B**: invitation flow, joint-photo upload, three approval gates wired
-  into matching, no-guardian admin queue, 3/7/14 reminders, unfair-guardian
-  path, admin messaging with the relay prohibition rendered in the UI
+- **Part B**: invitation *delivery* (email + WhatsApp send, the model is done),
+  joint-photo upload with the generated code, calling `GuardianGate` from the
+  matching pipeline and the match/contact controllers (the gate exists and is
+  tested; nothing calls it yet), no-guardian admin queue, 3/7/14 reminders,
+  unfair-guardian path, admin messaging with the relay prohibition in the UI
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -66,7 +72,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 537 tests, 528 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 545 tests, 536 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Needs the client, not the developer

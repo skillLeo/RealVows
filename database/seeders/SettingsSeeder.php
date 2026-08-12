@@ -46,6 +46,31 @@ class SettingsSeeder extends Seeder
     private function definitions(): array
     {
         $rows = [
+            /*
+             * ⚠️ THE TRUSTED-CONTACT REQUIREMENT IS UNSET ON PURPOSE.
+             *
+             * The client does not want it presented to men and believes many
+             * members will not have anybody to name. Compliance wants it. That
+             * argument is not settled, so it is a setting rather than a branch
+             * and it ships with no answer chosen.
+             *
+             * `off` is the seeded value, and it is the ABSENCE of a decision
+             * rather than a decision: it leaves the product behaving exactly as
+             * it did before the system existed. Choosing `required_all` here
+             * would resolve a live disagreement quietly, in a seeder, and
+             * present it as an implementation detail.
+             *
+             * The description says so in the words the person choosing needs.
+             */
+            'guardian' => [
+                ['key' => 'guardian_requirement', 'label' => 'Trusted contact requirement', 'type' => 'select', 'options' => [
+                    'off' => 'Off — not asked for at all',
+                    'optional' => 'Optional — members may add one',
+                    'required_female' => 'Required for women',
+                    'required_all' => 'Required for everyone',
+                ], 'description' => 'Nobody has chosen this yet. It is off, which means the product behaves exactly as it did before the trusted-contact system was built. Changing it takes effect immediately and needs no deploy.'],
+            ],
+
             'general' => [
                 /*
                  * ⚠️ A REAL MODE, NOT A GATEWAY LEFT SWITCHED OFF. While this
@@ -240,6 +265,7 @@ class SettingsSeeder extends Seeder
             'packages.octet_credits' => '8',
             'packages.octet_price_cents' => '10000',
             'packages.octet_badge' => 'Best value',
+            'guardian.guardian_requirement' => 'off',
         ];
 
         $flat = [];

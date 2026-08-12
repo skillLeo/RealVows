@@ -14,6 +14,7 @@ use App\Http\Controllers\TrustedContactAcceptanceController;
 use App\Http\Controllers\TrustedContactController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\ProfileWriterController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ResendWebhookController;
@@ -96,6 +97,12 @@ Route::controller(LegalController::class)->group(function () {
  * finds this URL while the requirement is off should find nothing.
  */
 Route::middleware('auth')->group(function () {
+    /*
+     * Suggests a tidier bio and saves nothing. The member chooses, and the
+     * choice goes through the ordinary profile save.
+     */
+    Route::post('/profile/rewrite', ProfileWriterController::class)->name('profile.rewrite');
+
     Route::get('/trusted-contact', [TrustedContactController::class, 'show'])->name('trusted-contact.show');
     Route::post('/trusted-contact', [TrustedContactController::class, 'store'])->name('trusted-contact.store');
     Route::post('/trusted-contact/appointed', [TrustedContactController::class, 'requestAppointed'])

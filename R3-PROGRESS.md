@@ -40,7 +40,14 @@ settings, and `AiProviderBannerTest` 5/5 rebinds the narrator and asserts the
 banner changes — the test that proves it is not reasoning its way to an answer.
 Withheld from members.
 
-**Part D fidelity is done; the writer itself is not.**
+**Part D is done.** `ProfileWriter` calls the provider, and an unfaithful
+rewrite is DISCARDED inside the service rather than shown with a caution.
+`/profile/rewrite` suggests and never saves. Five per member per day, keyed on
+the user rather than the address. `profiles.bio_original` /
+`bio_rewritten_by` / `bio_rewritten_at` store what the member actually wrote so
+a false claim can be traced to its author. `ProfileWriterTest` 9/9.
+
+**Fidelity core:**
 `ProfileWriterFidelity` catches invented proper nouns and invented numbers,
 survives capitalisation and punctuation, and does NOT flag ordinary sentence
 openers — an over-eager check would reject every rewrite and be switched off,
@@ -106,9 +113,9 @@ not simply returning nothing.
   `TrustedContact/Show` does not yet render the offer or a way to raise it);
   no link from admin to an individual message thread — `/admin/messages/{user}`
   is reachable only by typing it
-- **Part D** — the writer itself: the provider call, the accept/reject UI,
-  storing the original alongside the rewrite, and the 5-per-day rate limit.
-  The fidelity check that gates it is built and tested.
+- **Part D** — the member-facing accept/reject UI in the profile builder (the
+  endpoint returns both versions; nothing renders them yet), and writing
+  `bio_original` on save when a rewrite is accepted
 - **Part F** — public copy reduction
 - **Part G** — home banner ("The Meeting")
 - **Part H** — premium and mobile pass + device walk-list
@@ -141,7 +148,7 @@ not simply returning nothing.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 620 tests, 611 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 629 tests, 620 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

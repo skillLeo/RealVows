@@ -41,14 +41,20 @@
   sent), the no-contact path (B7, marks `is_appointed`), and acceptance (the
   guardian creates their own account with their own password, single-use
   token). `GuardianNominationTest` 9/9.
+  **The member-facing flow is live over HTTP:** `/trusted-contact` to name one
+  or request an appointed contact (404s while the requirement is off),
+  `/trusted-contact/accept/{token}` public so an invited person can create
+  their account. `TrustedContactInvitation` mailable plus HTML and text views.
+  `TrustedContactFlowTest` 8/8.
 
 ## Not started
 
-- **Part B**: invitation *delivery* — the service issues the token, nothing
-  sends it yet; joint-photo upload with the generated code; no-guardian admin
+- **Part B**: joint-photo upload with the generated code; no-guardian admin
   queue; 3/7/14 reminders; unfair-guardian path; admin messaging with the relay
-  prohibition in the UI; member-facing screens (dashboard shows the state,
-  there is no form to name a contact and no page to accept an invitation)
+  prohibition in the UI. The two Vue pages (`TrustedContact/Show` and
+  `TrustedContact/Accept`) are referenced by the controllers and **not yet
+  written** — the routes and tests pass because Inertia does not resolve the
+  component server-side.
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -84,7 +90,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 561 tests, 552 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 569 tests, 560 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

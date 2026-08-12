@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ReportQueueController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\GuardianDashboardController;
+use App\Http\Controllers\TrustedContactAcceptanceController;
+use App\Http\Controllers\TrustedContactController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
@@ -86,7 +88,32 @@ Route::controller(LegalController::class)->group(function () {
 | rule is re-asked at the point the bytes would be streamed.
 */
 
-Route::middleware(['auth', 'guardian'])->prefix('trusted-contact')->name('guardian.')->group(function () {
+/*
+ * The member's own trusted-contact screens. Behind `auth`, and each action
+ * 404s when the policy does not offer the feature to that member — a member who
+ * finds this URL while the requirement is off should find nothing.
+ */
+Route::middleware('auth')->group(function () {
+    Route::get('/trusted-contact', [TrustedContactController::class, 'show'])->name('trusted-contact.show');
+    Route::post('/trusted-contact', [TrustedContactController::class, 'store'])->name('trusted-contact.store');
+    Route::post('/trusted-contact/appointed', [TrustedContactController::class, 'requestAppointed'])
+        ->name('trusted-contact.appointed');
+});
+
+/*
+ * ⚠️ ACCEPTANCE IS PUBLIC AND MUST BE. The person opening this link has no
+ * account — creating one is the entire purpose. Putting it behind `auth` would
+ * make the invitation unusable by the only people it is sent to.
+ *
+ * The token is the whole credential: looked up by hash, single use, expiring.
+ * There is no id in the URL to enumerate.
+ */
+Route::get('/trusted-contact/accept/{token}', [TrustedContactAcceptanceController::class, 'show'])
+    ->name('trusted-contact.accept');
+Route::post('/trusted-contact/accept/{token}', [TrustedContactAcceptanceController::class, 'store'])
+    ->name('trusted-contact.accept.store');
+
+Route::middleware(['auth', 'guardian'])->prefix('trusted-contact-dashboard')->name('guardian.')->group(function () {
     Route::get('/', [GuardianDashboardController::class, 'index'])->name('dashboard');
     Route::post('/decisions/{match}', [GuardianDashboardController::class, 'decide'])->name('decide');
     Route::get('/photo/{photo}', [GuardianDashboardController::class, 'photo'])->name('photo');

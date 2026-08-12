@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\ReportQueueController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VerificationController;
+use App\Http\Controllers\GuardianDashboardController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PublicPageController;
@@ -71,6 +72,24 @@ Route::controller(LegalController::class)->group(function () {
      * Its absence is a gap regardless of when payments switch on.
      */
     Route::get('/refunds', 'refunds')->name('legal.refunds');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Trusted contact (guardian)
+|--------------------------------------------------------------------------
+| A trusted contact has their own account and their own screens. They are NOT
+| staff and must never reach /admin — `isAdmin()` deliberately omits the role.
+|
+| ⚠️ The photograph route asks GuardianPresenter, not the view. A signed URL
+| that leaked into a browser history or a log must still be refused, so the
+| rule is re-asked at the point the bytes would be streamed.
+*/
+
+Route::middleware(['auth', 'guardian'])->prefix('trusted-contact')->name('guardian.')->group(function () {
+    Route::get('/', [GuardianDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/decisions/{match}', [GuardianDashboardController::class, 'decide'])->name('decide');
+    Route::get('/photo/{photo}', [GuardianDashboardController::class, 'photo'])->name('photo');
 });
 
 /*

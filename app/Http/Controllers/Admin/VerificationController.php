@@ -38,6 +38,8 @@ class VerificationController extends Controller
                 fn ($query) => $query->where('status', $status)
             )
             ->whereHas('profile', fn ($query) => $query->whereNotNull('submitted_at'))
+            // ⚠️ Gender separation, applied to the QUERY. See ReviewerScope.
+            ->tap(fn ($query) => \App\Support\ReviewerScope::applyToProfileRelation($query, $request->user()))
             ->with([
                 'profile:id,user_id,first_name,last_name,date_of_birth,city,country',
                 'profile.photos:id,profile_id,slot',
@@ -70,6 +72,15 @@ class VerificationController extends Controller
     public function show(Verification $verification): Response
     {
         $verification->load(['profile.photos', 'profile.user:id,email', 'reviewer:id,name']);
+
+        /*
+         * ⚠️ 404, NEVER 403. A 403 tells a reviewer probing ids that the record
+         * exists and is somebody else's. A 404 tells them nothing.
+         */
+        abort_unless(
+            \App\Support\ReviewerScope::maySee(request()->user(), $verification->profile?->gender),
+            404
+        );
 
         return Inertia::render('Admin/Verifications/Show', [
             'verification' => [
@@ -138,6 +149,14 @@ class VerificationController extends Controller
     {
         abort_unless($photo->profile_id === $verification->profile_id, 404);
 
+        /*
+         * ⚠️ THE CHECK BELONGS HERE, not only on the page that links to it.
+         * This route streams the bytes. A reviewer who is shown no thumbnail
+         * can still type this URL, and until this line existed it would have
+         * been served.
+         */
+        $this->assertInScope($verification);
+
         return Storage::disk(PhotoStorageService::DISK)->response($photo->path, null, [
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=600',
@@ -148,10 +167,37 @@ class VerificationController extends Controller
     {
         abort_unless($verification->selfie_path !== null, 404);
 
+        $this->assertInScope($verification);
+
         return Storage::disk(PhotoStorageService::DISK)->response($verification->selfie_path, null, [
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=600',
         ]);
+    }
+
+    /**
+     * ⚠️ ONE PLACE THAT DECIDES, AND IT LOGS THE UNRESTRICTED CASE.
+     *
+     * Super admin keeps full access, because somebody has to be able to
+     * resolve a dispute about a review. That access is recorded: an
+     * unrestricted account reading a member's photographs is exactly the thing
+     * that should leave a trail, and "the owner can see everything" is only
+     * acceptable if the owner can be asked about it afterwards.
+     */
+    private function assertInScope(Verification $verification): void
+    {
+        $user = request()->user();
+        $gender = $verification->profile?->gender;
+
+        abort_unless(\App\Support\ReviewerScope::maySee($user, $gender), 404);
+
+        if (\App\Support\ReviewerScope::gendersFor($user) === null) {
+            \Illuminate\Support\Facades\Log::info('super admin viewed a verification photograph', [
+                'user_id' => $user?->id,
+                'verification_id' => $verification->id,
+                'member_gender' => $gender,
+            ]);
+        }
     }
 
     /**

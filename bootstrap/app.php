@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            'guardian' => \App\Http\Middleware\EnsureUserIsGuardian::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

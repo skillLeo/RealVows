@@ -56,6 +56,31 @@ class RolesAndPermissionsSeeder extends Seeder
             'credits.adjust',
         ]);
 
+        /*
+         * ⚠️ GENDER-SEPARATED REVIEW.
+         *
+         * Verification requires a person to look at photographs of a member,
+         * and for a large part of this client's market a man reviewing a
+         * woman's photographs is the reason she would not join at all. Two
+         * reviewer roles, each seeing only their own gender.
+         *
+         * They hold the SAME permissions as `admin`. The separation is not a
+         * permission, it is a scope, and it is enforced in the query rather
+         * than in the view — see App\Support\ReviewerScope. A permission
+         * check would still let a male reviewer reach a woman's photograph by
+         * typing the URL, which is precisely the failure this exists to
+         * prevent.
+         */
+        foreach (['reviewer_female', 'reviewer_male'] as $reviewer) {
+            Role::findOrCreate($reviewer, 'web')->syncPermissions([
+                'users.view',
+                'verifications.view',
+                'verifications.review',
+            ]);
+        }
+
+        Role::findOrCreate('guardian', 'web');
+
         Role::findOrCreate('member', 'web');
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

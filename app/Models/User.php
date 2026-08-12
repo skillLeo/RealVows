@@ -98,9 +98,33 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->phone_country_code.' '.$this->phone_number;
     }
 
+    /**
+     * ⚠️ THE STAFF ROLES, AND THE REVIEWER ROLES ARE STAFF.
+     *
+     * `reviewer_female` and `reviewer_male` were added for gender-separated
+     * verification review. They hold `verifications.view` and
+     * `verifications.review`, so the permission check further down the
+     * middleware would have let them through — but this list gate runs first
+     * and rejected them, giving a 404 that looked exactly like the gender
+     * scope refusing an out-of-scope record.
+     *
+     * ⚠️ THAT IS WHY ReviewerScopeTest CARRIES A POSITIVE CONTROL. Every scope
+     * assertion is "expect 404", and a route that refuses everybody returns
+     * 404 too. Without a test asserting the RIGHT reviewer gets through, the
+     * whole separation would have reported itself working while nobody could
+     * review anything at all.
+     *
+     * `guardian` is deliberately NOT here. A guardian has an account and a
+     * dashboard of their own; they are not staff and must never reach /admin.
+     */
     public function isAdmin(): bool
     {
-        return $this->hasAnyRole(['admin', 'super_admin']);
+        return $this->hasAnyRole([
+            'admin',
+            'super_admin',
+            \App\Support\ReviewerScope::FEMALE,
+            \App\Support\ReviewerScope::MALE,
+        ]);
     }
 
     /** Branded in the RealVows frame rather than Laravel's generic default. */

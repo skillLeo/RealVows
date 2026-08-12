@@ -1,0 +1,83 @@
+<!doctype html><meta charset="utf-8"><style>html,body{margin:0}iframe{border:0;display:block}</style>
+<body><script>
+/*
+ * ⚠️ RULE 5 FOR A HARNESS: PROVE IT CAN SEE BEFORE IT REPORTS.
+ *
+ * Measures every interactive element at a real 375px viewport and reports any
+ * whose tappable box is under 44px in either dimension.
+ *
+ * It measures the RENDERED BOX, not the CSS rule. A button with
+ * `min-height: 44px` inside a flex parent that squashes it is 30px on screen
+ * and passes any source-reading check.
+ *
+ * Before it touches a real page it is run against two fixtures built here:
+ * one deliberately too small, one deliberately correct. If it cannot tell them
+ * apart it ABORTS rather than emit a table, because a harness that reports the
+ * wrong number is worse than one that reports nothing.
+ */
+const MIN = 44;
+
+function undersized(doc) {
+  const out = [];
+  const nodes = doc.querySelectorAll('a[href], button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])');
+  nodes.forEach((el) => {
+    const r = el.getBoundingClientRect();
+    // Hidden things are not tap targets.
+    if (r.width === 0 && r.height === 0) return;
+    if (getComputedStyle(el).visibility === 'hidden') return;
+    if (r.height < MIN || r.width < MIN) {
+      out.push({
+        tag: el.tagName.toLowerCase(),
+        cls: (el.className || '').toString().split(' ')[0] || '',
+        text: (el.textContent || '').trim().slice(0, 30),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+      });
+    }
+  });
+  return out;
+}
+
+function selfTest() {
+  const host = document.createElement('div');
+  host.style.cssText = 'position:absolute;left:-9999px;top:0;width:375px';
+  document.body.appendChild(host);
+
+  host.innerHTML = '<button id="small" style="width:20px;height:20px">x</button>'
+                 + '<button id="ok" style="width:48px;height:48px">y</button>';
+
+  const found = undersized(document);
+  const sawSmall = found.some((f) => f.w === 20);
+  const sawOk = found.some((f) => f.w === 48);
+
+  host.remove();
+
+  if (!sawSmall || sawOk) {
+    document.title = '@@ABORT: reader cannot tell a 20px target from a 48px one@@';
+    return false;
+  }
+  return true;
+}
+
+const p = new URLSearchParams(location.search);
+const urls = p.get('urls').split(',');
+const out = [];
+let i = 0;
+const f = document.createElement('iframe');
+f.width = Number(p.get('w') || 375); f.height = 900;
+document.body.appendChild(f);
+
+function next() {
+  if (i >= urls.length) { document.title = '@@' + JSON.stringify(out) + '@@'; return; }
+  const url = urls[i++];
+  f.onload = () => setTimeout(() => {
+    let rec = { url, offenders: [], err: null };
+    try { rec.offenders = undersized(f.contentDocument); }
+    catch (e) { rec.err = String(e).slice(0, 60); }
+    out.push(rec);
+    next();
+  }, 700);
+  f.src = url;
+}
+if (selfTest()) next();
+</script>

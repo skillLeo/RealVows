@@ -1,4 +1,5 @@
 <script setup>
+import { haptic } from '@/haptics';
 import { computed, onMounted, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -58,12 +59,6 @@ const skipped = ref(false);
 
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function buzz(pattern) {
-    // Capability-checked, and never on a desktop pointer.
-    if (!navigator.vibrate || !window.matchMedia('(hover: none)').matches) return;
-    navigator.vibrate(pattern);
-}
-
 async function runCeremony(ids) {
     if (!ids.length) return;
 
@@ -86,7 +81,8 @@ async function runCeremony(ids) {
         ? '1 introduction unlocked'
         : `${ids.length} introductions unlocked`;
 
-    buzz([10, 40, 10, 40, 10]);
+    // ⚠️ The unseal. One of exactly three sanctioned haptic moments.
+    haptic('unseal');
 }
 
 onMounted(() => {

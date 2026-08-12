@@ -135,11 +135,15 @@ createInertiaApp({
  * notice and reads as the interface acknowledging a tap rather than buzzing.
  * Touch devices only — a desktop that supports the API should never use it.
  */
-router.on('start', () => {
-    if (navigator.vibrate && window.matchMedia('(hover: none)').matches) {
-        navigator.vibrate(8);
-    }
-});
+/*
+ * ⚠️ THE HAPTIC ON EVERY NAVIGATION IS GONE.
+ *
+ * This fired on router.on('start') — a buzz every time a member opened any
+ * page. That is the "constant haptics feel cheap" failure described in the
+ * brief, shipped. Haptics now live in resources/js/haptics.js and fire at
+ * exactly three moments, and HapticsTest fails the build if navigator.vibrate
+ * appears anywhere else.
+ */
 
 /*
  * ── Service worker ────────────────────────────────────────────────────────

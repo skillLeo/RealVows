@@ -269,7 +269,6 @@ function pullToRefresh() {
 
     host.addEventListener('touchend', () => {
         if (pulled >= THRESHOLD) {
-            if (navigator.vibrate && isTouch()) navigator.vibrate(8);
             router.reload({ preserveScroll: false });
         }
 
@@ -295,7 +294,7 @@ function longPress() {
 
         origin = e.touches[0];
         timer = setTimeout(() => {
-            if (navigator.vibrate) navigator.vibrate(8);
+            // ⚠️ No haptic here. A long-press is a gesture, not an event.
             card.dispatchEvent(new CustomEvent('rv:longpress', { bubbles: true }));
         }, 500);
     }, { passive: true });

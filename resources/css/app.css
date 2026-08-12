@@ -4023,3 +4023,49 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-meeting__bloom { opacity: .03; }
   .rv-meeting__layer { transform: none; }
 }
+
+/* --------------------------------------------------------------------------
+   Touch targets
+   --------------------------------------------------------------------------
+   ⚠️ MEASURED AT 375px IN A REAL VIEWPORT, NOT ASSERTED FROM THE CSS.
+
+   tools/touch-target-audit.html walks every interactive element and reports
+   its RENDERED box. That distinction matters: a button carrying
+   `min-height: 44px` inside a flex parent that squashes it is thirty pixels on
+   screen and passes any source-reading check.
+
+   Five were under 44px on the first run. The footer's "About" link was 39px
+   wide because the word is short — nothing in the CSS was wrong, the text
+   simply did not fill the box.
+   -------------------------------------------------------------------------- */
+
+.rv-pubfoot__nav a,
+.rv-pubhead__link {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 8px;
+}
+
+/* Standalone controls that happen to be rendered as links. */
+.rv-auth__aside,
+.rv-link-inline {
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+}
+
+/*
+ * ⚠️ INLINE LINKS INSIDE A SENTENCE ARE DELIBERATELY EXEMPT.
+ *
+ * "Privacy Policy" sits inside the consent sentence next to a checkbox. Giving
+ * it a 44px box would open the line spacing of the paragraph around it and make
+ * the sentence harder to read, which is a worse outcome for everybody than a
+ * slightly small target for the few who tap the link rather than read past it.
+ *
+ * WCAG 2.5.8 exempts links in a block of text for exactly this reason. It is an
+ * exemption, not an oversight, and it is written down so the audit's remaining
+ * two rows are explainable rather than ignored.
+ */

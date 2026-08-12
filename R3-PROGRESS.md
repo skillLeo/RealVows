@@ -137,7 +137,17 @@ not simply returning nothing.
   home page. It was doing real work (proof that people come out the other side),
   the partial still exists at `public.partials.couples-rail`, and restoring it is
   one line. Client's call.
-- **Part H** — premium and mobile pass + device walk-list
+- ~~**Part H**~~ **measurable half done; the felt half is yours.**
+  Touch targets measured at a real 375px viewport with a new harness carrying a
+  self-test — five were under 44px and are fixed; the two remaining are inline
+  links inside sentences (WCAG 2.5.8 exemption, written down). Haptics closed to
+  three moments in one module with a build-failing guard: **there was a buzz on
+  every page navigation**, which is the exact failure the brief warns about.
+  `DEVICE-WALK-LIST.md` is the handover for what I cannot test.
+  **Still not done in H:** the floating action button, sheets-not-pages for
+  secondary flows, view transitions between card and match view, optimistic UI
+  for approve/decline, and the screen-by-screen premium pass (whitespace,
+  empty states, three-tier loading, error voice, 8px rhythm audit).
 - **Part I** — FAQ and support
 
 ## Carried debt
@@ -167,7 +177,7 @@ not simply returning nothing.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 629 tests, 620 passing, 9 skipped** (banner 7.4kb; breakpoints clean) (PowerTranz sandbox ×7 and the
+- **Suite: 633 tests, 624 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean) (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

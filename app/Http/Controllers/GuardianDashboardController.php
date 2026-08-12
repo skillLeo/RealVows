@@ -113,6 +113,68 @@ class GuardianDashboardController extends Controller
         ]);
     }
 
+    /**
+     * The joint photograph: the primary check in the whole system.
+     *
+     * ⚠️ NO GOVERNMENT ID IS COLLECTED, HERE OR ANYWHERE. A passport proves who
+     * somebody is and says nothing about whether this man is that woman's
+     * father, which is the only claim that matters — and Caribbean documents
+     * largely cannot establish it. Collecting them would build the most
+     * sensitive store on the platform in exchange for evidence of the wrong
+     * thing.
+     *
+     * ⚠️ THE CODE IS ISSUED ONLY AFTER THEY HAVE SIGNED IN, and that ordering
+     * is the check. A photograph of two people holding a code generated minutes
+     * ago cannot be an old picture found on a phone, and the person holding it
+     * had to receive the invitation and set their own password to see it.
+     */
+    public function joint(Request $request): Response
+    {
+        $guardian = $this->guardianFor($request);
+
+        // Issued once and kept, so a refresh does not invalidate a photograph
+        // somebody is in the middle of taking.
+        if (! $guardian->joint_photo_code) {
+            $guardian->forceFill([
+                'joint_photo_code' => strtoupper(substr(bin2hex(random_bytes(4)), 0, 6)),
+            ])->save();
+        }
+
+        return Inertia::render('Guardian/JointPhoto', [
+            'code' => $guardian->fresh()->joint_photo_code,
+            'memberName' => $guardian->member?->profile?->first_name,
+            'uploaded' => $guardian->joint_photo_uploaded_at !== null,
+            'status' => $guardian->status,
+        ]);
+    }
+
+    public function storeJoint(Request $request): RedirectResponse
+    {
+        $guardian = $this->guardianFor($request);
+
+        $request->validate([
+            'photo' => ['required', 'image', 'mimes:jpeg,png,webp', 'max:8192'],
+        ]);
+
+        /*
+         * ⚠️ PRIVATE DISK. This is a photograph of two identifiable people and
+         * it must never be reachable without going through a controller that
+         * asks who is looking. Same disk and same rule as member photographs.
+         */
+        $path = $request->file('photo')->store(
+            'guardians/'.$guardian->id,
+            PhotoStorageService::DISK,
+        );
+
+        $guardian->forceFill([
+            'joint_photo_path' => $path,
+            'joint_photo_uploaded_at' => now(),
+            'status' => Guardian::STATUS_SUBMITTED,
+        ])->save();
+
+        return back()->with('success', 'Thank you. Someone will check this and let you know.');
+    }
+
     private function guardianFor(Request $request): Guardian
     {
         $guardian = Guardian::where('user_id', $request->user()->id)

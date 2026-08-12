@@ -47,13 +47,17 @@
   their account. `TrustedContactInvitation` mailable plus HTML and text views.
   `TrustedContactFlowTest` 8/8. Both Vue pages are written, compiled and in the
   manifest; every string went through the copy deck under `trusted_contact`.
+  The entry point is a card on `/account` (not a fifth tab — Navigation
+  documents four, never five), absent entirely when the policy does not offer
+  it. Joint-photo upload built: the code is issued only after the contact signs
+  in, kept stable across refreshes, stored on the private disk, and moves the
+  record to `submitted` rather than `verified`. `GuardianJointPhotoTest` 5/5.
 
 ## Not started
 
-- **Part B**: joint-photo upload with the generated code; no-guardian admin
-  queue; 3/7/14 reminders; unfair-guardian path; admin messaging with the relay
-  prohibition in the UI. Nothing links to `/trusted-contact` from the product
-  navigation yet — the pages exist and are reachable only by typing the URL.
+- **Part B**: the `Guardian/JointPhoto` Vue page (route and controller exist,
+  component not written); no-guardian admin queue; 3/7/14 reminders;
+  unfair-guardian path; admin messaging with the relay prohibition in the UI
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -89,7 +93,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 569 tests, 560 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 574 tests, 565 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

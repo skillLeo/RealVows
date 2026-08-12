@@ -64,6 +64,18 @@ return new class extends Migration
 
             $table->string('joint_photo_path')->nullable();
 
+            /*
+             * ⚠️ THE CODE THE PAIR MUST BE HOLDING IN THE PHOTOGRAPH.
+             *
+             * Generated per guardian and shown only after they have signed in
+             * to their own account. That ordering is the check: a photograph of
+             * two people holding a code that was issued minutes ago cannot be
+             * an old picture found on a phone, and the person who received the
+             * code had to hold the invitation and set a password to see it.
+             */
+            $table->string('joint_photo_code', 8)->nullable();
+            $table->timestamp('joint_photo_uploaded_at')->nullable();
+
             $table->timestamp('verified_at')->nullable();
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('rejection_reason')->nullable();

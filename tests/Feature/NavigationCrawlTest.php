@@ -67,6 +67,30 @@ class NavigationCrawlTest extends TestCase
         parent::setUp();
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Database\Seeders\SettingsSeeder::class);
+
+        /*
+         * ⚠️ THE TRUSTED-CONTACT LINK IS POLICY-GATED, SO THIS TEST RUNS IN THE
+         * STATE WHERE IT IS RENDERED.
+         *
+         * The account page renders that link only when the policy offers the
+         * feature, and the route 404s when it does not. This crawler reads
+         * component SOURCE rather than rendered HTML — a documented limit — so
+         * it sees the href regardless of the v-if and reported a broken link.
+         *
+         * The tempting fix is EXPECTED_NON_200 with a reason. That would be
+         * wrong: it excuses the link permanently, including when the feature IS
+         * switched on and the link genuinely matters. Turning the policy on
+         * here means the link is really followed and really checked.
+         *
+         * ⚠️ THIS IS THE ONLY PLACE THE REQUIREMENT IS SET IN A TEST FIXTURE
+         * FOR CONVENIENCE. It does not change the shipped default, which is
+         * unset by design.
+         */
+        app(\App\Services\Settings\SettingsService::class)->set(
+            \App\Support\GuardianPolicy::GROUP,
+            \App\Support\GuardianPolicy::KEY,
+            \App\Support\GuardianPolicy::OPTIONAL,
+        );
     }
 
     public static function roles(): array

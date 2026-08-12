@@ -17,7 +17,27 @@ class AccountController extends Controller
     {
         $user = $request->user();
 
+        /*
+         * ⚠️ THE TRUSTED-CONTACT ENTRY LIVES HERE, NOT IN THE TAB BAR.
+         *
+         * Navigation documents its own rule: the bar is four tabs, never five,
+         * and reports were kept out of it for the same reason. A fifth tab
+         * would have been the easy thing.
+         *
+         * ⚠️ AND IT IS ABSENT ENTIRELY WHEN THE POLICY DOES NOT OFFER IT. The
+         * requirement is unset by design, so today no member sees this card.
+         * Rendering it disabled would advertise a system the client has not
+         * decided to switch on.
+         */
+        $policy = app(\App\Support\GuardianPolicy::class);
+        $gender = $request->user()->profile?->gender;
+
         return Inertia::render('Account', [
+            'trustedContact' => $policy->isOfferedTo($gender) ? [
+                'required' => $policy->isRequiredFor($gender),
+                'state' => app(\App\Services\Guardian\GuardianGate::class)->stateFor($request->user()),
+            ] : null,
+
             'account' => [
                 'email' => $user->email,
                 'emailVerified' => $user->hasVerifiedEmail(),

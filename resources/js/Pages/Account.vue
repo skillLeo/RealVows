@@ -13,6 +13,7 @@ const props = defineProps({
     account: { type: Object, required: true },
     countryCodes: { type: Array, required: true },
     notifications: { type: Object, default: () => ({}) },
+    trustedContact: { type: Object, default: null },
 });
 
 const page = usePage();
@@ -200,6 +201,23 @@ const logout = () => router.post('/logout');
                         {{ notifyForm.processing ? 'Saving' : 'Save preferences' }}
                     </BaseButton>
                 </form>
+            </BaseCard>
+
+            <!-- ⚠️ ABSENT, NOT DISABLED, WHEN THE POLICY DOES NOT OFFER IT.
+                 The requirement is unset by design; rendering a greyed-out card
+                 would advertise a system nobody has switched on. -->
+            <BaseCard v-if="trustedContact">
+                <div class="rv-stack" style="gap: 16px">
+                    <span class="rv-label rv-label--brass">{{ $t('trusted_contact.heading') }}</span>
+                    <p class="rv-body">
+                        {{ trustedContact.state.message ?? $t('trusted_contact.lead') }}
+                    </p>
+                    <div class="rv-actions">
+                        <BaseButton href="/trusted-contact" variant="secondary">
+                            {{ $t('trusted_contact.heading') }}
+                        </BaseButton>
+                    </div>
+                </div>
             </BaseCard>
 
             <BaseCard v-if="adminLinks.length" accent>

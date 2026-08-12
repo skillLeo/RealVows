@@ -117,6 +117,10 @@ Route::middleware(['auth', 'guardian'])->prefix('trusted-contact-dashboard')->na
     Route::get('/', [GuardianDashboardController::class, 'index'])->name('dashboard');
     Route::post('/decisions/{match}', [GuardianDashboardController::class, 'decide'])->name('decide');
     Route::get('/photo/{photo}', [GuardianDashboardController::class, 'photo'])->name('photo');
+
+    // The joint photograph. The code is issued on first view of this page.
+    Route::get('/confirm', [GuardianDashboardController::class, 'joint'])->name('joint');
+    Route::post('/confirm', [GuardianDashboardController::class, 'storeJoint'])->name('joint.store');
 });
 
 /*

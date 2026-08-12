@@ -4069,3 +4069,56 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * exemption, not an oversight, and it is written down so the audit's remaining
  * two rows are explainable rather than ignored.
  */
+
+/* --------------------------------------------------------------------------
+   Questions — native <details>, no JavaScript
+   -------------------------------------------------------------------------- */
+
+.rv-faq { display: flex; flex-direction: column; }
+
+.rv-faq__item { border-bottom: 1px solid var(--hairline); }
+
+.rv-faq__q {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--display);
+  font-size: var(--fs-display-3);
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 40, 'SOFT' 10, 'WONK' 0;
+}
+
+/* Safari draws its own triangle without this. */
+.rv-faq__q::-webkit-details-marker { display: none; }
+
+.rv-faq__q::after {
+  content: '';
+  margin-left: auto;
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid var(--brass);
+  border-bottom: 1px solid var(--brass);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 200ms var(--ease-settle);
+}
+
+.rv-faq__item[open] .rv-faq__q::after {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+.rv-faq__a {
+  margin: 0;
+  padding: 0 0 24px;
+  max-width: 62ch;
+  font-size: var(--fs-body-2);
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-faq__q::after { transition: none; }
+}

@@ -218,6 +218,16 @@
         "confirm_done_heading": "Thank you, that is with us",
         "confirm_done_body": "Someone will check it and we will email you. There is nothing else for you to do."
     },
+    "support": {
+        "heading": "Ask us something",
+        "lead": "A person reads every message and replies here. There is nobody else in the room.",
+        "unfair_prompt": "Your trusted contact has declined several introductions without saying why. If that does not feel right, tell us and we will look.",
+        "what_about": "What is this about?",
+        "tell_us": "Tell us what happened",
+        "send": "Send",
+        "sending": "Sending",
+        "open_heading": "Open with us"
+    },
     "demo": {
         "banner": "This is not the live platform. Every member shown here is invented, and the sign-in buttons are open to anyone."
     },

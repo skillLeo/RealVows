@@ -35,4 +35,9 @@ class PublicPageController extends Controller
     {
         return view('public.about');
     }
+
+    public function faq(): View
+    {
+        return view('public.faq');
+    }
 }

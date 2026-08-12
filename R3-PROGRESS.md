@@ -148,7 +148,19 @@ not simply returning nothing.
   secondary flows, view transitions between card and match view, optimistic UI
   for approve/decline, and the screen-by-screen premium pass (whitespace,
   empty states, three-tier loading, error voice, 8px rhythm audit).
-- **Part I** — FAQ and support
+- ~~**Part I**~~ **done.** `/questions` is a public Blade page using native
+  `<details>` — keyboard operable, screen-reader correct, works without
+  JavaScript, and findable by the browser's own in-page search, which a JS
+  accordion hides. Answers describe outcomes only. It joined
+  `PublicSurfaces::paths()` so the marriage-lead, outbound-link and prose-style
+  guards cover it automatically.
+  Support tickets for members and trusted contacts, with a type list that
+  differs by who is filling it in. `guardian_unfair` is pre-selected when the
+  decline pattern is present. The admin inbox sorts unfair-contact first and
+  then oldest, and replies go through the existing message thread rather than a
+  second reply box without the relay prohibition on it.
+  **Not built:** tests for the support flow itself, and no nav link to
+  `/support` from inside the product.
 
 ## Carried debt
 
@@ -177,7 +189,8 @@ not simply returning nothing.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 633 tests, 624 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean) (PowerTranz sandbox ×7 and the
+- **Suite: 633 tests, 624 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean)
+- **All ten R3 parts have been started; A, C, D, E, F, G, I are complete** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

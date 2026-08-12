@@ -40,6 +40,7 @@ class PublicSurfaces
             '/',
             '/how-it-works',
             '/about',
+            '/questions',
             '/terms',
             '/privacy',
             '/community-guidelines',

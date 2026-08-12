@@ -64,6 +64,7 @@
             <nav class="rv-pubfoot__nav" aria-label="Legal">
                 <a href="{{ route('how-it-works') }}">How it works</a>
                 <a href="{{ route('about') }}">About</a>
+                <a href="{{ route('faq') }}">Questions</a>
                 <a href="{{ route('legal.terms') }}">Terms of Service</a>
                 <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
                 <a href="{{ route('legal.guidelines') }}">Community Guidelines</a>

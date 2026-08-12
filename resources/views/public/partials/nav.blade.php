@@ -27,6 +27,7 @@
     $links = array_values(array_filter([
         ['href' => route('how-it-works'), 'label' => 'How it works'],
         ['href' => route('about'), 'label' => 'About'],
+        ['href' => route('faq'), 'label' => 'Questions'],
         $pricingVisible
             ? ['href' => url('/packages'), 'label' => 'Pricing']
             : null,

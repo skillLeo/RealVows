@@ -14,7 +14,9 @@ use App\Http\Controllers\TrustedContactAcceptanceController;
 use App\Http\Controllers\TrustedContactController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\Admin\SupportQueueController;
 use App\Http\Controllers\ProfileWriterController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ResendWebhookController;
@@ -45,6 +47,7 @@ Route::get('/', [PublicPageController::class, 'home'])->name('home');
  */
 Route::get('/how-it-works', [PublicPageController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/about', [PublicPageController::class, 'about'])->name('about');
+Route::get('/questions', [PublicPageController::class, 'faq'])->name('faq');
 
 /*
  * Served rather than static, because it must answer differently on the review
@@ -102,6 +105,10 @@ Route::middleware('auth')->group(function () {
      * choice goes through the ordinary profile save.
      */
     Route::post('/profile/rewrite', ProfileWriterController::class)->name('profile.rewrite');
+
+    // Support, for members and trusted contacts alike.
+    Route::get('/support', [SupportController::class, 'show'])->name('support');
+    Route::post('/support', [SupportController::class, 'store'])->name('support.store');
 
     Route::get('/trusted-contact', [TrustedContactController::class, 'show'])->name('trusted-contact.show');
     Route::post('/trusted-contact', [TrustedContactController::class, 'store'])->name('trusted-contact.store');
@@ -178,6 +185,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
          * Staff talking to one member or one trusted contact. There is no
          * member-to-member route and the schema has no shape for one.
          */
+        Route::get('/support', [SupportQueueController::class, 'index'])->name('support');
+        Route::post('/support/{ticket}', [SupportQueueController::class, 'resolve'])->name('support.resolve');
+
         Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages');
         Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
     });

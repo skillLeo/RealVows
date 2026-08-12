@@ -412,7 +412,7 @@ class Scanners
         preg_match_all(
             '#(?:https?:)?//([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+)'
             .'|(?<![a-z0-9@.\\\\-])([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*'
-            .'\.(?:com|net|org|io|co|uk|jm|dev|app|test|info|biz|me|ai))\b#i',
+            .'\.(?:com|net|org|io|co|uk|jm|dev|app|test|info|biz|me|ai|cloud|site|online|xyz|link|live))\b#i',
             $text,
             $matches,
             PREG_SET_ORDER,

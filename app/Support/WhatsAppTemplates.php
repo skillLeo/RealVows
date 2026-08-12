@@ -63,7 +63,7 @@ class WhatsAppTemplates
         'introduction_delivered' => [
             'category' => self::UTILITY,
             'variables' => ['first_name', 'count'],
-            'body' => "Hello {{1}}, someone new is waiting for you on RealVows — {{2}} introduction to open when you are ready.\n\nOpen it here: realvows.skillleo.com/dashboard\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, someone new is waiting for you on RealVows — {{2}} introduction to open when you are ready.\n\nOpen it here: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],
 
         /*
@@ -72,7 +72,7 @@ class WhatsAppTemplates
         'introduction_unlocked' => [
             'category' => self::UTILITY,
             'variables' => ['first_name', 'count'],
-            'body' => "Hello {{1}}, your payment is complete and {{2}} introduction is now open.\n\nRead it here: realvows.skillleo.com/dashboard\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, your payment is complete and {{2}} introduction is now open.\n\nRead it here: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],
 
         /*
@@ -82,7 +82,7 @@ class WhatsAppTemplates
         'mutual_interest' => [
             'category' => self::UTILITY,
             'variables' => ['first_name', 'other_first_name'],
-            'body' => "Hello {{1}}, good news — {{2}} is interested in you as well. You can now see how to get in touch.\n\nOpen it here: realvows.skillleo.com/dashboard\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, good news — {{2}} is interested in you as well. You can now see how to get in touch.\n\nOpen it here: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],
 
         /*
@@ -97,7 +97,7 @@ class WhatsAppTemplates
         'someone_interested' => [
             'category' => self::UTILITY,
             'variables' => ['first_name'],
-            'body' => "Hello {{1}}, someone you were introduced to has expressed interest in you.\n\nOpen your introductions to see who: realvows.skillleo.com/dashboard\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, someone you were introduced to has expressed interest in you.\n\nOpen your introductions to see who: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],
 
         /*
@@ -106,7 +106,7 @@ class WhatsAppTemplates
         'verification_approved' => [
             'category' => self::UTILITY,
             'variables' => ['first_name'],
-            'body' => "Hello {{1}}, your profile has been verified. Your introductions are on their way.\n\nrealvows.skillleo.com/dashboard\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, your profile has been verified. Your introductions are on their way.\n\nrealvows.com/dashboard\n\n".self::OPT_OUT,
         ],
 
         /*
@@ -116,7 +116,7 @@ class WhatsAppTemplates
         'verification_rejected' => [
             'category' => self::UTILITY,
             'variables' => ['first_name', 'reason'],
-            'body' => "Hello {{1}}, your profile needs a little more before it can be verified. Reason: {{2}}\n\nYou can put it right here: realvows.skillleo.com/account\n\n".self::OPT_OUT,
+            'body' => "Hello {{1}}, your profile needs a little more before it can be verified. Reason: {{2}}\n\nYou can put it right here: realvows.com/account\n\n".self::OPT_OUT,
         ],
 
         /*

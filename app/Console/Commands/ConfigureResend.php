@@ -78,7 +78,7 @@ class ConfigureResend extends Command
                 $settings->set('mail', 'from_address', $from);
                 $this->info("From address set to {$from}.");
             } elseif (! $settings->get('mail', 'from_address')) {
-                $settings->set('mail', 'from_address', 'introductions@realvows.skillleo.com');
+                $settings->set('mail', 'from_address', 'info@realvows.com');
             }
 
             if (! $settings->get('mail', 'from_name')) {
@@ -102,7 +102,7 @@ class ConfigureResend extends Command
                 $this->warn('  Resend rejects any message whose from-domain is not verified in');
                 $this->warn('  YOUR Resend account, with a 403 — every send would fail. If this');
                 $this->warn('  domain is not verified there, change it:');
-                $this->warn('      --from=introductions@realvows.skillleo.com');
+                $this->warn('      --from=info@realvows.com');
                 $this->line('');
             }
 

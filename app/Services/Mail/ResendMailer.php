@@ -172,7 +172,7 @@ class ResendMailer
 
     private function from(): string
     {
-        $address = $this->settings->get('mail', 'from_address') ?: 'introductions@realvows.skillleo.com';
+        $address = $this->settings->get('mail', 'from_address') ?: 'info@realvows.com';
         $name = $this->settings->get('mail', 'from_name') ?: 'RealVows';
 
         return "{$name} <{$address}>";

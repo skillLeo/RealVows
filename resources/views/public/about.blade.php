@@ -70,8 +70,8 @@
 
         <div class="rv-grid rv-grid--3" data-stagger>
             @foreach ([
-                ['Real people only', 'Every member is reviewed by a real person before they can be matched. Nobody enters the matching pool unverified.'],
-                ['Privacy by default', 'Your photographs are held privately and your last name stays yours until you and someone else have both said yes.'],
+                ['Real people only', 'Everyone here has been checked before they can be matched.'],
+                ['Privacy by default', 'Your last name stays yours until you and someone else have both said yes.'],
                 ['No games', 'Nobody is ranked against strangers and nothing is scored in public. You are introduced, or you are not.'],
             ] as [$title, $body])
                 <div class="rv-card rv-stack" style="gap: 16px" data-reveal>

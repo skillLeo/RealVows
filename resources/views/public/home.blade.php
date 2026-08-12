@@ -14,7 +14,7 @@
     over rendered output and keeps the allow-list of legitimate uses current.
 --}}
 @section('title', 'Find your true soul mate')
-@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every profile verified by a real person, introductions brought to your email and WhatsApp.')
+@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every member verified, introductions brought to your email and WhatsApp.')
 
 @section('content')
 
@@ -35,8 +35,8 @@
                      addresses the reader. He sent "The person to build a life
                      with." --}}
                 <p class="rv-lead" style="max-width: 44ch">
-                    The person you build a life with. Joining is free, and a real person checks
-                    every profile before anyone is introduced.
+                    The person you build a life with. Joining is free, and everyone here has been
+                    checked.
                 </p>
 
                 {{--
@@ -141,7 +141,7 @@
                  reader feels without being able to name. --}}
             @foreach ([
                 ['diamond', 'Free to join', 'Build your entire profile without paying anything.'],
-                ['check', 'Verified identity', 'A real person reviews every member before they can be matched.'],
+                ['check', 'Verified identity', 'Nobody is introduced to you unchecked.'],
                 ['four', 'Four photos', 'Enough to show who you are, few enough to finish in one sitting.'],
                 ['envelope', 'Email and WhatsApp', 'Your introductions come to you, wherever you are.'],
             ] as [$icon, $title, $body])

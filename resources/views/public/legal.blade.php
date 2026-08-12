@@ -119,9 +119,7 @@
             --}}
             <h2 class="rv-d3">Verification</h2>
             <p class="rv-body">
-                Every member is reviewed by a real person before they can be matched. Nobody
-                enters the matching pool unverified. We ask for four photographs as part of
-                building a profile.
+                Every member is checked before they can be matched.
             </p>
 
             {{--
@@ -144,10 +142,9 @@
 
             <h2 class="rv-d3">Your data</h2>
             <p class="rv-body">
-                Your photographs are held in private storage and are never publicly linkable.
                 Your last name stays private until you and another member have both expressed
                 interest. You can ask us for a copy of your data, or ask us to delete it, at
-                any time.
+                any time. How we hold it is set out in the Privacy Policy.
             </p>
         </div>
     </article>

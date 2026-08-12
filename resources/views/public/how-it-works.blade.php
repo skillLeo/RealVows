@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'How it works')
-@section('description', 'Build a profile, get verified by a real person, and receive introductions chosen for you. There is no directory to browse and nothing to search.')
+@section('description', 'Build a profile, get verified, and receive introductions chosen for you.')
 
 @section('content')
     <section class="rv-shell rv-section">
@@ -29,8 +29,7 @@
             <h1 class="rv-d1" style="max-width: 20ch">We choose. You decide.</h1>
             <p class="rv-lead" style="max-width: 54ch">
                 You will not spend your evenings scrolling. You tell us who you are and what
-                matters to you. A real person confirms you are genuine. After that, introductions
-                come to you.
+                matters to you. After that, introductions come to you.
             </p>
         </div>
     </section>
@@ -54,43 +53,30 @@
         <div class="rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
             <p class="rv-body">
                 You answer a set of questions about your values, your faith, the pace you want to
-                move at and the life you are trying to build. Your answers are compared with
-                everyone who could realistically be right for you, and the closest are brought to
+                move at and the life you are trying to build. The closest matches are brought to
                 you a few at a time.
             </p>
             <p class="rv-body">
-                What you will never do here is browse. There is no directory and no way to look
-                somebody up. That is deliberate. A person you were introduced to deserves your
-                attention more than a person you scrolled past.
+                What you will never do here is browse. A person you were introduced to deserves
+                your attention more than a person you scrolled past.
             </p>
             <p class="rv-body">
-                Your absolute limits are treated as absolute. Anyone they apply to is removed
-                before anything is scored, so you are never shown someone you have already said
-                you could not consider.
+                Your absolute limits are treated as absolute.
             </p>
         </div>
     </section>
 
-    {{-- Verification: the outcome, never the method. See public/legal.blade.php
-         for why the method does not appear on a public page. --}}
-    <section class="rv-shell rv-section">
-        <div class="rv-stack rv-section__head" data-reveal>
-            <p class="rv-eyebrow">Before anyone is matched</p>
-            <h2 class="rv-d2">Everyone here is checked by a person</h2>
-            <span class="rv-underline" style="max-width: 200px"></span>
-        </div>
+    {{-- ⚠️ A WHOLE SECTION EXPLAINING VERIFICATION USED TO SIT HERE.
 
-        <div class="rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
-            <p class="rv-body">
-                Every member is reviewed by a real person before they can be matched. Nobody enters
-                the matching pool unverified.
-            </p>
-            <p class="rv-body">
-                It is the slowest part of joining. It is also the reason the rest of it is worth
-                anything.
-            </p>
-        </div>
-    </section>
+         It said every member is reviewed by a real person, that nobody enters
+         the pool unverified, and that it is the slowest part of joining. All
+         true, and all an explanation of how the product works rather than what
+         it is for.
+
+         The client has now said three times that the product should do things
+         rather than describe how it does them, and publishing the shape of a
+         check tells anyone who wants to work around it where to start. The
+         outcome is stated once, in the three steps above. That is enough. --}}
 
     @include('public.partials.what-arrives')
 @endsection

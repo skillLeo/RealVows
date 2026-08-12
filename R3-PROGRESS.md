@@ -116,7 +116,16 @@ not simply returning nothing.
 - **Part D** — the member-facing accept/reject UI in the profile builder (the
   endpoint returns both versions; nothing renders them yet), and writing
   `bio_original` on save when a rewrite is accepted
-- **Part F** — public copy reduction
+- ~~**Part F** — public copy reduction~~ **done for the marketing pages.**
+  Verification steps, message-content descriptions and the safety-feature list
+  are out of home, how-it-works, about and the shared legal preamble. A whole
+  section explaining verification was removed from `/how-it-works`.
+  **⚠️ ONE DELIBERATE DEPARTURE, FLAGGED FOR THE CLIENT:** §F says "all public
+  pages", but the Privacy Policy's own "Keeping it safe" section still says
+  traffic is encrypted and photographs are held privately. A privacy policy
+  exists to disclose data handling; stripping it would make it a worse legal
+  document, and it is the one page where explaining how the product works is
+  the point. Reverse it if he disagrees.
 - **Part G** — home banner ("The Meeting")
 - **Part H** — premium and mobile pass + device walk-list
 - **Part I** — FAQ and support

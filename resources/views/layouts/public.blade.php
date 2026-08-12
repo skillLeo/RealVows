@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#4A1220">
 
     <title>@yield('title', 'RealVows') · RealVows</title>
-    <meta name="description" content="@yield('description', 'Find your true soul mate. Free to join, every profile verified by a real person, introductions brought to your email and WhatsApp.')">
+    <meta name="description" content="@yield('description', 'Find your true soul mate. Free to join, every member verified, introductions brought to your email and WhatsApp.')">
 
     {{-- The one-click sign-in is open on the review build, so it must
          not be indexed. Removed automatically when it goes live. --}}

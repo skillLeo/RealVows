@@ -44,9 +44,14 @@
             <figcaption class="rv-eyebrow">By email</figcaption>
 
             <div class="rv-arrives__mock">
+                {{-- ⚠️ THIS SAYS THAT IT ARRIVES, NOT WHAT IS IN IT.
+                     "Arrives in your inbox, privately, nobody else sees it" is
+                     a description of the message, which the client asked to be
+                     removed twice. It is also defensive: six sentences about
+                     what the site prevents read as a product answering an
+                     accusation nobody made. --}}
                 <p class="rv-arrives__body">
-                    An introduction arrives in your inbox, privately, as soon as it is ready.
-                    Nobody else sees it and nothing is announced.
+                    It reaches you by email, quietly, whenever it is ready.
                 </p>
 
                 <span class="rv-seal rv-seal--sm rv-arrives__seal">RV</span>
@@ -58,8 +63,7 @@
 
             <div class="rv-arrives__mock">
                 <p class="rv-arrives__body">
-                    So it reaches you wherever you are. You do not have to sit at a screen waiting.
-                    Open it when the time is right.
+                    And on your phone, wherever you are. Open it when the time is right.
                 </p>
             </div>
         </figure>

@@ -33,9 +33,20 @@ photograph, never a surname. A failing provider degrades to rules-only with a
 visible note; no key at all is "off" rather than "unavailable", which are
 deliberately different answers. `RiskScoringTest` 10/10.
 
-**Part E is half done.** The `ai` settings group is seeded (both keys, provider,
-per-feature models, per-feature toggles, monthly cap). The provider status
-banner is NOT built.
+**Part E is done.** The `ai` settings group is seeded (both keys, provider,
+per-feature models, per-feature toggles, monthly cap). `AiProviderStatus` asks
+the container what was actually bound rather than re-deriving the rule from
+settings, and `AiProviderBannerTest` 5/5 rebinds the narrator and asserts the
+banner changes — the test that proves it is not reasoning its way to an answer.
+Withheld from members.
+
+**Part D fidelity is done; the writer itself is not.**
+`ProfileWriterFidelity` catches invented proper nouns and invented numbers,
+survives capitalisation and punctuation, and does NOT flag ordinary sentence
+openers — an over-eager check would reject every rewrite and be switched off,
+which is the same as having none. `ProfileWriterFidelityTest` 8/8 including the
+hallucinating fixture the brief requires and a control proving the checker is
+not simply returning nothing.
 
 
 - **Part B remainder.** Built since the last handoff: `GuardianInvitation`
@@ -95,8 +106,9 @@ banner is NOT built.
   `TrustedContact/Show` does not yet render the offer or a way to raise it);
   no link from admin to an individual message thread — `/admin/messages/{user}`
   is reachable only by typing it
-- **Part E** — the provider status banner (settings group is done)
-- **Part D** — AI profile writer + fidelity test
+- **Part D** — the writer itself: the provider call, the accept/reject UI,
+  storing the original alongside the rewrite, and the 5-per-day rate limit.
+  The fidelity check that gates it is built and tested.
 - **Part F** — public copy reduction
 - **Part G** — home banner ("The Meeting")
 - **Part H** — premium and mobile pass + device walk-list
@@ -129,7 +141,7 @@ banner is NOT built.
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 607 tests, 598 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 620 tests, 611 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

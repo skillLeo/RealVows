@@ -88,6 +88,14 @@ class HandleInertiaRequests extends Middleware
                 ? app(\App\Support\GatewayStatus::class)->forDisplay()
                 : null,
 
+            /*
+             * ⚠️ ASKED OF THE CONTAINER, LIKE THE GATEWAY BANNER, and withheld
+             * from members — which model is bound is operational detail.
+             */
+            'ai' => fn () => $user?->can('settings.view')
+                ? app(\App\Support\AiProviderStatus::class)->forDisplay()
+                : null,
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

@@ -9,6 +9,7 @@ defineProps({
     status: { type: String, required: true },
     counts: { type: Object, required: true },
     openReports: { type: Number, default: 0 },
+    openTrustedContacts: { type: Number, default: 0 },
 });
 
 const page = usePage();
@@ -57,6 +58,16 @@ const FILTERS = [
                 <Link href="/admin/reports" class="rv-tab">
                     <span>Reports</span>
                     <span v-if="openReports > 0" class="rv-tab__count">{{ openReports }}</span>
+                    <span v-else class="rv-tab__count rv-tab__count--done">—</span>
+                </Link>
+
+                <!-- Same argument as Reports: same job, and the bar stays at
+                     four tabs. Without this link the trusted-contact queue is
+                     reachable only by typing the URL, which is how a queue of
+                     people waiting on us goes unread. -->
+                <Link href="/admin/trusted-contacts" class="rv-tab">
+                    <span>Trusted contacts</span>
+                    <span v-if="openTrustedContacts > 0" class="rv-tab__count">{{ openTrustedContacts }}</span>
                     <span v-else class="rv-tab__count rv-tab__count--done">—</span>
                 </Link>
             </nav>

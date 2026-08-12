@@ -69,14 +69,18 @@
   than hardcoded in the template. Gender separation applies to threads too, and
   a trusted contact's thread is scoped on the member they serve rather than
   themselves. `AdminMessagingTest` 7/7.
+  B8 replacement offer at 14 days and B9 unexplained-decline signal both in
+  `GuardianGate`, with a test proving five declines WITH reasons do not trigger
+  support — declining with a reason is the contact doing the job. The queue is
+  linked from the verification screen with a combined count so the forgotten
+  list is visible where staff actually look.
 
 ## Not started
 
-- **Part B**: the member-facing "offer a replacement at 14 days" prompt (the
-  command identifies stale cases, nothing tells her yet); B9 unfair-guardian
-  support path (auto-suggested after 5 declines with no reason) — the decision
-  history is recorded and queryable, nothing surfaces it; no link from the admin
-  nav to `/admin/trusted-contacts` or the message threads
+- **Part B**: the support *ticket* itself (B9 detects the pattern and
+  `TrustedContact/Show` does not yet render the offer or a way to raise it);
+  no link from admin to an individual message thread — `/admin/messages/{user}`
+  is reachable only by typing it
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -112,7 +116,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 595 tests, 586 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 597 tests, 588 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

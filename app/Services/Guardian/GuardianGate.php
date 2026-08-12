@@ -98,12 +98,58 @@ class GuardianGate
                 'state' => 'rejected',
                 'message' => 'We could not confirm your trusted contact. You can name somebody else.',
             ],
+            /*
+             * ⚠️ AT 14 DAYS SHE IS OFFERED SOMEBODY ELSE (B8).
+             *
+             * The reminder command stops chasing at this point, and without
+             * this branch the member would simply keep reading "we are waiting"
+             * forever with no way out. A flow that cannot end is worse than one
+             * that ends badly: she cannot chase him, and until now nothing told
+             * her she was allowed to stop waiting.
+             */
+            $guardian->created_at->diffInDays(now()) >= \App\Console\Commands\RemindTrustedContacts::OFFER_REPLACEMENT => [
+                'state' => 'stale',
+                'message' => 'Your trusted contact has not replied. You can name somebody else, '
+                    .'or ask us to arrange somebody for you.',
+                'mayReplace' => true,
+            ],
+
             default => [
                 'state' => 'awaiting',
                 'message' => 'We are waiting for your trusted contact to confirm. '
                     .'We will let you know as soon as they do.',
             ],
         };
+    }
+
+    /**
+     * ⚠️ B9. FIVE DECLINES WITH NO REASON IS A PATTERN, NOT A JUDGEMENT.
+     *
+     * A trusted contact is entitled to decline anybody, and declining with a
+     * reason is them doing the job. Declining repeatedly and saying nothing is
+     * the shape that leaves a member stuck with no way to understand or appeal
+     * it, and she has no visibility of the decisions at all.
+     *
+     * This does not accuse anybody. It surfaces a support route to the member
+     * so she can ask a human to look, which is the only fair response to a
+     * question the platform cannot answer on its own.
+     */
+    public const UNEXPLAINED_DECLINES_BEFORE_SUPPORT = 5;
+
+    public function shouldOfferSupport(User $member): bool
+    {
+        $guardian = Guardian::where('member_id', $member->id)
+            ->whereNot('status', Guardian::STATUS_REPLACED)
+            ->first();
+
+        if (! $guardian) {
+            return false;
+        }
+
+        return $guardian->decisions()
+            ->where('decision', \App\Models\GuardianDecision::DECLINED)
+            ->where(fn ($q) => $q->whereNull('reason')->orWhere('reason', ''))
+            ->count() >= self::UNEXPLAINED_DECLINES_BEFORE_SUPPORT;
     }
 
     private function verifiedGuardianFor(User $member): ?Guardian

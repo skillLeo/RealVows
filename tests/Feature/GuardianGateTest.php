@@ -204,4 +204,91 @@ class GuardianGateTest extends TestCase
         $guardian->forceFill(['status' => Guardian::STATUS_VERIFIED])->save();
         $this->assertSame('verified', $gate->stateFor($member->fresh())['state']);
     }
+
+    /**
+     * ⚠️ A FLOW THAT CANNOT END IS WORSE THAN ONE THAT ENDS BADLY.
+     *
+     * The reminder command stops chasing at 14 days. Without this branch the
+     * member reads "we are waiting" forever: she cannot chase him herself, and
+     * nothing told her she was allowed to stop waiting.
+     */
+    public function test_after_fourteen_days_she_is_offered_somebody_else(): void
+    {
+        $this->setLevel(GuardianPolicy::REQUIRED_ALL);
+        $member = $this->member('woman');
+
+        $guardian = Guardian::create([
+            'member_id' => $member->id,
+            'name' => 'Yusuf Adeyemi',
+            'relationship' => 'father',
+            'status' => Guardian::STATUS_INVITED,
+        ]);
+
+        // Still inside the window: she is told to wait.
+        $guardian->forceFill(['created_at' => now()->subDays(5)])->save();
+        $this->assertSame('awaiting', app(GuardianGate::class)->stateFor($member->fresh())['state']);
+
+        // Past it: she is offered a way out.
+        $guardian->forceFill(['created_at' => now()->subDays(15)])->save();
+
+        $state = app(GuardianGate::class)->stateFor($member->fresh());
+
+        $this->assertSame('stale', $state['state']);
+        $this->assertTrue($state['mayReplace'] ?? false);
+        $this->assertStringContainsString('name somebody else', $state['message']);
+    }
+
+    /**
+     * ⚠️ B9. FIVE DECLINES WITH NO REASON IS A PATTERN, NOT A JUDGEMENT.
+     *
+     * Declining WITH a reason is the trusted contact doing the job, and must
+     * never trigger this. The distinction is the whole point: one is somebody
+     * exercising the role, the other leaves a member stuck with nothing to
+     * understand or appeal.
+     */
+    public function test_repeated_unexplained_declines_offer_the_member_support(): void
+    {
+        $this->setLevel(GuardianPolicy::REQUIRED_ALL);
+        $member = $this->member('woman');
+        $gate = app(GuardianGate::class);
+
+        $guardian = Guardian::create([
+            'member_id' => $member->id,
+            'name' => 'Yusuf Adeyemi',
+            'relationship' => 'father',
+            'status' => Guardian::STATUS_VERIFIED,
+        ]);
+
+        $this->assertFalse($gate->shouldOfferSupport($member->fresh()));
+
+        // ⚠️ Five declines WITH reasons must not trigger it.
+        for ($i = 0; $i < 5; $i++) {
+            GuardianDecision::create([
+                'guardian_id' => $guardian->id,
+                'gate' => Guardian::GATE_INTRODUCTION,
+                'decision' => GuardianDecision::DECLINED,
+                'reason' => 'Not a good fit for her.',
+                'decided_at' => now(),
+            ]);
+        }
+
+        $this->assertFalse(
+            $gate->shouldOfferSupport($member->fresh()),
+            'Declining with a reason is the trusted contact doing the job and must not be '
+                .'treated as unreasonable.'
+        );
+
+        // Five without a reason does.
+        for ($i = 0; $i < 5; $i++) {
+            GuardianDecision::create([
+                'guardian_id' => $guardian->id,
+                'gate' => Guardian::GATE_INTRODUCTION,
+                'decision' => GuardianDecision::DECLINED,
+                'reason' => null,
+                'decided_at' => now(),
+            ]);
+        }
+
+        $this->assertTrue($gate->shouldOfferSupport($member->fresh()));
+    }
 }

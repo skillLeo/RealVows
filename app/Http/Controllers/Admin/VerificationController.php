@@ -61,6 +61,20 @@ class VerificationController extends Controller
         return Inertia::render('Admin/Verifications/Index', [
             // The reports queue is reached from here, so its count belongs here.
             'openReports' => \App\Models\Report::where('status', \App\Models\Report::STATUS_OPEN)->count(),
+
+            /*
+             * ⚠️ BOTH TRUSTED-CONTACT QUEUES IN ONE NUMBER: contacts awaiting
+             * review, AND members waiting for us to appoint somebody. Counting
+             * only the first would leave the forgotten queue invisible in the
+             * one place staff actually look.
+             */
+            'openTrustedContacts' => \App\Models\Guardian::query()
+                ->where(fn ($q) => $q
+                    ->where('status', \App\Models\Guardian::STATUS_SUBMITTED)
+                    ->orWhere(fn ($a) => $a->where('is_appointed', true)->whereNull('user_id'))
+                )
+                ->whereNot('status', \App\Models\Guardian::STATUS_REPLACED)
+                ->count(),
             'verifications' => $verifications,
             'status' => $status,
             // A count per filter, so each tab says how much work is behind it

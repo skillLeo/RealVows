@@ -167,7 +167,24 @@ class MatchPresenter
              * block does not run. That is the case worth testing, because it is
              * the one a relaxed guard would quietly get wrong.
              */
-            ...($mutual ? [
+            /*
+             * ⚠️ THE THIRD B5 GATE, ASKED AT THE EMISSION POINT.
+             *
+             * Mutual interest is necessary and no longer sufficient. Where the
+             * policy requires a trusted contact, they approve before any
+             * contact detail moves — that is the whole reason the gates are
+             * three rather than one.
+             *
+             * Asked here rather than in the controller because this is the one
+             * method that assembles the payload. A controller check would leave
+             * every other caller of full() free to leak, and there is already
+             * more than one.
+             *
+             * ⚠️ THE LAST NAME GOES WITH IT. A surname plus a city is enough to
+             * find somebody, so releasing it while withholding the phone number
+             * would be a distinction without a difference.
+             */
+            ...($mutual && $this->contactReleased($match) ? [
                 'lastName' => $them?->last_name,
                 'contact' => $this->contact($them),
             ] : []),
@@ -177,6 +194,26 @@ class MatchPresenter
              * of birth beyond the age the member volunteered.
              */
         ];
+    }
+
+    /**
+     * ⚠️ NO-OP WHEN NOTHING IS REQUIRED, which is the configured state today.
+     *
+     * Written as "is it required, and if so has it been approved" rather than
+     * "has it been approved", because the second form withholds contact details
+     * from every member on a platform where the requirement is off — a feature
+     * nobody switched on silently breaking a feature everybody uses.
+     */
+    private function contactReleased(MatchRecord $match): bool
+    {
+        $seeker = $match->seeker?->user;
+
+        if (! $seeker) {
+            return false;
+        }
+
+        return app(\App\Services\Guardian\GuardianGate::class)
+            ->mayExchangeContact($seeker, $match);
     }
 
     /**

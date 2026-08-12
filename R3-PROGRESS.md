@@ -29,14 +29,20 @@
   previous), `GuardianGate` (the three B5 gates, each reading the policy first),
   and the `guardian` settings group seeded with the requirement unset.
   `GuardianGateTest` 8/8 covering all four levels.
+  **The gates are now enforced, not just built:** `CandidatePool` filters
+  ungated members out of the query (candidate side), and `MatchPresenter`
+  withholds the last name and contact details until the contact gate is
+  approved. `GuardianGateEnforcementTest` 5/5 goes through the real pool and
+  the real presenter.
 
 ## Not started
 
-- **Part B**: invitation *delivery* (email + WhatsApp send, the model is done),
-  joint-photo upload with the generated code, calling `GuardianGate` from the
-  matching pipeline and the match/contact controllers (the gate exists and is
-  tested; nothing calls it yet), no-guardian admin queue, 3/7/14 reminders,
-  unfair-guardian path, admin messaging with the relay prohibition in the UI
+- **Part B**: invitation *delivery* (email + WhatsApp send; the model is done),
+  joint-photo upload with the generated code, the **introduction** gate at its
+  emission point (pool and contact gates are wired; the middle one is not),
+  seeker-side pool gate before generation runs, no-guardian admin queue,
+  3/7/14 reminders, unfair-guardian path, admin messaging with the relay
+  prohibition in the UI
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -72,7 +78,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 545 tests, 536 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 550 tests, 541 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Needs the client, not the developer

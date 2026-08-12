@@ -43,6 +43,7 @@ class CandidatePool
         $this->dealBreakers($query, $seeker);        // 8. and 9.
         $this->noPriorPass($query, $seeker);         // 10.
         $this->noExistingRow($query, $seeker);       // 11.
+        $this->guardianVerified($query);             // 12.
         $this->notBlocked($query, $seeker);          // 12.
 
         return $query;
@@ -64,6 +65,48 @@ class CandidatePool
      * platform this small, in a country this small, that is how a block turns
      * into an escalation.
      */
+    /**
+     * ⚠️ NOBODY ENTERS THE POOL WITHOUT THE TRUSTED CONTACT THEIR POLICY LEVEL
+     * REQUIRES.
+     *
+     * This is the first B5 gate, applied where the other hard filters are: in
+     * the query, so an ungated member does not exist to be matched rather than
+     * being matched and hidden afterwards.
+     *
+     * ⚠️ IT FILTERS THE CANDIDATE, NOT THE SEEKER. The seeker's own gate is
+     * asked before generation runs at all — a member who should not be matched
+     * should not be having a pool built for them. This side stops somebody
+     * being introduced TO a person who has not cleared their own requirement,
+     * which is the direction a reader naturally forgets.
+     *
+     * ⚠️ NO-OP WHEN THE REQUIREMENT IS OFF, and that is the configured state
+     * today. `whereIn` on an unconstrained set would be a filter that silently
+     * empties the pool for everybody, so the level is checked first and the
+     * clause is not added at all when nothing is required.
+     */
+    private function guardianVerified(Builder $query): void
+    {
+        $policy = app(\App\Support\GuardianPolicy::class);
+
+        if ($policy->isOff() || $policy->level() === \App\Support\GuardianPolicy::OPTIONAL) {
+            return;
+        }
+
+        $gendersNeedingOne = $policy->level() === \App\Support\GuardianPolicy::REQUIRED_ALL
+            ? array_keys(\App\Support\ProfileOptions::GENDER)
+            : ['woman', 'non_binary'];
+
+        $query->where(function (Builder $q) use ($gendersNeedingOne) {
+            $q->whereNotIn('profiles.gender', $gendersNeedingOne)
+                ->orWhereExists(function ($sub) {
+                    $sub->selectRaw(1)
+                        ->from('guardians')
+                        ->whereColumn('guardians.member_id', 'profiles.user_id')
+                        ->where('guardians.status', \App\Models\Guardian::STATUS_VERIFIED);
+                });
+        });
+    }
+
     private function notBlocked(Builder $query, Profile $seeker): void
     {
         $query->whereNotExists(function ($q) use ($seeker) {

@@ -44,6 +44,27 @@ class WhatsAppTemplates
 
     public const AUTHENTICATION = 'AUTHENTICATION';
 
+    /**
+     * ⚠️ MARKETING IS NOT A CHOICE WE MADE. META IMPOSED IT.
+     *
+     * `someone_interested` and `introduction_unlocked` were submitted as
+     * Utility and Meta recategorised both, on the grounds that their content
+     * does not meet its utility guidelines. There is a 60-day appeal window
+     * (to 5 October 2026) and the client has chosen not to appeal.
+     *
+     * ⚠️ THE CONSEQUENCE IS REAL AND IT IS NOT ONLY COST. A marketing template
+     * costs more per message, and it is subject to per-user marketing limits
+     * and marketing opt-out in a way a utility template is not. A member who
+     * has opted out of marketing will not receive these two, while still
+     * receiving the other four.
+     *
+     * So a member can be told their profile was verified and NOT told somebody
+     * is interested in them. That is a worse gap than it sounds, and it is why
+     * the categories are recorded here honestly rather than left as the
+     * aspiration we submitted.
+     */
+    public const MARKETING = 'MARKETING';
+
     /** The line every body ends with, so opting out is never buried. */
     public const OPT_OUT = 'Reply STOP to stop receiving these messages.';
 
@@ -70,7 +91,7 @@ class WhatsAppTemplates
          * 2 — Payment succeeded and introductions are now open.
          */
         'introduction_unlocked' => [
-            'category' => self::UTILITY,
+            'category' => self::MARKETING,
             'variables' => ['first_name', 'count'],
             'body' => "Hello {{1}}, your payment is complete and {{2}} introduction is now open.\n\nRead it here: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],
@@ -95,7 +116,7 @@ class WhatsAppTemplates
          * not consented to disclose.
          */
         'someone_interested' => [
-            'category' => self::UTILITY,
+            'category' => self::MARKETING,
             'variables' => ['first_name'],
             'body' => "Hello {{1}}, someone you were introduced to has expressed interest in you.\n\nOpen your introductions to see who: realvows.com/dashboard\n\n".self::OPT_OUT,
         ],

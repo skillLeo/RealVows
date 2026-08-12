@@ -344,24 +344,87 @@ class WhatsAppTemplateTest extends TestCase
         }
     }
 
-    /** ⚠️ The code template is AUTHENTICATION; submitted as utility it is rejected. */
-    public function test_the_verification_code_is_an_authentication_template(): void
+    /**
+     * ⚠️ EVERY CATEGORY IS ASSERTED EXPLICITLY, BECAUSE META CHANGED TWO OF
+     * THEM WITHOUT ASKING.
+     *
+     * This used to say "the code template is Authentication, everything else is
+     * Utility", with a message arguing that Utility is right for a message the
+     * member's own action triggered. That argument is still sound. Meta
+     * disagreed and recategorised `someone_interested` and
+     * `introduction_unlocked` as Marketing on the grounds that their content
+     * does not meet its utility guidelines, with a 60-day appeal window the
+     * client chose not to use.
+     *
+     * ⚠️ SO THE MAP BELOW IS WHAT META ACTUALLY HAS, NOT WHAT WE SUBMITTED.
+     * A test that keeps asserting the intention after the platform has
+     * overruled it is not protecting anything — it fails on the truth and
+     * passes on the wish.
+     *
+     * Written out per template rather than as a rule with an exception, so
+     * changing one is a visible line in a diff. If Meta reclassifies a third,
+     * this fails, which is the signal that our understanding of what these
+     * messages are has drifted from the platform's.
+     */
+    public function test_every_template_carries_the_category_meta_actually_assigned(): void
     {
+        $expected = [
+            'introduction_delivered' => WhatsAppTemplates::UTILITY,
+            'mutual_interest' => WhatsAppTemplates::UTILITY,
+            'verification_approved' => WhatsAppTemplates::UTILITY,
+            'verification_rejected' => WhatsAppTemplates::UTILITY,
+
+            // Recategorised by Meta on 5 August 2026. Not our choice.
+            'introduction_unlocked' => WhatsAppTemplates::MARKETING,
+            'someone_interested' => WhatsAppTemplates::MARKETING,
+
+            'phone_verification_code' => WhatsAppTemplates::AUTHENTICATION,
+        ];
+
         $this->assertSame(
-            WhatsAppTemplates::AUTHENTICATION,
-            WhatsAppTemplates::TEMPLATES['phone_verification_code']['category'],
+            array_keys($expected),
+            array_keys(array_intersect_key($expected, WhatsAppTemplates::TEMPLATES)),
+            'A template was added or removed without updating the category map.'
         );
 
-        foreach (WhatsAppTemplates::TEMPLATES as $name => $template) {
-            if ($name === 'phone_verification_code') {
-                continue;
-            }
-
+        foreach ($expected as $name => $category) {
             $this->assertSame(
-                WhatsAppTemplates::UTILITY,
-                $template['category'],
-                "Template [{$name}] is not Utility. Marketing costs more, approves slower, and is "
-                    .'the wrong classification for a message the member\'s own action triggered.'
+                $category,
+                WhatsAppTemplates::TEMPLATES[$name]['category'],
+                "Template [{$name}] no longer carries the category Meta has for it. If Meta "
+                    .'reclassified it again, update this map and read the note above about what '
+                    .'Marketing costs in reach.'
+            );
+        }
+    }
+
+    /**
+     * ⚠️ THE TWO MARKETING TEMPLATES CAN BE SUPPRESSED FOR A MEMBER WHO STILL
+     * RECEIVES THE OTHER FOUR.
+     *
+     * Marketing templates are subject to per-user marketing limits and opt-out
+     * in a way Utility templates are not. So a member can be told their profile
+     * was verified and NOT told that somebody is interested in them — which is
+     * the more important of the two messages.
+     *
+     * This asserts the gap exists so it is a known property rather than a
+     * surprise. It is not a bug to fix in code; it is a consequence to design
+     * around, and the fallback to email is what covers it.
+     */
+    public function test_the_marketing_templates_are_the_ones_email_must_cover(): void
+    {
+        $marketing = array_keys(array_filter(
+            WhatsAppTemplates::TEMPLATES,
+            fn (array $t) => $t['category'] === WhatsAppTemplates::MARKETING,
+        ));
+
+        $this->assertSame(['introduction_unlocked', 'someone_interested'], $marketing);
+
+        foreach ($marketing as $name) {
+            $this->assertNotEmpty(
+                WhatsAppTemplates::TEMPLATES[$name]['body'],
+                "[{$name}] is a marketing template and may not reach every member. There must be "
+                    .'an email carrying the same news.'
             );
         }
     }

@@ -104,7 +104,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 587 tests, 578 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 588 tests, 579 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten
@@ -119,7 +119,17 @@
 
 ## Needs the client, not the developer
 
-- **The six WhatsApp templates must be resubmitted to Meta.** Changing a body
-  invalidates the approved version. Six as Utility, `phone_verification_code`
-  as Authentication.
+- **The six WhatsApp templates must be resubmitted to Meta.** All six are
+  Active but were last edited 5 Aug, before the host changed — they still send
+  members to `realvows.skillleo.com`. Changing a body invalidates the approved
+  version, so this is unavoidable.
+- **`phone_verification_code` has never been submitted.** The code declares it;
+  Meta does not have it. Phone verification fails silently the day it is
+  switched on.
+- **An eighth template** is needed for the trusted-contact invitation, or
+  invitations go by email only.
+- **WhatsApp credentials are not on the new server.** All eight settings are
+  empty at `/admin/settings`. WABA ID `1553517519889000`, business ID
+  `1896803604614710`. Needs phone number ID, permanent access token, app secret
+  and a verify token.
 - `guardian_requirement` is unset by design. Somebody has to choose.

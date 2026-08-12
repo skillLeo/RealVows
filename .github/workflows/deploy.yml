@@ -218,15 +218,24 @@ jobs:
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
             "cd /var/www/realvows && /usr/bin/php8.4 artisan up" || true
 
+      # ⚠️ CHECKED ON THE DOMAIN, OVER HTTPS, NOT ON THE IP OVER HTTP.
+      #
+      # This asked for http://<ip>/ and demanded 200. That worked until TLS was
+      # issued: certbot rewrote the vhost and the bare IP now falls through to
+      # nginx's default, which answers 404. So a completely healthy deploy
+      # reported failure, and the failure pointed at the application rather
+      # than at the check.
+      #
+      # ⚠️ A HEALTH CHECK THAT TESTS SOMETHING MEMBERS NEVER USE IS NOT A
+      # HEALTH CHECK. Members reach https://realvows.com. That is what has to
+      # answer, and it is what is asked now.
       - name: Confirm the site answers
-        env:
-          SSH_HOST: ${{ secrets.VPS_HOST }}
         run: |
           for attempt in 1 2 3; do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://$SSH_HOST/" || echo 000)
-            if [ "$CODE" = "200" ]; then echo "Home page answered 200."; exit 0; fi
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://realvows.com/ || echo 000)
+            if [ "$CODE" = "200" ]; then echo "https://realvows.com answered 200."; exit 0; fi
             echo "::warning::Home page returned $CODE on attempt $attempt."
             sleep 10
           done
-          echo "::error::The site is not answering 200 after the deploy."
+          echo "::error::https://realvows.com is not answering 200 after the deploy."
           exit 1

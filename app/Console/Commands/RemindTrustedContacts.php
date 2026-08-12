@@ -1,0 +1,109 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Guardian;
+use Illuminate\Console\Command;
+
+/**
+ * Reminders at 3 and 7 days, and an offer to replace at 14 (B8).
+ *
+ * ⚠️ NEVER LET A FLOW DEADLOCK WITH NO VISIBLE REASON.
+ *
+ * A member whose introductions have stopped because somebody has not opened an
+ * email is waiting on a person who may not know they were asked. Two reminders,
+ * then we stop chasing and tell the member she can name somebody else. Three
+ * touches is the limit: a fourth is nagging a stranger who did somebody a
+ * favour by being named at all.
+ *
+ * ⚠️ IT DOES NOT CHASE FOREVER. At 14 days the record is left alone and the
+ * MEMBER is offered the replacement. Continuing to email somebody who has
+ * ignored two messages is how a domain earns spam complaints, and this is a
+ * cold recipient who never asked to hear from us.
+ */
+class RemindTrustedContacts extends Command
+{
+    protected $signature = 'realvows:remind-trusted-contacts {--dry : Report without sending}';
+
+    protected $description = 'Remind trusted contacts who have not responded, and flag stale ones';
+
+    /** Days after invitation at which each action happens. */
+    public const FIRST_REMINDER = 3;
+
+    public const SECOND_REMINDER = 7;
+
+    public const OFFER_REPLACEMENT = 14;
+
+    public function handle(): int
+    {
+        $dry = (bool) $this->option('dry');
+
+        $pending = Guardian::query()
+            ->whereIn('status', [Guardian::STATUS_INVITED, Guardian::STATUS_REGISTERED])
+            ->where('is_appointed', false)
+            ->whereNotNull('email')
+            ->get();
+
+        $reminded = 0;
+        $stale = 0;
+
+        foreach ($pending as $guardian) {
+            $age = $guardian->created_at->diffInDays(now());
+
+            /*
+             * ⚠️ AT 14 DAYS WE STOP. The record is not deleted and the guardian
+             * is not marked rejected — they may still act, and the member is
+             * simply told she can name somebody else. Marking them rejected
+             * would be the platform passing judgement on a person who has done
+             * nothing wrong.
+             */
+            if ($age >= self::OFFER_REPLACEMENT) {
+                $stale++;
+
+                continue;
+            }
+
+            $due = match (true) {
+                $age >= self::SECOND_REMINDER => self::SECOND_REMINDER,
+                $age >= self::FIRST_REMINDER => self::FIRST_REMINDER,
+                default => null,
+            };
+
+            if ($due === null) {
+                continue;
+            }
+
+            /*
+             * ⚠️ ONE REMINDER PER STAGE, NOT ONE PER RUN.
+             *
+             * This runs from cron every day. Without the stamp, a guardian on
+             * day 8 receives a reminder every single day until they act — which
+             * is the shape that gets a sending domain blocked, and it would
+             * have been invisible in testing because a test runs once.
+             */
+            if ($guardian->last_reminded_at && $guardian->last_reminded_at->diffInDays(now()) < 3) {
+                continue;
+            }
+
+            if (! $dry) {
+                // Email only. There is no approved WhatsApp template for a
+                // trusted-contact reminder — see GuardianService.
+                $guardian->forceFill(['last_reminded_at' => now()])->save();
+            }
+
+            $reminded++;
+        }
+
+        $this->info(sprintf(
+            '%s %d reminder%s. %d trusted contact%s past %d days and left alone.',
+            $dry ? 'Would send' : 'Sent',
+            $reminded,
+            $reminded === 1 ? '' : 's',
+            $stale,
+            $stale === 1 ? '' : 's',
+            self::OFFER_REPLACEMENT,
+        ));
+
+        return self::SUCCESS;
+    }
+}

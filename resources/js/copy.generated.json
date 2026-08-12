@@ -198,6 +198,26 @@
         "accept_submit": "Create my account",
         "accept_submitting": "Creating your account"
     },
+    "guardian_area": {
+        "dashboard_heading": "Introductions for :name",
+        "dashboard_lead": "You are asked to look at each introduction before she does. Take your time.",
+        "nothing_yet": "There is nothing waiting for you.",
+        "nothing_yet_body": "When she is introduced to somebody, it will appear here and we will email you.",
+        "withheld": "Photographs are not shared with an appointed trusted contact. They are reviewed by our team and shown to her directly.",
+        "approve": "This one is fine",
+        "decline": "Not this one",
+        "reason": "Why, if you would like to say",
+        "reason_help": "She will not be shown this. It helps us if you are ever replaced.",
+        "decided": "Thank you. Your decision has been recorded.",
+        "confirm_heading": "One photograph, and you are done",
+        "confirm_lead": "We need one photograph of you and :name together, holding this code. A person on our team checks it.",
+        "confirm_code_label": "Write this down or show it on a screen",
+        "confirm_no_id": "We do not ask for any identity document, and we never will.",
+        "confirm_upload": "Upload the photograph",
+        "confirm_uploading": "Uploading",
+        "confirm_done_heading": "Thank you, that is with us",
+        "confirm_done_body": "Someone will check it and we will email you. There is nothing else for you to do."
+    },
     "demo": {
         "banner": "This is not the live platform. Every member shown here is invented, and the sign-in buttons are open to anyone."
     },

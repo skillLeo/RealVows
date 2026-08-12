@@ -66,6 +66,15 @@ Schedule::command('realvows:project-public-state --quiet-if-unchanged')
     ->withoutOverlapping();
 
 /*
+ * ⚠️ DAILY, NOT EVERY MINUTE. A reminder is a message to a real person who did
+ * somebody a favour by being named at all, and the command stamps each one so a
+ * guardian on day 8 is not emailed every day until they act.
+ */
+Schedule::command('realvows:remind-trusted-contacts')
+    ->dailyAt('09:20')
+    ->withoutOverlapping();
+
+/*
  * Tops up introductions for anyone verified whose set has gone stale. Queues
  * jobs rather than doing the work, so the drain above does it a chunk at a
  * time and being killed mid-run costs at most one chunk.

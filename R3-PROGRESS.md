@@ -52,12 +52,19 @@
   it. Joint-photo upload built: the code is issued only after the contact signs
   in, kept stable across refreshes, stored on the private disk, and moves the
   record to `submitted` rather than `verified`. `GuardianJointPhotoTest` 5/5.
+  All three guardian Vue pages written and compiled (`Dashboard`, `JointPhoto`,
+  plus the two member pages), strings in the deck under `guardian_area`.
+  Reminders at 3 and 7 days with a per-stage stamp so a daily cron cannot nag;
+  at 14 days we stop chasing and leave the record alone rather than marking
+  somebody rejected who has done nothing wrong. `TrustedContactReminderTest` 6/6.
 
 ## Not started
 
-- **Part B**: the `Guardian/JointPhoto` Vue page (route and controller exist,
-  component not written); no-guardian admin queue; 3/7/14 reminders;
-  unfair-guardian path; admin messaging with the relay prohibition in the UI
+- **Part B**: no-guardian admin queue (records are created with `is_appointed`
+  but no admin screen lists them); the member-facing "offer a replacement at 14
+  days" prompt (the command identifies stale cases, nothing tells her yet);
+  unfair-guardian path; admin messaging with the relay prohibition in the UI;
+  the reminder command stamps but does not yet SEND an email
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -93,7 +100,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 574 tests, 565 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 580 tests, 571 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

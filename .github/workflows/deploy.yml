@@ -21,18 +21,35 @@ on:
         description: 'Type DEPLOY to confirm'
         required: true
         default: ''
+      # ⚠️ CLOSED SETS, NOT FREE TEXT.
+      #
+      # These values end up in a command that runs as root on the client's
+      # server. As free-text inputs they were a command injection: a single
+      # quote inside the value closed the quoting and everything after it ran
+      # as root on the box holding members' photographs.
+      #
+      # `choice` removes the whole class of problem at the source, because
+      # GitHub will not dispatch a value that is not on the list. The
+      # validation step below is the second line, for the API path and for the
+      # day somebody adds a free-text input here without thinking about it.
       seed_demo:
-        description: 'Re-seed the demo members after deploying ("yes" to run)'
+        description: 'Re-seed the demo members after deploying'
         required: false
-        default: ''
+        default: 'no'
+        type: choice
+        options: ['no', 'yes']
       teardown_demo:
-        description: 'Demo teardown: "dry" to count, "execute" to delete (irreversible)'
+        description: 'Demo teardown. "execute" is irreversible.'
         required: false
-        default: ''
+        default: 'skip'
+        type: choice
+        options: ['skip', 'dry', 'execute']
       settings_status:
-        description: 'Show which settings are filled in, never their values. e.g. mail'
+        description: 'Show which settings are filled in, never their values'
         required: false
-        default: ''
+        default: 'skip'
+        type: choice
+        options: ['skip', 'mail', 'payments', 'general', 'whatsapp', 'storage']
 
 concurrency:
   group: deploy-production
@@ -141,8 +158,35 @@ jobs:
             /usr/bin/php8.4 artisan up
           REMOTE
 
+      # ⚠️ FAIL CLOSED ON ANYTHING NOT ON THE LIST.
+      #
+      # `type: choice` constrains the web UI. It does NOT constrain the REST
+      # API, which will happily dispatch a workflow with an arbitrary string in
+      # any input. So the value is checked against the closed set here, in the
+      # runner, before it can reach a shell on the client's server.
+      #
+      # A case statement rather than a regex: the set is small, closed, and
+      # written out, so there is nothing to get subtly wrong.
+      - name: Validate the operation inputs
+        env:
+          SEED: ${{ github.event.inputs.seed_demo }}
+          TEARDOWN: ${{ github.event.inputs.teardown_demo }}
+          STATUS: ${{ github.event.inputs.settings_status }}
+        run: |
+          case "${SEED:-no}" in no|yes) ;; *) echo "::error::seed_demo must be no or yes."; exit 1 ;; esac
+          case "${TEARDOWN:-skip}" in skip|dry|execute) ;; *) echo "::error::teardown_demo must be skip, dry or execute."; exit 1 ;; esac
+          case "${STATUS:-skip}" in skip|mail|payments|general|whatsapp|storage) ;; *) echo "::error::settings_status is not a known group."; exit 1 ;; esac
+          echo "Inputs are on the allow-list."
+
+      # ⚠️ NOTHING FROM AN INPUT IS INTERPOLATED INTO THE REMOTE COMMAND.
+      #
+      # The remote script is a quoted heredoc, so the runner does no expansion
+      # on it at all. The three values arrive as ARGUMENTS to `bash -s`, which
+      # means the remote shell receives them as $1 $2 $3 rather than as text it
+      # has to parse. Even if validation above were removed, there is no
+      # quoting for a value to break out of.
       - name: Optional operations
-        if: ${{ github.event.inputs.seed_demo != '' || github.event.inputs.teardown_demo != '' || github.event.inputs.settings_status != '' }}
+        if: ${{ github.event.inputs.seed_demo == 'yes' || github.event.inputs.teardown_demo != 'skip' || github.event.inputs.settings_status != 'skip' }}
         env:
           SSH_HOST: ${{ secrets.VPS_HOST }}
           SSH_USER: ${{ secrets.VPS_USER }}
@@ -151,11 +195,15 @@ jobs:
           STATUS: ${{ github.event.inputs.settings_status }}
         run: |
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
-            "cd /var/www/realvows
-             [ '$SEED' = 'yes' ] && /usr/bin/php8.4 artisan db:seed --class=DemoSeeder --force
-             [ -n '$TEARDOWN' ] && /usr/bin/php8.4 artisan realvows:teardown-demo --mode='$TEARDOWN'
-             [ -n '$STATUS' ] && /usr/bin/php8.4 artisan realvows:settings-status '$STATUS'
-             true"
+            bash -s -- "${SEED:-no}" "${TEARDOWN:-skip}" "${STATUS:-skip}" <<'REMOTE'
+            set -e
+            seed="$1"; teardown="$2"; status="$3"
+            cd /var/www/realvows
+            [ "$seed" = "yes" ] && /usr/bin/php8.4 artisan db:seed --class=DemoSeeder --force
+            [ "$teardown" != "skip" ] && /usr/bin/php8.4 artisan realvows:teardown-demo --mode="$teardown"
+            [ "$status" != "skip" ] && /usr/bin/php8.4 artisan realvows:settings-status "$status"
+            true
+          REMOTE
 
       # ⚠️ ALWAYS. If a step above died after `artisan down`, the site is
       # sitting on a maintenance page and the only thing that lifts it is this.

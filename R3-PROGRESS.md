@@ -61,14 +61,22 @@
   `TrustedContactReminderTest` 7/7. Admin queue built at
   `/admin/trusted-contacts`: contacts awaiting review AND members waiting for us
   to appoint one, gender-separated like verification, rejection requires a
-  reason. `TrustedContactQueueTest` 6/6.
+  reason. `TrustedContactQueueTest` 6/6, component written with the
+  no-contact queue placed FIRST because it is the one that gets forgotten.
+  **B11 admin messaging built:** one counterparty per thread, so the schema has
+  no shape for a member-to-member conversation, and the relay prohibition is
+  rendered above the compose box from `AdminMessage::RELAY_PROHIBITION` rather
+  than hardcoded in the template. Gender separation applies to threads too, and
+  a trusted contact's thread is scoped on the member they serve rather than
+  themselves. `AdminMessagingTest` 7/7.
 
 ## Not started
 
-- **Part B**: the `Admin/TrustedContacts/Index` Vue page (route, controller and
-  tests exist; component not written); the member-facing "offer a replacement at
-  14 days" prompt (the command identifies stale cases, nothing tells her yet);
-  unfair-guardian path; admin messaging with the relay prohibition in the UI
+- **Part B**: the member-facing "offer a replacement at 14 days" prompt (the
+  command identifies stale cases, nothing tells her yet); B9 unfair-guardian
+  support path (auto-suggested after 5 declines with no reason) — the decision
+  history is recorded and queryable, nothing surfaces it; no link from the admin
+  nav to `/admin/trusted-contacts` or the message threads
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -104,7 +112,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 588 tests, 579 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 595 tests, 586 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

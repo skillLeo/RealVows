@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\CreditAdminController;
 use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\MatchAuditController;
@@ -165,6 +166,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             ->name('trusted-contacts.review');
         Route::get('/trusted-contacts/{guardian}/photo', [TrustedContactQueueController::class, 'photo'])
             ->name('trusted-contacts.photo');
+
+        /*
+         * Staff talking to one member or one trusted contact. There is no
+         * member-to-member route and the schema has no shape for one.
+         */
+        Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages');
+        Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
     });
 
     Route::middleware('admin:verifications.review')->group(function () {

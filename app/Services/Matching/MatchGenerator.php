@@ -37,6 +37,28 @@ class MatchGenerator
             return 0;
         }
 
+        /*
+         * ⚠️ THE SEEKER'S OWN B5 POOL GATE, ASKED BEFORE ANY ROW IS WRITTEN.
+         *
+         * CandidatePool gates the CANDIDATE side — it stops this member being
+         * introduced to somebody who has not cleared their requirement. This is
+         * the other half: a member who has not cleared their OWN requirement
+         * should not have introductions generated for them at all.
+         *
+         * Both halves are needed and neither implies the other. Without this
+         * one, an ungated woman would receive a full set of introductions she
+         * is not yet allowed to act on, and would then be told by the dashboard
+         * that she is waiting on her trusted contact — which reads as the
+         * product having changed its mind.
+         *
+         * ⚠️ RETURNS 0 RATHER THAN THROWING. Not being ready is an ordinary
+         * state, not an error, and the nightly sweep runs this across every
+         * member on the platform.
+         */
+        if ($seeker->user && ! app(\App\Services\Guardian\GuardianGate::class)->mayEnterPool($seeker->user)) {
+            return 0;
+        }
+
         $threshold = $this->dials->threshold();
         $wanted = $this->dials->teaserCount();
 

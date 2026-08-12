@@ -29,20 +29,22 @@
   previous), `GuardianGate` (the three B5 gates, each reading the policy first),
   and the `guardian` settings group seeded with the requirement unset.
   `GuardianGateTest` 8/8 covering all four levels.
-  **The gates are now enforced, not just built:** `CandidatePool` filters
-  ungated members out of the query (candidate side), and `MatchPresenter`
-  withholds the last name and contact details until the contact gate is
-  approved. `GuardianGateEnforcementTest` 5/5 goes through the real pool and
-  the real presenter.
+  **All three B5 gates are enforced, not just built.** Pool: `CandidatePool`
+  filters ungated candidates out of the query, and `MatchGenerator` refuses to
+  write rows for an ungated seeker. Introduction: `DashboardController` filters
+  unapproved introductions out of the payload rather than hiding them in the
+  component. Contact: `MatchPresenter` withholds the last name and contact
+  details until the contact gate is approved. The dashboard also carries
+  `trustedContact` state so a waiting member is always told why.
+  `GuardianGateEnforcementTest` 7/7, every refusal paired with a control.
 
 ## Not started
 
 - **Part B**: invitation *delivery* (email + WhatsApp send; the model is done),
-  joint-photo upload with the generated code, the **introduction** gate at its
-  emission point (pool and contact gates are wired; the middle one is not),
-  seeker-side pool gate before generation runs, no-guardian admin queue,
+  joint-photo upload with the generated code, no-guardian admin queue,
   3/7/14 reminders, unfair-guardian path, admin messaging with the relay
-  prohibition in the UI
+  prohibition in the UI, and the member-facing trusted-contact screens
+  (the dashboard carries the state; there is no form to add one yet)
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -78,7 +80,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 550 tests, 541 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 552 tests, 543 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Needs the client, not the developer

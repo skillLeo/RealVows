@@ -11,7 +11,10 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly MatchPresenter $presenter) {}
+    public function __construct(
+        private readonly MatchPresenter $presenter,
+        private readonly \App\Services\Guardian\GuardianGate $gate,
+    ) {}
 
     /**
      * The member's introductions, in one of five states.
@@ -59,7 +62,36 @@ class DashboardController extends Controller
                     : null,
             ],
 
-            'matches' => $matches->map(fn (MatchRecord $m) => $this->presenter->forCard($m))->all(),
+            /*
+             * ⚠️ THE MIDDLE B5 GATE, ASKED WHERE THE CARDS ARE EMITTED.
+             *
+             * Where the policy requires a trusted contact, they see the other
+             * party first and approve before the member sees anything. So an
+             * introduction awaiting that approval is not rendered as a locked
+             * card — it is not rendered at all. A locked card is an invitation
+             * to spend a credit, and offering one that cannot be opened yet is
+             * worse than showing nothing.
+             *
+             * ⚠️ FILTERED, NOT HIDDEN IN THE COMPONENT. The card payload
+             * carries a first name, a city and a score. Rendering it and
+             * hiding it in Vue would put all three in the page source of a
+             * member who is not yet permitted to see them.
+             */
+            'matches' => $matches
+                ->filter(fn (MatchRecord $m) => $this->gate->mayReleaseIntroduction($request->user(), $m))
+                ->map(fn (MatchRecord $m) => $this->presenter->forCard($m))
+                ->values()
+                ->all(),
+
+            /*
+             * ⚠️ NEVER LET A FLOW DEADLOCK WITH NO VISIBLE REASON (B8).
+             *
+             * A member whose introductions have stopped must be able to see
+             * why on their own dashboard. Silence reads as the product being
+             * broken, and nobody can chase a person they were never told they
+             * were waiting on.
+             */
+            'trustedContact' => $this->gate->stateFor($request->user()),
             'lockedCount' => $matches->where('status', MatchRecord::STATUS_TEASER)->count(),
             'openCount' => $matches->where('status', MatchRecord::STATUS_UNLOCKED)->count(),
 

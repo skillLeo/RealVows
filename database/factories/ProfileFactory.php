@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Profile;
 use App\Models\User;
 use App\Models\Verification;
-use App\Services\Sign\SignCalculator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +23,6 @@ class ProfileFactory extends Factory
          * does it. A factory that set these directly could drift from the
          * calculator and hide a bug in the thing being tested.
          */
-        $derived = (new SignCalculator)->for(\Illuminate\Support\Carbon::instance($dob));
 
         return [
             'user_id' => User::factory(),
@@ -36,8 +34,6 @@ class ProfileFactory extends Factory
             'city' => 'Kingston',
             'country' => 'Jamaica',
             'willing_to_relocate' => false,
-            'sign' => $derived['sign'],
-            'element' => $derived['element'],
             'height_cm' => fake()->numberBetween(150, 190),
             'body_type' => 'average',
             'education' => 'Bachelor degree',
@@ -87,12 +83,9 @@ class ProfileFactory extends Factory
 
     public function bornOn(string $date): static
     {
-        $derived = (new SignCalculator)->for(\Illuminate\Support\Carbon::parse($date));
 
         return $this->state([
             'date_of_birth' => $date,
-            'sign' => $derived['sign'],
-            'element' => $derived['element'],
         ]);
     }
 }

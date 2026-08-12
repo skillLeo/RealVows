@@ -3,7 +3,6 @@
 namespace App\Services\Matching;
 
 use App\Models\Profile;
-use App\Services\Matching\Scorers\AffinityScorer;
 use App\Services\Matching\Scorers\ComponentScorer;
 use App\Services\Matching\Scorers\LifestyleScorer;
 use App\Services\Matching\Scorers\PersonalityScorer;
@@ -12,15 +11,21 @@ use App\Services\Matching\Scorers\PreferencesScorer;
 use App\Services\Matching\Scorers\ValuesScorer;
 
 /**
- * Runs the six components and combines them into one number.
+ * Runs the five components and combines them into one number.
  *
  * Pure and deterministic end to end: the same two profiles always produce
  * the same score, so a member asking "why 87?" gets an answer that is still
  * true tomorrow, and the admin match log can show its working.
  *
  * ⚠️ The breakdown this returns is SERVER-SIDE ONLY. It is written to
- * matches.score_breakdown for the audit log and must never be serialised to
- * a member — it is the one place the internal mechanism is legible.
+ * matches.score_breakdown for the audit log.
+ *
+ * That used to be a secrecy requirement, because one of the six components was
+ * an affinity score derived from date of birth, and the breakdown was the
+ * one place that mechanism was legible. That component is gone. The breakdown stays
+ * server-side now for a duller and better reason: a member does not need five
+ * numbers to understand why somebody was chosen, and showing them invites an
+ * argument about the arithmetic rather than a conversation about the person.
  */
 class CompatibilityScorer
 {
@@ -28,14 +33,13 @@ class CompatibilityScorer
     private array $scorers;
 
     public function __construct(
-        AffinityScorer $affinity,
         PreferencesScorer $preferences,
         ValuesScorer $values,
         LifestyleScorer $lifestyle,
         PersonalityScorer $personality,
         PhysicalScorer $physical,
     ) {
-        $this->scorers = [$affinity, $preferences, $values, $lifestyle, $personality, $physical];
+        $this->scorers = [$preferences, $values, $lifestyle, $personality, $physical];
     }
 
     /**
@@ -112,6 +116,47 @@ class CompatibilityScorer
             }
 
             $total += $weighted;
+        }
+
+        /*
+         * ── ⚠️ THE ROUNDING REMAINDER GOES SOMEWHERE ON PURPOSE ───────────
+         *
+         * `weight` is rounded to 2dp for the audit log. Redistributing a
+         * missing component's weight across the rest produces repeating
+         * decimals, and five numbers each rounded to 2dp do not have to sum to
+         * 100. With the previous six weights they summed to 100.01 or 99.98 in
+         * five of the six possible cases.
+         *
+         * That drift shipped for months and the test meant to catch it passed,
+         * because its fixture happened to omit the ONE component whose removal
+         * landed exactly on 100. A test that holds only for the case somebody
+         * happened to write is the shape this project keeps finding.
+         *
+         * The remainder is given to the largest present component, which is the
+         * one where a hundredth of a point is least visible. The stored weights
+         * now sum to exactly 100 for every possible omission, which is what the
+         * admin log claims when it says "out of 100".
+         *
+         * ⚠️ THE TOTAL IS NOT ADJUSTED, only the displayed weights. `$total` is
+         * accumulated from the unrounded values and is already correct; nudging
+         * it to match a rounding artefact would corrupt the actual score to
+         * tidy up its own description.
+         */
+        if ($components !== []) {
+            $sum = round(array_sum(array_column($components, 'weight')), 2);
+            $remainder = round(100 - $sum, 2);
+
+            if (abs($remainder) >= 0.01) {
+                $largest = array_key_first($components);
+
+                foreach ($components as $key => $c) {
+                    if ($c['weight'] > $components[$largest]['weight']) {
+                        $largest = $key;
+                    }
+                }
+
+                $components[$largest]['weight'] = round($components[$largest]['weight'] + $remainder, 2);
+            }
         }
 
         return [

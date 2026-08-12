@@ -247,36 +247,44 @@ class ForbiddenLanguageTest extends TestCase
     }
 
     /**
-     * ⚠️ The structural guarantee, not a copy check.
+     * ⚠️ THE STRUCTURAL GUARANTEE, INVERTED.
      *
-     * The writer strips the affinity component before choosing anything, so
-     * no sentence can be keyed on it. Proven by making affinity overwhelming
-     * and confirming the copy does not change to describe it.
+     * This used to prove the writer could not key a sentence on the affinity
+     * component, by handing it an overwhelming affinity score and asserting the
+     * copy did not change. The component is deleted, so that test now proves
+     * nothing: it would pass against a writer that had never heard of the key.
+     *
+     * ⚠️ A TEST THAT PASSES BECAUSE ITS SUBJECT NO LONGER EXISTS IS THE
+     * QUIETEST KIND OF DEAD TEST, and this file is where that matters most.
+     *
+     * What is still worth guaranteeing is that the writer only ever speaks
+     * about components it has templates for. An unknown key must not produce a
+     * sentence, because the next time somebody adds a component it will arrive
+     * here before anybody has decided what may be said about it.
      */
-    public function test_the_writer_cannot_key_a_sentence_on_the_internal_component(): void
+    public function test_the_writer_says_nothing_about_a_component_it_has_no_words_for(): void
     {
         $writer = app(RationaleWriter::class);
 
         $seeker = Profile::factory()->woman()->create();
         $candidate = Profile::factory()->man()->create();
 
-        $withAffinityDominant = $writer->write($seeker, $candidate, [
+        $withUnknownDominant = $writer->write($seeker, $candidate, [
             'components' => [
-                'affinity' => ['raw' => 100.0, 'weight' => 25, 'weighted' => 25.0],
-                'values' => ['raw' => 71.0, 'weight' => 17, 'weighted' => 12.0],
+                'some_future_component' => ['raw' => 100.0, 'weight' => 40, 'weighted' => 40.0],
+                'values' => ['raw' => 71.0, 'weight' => 25, 'weighted' => 17.75],
             ],
         ]);
 
-        $withAffinityAbsent = $writer->write($seeker, $candidate, [
-            'components' => [
-                'values' => ['raw' => 71.0, 'weight' => 17, 'weighted' => 12.0],
-            ],
-        ]);
+        // It may open differently, because the opener bands on the top score.
+        // What it must never do is describe the component it has no words for.
+        $this->assertStringNotContainsString('some_future_component', $withUnknownDominant);
+        $this->assertClean($withUnknownDominant, 'a rationale with an unknown component');
 
-        $this->assertSame(
-            $withAffinityAbsent,
-            $withAffinityDominant,
-            'The rationale changed when the internal component changed, which means it can be read from the copy.'
+        $this->assertNotSame(
+            '',
+            trim($withUnknownDominant),
+            'The writer fell silent entirely rather than falling back to the components it knows.'
         );
     }
 
@@ -295,8 +303,12 @@ class ForbiddenLanguageTest extends TestCase
         $sameBirthday = $finder->find($a->fresh(), $b->fresh());
 
         // Change only the dates of birth. Nothing about the output may move.
-        $a->forceFill(['date_of_birth' => '1975-11-30', 'sign' => 'sagittarius', 'element' => 'fire'])->save();
-        $b->forceFill(['date_of_birth' => '1966-01-15', 'sign' => 'capricorn', 'element' => 'earth'])->save();
+        // ⚠️ The derived columns used to be set here alongside the dates,
+        // because writing a date of birth used to write them. Both columns are
+        // dropped. The dates alone are now the whole of what changes, which is
+        // exactly what this test claims to be varying.
+        $a->forceFill(['date_of_birth' => '1975-11-30'])->save();
+        $b->forceFill(['date_of_birth' => '1966-01-15'])->save();
 
         $this->assertSame(
             $sameBirthday,
@@ -350,7 +362,7 @@ class ForbiddenLanguageTest extends TestCase
             'seeker_profile_id' => $seeker->id,
             'matched_profile_id' => $candidate->id,
             'total_score' => 88,
-            'score_breakdown' => ['components' => ['affinity' => ['raw' => 92]]],
+            'score_breakdown' => ['components' => ['values' => ['raw' => 92]]],
             'status' => MatchRecord::STATUS_TEASER,
         ]);
 
@@ -362,19 +374,28 @@ class ForbiddenLanguageTest extends TestCase
     }
 
     /**
-     * The internal columns must not survive a careless serialisation of a
-     * whole Profile either.
+     * ⚠️ THE COLUMNS ARE GONE, NOT HIDDEN.
+     *
+     * This asserted that `sign` and `element` were computed and then hidden
+     * from serialisation. Both columns are dropped and the calculator is
+     * deleted, so hiding is no longer the mechanism: absence is.
+     *
+     * Kept rather than deleted, because the thing worth proving is unchanged —
+     * a serialised Profile must carry no trace of the removed mechanism — and
+     * because a future migration re-adding either column should fail here.
      */
-    public function test_the_internal_profile_columns_are_hidden(): void
+    public function test_the_removed_columns_are_absent_from_a_serialised_profile(): void
     {
         $profile = Profile::factory()->create(['date_of_birth' => '1990-04-01']);
 
-        $this->assertNotNull($profile->sign, 'The derivation should still be running.');
-
-        $json = $profile->toJson();
-
         $this->assertArrayNotHasKey('sign', $profile->toArray());
         $this->assertArrayNotHasKey('element', $profile->toArray());
-        $this->assertStringNotContainsStringIgnoringCase('aries', $json);
+
+        $this->assertFalse(
+            \Illuminate\Support\Facades\Schema::hasColumn('profiles', 'sign'),
+            'The profiles.sign column is back. The component that needed it was removed deliberately.'
+        );
+
+        $this->assertClean($profile->toJson(), 'a serialised profile');
     }
 }

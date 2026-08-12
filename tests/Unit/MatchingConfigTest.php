@@ -30,7 +30,7 @@ class MatchingConfigTest extends TestCase
     public function test_every_expected_component_is_present(): void
     {
         $this->assertSame(
-            ['affinity', 'preferences', 'values', 'lifestyle', 'personality', 'physical'],
+            ['preferences', 'values', 'lifestyle', 'personality', 'physical'],
             array_keys(config('matching.weights')),
             'A scorer exists for each of these keys. Adding or removing one here without '
                 .'adding or removing the matching scorer will produce scores that silently omit a component.'

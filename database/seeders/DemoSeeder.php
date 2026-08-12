@@ -13,7 +13,6 @@ use App\Models\Report;
 use App\Services\Credits\CreditService;
 use App\Services\Matching\MatchGenerator;
 use App\Services\Payments\PurchaseService;
-use App\Services\Sign\SignCalculator;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -60,7 +59,6 @@ class DemoSeeder extends Seeder
     public function __construct(
         private readonly PhotoStorageService $photos,
         private readonly ProfileCompleteness $completeness,
-        private readonly SignCalculator $signs,
     ) {}
 
     public function run(): void
@@ -176,7 +174,6 @@ class DemoSeeder extends Seeder
             $user->assignRole('member');
 
             $dob = Carbon::parse($person['dob']);
-            $derived = $this->signs->for($dob);
 
             $profile = Profile::create([
                 'user_id' => $user->id,
@@ -192,8 +189,6 @@ class DemoSeeder extends Seeder
 
                 // Internal, never surfaced. Written here so the Phase 2 engine
                 // has real values to score against when it is built.
-                'sign' => $derived['sign'],
-                'element' => $derived['element'],
 
                 'height_cm' => $person['height'],
                 'body_type' => $person['body'],

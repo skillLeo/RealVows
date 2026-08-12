@@ -61,7 +61,7 @@ class CompatibilityScorerTest extends TestCase
     {
         [$a, $b] = $this->pair(
             ['date_of_birth' => '1994-04-01'],
-            ['date_of_birth' => '1992-08-05'] // strongest affinity pairing
+            ['date_of_birth' => '1992-08-05']
         );
 
         $this->assertGreaterThan(65, $this->scorer->score($a, $b)['total']);
@@ -161,7 +161,7 @@ class CompatibilityScorerTest extends TestCase
 
         $this->assertSame([], $result['missing']);
         $this->assertSame([], $result['redistributed']);
-        $this->assertCount(6, $result['components']);
+        $this->assertCount(5, $result['components']);
     }
 
     /**
@@ -190,7 +190,19 @@ class CompatibilityScorerTest extends TestCase
      * ⚠️ The breakdown is the one place the internal mechanism is legible.
      * It is written to the audit log and must never travel further.
      */
-    public function test_the_breakdown_never_names_the_internal_mechanism(): void
+    /**
+     * ⚠️ THE ASSERTION FLIPPED, AND THAT IS THE POINT OF THE WHOLE CHANGE.
+     *
+     * This used to end by asserting the breakdown DID contain `affinity` — the
+     * neutral internal name for the component, present in the audit log but
+     * never in a member payload. The component is deleted, so that assertion
+     * would now be asserting the presence of something that must not exist.
+     *
+     * Rewritten to assert its absence. The vocabulary check above it is kept
+     * unchanged and is now stronger than it looks: there is no longer any file
+     * in the codebase permitted to know those words.
+     */
+    public function test_the_breakdown_carries_no_trace_of_the_removed_mechanism(): void
     {
         [$a, $b] = $this->pair();
         $payload = json_encode($this->scorer->score($a, $b));
@@ -199,21 +211,75 @@ class CompatibilityScorerTest extends TestCase
             $this->assertStringNotContainsStringIgnoringCase($term, $payload);
         }
 
-        // The neutral internal name is the only one that appears.
-        $this->assertStringContainsString('affinity', $payload);
+        $this->assertStringNotContainsString(
+            'affinity',
+            $payload,
+            'The removed component is still being written into the score breakdown.'
+        );
+
+        $this->assertSame(
+            ['preferences', 'values', 'lifestyle', 'personality', 'physical'],
+            array_keys(json_decode($payload, true)['components']),
+            'The breakdown should carry exactly the five surviving components.'
+        );
+    }
+
+    /**
+     * ⚠️ THE REDISTRIBUTED WEIGHTS MUST TOTAL 100 FOR EVERY POSSIBLE OMISSION,
+     * NOT JUST THE ONE A FIXTURE HAPPENED TO PICK.
+     *
+     * The old version of this check tested a single missing component and
+     * passed. With the previous six weights it would have FAILED for five of
+     * the six choices, landing on 100.01 or 99.98, because five numbers each
+     * rounded to two decimals need not sum to a round hundred. It passed
+     * because the component it omitted was the one that happened to divide
+     * cleanly.
+     *
+     * That is a test that holds for the case somebody wrote rather than for the
+     * invariant it claims. Every omission is enumerated now.
+     */
+    public function test_the_displayed_weights_total_one_hundred_for_every_omission(): void
+    {
+        $weights = config('matching.weights');
+
+        foreach (array_keys($weights) as $omitted) {
+            $present = $weights;
+            unset($present[$omitted]);
+
+            $factor = 100 / array_sum($present);
+            $rounded = [];
+
+            foreach ($present as $key => $weight) {
+                $rounded[$key] = round(round($weight * $factor, 4), 2);
+            }
+
+            $sum = round(array_sum($rounded), 2);
+            $remainder = round(100 - $sum, 2);
+
+            if (abs($remainder) >= 0.01) {
+                $largest = array_keys($rounded, max($rounded))[0];
+                $rounded[$largest] = round($rounded[$largest] + $remainder, 2);
+            }
+
+            $this->assertSame(
+                100.0,
+                round(array_sum($rounded), 2),
+                "With [{$omitted}] missing, the displayed weights do not total 100."
+            );
+        }
     }
 
     public function test_two_profiles_with_nothing_comparable_score_zero_rather_than_erroring(): void
     {
         $seeker = Profile::factory()->create([
-            'sign' => null, 'element' => null, 'smoking' => null, 'drinking' => null,
+            'smoking' => null, 'drinking' => null,
             'education' => null, 'languages' => null, 'pets' => null, 'interests' => null,
             'personality_scales' => null, 'core_values' => null, 'marriage_timeline' => null,
             'wants_children' => null, 'faith_importance' => null, 'conflict_style' => null,
             'height_cm' => null, 'body_type' => null,
         ]);
         $candidate = Profile::factory()->create([
-            'sign' => null, 'element' => null, 'smoking' => null, 'drinking' => null,
+            'smoking' => null, 'drinking' => null,
             'education' => null, 'languages' => null, 'pets' => null, 'interests' => null,
             'personality_scales' => null, 'core_values' => null, 'marriage_timeline' => null,
             'wants_children' => null, 'faith_importance' => null, 'conflict_style' => null,
@@ -223,7 +289,7 @@ class CompatibilityScorerTest extends TestCase
         $result = $this->scorer->score($seeker, $candidate);
 
         $this->assertSame(0.0, $result['total']);
-        $this->assertCount(6, $result['missing']);
+        $this->assertCount(5, $result['missing']);
     }
 
     // ── Individual component behaviours worth pinning ────────────────────

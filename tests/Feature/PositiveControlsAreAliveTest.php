@@ -44,30 +44,30 @@ use Tests\TestCase;
 class PositiveControlsAreAliveTest extends TestCase
 {
     /**
-     * ⚠️ THE ONLY TWO FILES PERMITTED TO KNOW THE SIGN NAMES, AND THIS LIST IS
-     * A CLOSED SET RATHER THAN AN EXCEPTION MECHANISM.
+     * ⚠️ EMPTY, AND THAT IS THE WHOLE POINT NOW.
      *
-     * The constraint has never been "the words must not exist" — the engine
-     * weights affinity, so the vocabulary has to live somewhere in order to be
-     * computed at all. The constraint is that it never reaches a surface a
-     * member can read.
+     * This was the closed set of two files permitted to know the affinity
+     * vocabulary: AffinityMatrix and SignCalculator. The constraint was never
+     * "the words must not exist" — the engine weighted affinity, so the
+     * vocabulary had to live somewhere in order to be computed at all. The
+     * constraint was that it never reached a surface a member could read.
      *
-     * These two are the mechanism. Neither renders anything, neither is
-     * reachable from a controller's output, and ForbiddenLanguageTest asserts
-     * separately that nothing they produce carries the vocabulary forward into
-     * a rationale or a commonality.
+     * Both files are deleted. The component is gone from the weights, the
+     * scorer is gone from the pipeline, and the two profile columns behind it
+     * are dropped. There is nothing left to allow.
      *
-     * ⚠️ ADDING A PATH HERE IS THE ONE CHANGE IN THIS FILE THAT WOULD MATTER.
-     * It is an allow-list, not an ignore-list: a THIRD file gaining the
-     * vocabulary fails the build, and that failure is the signal that the
-     * mechanism has started spreading toward the surface. Do not widen it to a
-     * directory, and do not silence a failure by appending to it without being
-     * able to say why the new file can never be read by a member.
+     * ⚠️ THE READER IS NOT RELAXED. It runs at full strictness over an empty
+     * allow-list, which is strictly stronger than before: previously a leak
+     * into either of those two files was permitted by design, and now any
+     * occurrence anywhere fails the build.
+     *
+     * ⚠️ AN EMPTY ALLOW-LIST IS ALSO THE EASIEST KIND TO MISREAD. If somebody
+     * later adds a path here, they are re-introducing a mechanism this product
+     * deliberately removed, and they should have to explain why in this
+     * docblock rather than in a commit message nobody reads.
      */
-    private const THE_ENGINE = [
-        'app/Services/Matching/AffinityMatrix.php',
-        'app/Services/Sign/SignCalculator.php',
-    ];
+    private const THE_ENGINE = [];
+
 
     /**
      * ⚠️ EVERY READER, WITH A VIOLATION THAT MUST BE CAUGHT AND A CLEAN SAMPLE
@@ -362,11 +362,28 @@ class PositiveControlsAreAliveTest extends TestCase
                 .'one that does not, so the freshness half of the allow-list check proves nothing.'
         );
 
-        // And the detector genuinely fires on a real engine file, so the
-        // comparison above is not passing because the reader is dead.
-        $live = base_path(self::THE_ENGINE[0]);
+        /*
+         * ⚠️ AND THE DETECTOR GENUINELY FIRES ON SOMETHING, so the comparison
+         * above is not passing merely because the reader is dead.
+         *
+         * This used to read THE_ENGINE[0] — a real file from the allow-list.
+         * That allow-list is now empty, because the mechanism it protected has
+         * been deleted, and an empty list has no element zero. The control
+         * broke the moment its subject disappeared, which is the correct
+         * behaviour and the reason it is written this way.
+         *
+         * A synthetic sample replaces it. The control no longer depends on the
+         * allow-list having any members, so it keeps proving the reader is
+         * alive whether the list is empty, has two entries, or has ten.
+         */
+        $planted = 'This file computes a zodiac affinity from a birth chart.';
 
-        $this->assertNotSame([], Scanners::forbiddenTerms(File::get($live)));
+        $this->assertNotSame(
+            [],
+            Scanners::forbiddenTerms($planted),
+            'The reader cannot see the vocabulary planted directly in front of it, so the '
+                .'stale-entry comparison above proves nothing.'
+        );
     }
 
     /**

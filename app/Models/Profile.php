@@ -24,7 +24,13 @@ class Profile extends Model
      * explicit columns anyway. But a safety net is what catches the case
      * nobody thought about.
      */
-    protected $hidden = ['sign', 'element'];
+    /*
+     * ⚠️ WAS ['sign', 'element'], HIDING THE AFFINITY INPUTS. Both columns are
+     * dropped and the component is deleted, so there is nothing left to hide
+     * here. Kept as an empty list rather than removed, because a model with no
+     * $hidden reads as a model nobody thought about.
+     */
+    protected $hidden = [];
 
     protected function casts(): array
     {

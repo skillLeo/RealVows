@@ -28,13 +28,36 @@ class MigrationReversibilityTest extends TestCase
      * claiming the schema was wrong when the count was. A constant that has
      * to be remembered will eventually not be.
      */
+    /**
+     * ⚠️ THE GLOB THIS REPLACED HAD A CLIFF EDGE IN IT.
+     *
+     * It was three globs: `2026_08_0[2-9]*`, `2026_0[9]*`, `202[7-9]*`. Read
+     * quickly that looks like "everything from 2 August onwards". It is not.
+     * It matches 2 to 9 August and then NOTHING until September, so every
+     * migration dated between the 10th and the 31st of August was invisible to
+     * it. The first one written after the 9th made this test roll back one
+     * step too few, restore the wrong schema, and report a failure that pointed
+     * at the migration rather than at the counting.
+     *
+     * The `atLeast: 2` guard below did not catch it, and could not: the count
+     * was 13, which is not zero and looks entirely reasonable. A wrong number
+     * that passes a sanity check is worse than no number.
+     *
+     * ⚠️ SO THIS NO LONGER PATTERN-MATCHES DATES. Phase 1 is a fixed, closed
+     * set that will never grow again. Everything lexicographically after it is
+     * Phase 2 or later, by definition, and there is no future date a pattern
+     * can stop matching.
+     */
+    private const LAST_PHASE_1_MIGRATION = '2026_08_01_999999';
+
     private function phase2Steps(): int
     {
-        $matched = array_merge(
-            glob(database_path('migrations/2026_08_0[2-9]*.php')) ?: [],
-            glob(database_path('migrations/2026_0[9]*.php')) ?: [],
-            glob(database_path('migrations/202[7-9]*.php')) ?: [],
-        );
+        $all = glob(database_path('migrations/*.php')) ?: [];
+
+        $matched = array_values(array_filter(
+            $all,
+            fn (string $path) => basename($path) > self::LAST_PHASE_1_MIGRATION,
+        ));
 
         /*
          * ⚠️ AN EMPTY GLOB WOULD MAKE THIS TEST PASS BY ROLLING BACK NOTHING.

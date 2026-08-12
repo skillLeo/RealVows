@@ -14,19 +14,29 @@ return [
     | They must sum to 100. MatchingConfigTest fails loudly if they stop, so
     | nobody can edit one number without editing another.
     |
-    | `affinity` is the internal mechanism described in SignCalculator. It is
-    | never named to a member, never serialised, and never the subject of a
-    | generated sentence.
+    | ── ⚠️ THE AFFINITY COMPONENT IS GONE, AND IT IS NOT COMING BACK ─────────
+    |
+    | It was 25 points of affinity, computed from date of birth, and it was
+    | the largest single weight in the product. It has been removed
+    | entirely rather than switched off: the matrix, the scorer, the calculator
+    | and the stored component are all deleted.
+    |
+    | That changes what this file is. The weights used to describe a mechanism
+    | that could not be explained to the person it was applied to. They now
+    | describe something a member could be told in full without the product
+    | being any worse for it: RealVows scores what you told us about yourself.
+    |
+    | Values rises furthest because alignment on life goals, children and pace
+    | is what this product is actually for.
     |
     */
 
     'weights' => [
-        'affinity' => 25,
-        'preferences' => 22,
-        'values' => 17,
-        'lifestyle' => 12,
-        'personality' => 12,
-        'physical' => 12,
+        'preferences' => 28,
+        'values' => 25,
+        'lifestyle' => 17,
+        'personality' => 17,
+        'physical' => 13,
     ],
 
     /*

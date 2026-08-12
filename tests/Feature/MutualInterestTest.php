@@ -57,7 +57,7 @@ class MutualInterestTest extends TestCase
             'seeker_profile_id' => $seeker->profile->id,
             'matched_profile_id' => $matched->profile->id,
             'total_score' => 87.25,
-            'score_breakdown' => ['components' => ['affinity' => ['raw' => 92.0]]],
+            'score_breakdown' => ['components' => ['values' => ['raw' => 92.0]]],
             'compatibility_rationale' => 'A patient, home-building match.',
             'commonalities' => ['You both put family first in your values.'],
             'status' => $status,

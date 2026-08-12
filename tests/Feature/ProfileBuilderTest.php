@@ -91,7 +91,18 @@ class ProfileBuilderTest extends TestCase
         $this->assertNotNull($user->profile->fresh()->date_of_birth);
     }
 
-    public function test_the_internal_derivation_runs_but_never_reaches_the_browser(): void
+    /**
+     * ⚠️ DATE OF BIRTH IS NOW ONLY AN AGE.
+     *
+     * This test used to assert that saving a date of birth ran a hidden
+     * derivation and that neither derived column reached the browser. The
+     * derivation is deleted and both columns are dropped, so the old assertions
+     * would be checking that something absent is absent in a particular way.
+     *
+     * What still matters, and is what this now proves: a date of birth is
+     * accepted, stored, and produces no derived data at all.
+     */
+    public function test_a_date_of_birth_produces_no_derived_data(): void
     {
         $user = $this->member();
 
@@ -101,13 +112,9 @@ class ProfileBuilderTest extends TestCase
 
         $profile = $user->profile->fresh();
 
-        // It ran server-side...
-        $this->assertNotNull($profile->sign);
-        $this->assertNotNull($profile->element);
+        $this->assertNotNull($profile->date_of_birth);
 
-        // ...and neither column appears in anything serialised to the client.
         $serialised = json_encode($profile->toArray());
-        $this->assertStringNotContainsString($profile->sign, $serialised);
         $this->assertStringNotContainsString('"sign"', $serialised);
         $this->assertStringNotContainsString('"element"', $serialised);
 

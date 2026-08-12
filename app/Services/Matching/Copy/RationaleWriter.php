@@ -8,15 +8,19 @@ use App\Support\ProfileOptions;
 /**
  * The one or two sentences a member reads under a score.
  *
- * ⚠️ THE STRUCTURAL RULE THAT MAKES THIS SAFE: this class cannot see the
- * affinity component at all. It is stripped in `write()` before anything is
- * chosen, so there is no code path in which a sentence can be keyed on it —
- * the leak is not prevented by discipline, it is prevented by the affinity
- * score not being in the room.
+ * ⚠️ EVERY COMPONENT IS NOW SAYABLE, AND THAT IS NEW.
  *
- * Everything written here describes what the two people said about their own
- * values, lifestyle and goals. It is honest: those genuinely are inputs to
- * the number, which is what makes the score feel earned rather than mystical.
+ * This class used to strip an affinity component before choosing a sentence,
+ * because that component was derived from date of birth and no honest
+ * sentence could describe it. The component is deleted. What is left is preferences,
+ * values, lifestyle, personality and physical, all of which are things the two
+ * people typed about themselves.
+ *
+ * So the old structural defence is gone because the thing it defended against
+ * is gone. The `except('affinity')` call stayed for one commit after the
+ * deletion, matching a key that no longer exists, which is a guard that has
+ * quietly stopped guarding. It has been removed rather than left to reassure
+ * somebody reading this in a year.
  *
  * Templates are selected deterministically from the pair's ids, so a member
  * refreshing the page sees the same sentence, and a rerun writes the same
@@ -120,13 +124,7 @@ class RationaleWriter
 
     public function write(Profile $seeker, Profile $candidate, array $result): string
     {
-        /*
-         * ⚠️ The affinity component is removed before anything is selected.
-         * Nothing below this line can key a sentence on it, because nothing
-         * below this line can see it.
-         */
         $components = collect($result['components'] ?? [])
-            ->except('affinity')
             ->sortByDesc('raw');
 
         if ($components->isEmpty()) {

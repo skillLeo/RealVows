@@ -6,7 +6,6 @@ use App\Jobs\RegenerateMatchesForProfile;
 use App\Models\Profile;
 use App\Services\Profile\ProfileCompleteness;
 use App\Services\Matching\MatchingFieldsHash;
-use App\Services\Sign\SignCalculator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +18,6 @@ class SaveProfileStep
     ];
 
     public function __construct(
-        private readonly SignCalculator $signs,
         private readonly ProfileCompleteness $completeness,
         private readonly MatchingFieldsHash $hashes,
     ) {}
@@ -39,22 +37,15 @@ class SaveProfileStep
             if ($profileData !== []) {
                 $profile->fill($profileData);
             }
-
             /*
-             * ⚠️ The silent derivation.
+             * ⚠️ DATE OF BIRTH IS NOW ONLY AN AGE.
              *
-             * Saving a date of birth recalculates the two internal columns
-             * behind the affinity component — see config/matching.php for
-             * what that component is currently worth. Nothing about it is
-             * returned to the browser, nothing is shown to the member, and
-             * there is no reveal card — the approved design had one and it
-             * was deliberately removed. See SignCalculator for the reasoning.
+             * Saving it used to recalculate two hidden columns behind an
+             * date-of-birth-derived affinity component worth 25 points of the match
+             * score. That component, its matrix and its calculator are deleted.
+             * Date of birth survives for the 18+ gate and the age shown on a
+             * profile, and for nothing else.
              */
-            if ($profile->isDirty('date_of_birth') && $profile->date_of_birth) {
-                $derived = $this->signs->for(Carbon::parse($profile->date_of_birth));
-                $profile->sign = $derived['sign'];
-                $profile->element = $derived['element'];
-            }
 
             // Furthest step reached, so returning members land where they
             // stopped rather than at the beginning.

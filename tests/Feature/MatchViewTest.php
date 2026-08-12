@@ -43,7 +43,7 @@ class MatchViewTest extends TestCase
             'seeker_profile_id' => $mine->id,
             'matched_profile_id' => $them->id,
             'total_score' => 88.97,
-            'score_breakdown' => ['components' => ['affinity' => ['raw' => 92]]],
+            'score_breakdown' => ['components' => ['values' => ['raw' => 92]]],
             'compatibility_rationale' => 'A patient, home-building match.',
             'commonalities' => ['You both put family first in your values.'],
             'status' => MatchRecord::STATUS_TEASER,

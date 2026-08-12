@@ -1,0 +1,203 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Guardian;
+use App\Models\Profile;
+use App\Models\User;
+use App\Services\Risk\GuardianRiskScorer;
+use App\Services\Risk\RiskAssessment;
+use App\Services\Risk\RiskNarrator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+/**
+ * ⚠️ THE MACHINE ADVISES. A HUMAN DECIDES.
+ *
+ * The brief requires that automated scoring cannot reject anybody, and the way
+ * to guarantee that is to make rejection inexpressible rather than forbidden.
+ */
+class RiskScoringTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        Http::preventStrayRequests();
+    }
+
+    private function guardian(array $attributes = []): Guardian
+    {
+        $member = User::factory()->create(['email' => 'aisha@example.com']);
+        Profile::factory()->woman()->create(['user_id' => $member->id]);
+
+        return Guardian::create(array_merge([
+            'member_id' => $member->id,
+            'name' => 'Yusuf Adeyemi',
+            'relationship' => 'father',
+            'email' => 'yusuf@example.com',
+            'status' => Guardian::STATUS_SUBMITTED,
+            'joint_photo_path' => 'guardians/1/together.jpg',
+            'user_id' => User::factory()->create()->id,
+        ], $attributes));
+    }
+
+    /**
+     * ⚠️ THE STRUCTURAL GUARANTEE. Not "we do not call reject" — there is
+     * nothing to call.
+     */
+    public function test_a_risk_assessment_has_no_way_to_express_a_rejection(): void
+    {
+        $methods = get_class_methods(RiskAssessment::class);
+
+        foreach (['reject', 'shouldReject', 'decide', 'verdict', 'approve', 'decision'] as $forbidden) {
+            $this->assertNotContains(
+                $forbidden,
+                $methods,
+                "RiskAssessment::{$forbidden}() exists. Automated scoring must not be able to "
+                    .'decide anything about a person.'
+            );
+        }
+
+        // ⚠️ CONTROL: the assertion is capable of failing. If get_class_methods
+        // returned nothing, every assertion above would pass vacuously.
+        $this->assertContains('band', $methods);
+        $this->assertContains('requiresReasonToApprove', $methods);
+    }
+
+    /**
+     * ⚠️ EVEN THE WORST SCORE STILL PERMITS APPROVAL. It asks for a reason,
+     * which is the difference between flagging and deciding.
+     */
+    public function test_the_highest_band_still_allows_a_human_to_approve(): void
+    {
+        $assessment = new RiskAssessment(score: 100, reasons: ['everything']);
+
+        $this->assertSame(RiskAssessment::BAND_HIGH, $assessment->band());
+        $this->assertTrue($assessment->requiresReasonToApprove());
+    }
+
+    public function test_the_bands_match_the_thresholds(): void
+    {
+        foreach ([0 => 'low', 29 => 'low', 30 => 'review', 60 => 'review', 61 => 'high', 100 => 'high'] as $score => $band) {
+            $this->assertSame(
+                $band,
+                (new RiskAssessment($score, []))->band(),
+                "A score of {$score} should be [{$band}]."
+            );
+        }
+    }
+
+    public function test_a_complete_trusted_contact_scores_low(): void
+    {
+        $assessment = app(GuardianRiskScorer::class)->score($this->guardian());
+
+        $this->assertSame(RiskAssessment::BAND_LOW, $assessment->band());
+        $this->assertSame([], $assessment->reasons);
+    }
+
+    /** ⚠️ POSITIVE CONTROL: the scorer can see a real problem. */
+    public function test_a_missing_photograph_and_no_account_scores_high(): void
+    {
+        $assessment = app(GuardianRiskScorer::class)->score($this->guardian([
+            'joint_photo_path' => null,
+            'user_id' => null,
+        ]));
+
+        $this->assertSame(75, $assessment->score);
+        $this->assertSame(RiskAssessment::BAND_HIGH, $assessment->band());
+        $this->assertCount(2, $assessment->reasons);
+    }
+
+    /** ⚠️ The strongest signal: one device operating both accounts. */
+    public function test_the_same_device_as_the_member_is_scored(): void
+    {
+        $guardian = $this->guardian();
+        $fingerprint = hash('sha256', 'one-device');
+
+        $guardian->forceFill(['device_fingerprint_hash' => $fingerprint])->save();
+        User::where('id', $guardian->member_id)->update(['device_fingerprint_hash' => $fingerprint]);
+
+        $assessment = app(GuardianRiskScorer::class)->score($guardian->fresh());
+
+        $this->assertGreaterThanOrEqual(40, $assessment->score);
+        $this->assertStringContainsString('same device', implode(' ', $assessment->reasons));
+    }
+
+    public function test_a_score_is_never_above_one_hundred(): void
+    {
+        $guardian = $this->guardian(['joint_photo_path' => null, 'user_id' => null]);
+        $guardian->forceFill([
+            'risk_reasons' => ['a', 'b', 'c'],
+            'email' => 'aisha@other.com',
+        ])->save();
+
+        $this->assertLessThanOrEqual(100, app(GuardianRiskScorer::class)->score($guardian->fresh())->score);
+    }
+
+    /**
+     * ⚠️ NO KEY MEANS RULES ONLY, NOT AN ERROR. Both AI features must degrade
+     * cleanly when nothing is configured, which is the state today.
+     */
+    public function test_with_no_api_key_the_score_still_works_and_nothing_is_called(): void
+    {
+        $assessment = app(GuardianRiskScorer::class)->score(
+            $this->guardian(['joint_photo_path' => null])
+        );
+
+        $this->assertSame(50, $assessment->score);
+        $this->assertNull($assessment->summary);
+
+        // preventStrayRequests would fail the test if anything reached out.
+        $this->assertTrue(true);
+    }
+
+    /**
+     * ⚠️ AN OUTAGE MUST NOT BLOCK A MEMBER. A provider returning 500 produces a
+     * score with a note, not an exception.
+     */
+    public function test_a_failing_provider_degrades_to_rules_only(): void
+    {
+        app(\App\Services\Settings\SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
+        Http::fake(['api.openai.com/*' => Http::response('upstream error', 500)]);
+
+        $assessment = app(GuardianRiskScorer::class)->score(
+            $this->guardian(['joint_photo_path' => null])
+        );
+
+        $this->assertSame(50, $assessment->score, 'The rules stopped working when the model did.');
+        $this->assertTrue($assessment->modelUnavailable);
+        $this->assertNull($assessment->summary);
+    }
+
+    /**
+     * ⚠️ NO PHOTOGRAPH IS EVER SENT TO A MODEL, and no surname either.
+     */
+    public function test_no_photograph_or_surname_is_sent_to_the_provider(): void
+    {
+        app(\App\Services\Settings\SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
+
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"summary":"Nothing unusual."}']]],
+            ]),
+        ]);
+
+        app(GuardianRiskScorer::class)->score($this->guardian());
+
+        Http::assertSent(function ($request) {
+            $body = json_encode($request->data());
+
+            $this->assertStringNotContainsString('joint_photo', $body, 'A photograph path was sent.');
+            $this->assertStringNotContainsString('guardians/', $body, 'A storage path was sent.');
+            $this->assertStringNotContainsString('Adeyemi', $body, 'A surname was sent.');
+            $this->assertStringNotContainsString('aisha@example.com', $body, 'An email was sent.');
+
+            return true;
+        });
+    }
+}

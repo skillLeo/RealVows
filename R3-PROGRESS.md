@@ -24,6 +24,20 @@
 
 ## In progress
 
+**Part C is done.** `RiskAssessment` carries a score and reasons and has NO
+verdict method — rejection is inexpressible rather than forbidden, asserted by
+a test that checks the class has no `reject`/`decide`/`verdict` method and
+carries a control so the assertion cannot pass vacuously. Rules do all the
+arithmetic; `RiskNarrator` contributes prose only, never a number, never a
+photograph, never a surname. A failing provider degrades to rules-only with a
+visible note; no key at all is "off" rather than "unavailable", which are
+deliberately different answers. `RiskScoringTest` 10/10.
+
+**Part E is half done.** The `ai` settings group is seeded (both keys, provider,
+per-feature models, per-feature toggles, monthly cap). The provider status
+banner is NOT built.
+
+
 - **Part B remainder.** Built since the last handoff: `GuardianInvitation`
   (hashed single-use token, plaintext returned once, re-issue invalidates the
   previous), `GuardianGate` (the three B5 gates, each reading the policy first),
@@ -81,8 +95,7 @@
   `TrustedContact/Show` does not yet render the offer or a way to raise it);
   no link from admin to an individual message thread — `/admin/messages/{user}`
   is reachable only by typing it
-- **Part C** — AI risk scoring
-- **Part E** — API keys and settings, provider status banner
+- **Part E** — the provider status banner (settings group is done)
 - **Part D** — AI profile writer + fidelity test
 - **Part F** — public copy reduction
 - **Part G** — home banner ("The Meeting")
@@ -116,7 +129,7 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 597 tests, 588 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 607 tests, 598 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
 
 ## Blocked, not forgotten

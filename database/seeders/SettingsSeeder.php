@@ -62,6 +62,30 @@ class SettingsSeeder extends Seeder
              *
              * The description says so in the words the person choosing needs.
              */
+            /*
+             * ⚠️ TWO AI FEATURES, BOTH OFF UNTIL A KEY IS PASTED IN.
+             *
+             * Risk scoring falls back to rules only and the profile writer
+             * hides its button. Neither breaks, and nothing here is required
+             * for the product to run — which is why the keys are empty rather
+             * than the features being behind a separate "enabled" flag nobody
+             * remembers to set.
+             *
+             * ⚠️ THE KEYS ARE SECRETS. They are encrypted at rest by the
+             * settings layer, masked on screen, and never logged. A leaked
+             * provider key is somebody else spending the client's money.
+             */
+            'ai' => [
+                ['key' => 'openai_api_key', 'label' => 'OpenAI API key', 'type' => 'password', 'is_secret' => true, 'description' => 'Leave empty to switch both AI features off. Risk scoring falls back to its rules; the profile writer hides its button.'],
+                ['key' => 'anthropic_api_key', 'label' => 'Anthropic API key', 'type' => 'password', 'is_secret' => true, 'description' => 'Optional alternative provider.'],
+                ['key' => 'provider', 'label' => 'Active provider', 'type' => 'select', 'options' => ['openai' => 'OpenAI', 'anthropic' => 'Anthropic'], 'description' => 'Which provider the features call.'],
+                ['key' => 'risk_model', 'label' => 'Model for risk scoring', 'type' => 'text', 'description' => 'The cheapest capable text model is correct here. It writes two sentences and contributes no part of the score.'],
+                ['key' => 'writer_model', 'label' => 'Model for the profile writer', 'type' => 'text', 'description' => 'Rewrites a member\'s own words. It may never add a fact they did not supply.'],
+                ['key' => 'risk_enabled', 'label' => 'Risk summaries', 'type' => 'toggle', 'description' => 'The rules always run. This only controls the written summary.'],
+                ['key' => 'writer_enabled', 'label' => 'Profile writer', 'type' => 'toggle'],
+                ['key' => 'monthly_cap_cents', 'label' => 'Monthly spend cap', 'type' => 'text', 'description' => 'In cents. An alert is sent at 80 per cent. Both features stop at the cap rather than spending past it.'],
+            ],
+
             'guardian' => [
                 ['key' => 'guardian_requirement', 'label' => 'Trusted contact requirement', 'type' => 'select', 'options' => [
                     'off' => 'Off — not asked for at all',
@@ -266,6 +290,12 @@ class SettingsSeeder extends Seeder
             'packages.octet_price_cents' => '10000',
             'packages.octet_badge' => 'Best value',
             'guardian.guardian_requirement' => 'off',
+            'ai.provider' => 'openai',
+            'ai.risk_model' => 'gpt-4o-mini',
+            'ai.writer_model' => 'gpt-4o-mini',
+            'ai.risk_enabled' => '1',
+            'ai.writer_enabled' => '1',
+            'ai.monthly_cap_cents' => '2000',
         ];
 
         $flat = [];

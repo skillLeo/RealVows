@@ -37,14 +37,18 @@
   details until the contact gate is approved. The dashboard also carries
   `trustedContact` state so a waiting member is always told why.
   `GuardianGateEnforcementTest` 7/7, every refusal paired with a control.
+  `GuardianService` handles nomination (integrity checked BEFORE anything is
+  sent), the no-contact path (B7, marks `is_appointed`), and acceptance (the
+  guardian creates their own account with their own password, single-use
+  token). `GuardianNominationTest` 9/9.
 
 ## Not started
 
-- **Part B**: invitation *delivery* (email + WhatsApp send; the model is done),
-  joint-photo upload with the generated code, no-guardian admin queue,
-  3/7/14 reminders, unfair-guardian path, admin messaging with the relay
-  prohibition in the UI, and the member-facing trusted-contact screens
-  (the dashboard carries the state; there is no form to add one yet)
+- **Part B**: invitation *delivery* — the service issues the token, nothing
+  sends it yet; joint-photo upload with the generated code; no-guardian admin
+  queue; 3/7/14 reminders; unfair-guardian path; admin messaging with the relay
+  prohibition in the UI; member-facing screens (dashboard shows the state,
+  there is no form to name a contact and no page to accept an invitation)
 - **Part C** — AI risk scoring
 - **Part E** — API keys and settings, provider status banner
 - **Part D** — AI profile writer + fidelity test
@@ -80,8 +84,18 @@
   ledger can confirm hand-off and never arrival
 - Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 552 tests, 543 passing, 9 skipped** (PowerTranz sandbox ×7 and the
+- **Suite: 561 tests, 552 passing, 9 skipped** (PowerTranz sandbox ×7 and the
   web-root check ×2, all needing a live host)
+
+## Blocked, not forgotten
+
+- **WhatsApp delivery of the trusted-contact invitation cannot be built.** B3
+  asks for the invitation to go by email and WhatsApp. A business-initiated
+  message to somebody who has never contacted us can only be sent from an
+  approved template, and none of the seven is an invitation. This needs an
+  **eighth template** submitted to Meta. Email works; the WhatsApp half is
+  blocked on review. Recorded in `GuardianService` rather than sending email
+  only and calling B3 done.
 
 ## Needs the client, not the developer
 

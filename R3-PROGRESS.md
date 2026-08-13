@@ -190,11 +190,34 @@ not simply returning nothing.
 - **Staging: realvows.skillleo.com** — nothing user-facing points here
 - Mail: Hostinger SMTP as `info@realvows.com`. No delivery webhook, so the
   ledger can confirm hand-off and never arrival
-- Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`)
+- Demo logins are ON (`APP_ENV=demo`, `REALVOWS_DEMO_LOGINS=true`) and now
+  **close themselves** the moment any account exists whose address is not
+  `@realvows.test`. Production: 32 demo, 0 real. The client's own genuine admin
+  account will end them — intended, and he has to be told
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 640 tests, 631 passing, 9 skipped** (banner 7.4kb; breakpoints and touch targets clean)
-- **All ten R3 parts have been started; A, C, D, E, F, G, I are complete** (PowerTranz sandbox ×7 and the
-  web-root check ×2, all needing a live host)
+- **Suite: 655 tests, 646 passing, 9 skipped** (banner 9.2kb of a 25kb budget,
+  0 images on home; breakpoints and touch targets clean)
+- **All ten R3 parts have been started; A, B, C, D, E, F, G, I, J are complete.**
+  H is partial (measurable half done; FAB, sheets, view transitions, optimistic
+  UI outstanding)
+
+### WhatsApp, as of 13 Aug 2026
+
+- Phone number **+1 561-899-5033**, status Connected, phone number ID
+  **1276562182199438** — stored on production along with the WABA ID and `en`
+- ⚠️ **The Meta app is UNPUBLISHED.** In development mode the Cloud API will
+  only message a handful of registered test numbers. No member receives
+  anything until the app is published, and publishing is gated on business
+  verification then App Review
+- ⚠️ **Business verification is Unverified and there is no payment method.**
+  This is why template creation now fails with "does not have permission to
+  create message template" — the first batch was allowed, further ones are not
+- ⚠️ **`WhatsAppTemplates::TEMPLATES` bodies are NOT what members receive.**
+  Meta stores the approved body; we send a name, a language and ordered values.
+  The approved `verification_rejected` differs from ours in wording, has no
+  link and no opt-out line. Variable counts do match, so nothing errors.
+  `realvows:whatsapp-templates-check` is the only check pointed at the real
+  emission point — run it once a token exists
 
 ## Blocked, not forgotten
 
@@ -208,17 +231,23 @@ not simply returning nothing.
 
 ## Needs the client, not the developer
 
-- **The six WhatsApp templates must be resubmitted to Meta.** All six are
-  Active but were last edited 5 Aug, before the host changed — they still send
-  members to `realvows.skillleo.com`. Changing a body invalidates the approved
-  version, so this is unavoidable.
-- **`phone_verification_code` has never been submitted.** The code declares it;
-  Meta does not have it. Phone verification fails silently the day it is
-  switched on.
+- **Business verification.** Umar's Jamaica business documents. It gates
+  template creation, publishing the app, and therefore every WhatsApp message
+  to a real member. Longest lead time of anything outstanding, and nobody but
+  him can supply the documents. Everything below waits on it.
+- **Publish the Meta app.** Development mode reaches test numbers only.
+- **`phone_verification_code` has never been submitted** and currently cannot
+  be — creation is refused while the business is unverified. Phone verification
+  by WhatsApp does not work at launch.
 - **An eighth template** is needed for the trusted-contact invitation, or
-  invitations go by email only.
-- **WhatsApp credentials are not on the new server.** All eight settings are
-  empty at `/admin/settings`. WABA ID `1553517519889000`, business ID
-  `1896803604614710`. Needs phone number ID, permanent access token, app secret
-  and a verify token.
+  invitations go by email only. Same blocker.
+- ~~The six templates send members to the old host~~ — **wrong, withdrawn.**
+  The approved bodies carry no link at all. Our file had the stale host; that
+  was fixed weeks ago and I then assumed Meta's copies shared the fault. They
+  never did. Nothing to resubmit for this reason.
+- **Two credentials still needed at `/admin/settings` → WhatsApp:** a permanent
+  access token (System user `realvows-api`, permissions
+  `whatsapp_business_messaging` + `whatsapp_business_management`, expiry Never)
+  and the app secret. Then `php artisan whatsapp:verify-token` mints the third
+  and prints the callback URL to paste into Meta.
 - `guardian_requirement` is unset by design. Somebody has to choose.

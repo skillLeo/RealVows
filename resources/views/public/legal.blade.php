@@ -147,5 +147,24 @@
                 any time. How we hold it is set out in the Privacy Policy.
             </p>
         </div>
+
+        {{--
+            ⚠️ EVERY LEGAL PAGE CARRIES ITS VERSION, AND AN UNDATED POLICY IS
+            THE REASON.
+
+            These terms say we will tell you before a change that affects you
+            takes effect. That is an empty promise if the document being changed
+            has no name: a member cannot work out which wording they agreed to,
+            and neither can we.
+
+            One version across all four pages on purpose. They cross-reference
+            each other, so versioning them separately would let somebody hold a
+            consistent-looking set of four that never existed together.
+        --}}
+        @isset($version)
+            <p class="rv-legal__version">
+                Version {{ $version }}. {{ $priorVersions }}
+            </p>
+        @endisset
     </article>
 @endsection

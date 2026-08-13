@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Billing;
+use App\Support\PhotoVisibilityPolicy;
 use Illuminate\View\View;
 
 /**
@@ -47,10 +48,47 @@ use Illuminate\View\View;
  */
 class LegalController extends Controller
 {
+    /**
+     * ⚠️ ONE VERSION FOR ALL FOUR PAGES, AND IT IS A DATE RATHER THAN A NUMBER.
+     *
+     * A member who is told the terms have changed has to be able to work out
+     * WHICH terms they agreed to. An undated policy makes that impossible, and
+     * "we may change these terms, we will tell you by email" is an empty
+     * promise if the thing being pointed at has no name.
+     *
+     * ⚠️ SHARED DELIBERATELY. The four documents cross-reference each other:
+     * the Terms incorporate the refund policy, the Terms point at the privacy
+     * policy for who sees a photograph, and the guidelines are grounds for
+     * removal under the Terms. Versioning them separately would let a member
+     * hold a consistent-looking set of four that never existed together.
+     *
+     * ⚠️ MOVE THIS WHEN THE WORDING CHANGES, NOT WHEN THE FILE DOES. A
+     * reformat, a typo fix or a comment is not a new version. A changed
+     * obligation is.
+     */
+    public const VERSION = '2026-08-14';
+
+    /**
+     * ⚠️ PRIOR VERSIONS ARE RETRIEVABLE, AND THIS IS WHERE THEY ARE.
+     *
+     * The honest answer today is git: every earlier wording of these pages is
+     * in the repository history, tagged by the commit that changed it. That is
+     * a real archive and it is not reachable by a member, so this says where to
+     * ask rather than pretending to a version picker that does not exist.
+     *
+     * If a member ever needs to see the terms they agreed to, that request is
+     * answerable in full. Saying so is the point.
+     */
+    public const PRIOR_VERSIONS =
+        'Earlier versions of this document are kept. Write to us and we will send you the '
+        .'wording that was in force on any date you name.';
+
     public function terms(): View
     {
         return view('public.legal', [
             'billing' => app(Billing::class)->forDisplay(),
+            'version' => self::VERSION,
+            'priorVersions' => self::PRIOR_VERSIONS,
             'heading' => 'Terms of Service',
             'intro' => 'The agreement between you and RealVows.',
             'sections' => $this->termsSections(),
@@ -61,6 +99,8 @@ class LegalController extends Controller
     {
         return view('public.legal', [
             'billing' => app(Billing::class)->forDisplay(),
+            'version' => self::VERSION,
+            'priorVersions' => self::PRIOR_VERSIONS,
             'heading' => 'Privacy Policy',
             'intro' => 'What we collect, why we collect it, and what we never do with it.',
             'sections' => $this->privacySections(),
@@ -80,6 +120,8 @@ class LegalController extends Controller
     {
         return view('public.legal', [
             'billing' => app(Billing::class)->forDisplay(),
+            'version' => self::VERSION,
+            'priorVersions' => self::PRIOR_VERSIONS,
             'heading' => 'Refunds and Cancellation',
             'intro' => 'What happens if you change your mind, and what an introduction credit is.',
             'sections' => $this->refundSections(),
@@ -90,6 +132,8 @@ class LegalController extends Controller
     {
         return view('public.legal', [
             'billing' => app(Billing::class)->forDisplay(),
+            'version' => self::VERSION,
+            'priorVersions' => self::PRIOR_VERSIONS,
             'heading' => 'Community Guidelines',
             'intro' => 'How members are expected to treat one another here.',
             'sections' => $this->guidelineSections(),
@@ -142,14 +186,42 @@ class LegalController extends Controller
             [
                 'heading' => 'Your content',
                 'body' => [
+                    /*
+                     * ⚠️ THE SAME FALSE CLAIM THE PRIVACY PAGE CARRIED. This
+                     * granted us permission "to show them to members you are
+                     * introduced to", which describes a product that no longer
+                     * exists and grants a permission we do not want and do not
+                     * use. A licence clause wider than the behaviour is not a
+                     * harmless leftover on a page a member agrees to.
+                     */
                     'Your photographs and the words you write remain yours. You give us '
-                        .'permission to store them and to show them to members you are introduced '
-                        .'to, and to nobody else.',
+                        .'permission to store them and to show them only to the people set out '
+                        .'in our privacy policy, and to nobody else.',
                     'We do not use your photographs in advertising. We do not sell them, license '
                         .'them, or publish them outside the platform.',
                     'You must have the right to upload what you upload. Photographs of other '
                         .'people, images taken from elsewhere, and anything you do not own will be '
                         .'removed.',
+                ],
+            ],
+            [
+                'heading' => 'Your trusted contact',
+                'body' => [
+                    'You may be asked to name a trusted contact before you can be introduced to '
+                        .'anybody. This is a person who looks at your introductions and advises '
+                        .'you, and on this platform they are a participant with their own account '
+                        .'and their own obligations.',
+                    'They agree to these terms when they accept your invitation. They must be who '
+                        .'you say they are, they must act in your interest, and they may not use '
+                        .'their position to reach or contact anybody on your behalf.',
+                    'They can approve or decline an introduction for you. They cannot write to '
+                        .'another member, and they cannot see anything about the platform beyond '
+                        .'what concerns you.',
+                    'If you believe your trusted contact is standing in your way without good '
+                        .'reason, write to us. We keep the whole record of what they decided and '
+                        .'when, and we will look at it. You may name somebody else at any time.',
+                    'We may remove a trusted contact who breaks these terms, and we will tell you '
+                        .'if we do.',
                 ],
             ],
             [
@@ -178,10 +250,21 @@ class LegalController extends Controller
             [
                 'heading' => 'What we are responsible for',
                 'body' => [
-                    'RealVows is an introduction service. We are not responsible for how another '
-                        .'member behaves, for anything they tell you, or for what happens when you '
-                        .'meet somebody in person. Use the same judgement you would use meeting '
-                        .'anybody new.',
+                    'RealVows is an introduction service. We introduce, and we do not guarantee. '
+                        .'We are not responsible for how another member behaves, for anything '
+                        .'they tell you, or for what happens when you meet somebody in person. '
+                        .'Use the same judgement you would use meeting anybody new.',
+                    /*
+                     * ⚠️ SAID EXPLICITLY BECAUSE OF WHERE THE PRODUCT STOPS.
+                     * Once two members hold each other\'s details they speak
+                     * privately and nothing of it passes through here. A member
+                     * who assumed otherwise would be assuming a protection that
+                     * does not exist, and the honest thing is to say so on the
+                     * page rather than let the assumption stand.
+                     */
+                    'Once you and another member have exchanged contact details, anything that '
+                        .'follows happens between the two of you. It does not pass through this '
+                        .'platform, we do not see it, and we cannot act on it.',
                     'We take reasonable care to keep the platform running and your information '
                         .'safe. We cannot promise the service will never be interrupted.',
                     'Nothing in these terms limits any right you have under the law that cannot '
@@ -211,21 +294,141 @@ class LegalController extends Controller
     /**
      * @return list<array{heading: string, body: list<string>}>
      */
+    /**
+     * ⚠️ THIS PAGE DESCRIBES A PRODUCT THAT CHANGED UNDER IT.
+     *
+     * It used to say "members you are introduced to see your profile and your
+     * photographs". That stopped being true and stayed on the page. A privacy
+     * policy that overstates who can see a photograph is not a stale sentence,
+     * it is a false statement about the most sensitive material held here, made
+     * on the page a person reads specifically in order to decide whether to
+     * hand it over.
+     *
+     * ── ⚠️ FOUR THINGS THAT WERE MISSING ENTIRELY ─────────────────────────
+     *
+     *  1. WHO SEES A PHOTOGRAPH. Stated by name now, and read from the live
+     *     setting rather than written down, so it cannot go stale the same way
+     *     twice. See App\Support\PhotoVisibilityPolicy.
+     *
+     *  2. THE TRUSTED CONTACT. A third person whose name, relationship, email
+     *     address, password, joint photograph and every decision are held here,
+     *     and who never signed up on their own initiative. They are a data
+     *     subject with their own rights, not a field on somebody else's form.
+     *
+     *  3. AI PROCESSING. Both features are built and dormant. The disclosure is
+     *     written NOW, before a key is pasted in, because the alternative is
+     *     depending on somebody remembering to write it on the day the feature
+     *     starts sending member text to a third party.
+     *
+     *  4. DEVICE AND TECHNICAL DATA. Risk scoring reads details of the device
+     *     and connection. Undisclosed profiling is the kind of thing that is
+     *     defensible right up until it is discovered.
+     *
+     * ⚠️ AND ONE THING WORTH SAYING OUT LOUD: no government identity document
+     * is collected anywhere in this product. That is a genuine assurance, it
+     * costs nothing to state, and a reader cannot infer it from silence.
+     *
+     * @return list<array{heading: string, body: list<string>}>
+     */
     private function privacySections(): array
     {
         return [
             [
                 'heading' => 'What we collect',
                 'body' => [
-                    'The account details you give us: your email address, your mobile number, and '
-                        .'your password, which we store only as a cryptographic hash and can '
-                        .'never read.',
-                    'Your profile: your age, where you live, your photographs, and the answers you '
-                        .'give about your values, your faith, your lifestyle and what you are '
-                        .'looking for in somebody else.',
-                    'The material you send us for verification.',
-                    'Technical records created by using the site, such as the times you signed in '
-                        .'and whether a message we sent you was delivered.',
+                    'The account details you give us. Your email address, your mobile number, and '
+                        .'your password, which we store only as a cryptographic hash and can never '
+                        .'read.',
+                    'Your profile. Your age, where you live, and the answers you give about your '
+                        .'values, your faith, your lifestyle and what you are looking for in '
+                        .'somebody else.',
+                    'Your photographs, and the material you send us so that a person can confirm '
+                        .'you are real.',
+                    'The details of the trusted contact you name, if you name one. Their name, '
+                        .'their relationship to you, and a way to reach them.',
+                    'Technical records created by using the site. The times you signed in, the '
+                        .'device and connection you used, and whether a message we sent you '
+                        .'arrived.',
+                ],
+            ],
+            [
+                'heading' => 'We do not ask for identity documents',
+                'body' => [
+                    'We never collect a passport, a driving licence, a national identity card or '
+                        .'any other government document. Not at registration, not for '
+                        .'verification, and not at any later stage.',
+                    'If anybody ever asks you for one in the name of RealVows, it did not come '
+                        .'from us.',
+                ],
+            ],
+            [
+                'heading' => 'Your photographs',
+                'body' => [
+                    'Photographs are the most sensitive thing we hold, and they are treated '
+                        .'differently from everything else on this list.',
+                    'A member of our review team sees them, and that person is always of the same '
+                        .'gender as you.',
+                    $this->whoElseSeesPhotographs(),
+                    'They are never published, never indexed by a search engine, and never '
+                        .'reachable by a plain address. They are held in private storage and are '
+                        .'served only through short-lived links issued to somebody entitled to '
+                        .'open them.',
+                    'They are never attached to an email or included in a message. No message we '
+                        .'send contains an image of any kind.',
+                    'We keep them while your account is open. When you delete your account we '
+                        .'delete the files themselves, not only the record pointing at them.',
+                ],
+            ],
+            [
+                'heading' => 'If you name a trusted contact',
+                'body' => [
+                    'A trusted contact is a person you name to look at your introductions and '
+                        .'advise you. They are told what we hold about them at the moment they '
+                        .'are invited, before they agree to anything.',
+                    'We hold their name, their relationship to you, a way to reach them, the '
+                        .'password they choose for their own account, the photograph the two of '
+                        .'you send us together, and a record of every decision they make about '
+                        .'your introductions.',
+                    'That record is kept in full and is never edited. If a trusted contact '
+                        .'changes their mind, we add the new decision rather than replacing the '
+                        .'old one, because the sequence is the only honest answer if you ever '
+                        .'tell us somebody is standing in your way.',
+                    'They have the same rights over their own information as you have over yours. '
+                        .'They can ask for a copy of it, correct it, or ask us to delete it, and '
+                        .'they can do that without going through you.',
+                    'If you close your account, their record closes with it. If they ask to be '
+                        .'removed while your account is open, we tell you that you need to name '
+                        .'somebody else.',
+                ],
+            ],
+            [
+                'heading' => 'Artificial intelligence',
+                'body' => [
+                    'Two features on this platform can call an outside provider. Both are '
+                        .'switched off until the platform owner supplies a key, and this section '
+                        .'describes what happens when they are on.',
+                    'The first helps you write about yourself. It takes the words you have '
+                        .'already written and offers a tidier version of them. It may never add a '
+                        .'fact you did not supply, and nothing it writes is saved until you have '
+                        .'read it and accepted it.',
+                    'The second writes a short summary to help our review team weigh an account. '
+                        .'It contributes no part of any score and no part of any matching '
+                        .'decision.',
+                    'Your photographs are never sent to any such provider. Neither is the '
+                        .'material you send us for verification, nor your contact details, nor '
+                        .'anything belonging to your trusted contact.',
+                    'The provider processes what we send on our instructions and may not use it '
+                        .'for anything else.',
+                ],
+            ],
+            [
+                'heading' => 'Device and technical information',
+                'body' => [
+                    'When you register or sign in we record details of the device and connection '
+                        .'you used. We compare those details across accounts to find the pattern '
+                        .'where one person is quietly operating several.',
+                    'That is the only purpose. We do not use it to build an advertising profile '
+                        .'of you, and we do not share it with anybody who does.',
                 ],
             ],
             [
@@ -234,7 +437,8 @@ class LegalController extends Controller
                     'To decide who to introduce you to. Your answers are the entire basis of that '
                         .'decision, which is why we ask for so many of them.',
                     'To confirm you are a real person, which is what the whole platform rests on.',
-                    'To send you your introductions and the messages that go with them.',
+                    'To send you your introductions and to let you know when something has '
+                        .'happened.',
                     'To take payment when payment applies, and to keep the records the law '
                         .'requires us to keep.',
                 ],
@@ -244,24 +448,26 @@ class LegalController extends Controller
                 'body' => [
                     'We do not sell your information. We do not rent it, trade it, or hand it to '
                         .'advertisers.',
-                    'We do not show your profile to anyone who has not been introduced to you.',
+                    'We do not show your profile to anybody who has not been introduced to you. '
+                        .'There is no directory here, no search, and no way to browse members.',
                     'We do not publish your last name. It stays private until you and another '
-                        .'member have both expressed interest in each other.',
-                    'We do not put your photographs anywhere they can be found by a search engine '
-                        .'or opened by somebody with a link.',
+                        .'member have both said yes to each other.',
+                    'We do not carry messages between members. If you write to us we answer you, '
+                        .'and we do not pass what you said to anybody else.',
                 ],
             ],
             [
                 'heading' => 'Who else sees anything',
                 'body' => [
-                    'Members you are introduced to see your profile and your photographs. They see '
-                        .'your last name and how to contact you only after you have both said yes.',
-                    'A small number of trusted suppliers process data on our behalf: our hosting '
+                    'Members you are introduced to see your first name, your age, where you live '
+                        .'and the answers you gave about yourself. They see your last name and '
+                        .'how to reach you only after you have both said yes.',
+                    'A small number of suppliers process data on our behalf. Our hosting '
                         .'provider, our email provider, our payment provider, and WhatsApp for '
                         .'message delivery. They act on our instructions and may not use your '
                         .'information for anything else.',
-                    'We disclose information to the authorities only where the law requires it, or '
-                        .'where somebody is at risk of serious harm.',
+                    'We disclose information to the authorities only where the law requires it, '
+                        .'or where somebody is at risk of serious harm.',
                 ],
             ],
             [
@@ -269,8 +475,8 @@ class LegalController extends Controller
                 'body' => [
                     'While your account is open, and for a short period afterwards so that an '
                         .'account closed by mistake can be restored.',
-                    'When you delete your account we remove your profile, your photographs and '
-                        .'your introductions.',
+                    'When you delete your account we remove your profile, your photographs, your '
+                        .'introductions and the record of your trusted contact.',
                     'We keep payment records for as long as tax and accounting law requires, even '
                         .'after an account is closed. Those records name the transaction rather '
                         .'than your profile.',
@@ -284,19 +490,20 @@ class LegalController extends Controller
                         .'from your account.',
                     'You can ask us to delete your account and your data.',
                     'You can stop receiving messages at any time. Every email carries a link to '
-                        .'unsubscribe, and you can reply STOP to any WhatsApp message.',
+                        .'unsubscribe, and you can reply STOP to any WhatsApp message. Stopping '
+                        .'one does not stop the other.',
                 ],
             ],
             [
                 'heading' => 'Keeping it safe',
                 'body' => [
                     'Traffic to and from the site is encrypted. Photographs are held in private '
-                        .'storage and are served only through short-lived links to people entitled '
-                        .'to see them.',
-                    'Access to member data inside RealVows is limited to the people who need it to '
-                        .'review verifications and answer support requests, and what they do is '
-                        .'recorded.',
-                    'No system is perfect. If something happens that affects you, we will tell you.',
+                        .'storage and are served only through short-lived links.',
+                    'Access to member data inside RealVows is limited to the people who need it '
+                        .'to review verifications and answer support requests, and what they do '
+                        .'is recorded.',
+                    'No system is perfect. If something happens that affects you, we will tell '
+                        .'you.',
                 ],
             ],
             [
@@ -307,6 +514,35 @@ class LegalController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * ⚠️ READ FROM THE LIVE SETTING, NEVER WRITTEN DOWN HERE.
+     *
+     * Whether a member ever sees a photograph of the person they have been
+     * introduced to is a setting, because it is a religious question the
+     * client's scholar answers rather than one this codebase decides. A
+     * sentence typed into this policy would be correct until the day he
+     * answers, and then it would be a false statement on the privacy page,
+     * which is exactly how the old wording came to overstate who could see a
+     * photograph.
+     *
+     * ⚠️ AN UNREADABLE SETTING PRODUCES THE STRICTEST SENTENCE, because the
+     * policy resolves to `never` in that case and this must describe what the
+     * product will actually do, not what it would prefer to say.
+     */
+    private function whoElseSeesPhotographs(): string
+    {
+        return match (app(PhotoVisibilityPolicy::class)->level()) {
+            PhotoVisibilityPolicy::AFTER_CONTACT_APPROVAL => 'The trusted contact of a member you are introduced to sees them, once that '
+                .'member has been approved to meet you. Nobody else does.',
+
+            PhotoVisibilityPolicy::AT_MUTUAL_INTEREST => 'A member you are introduced to sees them once you have both said yes to each '
+                .'other, and their trusted contact sees them before that. Nobody else does.',
+
+            default => 'Your own trusted contact sees them, if you have named one. No other member '
+                .'ever sees them, at any stage, whether or not you have both said yes.',
+        };
     }
 
     /**
@@ -331,6 +567,20 @@ class LegalController extends Controller
                         .'interested, they are owed the courtesy you would want yourself.',
                     'It is always acceptable to say no, or to say nothing. It is never acceptable '
                         .'to be cruel about it.',
+                ],
+            ],
+            [
+                'heading' => 'Respect the people around them',
+                'body' => [
+                    'Many members here are advised by a trusted contact, usually a father or a '
+                        .'brother. That person is part of how this works and is owed the same '
+                        .'courtesy as the member themselves.',
+                    'Do not try to reach somebody around their trusted contact, and do not press '
+                        .'them to answer without one. If a trusted contact declines an '
+                        .'introduction, that is the answer.',
+                    'Do not ask a member to hide anything about this from their family. A '
+                        .'request to keep it quiet is the clearest warning sign there is, and we '
+                        .'act on reports of it.',
                 ],
             ],
             [

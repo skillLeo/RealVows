@@ -2509,6 +2509,17 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--ink);
 }
 
+/* The version line. Quiet, and set apart by a rule rather than a box, because
+   it is a fact about the document rather than part of its argument. */
+.rv-legal__version {
+  margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid color-mix(in oklab, var(--brass) 26%, transparent);
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
 /* ==========================================================================
    Sticky app bars
    ========================================================================== */

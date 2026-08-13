@@ -25,6 +25,29 @@ class SettingsController extends Controller
         'storage' => 'Photo storage',
         'verification' => 'Verification',
         'matching' => 'Matching',
+
+        /*
+         * ⚠️ THESE TWO WERE SEEDED AND THEN UNREACHABLE.
+         *
+         * `guardian` and `ai` had rows in the settings table, a full admin
+         * form waiting to render them, and no entry here — so they appeared on
+         * no screen and could be changed only by opening a database client.
+         *
+         * For `ai` that meant the risk narrator and the profile writer looked
+         * broken rather than unconfigured. For `guardian` it was worse: the
+         * requirement is the single switch that turns the entire
+         * trusted-contact system on, so with no way to reach it the whole
+         * feature was built, tested, deployed and invisible. Members could not
+         * nominate anybody and every gate was inert, which is exactly what the
+         * client reported — that the flow simply was not there.
+         *
+         * ⚠️ "Trusted contact rules", not "Trusted contacts". The sidebar
+         * already has a Trusted contacts QUEUE under Review. Two entries with
+         * one name, one a queue of people and one a policy, is the same
+         * collision that made admin Settings and member Settings unreadable.
+         */
+        'guardian' => 'Trusted contact rules',
+        'ai' => 'AI features',
         'packages' => 'Packages',
         'payments' => 'Payments',
         'whatsapp' => 'WhatsApp',

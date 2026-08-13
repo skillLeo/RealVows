@@ -86,6 +86,32 @@ const saveMessage = computed(
         })[status.value]
 );
 
+/**
+ * The same state, as a word rather than a sentence.
+ *
+ * ⚠️ IDLE SAYS NOTHING, AND THAT IS THE WHOLE SAVING.
+ *
+ * The long form said "Saved automatically as you type." permanently, including
+ * before anything had been typed — a promise, a status and a piece of
+ * furniture at once, occupying a row of the action bar on every step forever.
+ *
+ * Here it is blank until something happens. A word that appears when the state
+ * changes is read; a sentence that is always there is furniture.
+ *
+ * ⚠️ THE ERROR KEEPS ITS FULL SENTENCE. "We could not save" as one word would
+ * be alarming and useless — the member needs to know their answers are still
+ * there and that we will try again, and that does not fit in a word.
+ */
+const shortSaveState = computed(
+    () =>
+        ({
+            idle: '',
+            saving: 'Saving…',
+            saved: 'Saved',
+            error: 'Not saved — we will try again',
+        })[status.value]
+);
+
 /** Photo uploads move the completeness figure too, so the header keeps up. */
 function onPhotosUpdated(payload) {
     liveCompleteness.value = payload.completeness;
@@ -113,21 +139,42 @@ async function submit() {
     <Head :title="`${steps[currentStepNumber - 1]} · Your profile`" />
 
     <AppLayout bare>
-        <!-- Persistent header: step count in the display face, brass progress bar -->
-        <template #bar>
-            <div class="rv-shell rv-builder__meta">
-                <span class="rv-builder__count">Step {{ currentStepNumber }} of {{ steps.length }}</span>
-                <span class="rv-builder__pct">{{ liveCompleteness }}% complete</span>
-            </div>
-            <div class="rv-progress">
-                <div class="rv-progress__fill" :style="{ width: progress }" />
-            </div>
-        </template>
-
+        <!-- ⚠️ THE PROGRESS IS PART OF THE PAGE, NOT PART OF THE CHROME.
+             It was bolted onto the app's top bar, which made the header three
+             rows deep on every step and pushed the actual question further
+             down a screen that is mostly question. A step counter is about the
+             form, not about the product, and it belongs with the form. -->
         <div class="rv-shell rv-builder">
             <StepSidebar :steps="steps" :current="index" @select="jump" />
 
             <div class="rv-builder__main">
+                <div class="rv-builder__head">
+                    <div class="rv-builder__meta">
+                        <span class="rv-builder__count">Step {{ currentStepNumber }} of {{ steps.length }}</span>
+
+                        <!-- ⚠️ THE SAVE STATE MOVED HERE FROM A FULL LINE AT
+                             THE BOTTOM OF THE PAGE.
+                             "Saved automatically as you type." sat permanently
+                             under the buttons, costing a row of the action bar
+                             to say the same thing on every step forever. The
+                             reassurance is worth keeping and the sentence is
+                             not: as a word beside the percentage it is read
+                             when it changes and ignored when it does not. -->
+                        <span
+                            class="rv-builder__save"
+                            :class="{ 'is-error': status === 'error' }"
+                            role="status"
+                            aria-live="polite"
+                        >{{ shortSaveState }}</span>
+
+                        <span class="rv-builder__pct">{{ liveCompleteness }}%</span>
+                    </div>
+
+                    <div class="rv-progress">
+                        <div class="rv-progress__fill" :style="{ width: progress }" />
+                    </div>
+                </div>
+
                 <Transition :name="direction === 'forward' ? 'rv-slide' : 'rv-slide-back'" mode="out-in">
                     <component
                         :is="STEP_COMPONENTS[currentStep]"
@@ -164,15 +211,6 @@ async function submit() {
                         </BaseButton>
                     </div>
 
-                    <p
-                        class="rv-small rv-builder__savenote"
-                        :class="{ 'is-error': status === 'error' }"
-                        role="status"
-                        aria-live="polite"
-                    >
-                        {{ autosaves ? saveMessage : 'Your answers are kept as you go.' }}
-                    </p>
-
                     <p v-if="page.props.flash?.error" class="rv-builder__missing" role="alert">
                         {{ page.props.flash.error }}
                     </p>
@@ -183,11 +221,31 @@ async function submit() {
 </template>
 
 <style scoped>
+
+/* ── The step header, in the page ────────────────────────────────────────
+   One line and a 3px bar, where the top-bar version was two stacked rows of
+   chrome above the app header. */
+.rv-builder__head {
+    display: grid;
+    gap: 8px;
+    margin-block-end: 20px;
+}
+
+.rv-builder__save {
+    /* Reserves nothing when empty: an idle builder shows no word at all and
+       the line does not jump when one appears. */
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-inline-start: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-builder__save.is-error { color: var(--rose); }
+
 .rv-builder__meta {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     padding-bottom: 16px;
 }
 
@@ -220,11 +278,20 @@ async function submit() {
     min-width: 0;
 }
 
+/* ⚠️ SIZED FOR WHAT IS ACTUALLY IN IT NOW.
+ *
+ * This held three rows — buttons, a permanent save sentence, and an error slot
+ * — so it was padded for three and reserved the height whether or not the
+ * other two had anything to say. On the profile builder, which is a form
+ * somebody scrolls, that is a strip of the screen taken from the question
+ * being asked.
+ *
+ * One row of buttons, and the error appears only when there is one. */
 .rv-builder__actions {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-block: 20px;
+    gap: 10px;
+    padding-block: 12px;
 }
 
 .rv-builder__actions-row {
@@ -233,14 +300,6 @@ async function submit() {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-}
-
-.rv-builder__savenote {
-    text-align: center;
-}
-
-.rv-builder__savenote.is-error {
-    color: var(--rose);
 }
 
 .rv-builder__missing {

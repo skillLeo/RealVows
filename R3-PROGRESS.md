@@ -22,6 +22,25 @@
   4/4 guards templates, rendered mailables and signed links
 - **SSH password auth disabled** on the VPS, key-only, verified from outside
 
+- **Admin dashboard** at `/admin`, first item in the sidebar. Queue tiles, member
+  figures, a fourteen-day joining chart, two donuts, completeness bands, and a
+  plain-language "what needs you" panel. Every figure scoped by `ReviewerScope`
+  and the scope printed on the page — an aggregate is information about the rows
+  behind it, and a female reviewer must not be handed a description of the
+  people she was specifically not given access to. `AdminDashboardScopeTest` 7/7,
+  verified by deleting the scoping and watching five fail.
+  Charts are inline SVG, no library. The summary is computed in PHP
+  (`DashboardInsights`), not by a model: every sentence quotes a figure drawn
+  beside it, and a model that writes "about a dozen" next to a tile reading 3
+  makes the page untrustworthy to the one reader who cannot check it.
+- **Admin shell** — `AdminLayout` with a permanent sidebar carrying all sixteen
+  destinations. Seven of them previously had no navigation at all and could only
+  be reached by typing the URL. `AppLayout` delegates to it for staff, so
+  `/dashboard` and `/account` do not drop a reviewer back into the member
+  layout. Admin "Settings" renamed **Configuration** — the member's own account
+  page is also called Settings, and staff saw two items meaning entirely
+  different things under one word.
+
 ## In progress
 
 **Part C is done.** `RiskAssessment` carries a score and reasons and has NO
@@ -146,10 +165,16 @@ not simply returning nothing.
   three moments in one module with a build-failing guard: **there was a buzz on
   every page navigation**, which is the exact failure the brief warns about.
   `DEVICE-WALK-LIST.md` is the handover for what I cannot test.
-  **Still not done in H:** the floating action button, sheets-not-pages for
-  secondary flows, view transitions between card and match view, optimistic UI
-  for approve/decline, and the screen-by-screen premium pass (whitespace,
-  empty states, three-tier loading, error voice, 8px rhythm audit).
+  ⚠️ **This list was wrong and had been for a while.** It named five things as
+  outstanding; three were already built and shipped, and I only found that by
+  checking the emission points rather than believing the file. The FAB is used
+  in `Dashboard.vue`, `SheetModal`/`ReportSheet` are used on two screens, and
+  `startViewTransition` is called in `app.js`. A progress file that says work
+  is undone is the same failure class as a guard that reads the wrong artefact
+  — it looks like information and is not.
+  **Now genuinely done in H:** optimistic approve/decline with server-governed
+  rollback; empty states on the credit ledger, the support page and the
+  verification review screen, held by `EmptyStatesTest`.
 - ~~**Part I**~~ **done.** `/questions` is a public Blade page using native
   `<details>` — keyboard operable, screen-reader correct, works without
   JavaScript, and findable by the browser's own in-page search, which a JS
@@ -195,7 +220,7 @@ not simply returning nothing.
   `@realvows.test`. Production: 32 demo, 0 real. The client's own genuine admin
   account will end them — intended, and he has to be told
 - Free period is ON; founding-offer band counts verified members
-- **Suite: 655 tests, 646 passing, 9 skipped** (banner 9.2kb of a 25kb budget,
+- **Suite: 688 tests, 679 passing, 9 skipped** (banner 16.1kb of a 25kb budget,
   0 images on home; breakpoints and touch targets clean)
 - **All ten R3 parts have been started; A, B, C, D, E, F, G, I, J are complete.**
   H is partial (measurable half done; FAB, sheets, view transitions, optimistic

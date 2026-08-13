@@ -94,8 +94,14 @@
 
             {{-- The light behind the screen. --}}
             <radialGradient id="rv-meeting-glow" cx=".5" cy=".47" r=".5">
-                <stop offset="0%"   stop-color="var(--brass)" stop-opacity=".26" />
-                <stop offset="38%"  stop-color="var(--brass)"        stop-opacity=".11" />
+                {{-- ⚠️ MEASURED, NOT EYEBALLED. At .26 the centre of the hero
+                     came out (227,210,189) — a tan, not lit paper — and the
+                     tracked-caps line failed AA against it at 4.16:1. These
+                     numbers are set by the contrast of the text that sits on
+                     top of them, which is the only thing that decides how
+                     strong a background light is allowed to be. --}}
+                <stop offset="0%"   stop-color="var(--brass)" stop-opacity=".09" />
+                <stop offset="38%"  stop-color="var(--brass)" stop-opacity=".04" />
                 <stop offset="100%" stop-color="var(--brass)"        stop-opacity="0" />
             </radialGradient>
 

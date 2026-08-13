@@ -1695,6 +1695,17 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   text-align: center;
 }
 
+/*
+ * ⚠️ FULL-STRENGTH INK IN THE HERO, NOT --ink-soft.
+ *
+ * --ink-soft is for labels and helper text sitting on flat cream. Over the warm
+ * centre of this hero it measured 4.20:1 and failed AA outright. It is also the
+ * wrong call typographically: this is the only paragraph on the page a visitor
+ * is guaranteed to read, and it was set in the colour reserved for things that
+ * do not matter much.
+ */
+.rv-hero .rv-lead { color: var(--ink); }
+
 /* ⚠️ ch, NOT PIXELS. A ch is a fraction of the font size, so these measures
    grow and shrink with the type — which is exactly what a zoom level changes.
    A px max-width here is the same bug in a smaller place. */
@@ -4006,11 +4017,20 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
      flat fill is what made this read as a coloured rectangle. */
   /* Warmest where the words are, cooling to plain cream at the corners. The
      light is now daylight through a window rather than a candle in a crypt. */
+  /*
+   * ⚠️ 6%, NOT 13%. THE GLOW WAS EATING THE TYPE.
+   *
+   * At 13% brass the centre measured (227,210,189) — a saturated tan, not lit
+   * paper. Everything set on it lost contrast: the lead came out at 4.20:1,
+   * under the 4.5 AA floor for normal text, and the whole composition read
+   * muddy. Light on paper barely tints it; if the glow is legible AS a colour
+   * it is already too strong.
+   */
   background:
     radial-gradient(115% 95% at 50% 44%,
-      color-mix(in oklab, var(--brass) 13%, var(--card)) 0%,
-      var(--cream) 58%,
-      color-mix(in oklab, var(--brass) 7%, var(--cream)) 100%);
+      color-mix(in oklab, var(--brass) 4%, var(--card)) 0%,
+      var(--cream) 60%,
+      color-mix(in oklab, var(--brass) 4%, var(--cream)) 100%);
 }
 
 .rv-meeting__svg {
@@ -4140,7 +4160,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 .rv-meeting__candle {
-  opacity: .05;
+  opacity: .04;
   animation: rv-drift 9s ease-in-out infinite;
 }
 
@@ -4149,6 +4169,16 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * A single warm light crossing the headline, slowly, once every nine seconds.
  * Shadows are banned, so the only way to suggest a light source in the room is
  * to let one travel across something.
+ *
+ * ⚠️ ON A LIGHT GROUND THE SWEEP DARKENS. IT USED TO LIGHTEN, AND THAT WAS
+ * BACKWARDS.
+ *
+ * On the old oxblood hero the gleam ran cream → brass-bright → cream: brighter
+ * than the type, so it read as light catching the letters. Carried onto cream
+ * unchanged it ran oxblood → brass-ink, which is LIGHTER than oxblood — so
+ * every nine seconds the headline visibly faded, and contrast dropped while it
+ * did. On paper, light moving across ink deepens it. The sweep now passes
+ * through oxblood-deep, so the headline can only ever get stronger.
  *
  * ⚠️ NO NEW KEYFRAME. This is #15 The Gleam, already in the catalogue as
  * marketing-only and already permitted to loop.
@@ -4171,7 +4201,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
       background-image: linear-gradient(
         100deg,
         var(--oxblood) 42%,
-        var(--brass-ink) 50%,
+        var(--oxblood-deep) 50%,
         var(--oxblood) 58%
       );
       background-size: 300% 100%;

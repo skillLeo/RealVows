@@ -80,20 +80,44 @@
             <path class="rv-meeting__arch rv-meeting__arch--central"
                   d="M486 460 L486 150 A114 114 0 0 1 714 150 L714 460" />
 
-            {{-- The keystone. A single brass mark at the apex. --}}
-            <circle class="rv-meeting__bloom" cx="600" cy="150" r="120"
+            {{-- ⚠️ THE KEYSTONE SITS AT THE APEX, WHICH IS WHERE THE TWO
+                 HALVES MEET.
+
+                 It used to sit at (600,150) — the CENTRE of the arc's circle,
+                 not the crown of the arch. Architecturally that is a diamond
+                 floating in a doorway. A keystone is the wedge at the top, and
+                 it is the stone both halves lean on, which is the entire
+                 reason it is the right shape for this product. --}}
+            <circle class="rv-meeting__bloom" cx="600" cy="36" r="110"
                     fill="url(#rv-keystone-bloom)" />
             <path class="rv-meeting__keystone"
-                  d="M578 150 L600 126 L622 150 L600 174 Z" />
+                  d="M578 36 L600 12 L622 36 L600 60 Z" />
         </g>
 
-        {{-- ── The two lines. ────────────────────────────────────────────
-             They start off-canvas and travel inward. Different durations, so
-             one arrives fractionally before the other and waits. --}}
-        <line class="rv-meeting__path rv-meeting__path--left"
-              x1="0" y1="300" x2="600" y2="300" />
-        <line class="rv-meeting__path rv-meeting__path--right"
-              x1="1200" y1="300" x2="600" y2="300" />
+        {{-- ── The two halves. ───────────────────────────────────────────
+
+             ⚠️ THESE ARE HALVES OF THE CENTRAL ARCH, NOT TWO LINES ON A FLOOR.
+
+             They were two horizontal strokes travelling inward along the
+             colonnade to meet in the middle. That reads as "two paths cross",
+             which is a smaller idea than the one available: each half starts
+             at its own base, climbs its own side, and the two complete a
+             single arch at the keystone.
+
+             Two halves finishing one arch is the union stated in the shape
+             itself, using the motif the product already owns — the doorway a
+             mosque and a church share. Nothing has to be explained.
+
+             Each traces the faint central arch beneath it, so the finished
+             shape is visible the whole time and the bright brass is the part
+             being walked.
+
+             Different durations on purpose. One arrives before the other and
+             waits at the top. Two people are not symmetrical. --}}
+        <path class="rv-meeting__path rv-meeting__path--left"
+              d="M486 460 L486 150 A114 114 0 0 1 600 36" />
+        <path class="rv-meeting__path rv-meeting__path--right"
+              d="M714 460 L714 150 A114 114 0 0 0 600 36" />
 
         {{-- A floor line, so the colonnade stands on something. --}}
         <line class="rv-meeting__floor" x1="0" y1="460" x2="1200" y2="460" />

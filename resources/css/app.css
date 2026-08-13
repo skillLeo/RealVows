@@ -3993,22 +3993,89 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-meeting__layer--mid { --rate: 30px; opacity: .85; }
 .rv-meeting__layer--near { --rate: 52px; }
 
-/* ── The convergence. ──────────────────────────────────────────────────── */
+/* ── The convergence. ────────────────────────────────────────────────────
+ *
+ * ⚠️ 500 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
+ *
+ * Each half is a 310-unit upright plus a quarter of a 114-radius arc
+ * (π × 114 ÷ 2 ≈ 179), so ≈ 489. If dasharray were shorter than the true
+ * length the dash would repeat and the arch would appear to draw itself twice.
+ * Rounded up rather than measured with getTotalLength(), because this
+ * composition ships no JavaScript — a number in a stylesheet cannot fail to
+ * run the way a measurement can.
+ *
+ * ⚠️ fill: none MATTERS MORE THAN IT LOOKS. These are paths now rather than
+ * lines, and a path with the default fill would drop a solid brass wedge
+ * across the whole doorway.
+ */
 .rv-meeting__path {
+  fill: none;
   stroke: var(--brass-bright);
   stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
   opacity: .8;
-  stroke-dasharray: 600;
+  stroke-dasharray: 500;
+  stroke-linecap: round;
 }
 
+/* Both climb from their own base, so both offsets are positive. The right
+ * stroke used -600 because it drew inward from the far end of a horizontal
+ * line; there is no far end now, only a bottom and a top. */
 .rv-meeting__path--left {
-  stroke-dashoffset: 600;
+  stroke-dashoffset: 500;
   animation: rv-meet-left 20s var(--ease-entrance) infinite;
 }
 
 .rv-meeting__path--right {
-  stroke-dashoffset: -600;
+  stroke-dashoffset: 500;
   animation: rv-meet-right 20s var(--ease-entrance) infinite;
+}
+
+/* ── The candlelight. ────────────────────────────────────────────────────
+ *
+ * A single warm light crossing the headline, slowly, once every nine seconds.
+ * Shadows are banned, so the only way to suggest a light source in the room is
+ * to let one travel across something.
+ *
+ * ⚠️ NO NEW KEYFRAME. This is #15 The Gleam, already in the catalogue as
+ * marketing-only and already permitted to loop. It was written for the photo
+ * mosaic that R3 deleted, so until now it was a registered primitive animating
+ * nothing at all. The sweep it describes is exactly this one.
+ *
+ * ⚠️ GUARDED BY @supports, AND THAT GUARD IS NOT OPTIONAL.
+ *
+ * background-clip: text works by painting the gradient and clipping it to the
+ * glyphs, which requires the text itself to be transparent. In a browser that
+ * does not support it, transparent text is simply invisible — the headline of
+ * the home page disappears completely. Inside @supports, an unsupporting
+ * browser never sees the transparency at all and keeps the cream it already
+ * had. The -webkit- prefix is tested first because a large share of Android
+ * WebViews still answer only to that one.
+ *
+ * ⚠️ MARKETING ONLY. background-position repaints rather than compositing, so
+ * this may never appear on an authenticated screen where somebody is trying to
+ * finish a task. It is confined to the public hero headline.
+ */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rv-hero .rv-d1 {
+      background-image: linear-gradient(
+        100deg,
+        var(--cream) 42%,
+        var(--brass-bright) 50%,
+        var(--cream) 58%
+      );
+      background-size: 300% 100%;
+      background-repeat: no-repeat;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      /* Starts after the words have arrived. A light that crosses type still
+       * settling reads as a glitch rather than as a room. */
+      animation: rv-arch-gleam 9s linear 2.6s infinite;
+    }
+  }
 }
 
 .rv-meeting__bloom {
@@ -4016,22 +4083,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 @keyframes rv-meet-left {
-  0%   { stroke-dashoffset: 600; opacity: 0; }
+  0%   { stroke-dashoffset: 500; opacity: 0; }
   8%   { opacity: .8; }
-  /* Arrives first, then holds while the other closes the gap. */
+  /* Reaches the keystone first, then holds while the other climbs to it. */
   38%  { stroke-dashoffset: 0; opacity: .8; }
   72%  { stroke-dashoffset: 0; opacity: .8; }
   88%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 600; opacity: 0; }
+  100% { stroke-dashoffset: 500; opacity: 0; }
 }
 
 @keyframes rv-meet-right {
-  0%   { stroke-dashoffset: -600; opacity: 0; }
+  0%   { stroke-dashoffset: 500; opacity: 0; }
   10%  { opacity: .8; }
   44%  { stroke-dashoffset: 0; opacity: .8; }
   72%  { stroke-dashoffset: 0; opacity: .8; }
   88%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: -600; opacity: 0; }
+  100% { stroke-dashoffset: 500; opacity: 0; }
 }
 
 /* ⚠️ 4% ABOVE AMBIENT AND NO MORE. A bloom that reads as a glow belongs on a

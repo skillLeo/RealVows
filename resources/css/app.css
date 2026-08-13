@@ -4025,9 +4025,19 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * under the 4.5 AA floor for normal text, and the whole composition read
    * muddy. Light on paper barely tints it; if the glow is legible AS a colour
    * it is already too strong.
+   *
+   * ⚠️ THE LIGHT SITS HIGH, BEHIND THE HEADLINE, AND STOPS ABOVE THE SMALL
+   * TEXT. THAT IS A CONTRAST DECISION, NOT A COMPOSITIONAL ONE.
+   *
+   * Centred at 44% it pooled behind the whole column, and the tracked caps at
+   * the foot — 14px, so they need the full 4.5 — landed on (219,209,192) and
+   * measured 3.88:1. The headline is 56px and only needs 3:1, so it can carry
+   * as much light as the composition wants. Putting the source at 34% and
+   * tightening its reach gives the display type its glow and leaves everything
+   * small sitting on all but pure cream.
    */
   background:
-    radial-gradient(115% 95% at 50% 44%,
+    radial-gradient(95% 70% at 50% 34%,
       color-mix(in oklab, var(--brass) 4%, var(--card)) 0%,
       var(--cream) 60%,
       color-mix(in oklab, var(--brass) 4%, var(--cream)) 100%);
@@ -4083,7 +4093,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    a fill="url(#rv-mashrabiya)" presentation attribute, and any CSS fill on this
    selector beats that attribute and erases the entire screen. */
 .rv-meeting__screen {
-  opacity: .5;
+  opacity: .42;
 }
 
 /* ── The arch ────────────────────────────────────────────────────────── */

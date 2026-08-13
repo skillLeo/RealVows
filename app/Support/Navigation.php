@@ -191,26 +191,26 @@ class Navigation
                 'key' => 'overview',
                 'label' => 'Overview',
                 'items' => [
-                    ['key' => 'dashboard', 'label' => 'Dashboard', 'href' => '/admin', 'visible' => $user->can('verifications.view')],
+                    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'grid', 'href' => '/admin', 'visible' => $user->can('verifications.view')],
                 ],
             ],
             [
                 'key' => 'review',
                 'label' => 'Review',
                 'items' => [
-                    ['key' => 'verifications', 'label' => 'Verification queue', 'href' => '/admin/verifications', 'visible' => $user->can('verifications.view')],
-                    ['key' => 'trusted-contacts', 'label' => 'Trusted contacts', 'href' => '/admin/trusted-contacts', 'visible' => $user->can('verifications.review')],
-                    ['key' => 'reports', 'label' => 'Reports', 'href' => '/admin/reports', 'visible' => $user->can('verifications.review')],
-                    ['key' => 'support', 'label' => 'Support', 'href' => '/admin/support', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'verifications', 'label' => 'Verification queue', 'icon' => 'check', 'href' => '/admin/verifications', 'visible' => $user->can('verifications.view')],
+                    ['key' => 'trusted-contacts', 'label' => 'Trusted contacts', 'icon' => 'users', 'href' => '/admin/trusted-contacts', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'reports', 'label' => 'Reports', 'icon' => 'flag', 'href' => '/admin/reports', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'support', 'label' => 'Support', 'icon' => 'lifebuoy', 'href' => '/admin/support', 'visible' => $user->can('verifications.review')],
                 ],
             ],
             [
                 'key' => 'operations',
                 'label' => 'Operations',
                 'items' => [
-                    ['key' => 'matches', 'label' => 'Matches', 'href' => '/admin/matches', 'visible' => $user->can('matches.view')],
-                    ['key' => 'payments', 'label' => 'Payments', 'href' => '/admin/payments', 'visible' => $user->can('settings.update')],
-                    ['key' => 'emails', 'label' => 'Email previews', 'href' => '/admin/emails', 'visible' => $user->can('settings.update')],
+                    ['key' => 'matches', 'label' => 'Matches', 'icon' => 'matches', 'href' => '/admin/matches', 'visible' => $user->can('matches.view')],
+                    ['key' => 'payments', 'label' => 'Payments', 'icon' => 'card', 'href' => '/admin/payments', 'visible' => $user->can('settings.update')],
+                    ['key' => 'emails', 'label' => 'Email previews', 'icon' => 'envelope', 'href' => '/admin/emails', 'visible' => $user->can('settings.update')],
                 ],
             ],
             [
@@ -227,6 +227,24 @@ class Navigation
                     ->map(fn (string $label, string $key) => [
                         'key' => "settings.{$key}",
                         'label' => $label,
+                        /*
+                         * ⚠️ MATCHED BY KEY, WITH A FALLBACK. A group added to
+                         * SettingsController that nobody thinks to add here
+                         * gets the generic glyph rather than a blank space
+                         * where every sibling has an icon — which is what a
+                         * missing key looks like, and it reads as broken.
+                         */
+                        'icon' => match ($key) {
+                            'general' => 'sliders',
+                            'mail' => 'envelope',
+                            'storage' => 'image',
+                            'verification' => 'shield',
+                            'matching' => 'matches',
+                            'packages' => 'packages',
+                            'payments' => 'card',
+                            'whatsapp' => 'message',
+                            default => 'sliders',
+                        },
                         'href' => "/admin/settings/{$key}",
                         /*
                          * ⚠️ THE COUNT MOVED HERE FROM THE TAB STRIP RATHER
@@ -265,7 +283,7 @@ class Navigation
                 'key' => 'you',
                 'label' => 'You',
                 'items' => [
-                    ['key' => 'account', 'label' => 'Your account', 'href' => '/account', 'visible' => true],
+                    ['key' => 'account', 'label' => 'Your account', 'icon' => 'account', 'href' => '/account', 'visible' => true],
                 ],
             ],
         ];

@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import RvLogo from '@/Components/RvLogo.vue';
+import RvIcon from '@/Components/RvIcon.vue';
 import AccountMenu from '@/Components/AccountMenu.vue';
 
 /**
@@ -52,7 +53,116 @@ defineProps({
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const current = computed(() => page.url.split('?')[0]);
-const sections = computed(() => page.props.adminNav ?? []);
+const allSections = computed(() => page.props.adminNav ?? []);
+
+/*
+ * ⚠️ ONE PINNED CONTROL, AND IT IS THE ACTION RATHER THAN THE DESTINATION.
+ *
+ * I pinned both "Your account" and "Log out" and the client was right that it
+ * is one too many: two stuck buttons stop reading as a footer and start
+ * reading as a second navigation competing with the first.
+ *
+ * The distinction that settles which one stays is what they are, not which
+ * feels more important. Your account is a DESTINATION — a page, like the
+ * fifteen above it — so it belongs in the list with them, under its own
+ * heading. Log out is an ACTION: it changes state, it is available from
+ * everywhere, and it is the one thing somebody must never have to scroll to
+ * find. That is what a pinned footer is for.
+ */
+const sections = computed(() => allSections.value);
+
+function logout() {
+    router.post('/logout');
+}
+
+/*
+ * ⚠️ THE BAR IS MEASURED, NOT GUESSED.
+ *
+ * The sidebar was `top: 62px` with `max-height: calc(100dvh - 62px)` — a
+ * hardcoded guess at the header's height. The review banner and the gateway
+ * banner sit above it, so the real offset is larger and varies by build; the
+ * column was therefore taller than the space it had and its last item fell off
+ * the bottom of the screen. Exactly the fault as the mobile drawer, in a
+ * second place, from the same number.
+ *
+ * A ResizeObserver writes the true height to a custom property. It costs one
+ * observer on staff screens and cannot be wrong.
+ */
+const bar = ref(null);
+const scroller = ref(null);
+
+let observer = null;
+
+/*
+ * ⚠️ THE SIDEBAR'S OWN SCROLL POSITION SURVIVES A NAVIGATION.
+ *
+ * Inertia swaps the page component and this layout is remounted with it, so
+ * the scrolling element is a brand new node every time — and a new node starts
+ * at the top. Click WhatsApp near the bottom of Configuration and the column
+ * snapped back, hiding the item you had just chosen and every one around it.
+ *
+ * The client's description is exact: the sidebar should not move when the page
+ * does. It is furniture. Furniture that jumps on every click reads as the page
+ * reloading, which is the one thing a single-page app exists to avoid.
+ *
+ * ⚠️ sessionStorage, NOT A MODULE VARIABLE. A hard refresh — which the client
+ * also does constantly — throws module state away, and landing at the top
+ * after F5 is the same complaint again. Session-scoped so it does not outlive
+ * the tab, and keyed so a member's screens can never read it.
+ *
+ * The proper fix is Inertia's persistent layouts, which would stop the
+ * remount entirely. That means changing how every admin page declares its
+ * layout, and this is the same result in fifteen lines that cannot half-apply
+ * to some pages and not others.
+ */
+const SCROLL_KEY = 'rv.admin.nav.scroll';
+
+function rememberScroll() {
+    if (! scroller.value) return;
+
+    try {
+        sessionStorage.setItem(SCROLL_KEY, String(scroller.value.scrollTop));
+    } catch {
+        // Private browsing refuses sessionStorage. Losing the position is a
+        // nuisance; throwing here would break the sidebar.
+    }
+}
+
+function restoreScroll() {
+    if (! scroller.value) return;
+
+    try {
+        const saved = Number(sessionStorage.getItem(SCROLL_KEY) ?? 0);
+
+        if (saved > 0) scroller.value.scrollTop = saved;
+    } catch {
+        // As above.
+    }
+}
+
+onMounted(() => {
+    restoreScroll();
+    scroller.value?.addEventListener('scroll', rememberScroll, { passive: true });
+
+    if (! bar.value || typeof ResizeObserver === 'undefined') return;
+
+    observer = new ResizeObserver(() => {
+        document.documentElement.style.setProperty(
+            '--rv-admin-bar',
+            `${Math.round(bar.value.getBoundingClientRect().bottom)}px`
+        );
+    });
+
+    observer.observe(bar.value);
+});
+
+onBeforeUnmount(() => {
+    // Written on the way out too: a click can land before the last scroll
+    // event has been handled.
+    rememberScroll();
+    scroller.value?.removeEventListener('scroll', rememberScroll);
+    observer?.disconnect();
+});
 
 /*
  * ⚠️ THE LOGO GOES WHEREVER THIS PERSON CAN ACTUALLY GO.
@@ -143,7 +253,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     </div>
 
     <div class="rv-admin">
-        <header class="rv-admin__bar">
+        <header ref="bar" class="rv-admin__bar">
             <button
                 type="button"
                 class="rv-admin__drawer-toggle"
@@ -189,6 +299,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                     </button>
                 </div>
 
+                <div ref="scroller" class="rv-admin__scroll">
                 <div v-for="section in sections" :key="section.key" class="rv-admin__group">
                     <h2 class="rv-admin__group-label">{{ section.label }}</h2>
 
@@ -200,7 +311,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                                 :class="{ 'is-active': activeHref === item.href }"
                                 :aria-current="activeHref === item.href ? 'page' : undefined"
                             >
-                                <span>{{ item.label }}</span>
+                                <RvIcon
+                                    v-if="item.icon"
+                                    :name="item.icon"
+                                    :size="17"
+                                    class="rv-admin__icon"
+                                />
+                                <span class="rv-admin__link-text">{{ item.label }}</span>
 
                                 <!-- ⚠️ Only when there is something to say. A
                                      tick beside every finished group turns the
@@ -214,6 +331,17 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                             </Link>
                         </li>
                     </ul>
+                </div>
+                </div>
+
+                <!-- ⚠️ PINNED BELOW THE SCROLL, NOT INSIDE IT. margin-block-start
+                     auto pushes this to the bottom of the flex column, so it
+                     stays put however long the section list grows. -->
+                <div class="rv-admin__foot">
+                    <button type="button" class="rv-admin__action rv-admin__action--out" @click="logout">
+                        <RvIcon name="signout" :size="17" />
+                        <span>Log out</span>
+                    </button>
                 </div>
             </nav>
 
@@ -310,15 +438,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 /* ── The sidebar ─────────────────────────────────────────────────────────
    Sticky under the bar and scrolling on its own, so a long configuration page
    never leaves somebody scrolled away from the navigation. */
+/* ⚠️ A FLEX COLUMN, so the sections scroll and the footer pins. As a grid with
+   `align-content: start` the account and log-out controls were simply the last
+   rows of a scrolling list, which is how they ended up cut off. */
 .rv-admin__nav {
     position: sticky;
-    top: 62px;
-    max-height: calc(100dvh - 62px);
-    overflow-y: auto;
-    padding: 24px 14px 40px;
-    display: grid;
+    /* Measured — see the ResizeObserver. The fallback is only for the first
+       paint before it runs, and being slightly wrong for one frame is fine
+       where being permanently wrong was not. */
+    top: var(--rv-admin-bar, 62px);
+    height: calc(100dvh - var(--rv-admin-bar, 62px));
+    overflow: hidden;
+    padding: 24px 14px 16px;
+    display: flex;
+    flex-direction: column;
     gap: 18px;
-    align-content: start;
     /* Tone, not a shadow. Shadows are banned by the design system, so the
        separation between navigation and work is a single hairline and a
        slightly cooler ground. */
@@ -370,6 +504,89 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     cursor: pointer;
 }
 
+/* Only the sections scroll. The footer below them never moves. */
+.rv-admin__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: grid;
+    gap: 18px;
+    align-content: start;
+    /* Room for the scrollbar so it does not sit on top of the badges. */
+    padding-inline-end: 2px;
+}
+
+/* ── The two controls that must always be reachable ──────────────────────── */
+.rv-admin__foot {
+    margin-block-start: auto;
+    padding-block-start: 14px;
+    border-block-start: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
+    display: grid;
+    gap: 8px;
+}
+
+/*
+ * ⚠️ SECONDARY, NOT PRIMARY, AND THAT IS A SAFETY DECISION AS MUCH AS A VISUAL
+ * ONE. A filled oxblood button is what this system uses for the action a screen
+ * WANTS you to take. Log out is not that — it is available, deliberate, and
+ * should never be the brightest thing in the column or somebody working a queue
+ * will eventually hit it by muscle memory. An outline reads as present without
+ * inviting the press.
+ */
+.rv-admin__action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* 44px including padding, the touch-target floor measured elsewhere in
+       this project rather than assumed. */
+    min-height: 44px;
+    /* 12px matches the links and the group labels, so icons, text and
+       headings all sit on one vertical line down the column. */
+    padding: 10px 12px;
+    border-radius: var(--r-sm, 8px);
+    border: 1px solid color-mix(in oklab, var(--oxblood) 26%, transparent);
+    background: var(--card);
+    color: var(--oxblood);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 140ms var(--ease), border-color 140ms var(--ease);
+}
+
+.rv-admin__action:hover {
+    background: color-mix(in oklab, var(--oxblood) 8%, var(--card));
+    border-color: var(--oxblood);
+}
+
+.rv-admin__action.is-active {
+    background: color-mix(in oklab, var(--oxblood) 12%, var(--card));
+    border-color: var(--oxblood);
+}
+
+/* Quieter still than its neighbour: the way out should not out-rank the way in. */
+.rv-admin__action--out {
+    color: var(--ink-soft);
+    border-color: color-mix(in oklab, var(--ink) 16%, transparent);
+}
+
+.rv-admin__action--out:hover {
+    color: var(--rose);
+    background: color-mix(in oklab, var(--rose) 7%, var(--card));
+    border-color: color-mix(in oklab, var(--rose) 45%, transparent);
+}
+
+/* The icon must never shrink when a label wraps. */
+.rv-admin__icon { flex: none; }
+.rv-admin__link-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .rv-admin__group + .rv-admin__group {
     padding-block-start: 18px;
     border-block-start: 1px solid color-mix(in oklab, var(--ink) 9%, transparent);
@@ -394,10 +611,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     gap: 2px;
 }
 
+/*
+ * ⚠️ NOT space-between. THAT IS WHAT MADE IT READ BACKWARDS.
+ *
+ * With three children — icon, label, badge — space-between spreads all three
+ * across the full width, so the icon pinned left and the label drifted to the
+ * middle with a gap between them. The eye then reads the label as starting in
+ * the centre of the row and the icon as belonging to nothing, which is exactly
+ * the impression of a right-to-left layout.
+ *
+ * An icon labels the thing immediately after it. They sit together at the
+ * start with one gap, and only the badge is pushed to the far end.
+ */
 .rv-admin__link {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
     padding: 9px 12px;
     border-radius: var(--r-sm, 8px);
@@ -432,6 +660,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
    review build is the expected state, and a red count beside eight of them
    would read as eight faults. */
 .rv-admin__badge-count {
+    /* The only child that goes to the far edge. */
+    margin-inline-start: auto;
     flex: none;
     min-width: 20px;
     padding: 1px 6px;
@@ -498,6 +728,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     .rv-admin__nav {
         position: fixed;
         inset: 0 auto 0 0;
+        height: 100dvh;
         width: min(320px, 86vw);
         z-index: 60;
         transform: translateX(-102%);

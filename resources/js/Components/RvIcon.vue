@@ -32,6 +32,66 @@ defineProps({
         <!-- Free to join -->
         <path v-if="name === 'diamond'" d="M12 3 21 12l-9 9-9-9 9-9Z" />
 
+
+        <!-- ── Administration ──────────────────────────────────────────────
+             Added for the staff sidebar. Same 24px box, same 1.25 stroke and
+             same round joins as the rest, so they sit on the optical baseline
+             the existing set established rather than looking imported. -->
+
+        <!-- Overview -->
+        <template v-else-if="name === 'grid'">
+            <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" />
+            <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" />
+            <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" />
+            <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" />
+        </template>
+
+        <!-- Trusted contacts: two people, one standing behind the other -->
+        <template v-else-if="name === 'users'">
+            <circle cx="9" cy="8" r="3.25" />
+            <path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" />
+            <path d="M16 5.5a3.25 3.25 0 0 1 0 5" />
+            <path d="M17.5 14.9c1.9.6 3 2.4 3 4.6" />
+        </template>
+
+        <!-- Reports -->
+        <template v-else-if="name === 'flag'">
+            <path d="M5 21V4" />
+            <path d="M5 4.5h11l-2 3.5 2 3.5H5" />
+        </template>
+
+        <!-- Support -->
+        <template v-else-if="name === 'lifebuoy'">
+            <circle cx="12" cy="12" r="8.5" />
+            <circle cx="12" cy="12" r="3.5" />
+            <path d="m6 6 3.5 3.5M14.5 14.5 18 18M18 6l-3.5 3.5M9.5 14.5 6 18" />
+        </template>
+
+        <!-- Payments -->
+        <template v-else-if="name === 'card'">
+            <rect x="2.5" y="5" width="19" height="14" rx="2" />
+            <path d="M2.5 10h19" />
+            <path d="M6 14.5h3.5" />
+        </template>
+
+        <!-- General settings -->
+        <template v-else-if="name === 'sliders'">
+            <path d="M5 20v-6M5 10V4M12 20v-9M12 7V4M19 20v-4M19 12V4" />
+            <path d="M2.5 14h5M9.5 7h5M16.5 16h5" />
+        </template>
+
+        <!-- WhatsApp / messages -->
+        <template v-else-if="name === 'message'">
+            <path d="M20.5 11.5a7.5 7.5 0 0 1-11 6.7L4 19.5l1.4-4.9a7.5 7.5 0 1 1 15.1-3.1Z" />
+        </template>
+
+        <!-- Log out -->
+        <template v-else-if="name === 'signout'">
+            <path d="M9.5 4.5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3.5" />
+            <path d="M15.5 8.5 19.5 12l-4 3.5" />
+            <path d="M19 12H9.5" />
+        </template>
+
         <!-- Verified / approved -->
         <path v-else-if="name === 'check'" d="m4.5 12.5 5 5 10-11" />
 

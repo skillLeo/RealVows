@@ -82,10 +82,21 @@
             {{-- The screen is opened where the words are. White shows the
                  lattice, black hides it; the hole is generous and very soft,
                  because a hard edge would read as a spotlight. --}}
-            <radialGradient id="rv-meeting-open" cx=".5" cy=".47" r=".54">
+            {{-- ⚠️ THE PLATEAU IS SIZED BY LEGIBILITY, NOT BY TASTE.
+
+                 The fully-open region ran to 46% of the radius, which cleared
+                 the headline and left the tracked caps at the foot sitting on
+                 lattice. Text on a lattice line measured 3.92:1 against a 4.5
+                 requirement — the pattern was quietly eating the small type.
+
+                 The screen is now fully open across the whole text column and
+                 only begins to close outside it. "The screen opens where the
+                 words are" was always the idea; this is the size the words
+                 actually are. --}}
+            <radialGradient id="rv-meeting-open" cx=".5" cy=".44" r=".72">
                 <stop offset="0%"   stop-color="#000" />
-                <stop offset="46%"  stop-color="#000" />
-                <stop offset="78%"  stop-color="#888" />
+                <stop offset="58%"  stop-color="#000" />
+                <stop offset="82%"  stop-color="#999" />
                 <stop offset="100%" stop-color="#fff" />
             </radialGradient>
             <mask id="rv-meeting-screen">
@@ -93,7 +104,7 @@
             </mask>
 
             {{-- The light behind the screen. --}}
-            <radialGradient id="rv-meeting-glow" cx=".5" cy=".47" r=".5">
+            <radialGradient id="rv-meeting-glow" cx=".5" cy=".36" r=".40">
                 {{-- ⚠️ MEASURED, NOT EYEBALLED. At .26 the centre of the hero
                      came out (227,210,189) — a tan, not lit paper — and the
                      tracked-caps line failed AA against it at 4.16:1. These
@@ -114,7 +125,7 @@
 
         {{-- Light first, then the screen in front of it. --}}
         <rect width="1200" height="1000" fill="url(#rv-meeting-glow)" />
-        <circle class="rv-meeting__candle" cx="600" cy="470" r="420" fill="url(#rv-keystone-bloom)" />
+        <circle class="rv-meeting__candle" cx="600" cy="370" r="360" fill="url(#rv-keystone-bloom)" />
 
         <g mask="url(#rv-meeting-screen)">
             <rect class="rv-meeting__screen" width="1200" height="1000" fill="url(#rv-diaper)" />

@@ -169,6 +169,8 @@
         "dashboard": "Your introductions are free at the moment. Open as many as you like."
     },
     "trusted_contact": {
+        "name_someone_else": "Name somebody else",
+        "rejected_because": "We could not confirm the person you named. :reason You can name somebody else below.",
         "heading": "Your trusted contact",
         "lead": "Someone who knows you, who can confirm you are who you say you are, and who looks at an introduction before you do.",
         "where_this_stands": "Where this stands",

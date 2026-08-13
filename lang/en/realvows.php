@@ -278,6 +278,16 @@ return [
      * as religious machinery to a member.
      */
     'trusted_contact' => [
+        /*
+         * ⚠️ THE TWO STRINGS A STUCK MEMBER NEEDED.
+         *
+         * The gate has always told somebody whose contact was rejected or has
+         * gone quiet that they may name another person. The form to do it was
+         * a v-else on "has a contact", so it was never on the page for them —
+         * the product asked them to act and gave them nothing to act with.
+         */
+        'name_someone_else' => 'Name somebody else',
+        'rejected_because' => 'We could not confirm the person you named. :reason You can name somebody else below.',
         'heading' => 'Your trusted contact',
         'lead' => 'Someone who knows you, who can confirm you are who you say you are, and who looks at an introduction before you do.',
         'where_this_stands' => 'Where this stands',

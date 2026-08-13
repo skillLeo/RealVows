@@ -60,6 +60,21 @@ class TrustedContactController extends Controller
                 'name' => $current->is_appointed ? null : $current->name,
                 'status' => $current->status,
                 'isAppointed' => $current->is_appointed,
+
+                /*
+                 * ⚠️ THE REASON, WHEN THERE IS ONE.
+                 *
+                 * A member whose trusted contact was turned down was told only
+                 * that we "could not confirm" them. Without the reason there is
+                 * nothing to act on — they cannot tell whether the photograph
+                 * was unclear, the person declined, or something is wrong with
+                 * the relationship they claimed. A rejection a member cannot
+                 * understand is a rejection they will raise a support ticket
+                 * about, and rightly.
+                 */
+                'rejectionReason' => $current->status === Guardian::STATUS_REJECTED
+                    ? $current->rejection_reason
+                    : null,
             ] : null,
         ]);
     }

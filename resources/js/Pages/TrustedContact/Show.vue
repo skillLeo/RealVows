@@ -35,6 +35,31 @@ const appointed = useForm({});
  */
 const hasContact = computed(() => props.current !== null);
 
+/*
+ * ⚠️ THE FORM WAS UNREACHABLE FOR EVERY MEMBER WHO MOST NEEDED IT.
+ *
+ * It rendered on `!hasContact` alone. But the gate tells a member whose
+ * contact was rejected, or who has heard nothing for a fortnight, "You can
+ * name somebody else" — and with a contact on record the form was not on the
+ * page. The product asked them to act and gave them nothing to act with.
+ *
+ * The server has supported this the whole time: GuardianService marks the
+ * previous nomination `replaced` and creates a new one. Only the front end had
+ * a dead end in it.
+ *
+ * An appointed contact is excluded on purpose. That path is staff arranging
+ * somebody on the member's behalf, and a form here would let her cancel an
+ * arrangement she did not make and cannot see the state of.
+ */
+const canNominate = computed(() => {
+    if (! hasContact.value) return true;
+    if (props.current.isAppointed) return false;
+
+    return ['rejected', 'stale'].includes(props.state?.state) || props.state?.mayReplace === true;
+});
+
+const isReplacing = computed(() => hasContact.value && canNominate.value);
+
 function submit() {
     form.post('/trusted-contact', { preserveScroll: true });
 }
@@ -96,9 +121,23 @@ function submit() {
                 </div>
             </BaseCard>
 
-            <BaseCard v-else>
+            <!-- ⚠️ v-if, NOT v-else. As a v-else on "has a contact" this form
+                 was unreachable for exactly the members the gate was telling to
+                 use it: somebody whose contact was turned down, or who has
+                 heard nothing in a fortnight, was shown "You can name somebody
+                 else" with no way to name anybody. -->
+            <BaseCard v-if="canNominate">
                 <form class="rv-stack" style="gap: 24px" @submit.prevent="submit">
-                    <h2 class="rv-d3">{{ $t('trusted_contact.name_somebody') }}</h2>
+                    <h2 class="rv-d3">
+                        {{ isReplacing ? $t('trusted_contact.name_someone_else') : $t('trusted_contact.name_somebody') }}
+                    </h2>
+
+                    <!-- The reason, when there is one. A rejection a member
+                         cannot understand is a support ticket waiting to
+                         happen, and they cannot fix what they cannot see. -->
+                    <p v-if="current?.rejectionReason" class="rv-body">
+                        {{ $t('trusted_contact.rejected_because', { reason: current.rejectionReason }) }}
+                    </p>
 
                     <BaseField
                         v-model="form.name"

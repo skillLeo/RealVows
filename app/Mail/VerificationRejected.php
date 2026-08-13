@@ -36,7 +36,15 @@ class VerificationRejected extends Mailable implements ShouldQueue
                 'firstName' => $this->verification->profile?->greetingName(),
                 'reason' => $this->reason,
                 'note' => $this->note,
-                'code' => $this->verification->code,
+
+                /*
+                 * ⚠️ `code` IS NOT PASSED, AND ITS ABSENCE IS THE FIX.
+                 *
+                 * Removing it from the template alone would have left a live
+                 * verification code being handed to the view on every send,
+                 * one @if away from returning. The rule is that this email does
+                 * not carry the code, so the code does not reach the email.
+                 */
             ],
         );
     }

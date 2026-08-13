@@ -7,7 +7,10 @@ use App\Models\Guardian;
 use App\Models\Profile;
 use App\Models\User;
 use App\Support\ReviewerScope;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -24,8 +27,8 @@ class AdminMessagingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
     }
 
     private function staff(string $role = 'admin'): User
@@ -66,6 +69,36 @@ class AdminMessagingTest extends TestCase
             $body,
             'The relay prohibition is not on the page. It is the only control against staff '
                 .'passing messages between members, and a schema cannot enforce it.'
+        );
+
+        /*
+         * ⚠️ ABOVE THE BOX, WHICH IS WHAT THIS TEST IS NAMED FOR AND WAS NOT
+         * CHECKING.
+         *
+         * The assertion above proves the sentence is somewhere on the page. It
+         * would pass just as happily with the rule in the page footer, below
+         * the send button, under a fold — where the person about to relay a
+         * message has already typed it and is reaching for Send.
+         *
+         * "Present" and "read at the moment it applies" are different claims,
+         * and only the second one is a control. Order is checked in the
+         * component source because Inertia ships the page as a JSON blob: the
+         * textarea is not in the HTML response at all, so there is no rendered
+         * order to measure.
+         */
+        $component = file_get_contents(base_path('resources/js/Pages/Admin/Messages/Show.vue'));
+
+        $rule = strpos($component, 'rv-relay-rule');
+        $box = strpos($component, '<textarea');
+
+        $this->assertNotFalse($rule, 'The relay rule element is gone from the component.');
+        $this->assertNotFalse($box, 'The compose box is gone, so this test is measuring nothing.');
+
+        $this->assertLessThan(
+            $box,
+            $rule,
+            'The relay prohibition renders BELOW the compose box. By the time it is read the '
+                .'message is already written, which is not where a rule does any work.'
         );
     }
 
@@ -108,7 +141,7 @@ class AdminMessagingTest extends TestCase
      */
     public function test_a_thread_has_exactly_one_counterparty(): void
     {
-        $columns = \Illuminate\Support\Facades\Schema::getColumnListing('admin_messages');
+        $columns = Schema::getColumnListing('admin_messages');
 
         $partyColumns = array_values(array_filter(
             $columns,

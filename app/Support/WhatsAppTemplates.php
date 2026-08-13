@@ -3,9 +3,34 @@
 namespace App\Support;
 
 /**
- * The seven message templates, exactly as submitted to Meta.
+ * The seven message templates this codebase sends.
  *
- * ⚠️ THIS FILE IS THE CONTRACT WITH META, NOT A CONVENIENCE.
+ * ⚠️ THE BODIES HERE ARE NOT THE BODIES MEMBERS RECEIVE.
+ *
+ * This docblock used to say "exactly as submitted to Meta". That was false, and
+ * a screenshot of the Meta dashboard is what proved it: the approved body of
+ * `verification_rejected` reads "Hi {{1}}, your RealVows verification needs
+ * attention. Reason: {{2}}. Please log in to update your profile." — different
+ * wording from the text below, no link, and no opt-out line.
+ *
+ * Meta stores the approved body. We send only a NAME, a LANGUAGE and an ORDERED
+ * LIST OF VALUES. The sentence on a member's lock screen is Meta's, not ours,
+ * and editing the text below changes nothing about what anybody reads.
+ *
+ * ⚠️ SO EVERY GUARD THAT SCANS THESE BODIES IS SCANNING AN INTENTION.
+ *
+ * The marriage-lead reader, the forbidden-terms reader and the opt-out rule all
+ * read this file. They are still worth having — they keep what we ask Meta to
+ * approve honest — but they cannot tell you what was delivered. The only check
+ * pointed at the real emission point is:
+ *
+ *     php artisan realvows:whatsapp-templates-check
+ *
+ * which reads the approved templates back from the Graph API and compares them.
+ * Run it after anybody edits a template in the dashboard.
+ *
+ * ⚠️ WHAT IS STILL A HARD CONTRACT: the NAME, the LANGUAGE, and the NUMBER of
+ * variables. Those three must match Meta exactly or the send fails.
  *
  * A WhatsApp template is approved as a fixed body with numbered placeholders.
  * We then send an ORDERED, UNNAMED list of values and Meta drops them into

@@ -65,6 +65,16 @@ const verificationSplit = computed(() =>
                 <p class="rv-help">{{ scope.label }}</p>
             </header>
 
+            <!-- ⚠️ THE RAIL COMES FIRST IN THE MARKUP AND SECOND ON SCREEN.
+                 Grid places it in the right-hand column on a wide viewport; in
+                 source order it stays first, so on a phone — and to a screen
+                 reader, and in the tab order — the things needing attention
+                 are read before the charts describing them. Ordering by CSS
+                 alone would put the actions last for exactly the people who
+                 cannot see the layout. -->
+            <div class="rv-dash">
+                <aside class="rv-dash__rail">
+
             <!-- ── What this means ────────────────────────────────────────
                  ⚠️ FIRST ON THE PAGE, ABOVE EVERY NUMBER.
 
@@ -101,30 +111,6 @@ const verificationSplit = computed(() =>
                 </ul>
             </section>
 
-            <!-- ── Who is waiting ─────────────────────────────────────────── -->
-            <section class="rv-stack" style="gap: 12px">
-                <span class="rv-label">Waiting on you</span>
-
-                <p v-if="nothingWaiting" class="rv-help">
-                    Nothing is waiting. Every queue is clear.
-                </p>
-
-                <div class="rv-tiles">
-                    <Link v-for="tile in waiting" :key="tile.label" :href="tile.href" class="rv-tile">
-                        <span class="rv-tile__value" :class="{ 'is-zero': tile.value === 0 }">
-                            {{ tile.value }}
-                        </span>
-                        <span class="rv-tile__label">{{ tile.label }}</span>
-                    </Link>
-                </div>
-
-                <p v-if="queues.oldestWaitingDays !== null" class="rv-help">
-                    The longest anybody has been waiting for verification is
-                    <strong>{{ queues.oldestWaitingDays }}</strong>
-                    day<template v-if="queues.oldestWaitingDays !== 1">s</template>.
-                </p>
-            </section>
-
             <!-- ── Your own account ───────────────────────────────────────
                  Carried over from the member dashboard so /admin is somewhere
                  you can stay. Absent entirely for staff with no member profile
@@ -159,6 +145,34 @@ const verificationSplit = computed(() =>
                         <span class="rv-tile__label">Credits</span>
                     </Link>
                 </div>
+            </section>
+
+                </aside>
+
+                <div class="rv-dash__main">
+
+            <!-- ── Who is waiting ─────────────────────────────────────────── -->
+            <section class="rv-stack" style="gap: 12px">
+                <span class="rv-label">Waiting on you</span>
+
+                <p v-if="nothingWaiting" class="rv-help">
+                    Nothing is waiting. Every queue is clear.
+                </p>
+
+                <div class="rv-tiles">
+                    <Link v-for="tile in waiting" :key="tile.label" :href="tile.href" class="rv-tile">
+                        <span class="rv-tile__value" :class="{ 'is-zero': tile.value === 0 }">
+                            {{ tile.value }}
+                        </span>
+                        <span class="rv-tile__label">{{ tile.label }}</span>
+                    </Link>
+                </div>
+
+                <p v-if="queues.oldestWaitingDays !== null" class="rv-help">
+                    The longest anybody has been waiting for verification is
+                    <strong>{{ queues.oldestWaitingDays }}</strong>
+                    day<template v-if="queues.oldestWaitingDays !== 1">s</template>.
+                </p>
             </section>
 
             <!-- ── Members ────────────────────────────────────────────────── -->
@@ -278,11 +292,57 @@ const verificationSplit = computed(() =>
                     </div>
                 </BaseCard>
             </div>
+                </div>
+            </div>
         </div>
     </AdminLayout>
 </template>
 
 <style scoped>
+/* ── Two columns ─────────────────────────────────────────────────────────
+   The rail is a third of the width, not the full span. A one-sentence row
+   stretched across 900px leaves a canyon between the words and the action at
+   the end of it, and the eye has to travel the whole way to find out what it
+   can do. Narrow, the sentence and its link are one object. */
+.rv-dash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 28px;
+    align-items: start;
+}
+
+/* Explicit placement, because the rail is FIRST in the markup so that a phone
+   and a screen reader meet the actions before the charts. */
+.rv-dash__main { grid-column: 1; grid-row: 1; }
+
+.rv-dash__rail {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    gap: 28px;
+    align-content: start;
+    /* Follows down a long page. The queues are the reason this screen exists;
+       scrolling to the completeness chart should not lose them. */
+    position: sticky;
+    top: 90px;
+}
+
+/* One column below the breakpoint, and the rail keeps its source position —
+   first — which is the right order when there is no room for two. */
+@media (max-width: 1100px) {
+    .rv-dash {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rv-dash__main { grid-column: 1; grid-row: 2; }
+
+    .rv-dash__rail {
+        grid-column: 1;
+        grid-row: 1;
+        position: static;
+    }
+}
+
 /* ── The summary ─────────────────────────────────────────────────────────
    A rule down the leading edge carries the severity, not a coloured
    background. Three tinted panels stacked read as an alert dialogue; a
@@ -297,10 +357,9 @@ const verificationSplit = computed(() =>
 }
 
 .rv-insight {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
+    display: grid;
+    justify-items: start;
+    gap: 8px;
     padding: 12px 16px;
     border-radius: var(--r, 12px);
     background: var(--card);
@@ -332,6 +391,13 @@ const verificationSplit = computed(() =>
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
+}
+
+/* ⚠️ auto-fit would give the rail a single 300px-wide tile per row, which
+   turns four short numbers into a column half a page long. Two up reads as a
+   set. */
+.rv-dash__rail .rv-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* Tone and a hairline. Shadows are banned, so a tile lifts by being slightly

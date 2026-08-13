@@ -147,6 +147,26 @@ const verificationSplit = computed(() =>
                 </div>
             </section>
 
+            <BaseCard v-if="genderSplit">
+                <div class="rv-stack" style="gap: 16px">
+                    <h2 class="rv-d3">Who has joined</h2>
+                    <RvDonut :data="genderSplit" empty-message="No members yet." />
+                </div>
+            </BaseCard>
+
+            <!-- ⚠️ ABSENT, NOT EMPTY, for a scoped reviewer. They see one
+                 gender by design, so a split of it is a pie with one slice
+                 — a chart whose only message is that the reader is not
+                 allowed to see the rest. -->
+            <BaseCard v-else>
+                <div class="rv-stack" style="gap: 8px">
+                    <h2 class="rv-d3">Who has joined</h2>
+                    <p class="rv-help">
+                        The breakdown across the whole platform is not part of your review
+                        scope.
+                    </p>
+                </div>
+            </BaseCard>
                 </aside>
 
                 <div class="rv-dash__main">
@@ -200,27 +220,6 @@ const verificationSplit = computed(() =>
                         </div>
 
                         <RvDonut :data="verificationSplit" empty-message="No members yet." />
-                    </div>
-                </BaseCard>
-
-                <BaseCard v-if="genderSplit">
-                    <div class="rv-stack" style="gap: 16px">
-                        <h2 class="rv-d3">Who has joined</h2>
-                        <RvDonut :data="genderSplit" empty-message="No members yet." />
-                    </div>
-                </BaseCard>
-
-                <!-- ⚠️ ABSENT, NOT EMPTY, for a scoped reviewer. They see one
-                     gender by design, so a split of it is a pie with one slice
-                     — a chart whose only message is that the reader is not
-                     allowed to see the rest. -->
-                <BaseCard v-else>
-                    <div class="rv-stack" style="gap: 8px">
-                        <h2 class="rv-d3">Who has joined</h2>
-                        <p class="rv-help">
-                            The breakdown across the whole platform is not part of your review
-                            scope.
-                        </p>
                     </div>
                 </BaseCard>
             </div>
@@ -387,10 +386,27 @@ const verificationSplit = computed(() =>
 
 .rv-insight__go:hover { border-bottom-color: var(--oxblood); }
 
+/* ⚠️ FOUR, EXPLICITLY, NOT auto-fit.
+ *
+ * auto-fit with a 150px minimum fits only three once the rail takes its share
+ * of the width, so the four queues wrapped 3 + 1 — and a lone tile on a second
+ * row reads as a different, lesser group rather than as the fourth of four.
+ * They are one set and must sit on one line.
+ *
+ * The count steps down deliberately: four, then two, then one. Three would
+ * reintroduce the same orphan at a narrower width. */
 .rv-tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+}
+
+@media (max-width: 1400px) {
+    .rv-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+    .rv-tiles { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ⚠️ auto-fit would give the rail a single 300px-wide tile per row, which
@@ -434,7 +450,11 @@ const verificationSplit = computed(() =>
     color: var(--ink-soft);
 }
 
+/* "Trusted contacts" wraps to two lines while "Reports" does not, which left
+   one tile taller than the rest of the row. Reserving the second line keeps
+   the row even without shortening a label into something vaguer. */
 .rv-tile__label {
+    min-height: 2.4em;
     font-size: 12px;
     letter-spacing: .08em;
     text-transform: uppercase;

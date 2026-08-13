@@ -70,9 +70,16 @@ class PublicPageController extends Controller
                 .'to once you have both said yes to each other. They are never public and never '
                 .'findable by a search engine.',
 
-            default => 'Your trusted contact sees them, and nobody you are introduced to ever does. '
-                .'Nobody here is on display. They are never public and never findable by a '
-                .'search engine.',
+            /*
+             * ⚠️ WHAT REALVOWS DISPLAYS, NOT WHAT ANY PERSON EVER SEES. See the
+             * note in LegalController. A guardian may show his ward a
+             * photograph himself, so a sentence claiming nobody ever sees one
+             * is false the moment he does.
+             */
+            default => 'Your trusted contact sees them. RealVows does not display them to '
+                .'anybody you are introduced to, at any stage. Whether your trusted contact '
+                .'shows you one himself is his own judgement, not something the platform does. '
+                .'They are never public and never findable by a search engine.',
         };
     }
 }

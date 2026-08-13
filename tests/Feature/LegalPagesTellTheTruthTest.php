@@ -141,7 +141,7 @@ class LegalPagesTellTheTruthTest extends TestCase
     {
         $this->level(PhotoVisibilityPolicy::NEVER);
         $this->assertStringContainsString(
-            'nobody you are introduced to ever does',
+            'RealVows does not display them to anybody you are introduced to',
             $this->text('/questions'),
         );
 
@@ -194,7 +194,17 @@ class LegalPagesTellTheTruthTest extends TestCase
         );
 
         // And each says the thing that level actually does.
+        /*
+         * ⚠️ THE CLAIM IS ABOUT WHAT REALVOWS DISPLAYS, and the page must never
+         * go back to claiming nobody ever sees one. A guardian may show his
+         * ward a photograph himself, so the stronger sentence is false and the
+         * weaker one is exactly true.
+         */
         $this->assertStringContainsString(
+            'RealVows does not display them to any other member',
+            $sentences[PhotoVisibilityPolicy::NEVER],
+        );
+        $this->assertStringNotContainsString(
             'No other member ever sees them',
             $sentences[PhotoVisibilityPolicy::NEVER],
         );

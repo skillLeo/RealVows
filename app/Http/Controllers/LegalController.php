@@ -540,8 +540,25 @@ class LegalController extends Controller
             PhotoVisibilityPolicy::AT_MUTUAL_INTEREST => 'A member you are introduced to sees them once you have both said yes to each '
                 .'other, and their trusted contact sees them before that. Nobody else does.',
 
-            default => 'Your own trusted contact sees them, if you have named one. No other member '
-                .'ever sees them, at any stage, whether or not you have both said yes.',
+            /*
+             * ⚠️ "REALVOWS DOES NOT DISPLAY" AND NOT "NO MEMBER EVER SEES".
+             *
+             * The two sound alike and only one of them is true. The platform
+             * controls what it shows. It does not control what a father does
+             * with his own phone, and the position taken on this expects
+             * exactly that: the guardian may show his ward a photograph if he
+             * judges it right, which is a person exercising judgement rather
+             * than a system granting access.
+             *
+             * So "no other member ever sees them" became false the moment a
+             * guardian turned his screen around, and a legal page that says
+             * something untrue is worse than one that says nothing. The last
+             * sentence puts the line where it actually falls.
+             */
+            default => 'Your own trusted contact sees them, if you have named one. RealVows does '
+                .'not display them to any other member, at any stage, whether or not you have '
+                .'both said yes. What your trusted contact chooses to show you himself is '
+                .'between the two of you and is not something we do or record.',
         };
     }
 

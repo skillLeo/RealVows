@@ -322,13 +322,25 @@ class DemoSeeder extends Seeder
         $account = null;
 
         if ($status !== Guardian::STATUS_INVITED) {
-            $account = User::factory()->create([
+            /*
+             * ⚠️ User::create, NOT User::factory().
+             *
+             * Production installs with --no-dev, so fakerphp/faker is not
+             * there and every factory call dies with "Call to undefined
+             * function fake()". I used a factory here while the rest of this
+             * seeder uses create(), which made the seeder run locally and fail
+             * on the only machine it matters on.
+             */
+            $account = User::create([
                 'name' => "Guardian of {$prefix}{$index}",
                 'email' => "guardian-of-{$prefix}{$index}@realvows.test",
-                'password' => Hash::make('realvows2026'),
-                'email_verified_at' => now(),
-                'is_demo' => true,
+                'password' => Hash::make(self::PASSWORD),
             ]);
+
+            $account->forceFill([
+                'is_demo' => true,
+                'email_verified_at' => now(),
+            ])->save();
         }
 
         Guardian::create([

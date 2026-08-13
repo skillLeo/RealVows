@@ -40,14 +40,30 @@ class GuardianDashboardController extends Controller
 
         $pending = MatchRecord::query()
             ->where('seeker_profile_id', $guardian->member->profile?->id)
-            ->with(['matchedProfile.photos'])
+            /*
+             * ⚠️ `matched`, NOT `matchedProfile`. THE RELATION HAS NEVER HAD
+             * THAT NAME.
+             *
+             * MatchRecord declares seeker() and matched(). This asked for
+             * `matchedProfile` in two places, so the trusted contact's
+             * dashboard — the screen where introductions are actually approved
+             * or declined — threw RelationNotFoundException on first render and
+             * has never once worked.
+             *
+             * Nothing caught it because no test opened this route as a
+             * guardian: GuardianPhotoRuleTest exercises the presenter directly,
+             * which is correct for what it checks and says nothing about
+             * whether the page it feeds can load. The demo had no guardian
+             * accounts either, so there was no way to click it.
+             */
+            ->with(['matched.photos'])
             ->latest()
             ->take(20)
             ->get()
             ->map(fn (MatchRecord $match) => $this->presenter->introduction(
                 $guardian,
                 $match,
-                $match->matchedProfile,
+                $match->matched,
             ))
             ->all();
 

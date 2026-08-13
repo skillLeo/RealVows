@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Verification;
 use App\Services\Photos\PhotoStorageService;
 use App\Services\Profile\ProfileCompleteness;
+use App\Models\Guardian;
 use App\Models\MatchRecord;
 use App\Models\Report;
 use App\Services\Credits\CreditService;
@@ -263,10 +264,93 @@ class DemoSeeder extends Seeder
             $assessment = $this->completeness->assess($profile->fresh(['photos', 'preferences']));
             $profile->forceFill(['completeness_percent' => $assessment['percent']])->save();
 
+            $this->attachTrustedContact($user, $prefix, $index);
+
             $members->push($profile->fresh());
         }
 
         return $members;
+    }
+
+
+    /**
+     * A trusted contact per demo member, and one member deliberately without.
+     *
+     * ⚠️ THE FLOW COULD NOT BE WALKED WITHOUT THESE.
+     *
+     * The demo had thirty members and no trusted contacts at all, so every
+     * guardian screen — the member's own page, the admin queue, the contact's
+     * dashboard — opened onto an empty state. The system could be read in the
+     * code and not seen in the product, which is most of why it kept being
+     * reported as missing.
+     *
+     * ⚠️ ONE OF EACH STATE, NOT THIRTY VERIFIED ONES. A demo where everything
+     * is approved shows none of the screens that exist for when it is not, and
+     * those are the screens nobody has looked at.
+     *
+     * ⚠️ AND ONE MEMBER WITH NOBODY, ON PURPOSE. `girl5` names nobody, which is
+     * the state the pool gate holds and the one the client asked to see. A
+     * demo that cannot show a member being blocked cannot show the feature
+     * working.
+     */
+    private function attachTrustedContact(User $member, string $prefix, int $index): void
+    {
+        // Two of the thirty stand for "has not named anybody".
+        if (in_array("{$prefix}{$index}", ['girl5', 'boy6'], true)) {
+            return;
+        }
+
+        $status = match (true) {
+            $index === 2 => Guardian::STATUS_INVITED,     // sent, not accepted
+            $index === 3 => Guardian::STATUS_REGISTERED,  // accepted, no photo yet
+            $index === 4 => Guardian::STATUS_SUBMITTED,   // waiting on our team
+            $index === 7 => Guardian::STATUS_REJECTED,    // turned down, can replace
+            default => Guardian::STATUS_VERIFIED,
+        };
+
+        /*
+         * ⚠️ THE CONTACT SIGNS IN AS THEMSELVES.
+         *
+         * A trusted contact is a person with their own account, not a field on
+         * the member. Seeding them without a user would make the dashboard
+         * unreachable and the whole role untestable — which is the state the
+         * demo was already in.
+         *
+         * Addressed guardian-of-boy1@realvows.test so the one-click list reads
+         * as pairs and it is obvious who belongs to whom.
+         */
+        $account = null;
+
+        if ($status !== Guardian::STATUS_INVITED) {
+            $account = User::factory()->create([
+                'name' => "Guardian of {$prefix}{$index}",
+                'email' => "guardian-of-{$prefix}{$index}@realvows.test",
+                'password' => Hash::make('realvows2026'),
+                'email_verified_at' => now(),
+                'is_demo' => true,
+            ]);
+        }
+
+        Guardian::create([
+            'member_id' => $member->id,
+            'user_id' => $account?->id,
+            'name' => "Guardian of {$prefix}{$index}",
+            'relationship' => $index % 2 === 0 ? 'brother' : 'father',
+            'email' => "guardian-of-{$prefix}{$index}@realvows.test",
+            'phone' => null,
+            'status' => $status,
+            'joint_photo_path' => in_array($status, [Guardian::STATUS_SUBMITTED, Guardian::STATUS_VERIFIED], true)
+                ? 'guardians/demo/together.jpg'
+                : null,
+            'joint_photo_code' => strtoupper(Str::random(6)),
+            'joint_photo_uploaded_at' => in_array($status, [Guardian::STATUS_SUBMITTED, Guardian::STATUS_VERIFIED], true)
+                ? now()->subDays(2)
+                : null,
+            'verified_at' => $status === Guardian::STATUS_VERIFIED ? now()->subDay() : null,
+            'rejection_reason' => $status === Guardian::STATUS_REJECTED
+                ? 'The photograph did not show both faces clearly.'
+                : null,
+        ]);
     }
 
     /**

@@ -92,6 +92,22 @@ class DemoLoginController extends Controller
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
 
+        /*
+         * ⚠️ A TRUSTED CONTACT IS NOT A MEMBER AND MUST NOT LAND ON A MEMBER'S
+         * DASHBOARD.
+         *
+         * This sent everybody who was not staff to /dashboard. For a guardian
+         * that is a screen about introductions they do not have, belonging to
+         * an account with no profile — so the one role whose entire job lives
+         * at /trusted-contact-dashboard arrived somewhere else and looked
+         * broken on the first click.
+         */
+        // Asked the same way EnsureUserIsGuardian asks it: by the row that
+        // grants the role, not by a relation the User model does not have.
+        if (\App\Models\Guardian::where('user_id', $user->id)->whereNot('status', \App\Models\Guardian::STATUS_REPLACED)->exists()) {
+            return redirect()->route('guardian.dashboard');
+        }
+
         return redirect()->route($user->isAdmin() ? 'admin.verifications' : 'dashboard');
     }
 
@@ -119,6 +135,29 @@ class DemoLoginController extends Controller
 
         foreach (range(1, 6) as $i) {
             $accounts[] = ['key' => "girl{$i}", 'label' => "Girl {$i}", 'group' => 'Women'];
+        }
+
+        /*
+         * ⚠️ THE TRUSTED CONTACTS, PAIRED WITH THE MEMBER THEY SERVE.
+         *
+         * A trusted contact is a person with their own sign-in, and until now
+         * there was no way to be one. So the guardian dashboard — the screen
+         * where introductions are actually approved — could not be opened by
+         * anybody reviewing the product, and the whole role read as missing.
+         *
+         * Labelled by the member rather than by a name, because "Guardian of
+         * girl 1" says what the account is for and "Yusuf Adeyemi" does not.
+         *
+         * ⚠️ NOT ALL SIX PER SIDE. girl5 and boy6 name nobody on purpose —
+         * that is the state the pool gate holds, and a demo that cannot show a
+         * member being held cannot show the feature working at all.
+         */
+        foreach ([1, 2, 3, 4] as $i) {
+            $accounts[] = ['key' => "guardian-of-boy{$i}", 'label' => "of Boy {$i}", 'group' => 'Trusted contacts'];
+        }
+
+        foreach ([1, 2, 3, 4] as $i) {
+            $accounts[] = ['key' => "guardian-of-girl{$i}", 'label' => "of Girl {$i}", 'group' => 'Trusted contacts'];
         }
 
         return $accounts;

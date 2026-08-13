@@ -213,9 +213,37 @@ class MatchPresenter
              * find somebody, so releasing it while withholding the phone number
              * would be a distinction without a difference.
              */
-            ...($mutual && $this->contactReleased($match) ? [
+            /*
+             * ⚠️ THE FOURTH CONDITION, AND IT IS THE CLIENT'S SCHOLAR'S RULING.
+             *
+             * He was asked whether a guardian approving an exchange is the same
+             * as a guardian being present for it. It is not, except where the
+             * guardian is unjust, is not Muslim, or has died. Outside those, the
+             * details go to HIM and he makes the introduction himself.
+             *
+             * So approval is necessary and still not sufficient. A member with
+             * a family trusted contact never receives a phone number here, no
+             * matter how many gates have opened, because the platform is no
+             * longer the channel. See GuardianGate::contactIsMediated().
+             */
+            ...($mutual && $this->contactReleased($match) && ! $this->mediated($match) ? [
                 'lastName' => $them?->last_name,
                 'contact' => $this->contact($them),
+            ] : []),
+
+            /*
+             * ⚠️ SAID PLAINLY, BECAUSE THE ALTERNATIVE READS AS A BROKEN PAGE.
+             *
+             * A member who has said yes, been approved three times, and then
+             * finds no phone number would reasonably conclude the product had
+             * failed. Every gate in this system that withholds something also
+             * says why, and this is the last and most consequential one.
+             */
+            ...($mutual && $this->contactReleased($match) && $this->mediated($match) ? [
+                'contactWithTrustedContact' => true,
+                'contactWithTrustedContactReason' =>
+                    'Your trusted contact has their details and will make the introduction '
+                    .'himself. Speak to him about how you would like to go from here.',
             ] : []),
 
             /*
@@ -243,6 +271,18 @@ class MatchPresenter
 
         return app(GuardianGate::class)
             ->mayExchangeContact($seeker, $match);
+    }
+
+    /**
+     * ⚠️ ASKED OF THE SEEKER, WHO IS ALWAYS THE VIEWER OF THIS PAYLOAD. A
+     * member only ever holds the seeker side of their own rows, so there is no
+     * other person this could be about.
+     */
+    private function mediated(MatchRecord $match): bool
+    {
+        $seeker = $match->seeker?->user;
+
+        return $seeker !== null && app(GuardianGate::class)->contactIsMediated($seeker);
     }
 
     /**

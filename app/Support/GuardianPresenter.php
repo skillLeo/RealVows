@@ -101,6 +101,47 @@ class GuardianPresenter
                     .'Everything else about this introduction is here for you to weigh.';
         }
 
+        /*
+         * ⚠️ THE DETAILS COME HERE ONCE HE HAS APPROVED THE EXCHANGE, BECAUSE
+         * HE IS THE ONE MAKING THE INTRODUCTION.
+         *
+         * The client's scholar ruled that a guardian approving an exchange is
+         * not the same as a guardian being present for it, except where he is
+         * unjust, is not Muslim, or has died. Outside those, the platform stops
+         * being the channel and he becomes it.
+         *
+         * MatchPresenter now withholds the surname and the phone number from
+         * the MEMBER when that applies. Withholding alone would leave the
+         * introduction dead: she cannot proceed, he has nothing to pass on, and
+         * the product simply stops at the last gate with nobody holding
+         * anything. This is the other half, and neither half is correct alone.
+         *
+         * ⚠️ ONLY AFTER HIS OWN APPROVAL AT THE CONTACT GATE. A trusted contact
+         * who has not yet decided must not be able to read a phone number by
+         * opening the page — that would make his approval a formality he could
+         * skip, which is the exact failure being corrected.
+         *
+         * ⚠️ AND NEVER TO AN APPOINTED CONTACT. He is a stranger, he does not
+         * mediate, and the member receives her own details as before. Handing
+         * him a woman's phone number to pass on would be a worse exposure than
+         * the one this rule exists to prevent.
+         */
+        if (! $guardian->is_appointed && $guardian->hasApproved(Guardian::GATE_CONTACT, $match->id)) {
+            // ⚠️ A SEPARATE NAME. Reassigning $other from a Profile to a User
+            // works today and quietly changes the type under anything added
+            // below it, which is how a photograph key ends up reading the wrong
+            // record.
+            $otherUser = $other->user;
+
+            $payload['contact'] = array_filter([
+                'lastName' => $other->last_name,
+                'email' => $otherUser?->email,
+                'phone' => $otherUser?->fullPhone(),
+            ]);
+
+            $payload['contactIsYoursToPass'] = true;
+        }
+
         return $payload;
     }
 

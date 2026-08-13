@@ -320,6 +320,17 @@ return [
         'reason_help' => 'She will not be shown this. It helps us if you are ever replaced.',
         'decided' => 'Thank you. Your decision has been recorded.',
 
+        /*
+         * ⚠️ IT SAYS WHAT DID NOT HAPPEN, AND WHAT TO DO.
+         *
+         * The card leaves the list the instant a trusted contact decides, so
+         * when the request fails the card comes back — and a card reappearing
+         * with no explanation reads as the site undoing a decision on purpose.
+         * The safe reading of a vague failure is to press again, which is the
+         * one thing that must not become a habit here.
+         */
+        'decision_failed' => 'That did not save, so nothing has been recorded. Your answer is still waiting below.',
+
         'confirm_heading' => 'One photograph, and you are done',
         'confirm_lead' => 'We need one photograph of you and :name together, holding this code. A person on our team checks it.',
         'confirm_code_label' => 'Write this down or show it on a screen',

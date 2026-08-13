@@ -1645,6 +1645,30 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   gap: 16px;
 }
 
+/*
+ * ⚠️ ON A PHONE THIS TRACK WAS TWENTY-FOUR PIXELS TALL.
+ *
+ * "The Meeting" is `position: absolute; inset: 0`, so it contributes no
+ * height. Beside the copy that does not matter — the grid row is sized by the
+ * copy column and the art stretches to match. Stacked, the art is its own row
+ * with no in-flow children, and it collapsed to its own padding: the entire
+ * hero composition was invisible on the device the whole product is built for,
+ * and nothing failed, overflowed or errored to say so.
+ *
+ * An aspect ratio gives the row a height without giving the absolute child a
+ * layout. 4/5 keeps the threshold's crown and the near floor inside the slice
+ * at every phone width.
+ */
+@media (max-width: 879px) {
+  .rv-hero__art {
+    aspect-ratio: 4 / 5;
+    max-height: 78vh;
+    border-left: 0;
+    border-top: 1px solid var(--hairline);
+    padding: 0;
+  }
+}
+
 @media (min-width: 880px) {
   /* Beside the copy the art needs real margins. A flat 12px read as the
      photographs bleeding off the page rather than sitting inside it. */
@@ -3887,28 +3911,47 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* --------------------------------------------------------------------------
    "The Meeting" — the hero composition
    --------------------------------------------------------------------------
-   Two brass lines travel inward along a colonnade at slightly different speeds
-   and meet beneath the keystone, which warms. Then it rests. Roughly 20s.
+   One-point perspective. You stand inside a threshold and look down a lit
+   colonnade at a doorway of light. Two halves of the threshold climb their own
+   side and meet at the keystone, which warms. Then it rests. Roughly 20s.
+
+   ⚠️ IT SHIPPED FLAT ONCE, AND FLAT IS WHY IT FAILED.
+
+   The first build was three rows of identical arches on a coloured rectangle
+   with a brass veil washed over the top. No light source, no floor, no
+   distance, and a hard seam where the veil ran out. Everything below is
+   organised around the four depth cues that replaced it — scale, atmosphere,
+   light falloff and occlusion — because none of them is a shadow, and shadows
+   are banned.
 
    ⚠️ TRANSFORM AND OPACITY ONLY. Nothing here may cause a layout pass: this is
    the first thing painted on a mid-range Android over 4G, and a hero that
    janks is worse than a hero that is still.
 
-   ⚠️ THE TWO LINES ARE NOT SYMMETRICAL ON PURPOSE. Different durations, so one
+   ⚠️ THE TWO HALVES ARE NOT SYMMETRICAL ON PURPOSE. Different durations, so one
    arrives fractionally before the other and waits. Two people are not
    symmetrical either.
 
    Motion catalogue: registered as marketing-only. It may loop, on the same
    argument as #15 and #16 — a marketing page has no task for a loop to compete
-   with.
+   with. No new primitive was added; see the arrival block at the bottom.
    -------------------------------------------------------------------------- */
 
 .rv-meeting {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  /* Reserves the space so nothing shifts when the SVG paints. */
   contain: paint;
+  /*
+   * The room behind the SVG. Darkest at the top where nothing is lit, warming
+   * toward the floor. A flat fill here is what made the panel read as a
+   * coloured rectangle rather than as a space.
+   */
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, #000 22%, var(--oxblood-deep)) 0%,
+      color-mix(in oklab, #000 8%, var(--oxblood-deep)) 46%,
+      color-mix(in oklab, var(--oxblood) 22%, var(--oxblood-deep)) 100%);
 }
 
 .rv-meeting__svg {
@@ -3937,7 +3980,58 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   pointer-events: none;
 }
 
-.rv-meeting__arch {
+/* ── The colonnade ───────────────────────────────────────────────────────
+ *
+ * ⚠️ THE OPACITY IS ON THE <use>, NOT ON THE <g> THAT ANIMATES.
+ *
+ * The Arrival ends at `opacity: 1`. Put the depth fade on the same element and
+ * the animation's own final frame flattens every bay to full strength on
+ * arrival — the colonnade would build itself beautifully and then go flat. The
+ * group carries the motion, the <use> inside it carries the distance.
+ */
+.rv-meeting__bay {
+  /* Scaling about the vanishing point is what makes The Arrival read as depth
+     rather than as a zoom. transform-box is required: without it the origin is
+     resolved against the element's own bounding box, not the viewBox. */
+  transform-box: view-box;
+  transform-origin: 500px 470px;
+}
+
+.rv-meeting__bay > use {
+  fill: none;
+  stroke: var(--brass-bright);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  /* Atmospheric perspective: further is fainter. One number, one meaning. */
+  opacity: calc(.64 - var(--i) * .108);
+}
+
+.rv-meeting__aisle {
+  fill: none;
+  stroke: url(#rv-meeting-aisle);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.rv-meeting__course {
+  fill: none;
+  stroke: var(--brass-bright);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: .12;
+}
+
+/* ── The wall you are standing in ───────────────────────────────────────── */
+.rv-meeting__wall {
+  fill: color-mix(in oklab, #000 30%, var(--oxblood-deep));
+  opacity: .82;
+}
+
+/* A hairline, not a solid. The rest of the composition is drawn in 1px brass
+   line; a solid mass in the middle of it is the one element not made of the
+   same material. Kept faint on purpose — this is the trace the bright halves
+   walk over, and if it is as bright as they are there is nothing to watch. */
+.rv-meeting__jamb {
   fill: none;
   stroke: var(--brass);
   stroke-width: 1;
@@ -3945,98 +4039,62 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   opacity: .18;
 }
 
-.rv-meeting__arch--central {
-  opacity: .42;
-  stroke-width: 1.5;
-}
-
-.rv-meeting__floor {
-  stroke: var(--brass);
-  stroke-width: 1;
-  opacity: .22;
-}
-
-/* ⚠️ A HAIRLINE, NOT A SOLID. It was filled brass at .55 and read as a heavy
- * diamond floating above the crown rather than as part of the building. The
- * rest of the composition is drawn in 1px brass line; a solid mass in the
- * middle of it is the one element not made of the same material. Outlined, it
- * belongs to the arch it sits on. */
 .rv-meeting__keystone {
   fill: none;
   stroke: var(--brass-bright);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  opacity: .5;
+  opacity: .6;
 }
-
-.rv-meeting__bloom {
-  opacity: 0;
-}
-
-/* ── Parallax. Three layers, three rates. Driven by a scroll-linked custom
-   property set in public.js, with a static fallback when it is absent. ── */
-.rv-meeting__layer {
-  transform: translate3d(calc(var(--rv-scroll, 0) * var(--rate, 0px)), 0, 0);
-}
-
-/*
- * ⚠️ NO will-change HERE, AND THAT IS DELIBERATE.
- *
- * It was declared permanently on all three layers. Each promoted layer is a
- * full-resolution GPU texture, and three of them held for the life of the page
- * — on a device chosen for being mid-range — is memory spent on an
- * optimisation that only matters while something is moving.
- *
- * The first fix was a keyframe that flipped will-change to auto after ten
- * seconds. MotionCatalogueTest rejected it, correctly: that is a memory
- * lifecycle wearing an animation's clothes, and the registry exists so every
- * name in it is a real motion primitive somebody chose.
- *
- * It is simply gone. `translate3d` already promotes these layers to their own
- * compositing layer, so will-change was asking twice for something the browser
- * had already done.
- */
-
-.rv-meeting__layer--far { --rate: 14px; opacity: .7; }
-.rv-meeting__layer--mid { --rate: 30px; opacity: .85; }
-.rv-meeting__layer--near { --rate: 52px; }
 
 /* ── The convergence. ────────────────────────────────────────────────────
  *
- * ⚠️ 500 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
+ * ⚠️ 1100 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
  *
- * Each half is a 310-unit upright plus a quarter of a 114-radius arc
- * (π × 114 ÷ 2 ≈ 179), so ≈ 489. If dasharray were shorter than the true
+ * Each half is a 570-unit upright plus a quarter of a 300-radius arc
+ * (π × 300 ÷ 2 ≈ 471), so ≈ 1041. If dasharray were shorter than the true
  * length the dash would repeat and the arch would appear to draw itself twice.
  * Rounded up rather than measured with getTotalLength(), because this
  * composition ships no JavaScript — a number in a stylesheet cannot fail to
  * run the way a measurement can.
  *
- * ⚠️ fill: none MATTERS MORE THAN IT LOOKS. These are paths now rather than
- * lines, and a path with the default fill would drop a solid brass wedge
- * across the whole doorway.
+ * ⚠️ fill: none MATTERS MORE THAN IT LOOKS. A path with the default fill would
+ * drop a solid brass wedge across the whole doorway.
  */
 .rv-meeting__path {
   fill: none;
   stroke: var(--brass-bright);
-  stroke-width: 1.5;
+  stroke-width: 2;
   vector-effect: non-scaling-stroke;
-  opacity: .8;
-  stroke-dasharray: 500;
   stroke-linecap: round;
+  stroke-dasharray: 1100;
+  stroke-dashoffset: 1100;
+  opacity: 0;
 }
 
-/* Both climb from their own base, so both offsets are positive. The right
- * stroke used -600 because it drew inward from the far end of a horizontal
- * line; there is no far end now, only a bottom and a top. */
+/* Both climb from their own base, so both offsets are positive. */
 .rv-meeting__path--left {
-  stroke-dashoffset: 500;
   animation: rv-meet-left 20s var(--ease-entrance) infinite;
 }
 
 .rv-meeting__path--right {
-  stroke-dashoffset: 500;
   animation: rv-meet-right 20s var(--ease-entrance) infinite;
+}
+
+/* ── Light ───────────────────────────────────────────────────────────────
+ *
+ * The keystone warms as the halves meet. The far doorway breathes on The
+ * Candlelight — it is the one light source in the room, and a light source
+ * that is perfectly steady is a rectangle with a gradient in it.
+ */
+.rv-meeting__bloom {
+  opacity: 0;
+  animation: rv-keystone-warm 20s ease-in-out infinite;
+}
+
+.rv-meeting__candle {
+  opacity: .05;
+  animation: rv-drift 9s ease-in-out infinite;
 }
 
 /* ── The candlelight. ────────────────────────────────────────────────────
@@ -4107,61 +4165,84 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   }
 }
 
-.rv-meeting__bloom {
-  animation: rv-keystone-warm 20s ease-in-out infinite;
-}
-
 @keyframes rv-meet-left {
-  0%   { stroke-dashoffset: 500; opacity: 0; }
-  8%   { opacity: .8; }
+  0%   { stroke-dashoffset: 1100; opacity: 0; }
+  6%   { opacity: 1; }
   /* Reaches the keystone first, then holds while the other climbs to it. */
-  38%  { stroke-dashoffset: 0; opacity: .8; }
-  72%  { stroke-dashoffset: 0; opacity: .8; }
-  88%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 500; opacity: 0; }
+  36%  { stroke-dashoffset: 0; opacity: 1; }
+  74%  { stroke-dashoffset: 0; opacity: 1; }
+  90%  { stroke-dashoffset: 0; opacity: 0; }
+  100% { stroke-dashoffset: 1100; opacity: 0; }
 }
 
 @keyframes rv-meet-right {
-  0%   { stroke-dashoffset: 500; opacity: 0; }
-  10%  { opacity: .8; }
-  44%  { stroke-dashoffset: 0; opacity: .8; }
-  72%  { stroke-dashoffset: 0; opacity: .8; }
-  88%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 500; opacity: 0; }
+  0%   { stroke-dashoffset: 1100; opacity: 0; }
+  8%   { opacity: 1; }
+  42%  { stroke-dashoffset: 0; opacity: 1; }
+  74%  { stroke-dashoffset: 0; opacity: 1; }
+  90%  { stroke-dashoffset: 0; opacity: 0; }
+  100% { stroke-dashoffset: 1100; opacity: 0; }
 }
 
-/* ⚠️ 4% ABOVE AMBIENT AND NO MORE. A bloom that reads as a glow belongs on a
-   different product; this one should be noticed only if you were watching. */
+/* ⚠️ BARELY ABOVE AMBIENT. A bloom that reads as a glow belongs on a different
+   product; this one should be noticed only if you were watching. */
 @keyframes rv-keystone-warm {
-  0%, 40%   { opacity: 0; }
-  46%       { opacity: .04; }
-  60%       { opacity: .02; }
-  72%, 100% { opacity: 0; }
+  0%, 38%   { opacity: 0; }
+  46%       { opacity: .09; }
+  62%       { opacity: .05; }
+  74%, 100% { opacity: 0; }
 }
 
-/* ── Mobile: three arches and one keystone. The convergence still reads. ── */
+/* ── The arrival: the room opens out of the far light ────────────────────
+ *
+ * ⚠️ THIS IS #1 THE ARRIVAL, AND IT WAS WORTH THE EFFORT NOT TO ADD #17.
+ *
+ * "The colonnade builds itself in depth" sounds like a new primitive and is
+ * not one. rv-arrive already animates transform and opacity from
+ * --arrive-scale; point its transform-origin at the vanishing point and a
+ * scale becomes a movement along the depth axis. The bays are staggered
+ * furthest-first, so the light is there before the room is.
+ *
+ * MotionCatalogueTest exists because this codebase once had nine names for one
+ * idea. A tenth would have been easy to justify and wrong.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  [data-arrival='pending'] .rv-meeting__bay { opacity: 0; }
+
+  [data-arrival='running'] .rv-meeting__bay {
+    --arrive-y: 0;
+    --arrive-scale: .82;
+    animation: rv-arrive 900ms var(--ease-entrance) both;
+    /* Furthest bay first: (4 − depth). The whole colonnade lands inside the
+       900ms ceremony budget, after the headline's rule has drawn. */
+    animation-delay: calc(700ms + (4 - var(--i)) * 90ms);
+  }
+}
+
+/* ── Mobile: the same room, fewer bays. The perspective still reads. ── */
 @media (max-width: 767px) {
-  .rv-meeting__layer--far { display: none; }
-  .rv-meeting__layer--mid { opacity: .6; }
+  .rv-meeting__course { display: none; }
+  .rv-meeting__bay:nth-of-type(4) { display: none; }
 }
 
 /* ⚠️ A FULL STOP, NOT A SLOWDOWN. The composition renders in its final state:
-   lines already met, keystone already warm, nothing moving at all. */
+   the arch complete, the keystone warm, nothing moving at all. */
 @media (prefers-reduced-motion: reduce) {
   .rv-meeting__path--left,
   .rv-meeting__path--right,
-  .rv-meeting__bloom {
+  .rv-meeting__bloom,
+  .rv-meeting__candle {
     animation: none;
   }
 
   .rv-meeting__path--left,
   .rv-meeting__path--right {
     stroke-dashoffset: 0;
-    opacity: .8;
+    opacity: 1;
   }
 
-  .rv-meeting__bloom { opacity: .03; }
-  .rv-meeting__layer { transform: none; }
+  .rv-meeting__bloom { opacity: .04; }
+  .rv-meeting__candle { opacity: .05; }
 }
 
 /* --------------------------------------------------------------------------

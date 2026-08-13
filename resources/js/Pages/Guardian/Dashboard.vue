@@ -1,5 +1,6 @@
 <script setup>
-import { useForm, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
@@ -12,11 +13,62 @@ const props = defineProps({
 
 const page = usePage();
 
-const form = useForm({ decision: '', gate: 'introduction', reason: '' });
+/*
+ * ⚠️ OPTIMISTIC IN APPEARANCE ONLY. THE SERVER REMAINS THE AUTHORITY.
+ *
+ * The card leaves the moment the trusted contact decides, because waiting for a
+ * round trip on a Jamaican 4G connection makes a considered decision feel like
+ * a broken button — and the commonest way that goes wrong is a second press.
+ *
+ * But this is somebody deciding, on another adult's behalf, whether an
+ * introduction proceeds. So the optimism is confined to the animation out.
+ * `pending` is cleared unconditionally in onFinish, which means the card only
+ * STAYS gone if the server came back without it. A refused, failed or
+ * abandoned request puts it back, every time, because the list is re-rendered
+ * from props rather than from anything held here.
+ *
+ * ⚠️ WHAT THIS PATTERN MUST NEVER BE APPLIED TO: anything spending credits.
+ * A balance that drops optimistically and rolls back has shown somebody a
+ * number that was never true about their money. Introductions are recoverable;
+ * a wrong balance is a support ticket and a loss of trust.
+ */
+const settling = ref(new Set());
+const failed = ref(null);
+
+const visible = computed(() =>
+    props.introductions.filter((item) => !settling.value.has(item.matchId))
+);
 
 function decide(matchId, decision) {
-    form.decision = decision;
-    form.post(`/trusted-contact-dashboard/decisions/${matchId}`, { preserveScroll: true });
+    if (settling.value.has(matchId)) return;
+
+    failed.value = null;
+    settling.value = new Set(settling.value).add(matchId);
+
+    router.post(
+        `/trusted-contact-dashboard/decisions/${matchId}`,
+        { decision, gate: 'introduction', reason: '' },
+        {
+            preserveScroll: true,
+
+            /*
+             * ⚠️ Named, not generic. "Something went wrong" leaves somebody
+             * unsure whether their decision was recorded, and the safe reading
+             * of that ambiguity is to press again.
+             */
+            onError: () => {
+                failed.value = matchId;
+            },
+
+            // Runs after success, after failure, and after an exception. The
+            // card's absence is therefore never this component's opinion.
+            onFinish: () => {
+                const next = new Set(settling.value);
+                next.delete(matchId);
+                settling.value = next;
+            },
+        }
+    );
 }
 </script>
 
@@ -36,14 +88,21 @@ function decide(matchId, decision) {
                 {{ page.props.flash.success }}
             </p>
 
-            <BaseCard v-if="!introductions.length">
+            <!-- ⚠️ ANNOUNCED, NOT ONLY SHOWN. The card vanishing is the only
+                 feedback a sighted person needs; somebody on a screen reader
+                 gets silence unless it is said. -->
+            <p v-if="failed" class="rv-flash rv-flash--error" role="alert">
+                {{ $t('guardian_area.decision_failed') }}
+            </p>
+
+            <BaseCard v-if="!visible.length">
                 <div class="rv-stack" style="gap: 8px">
                     <h2 class="rv-d3">{{ $t('guardian_area.nothing_yet') }}</h2>
                     <p class="rv-body">{{ $t('guardian_area.nothing_yet_body') }}</p>
                 </div>
             </BaseCard>
 
-            <BaseCard v-for="item in introductions" :key="item.matchId">
+            <BaseCard v-for="item in visible" :key="item.matchId">
                 <div class="rv-stack" style="gap: 20px">
                     <div class="rv-stack" style="gap: 4px">
                         <h2 class="rv-d3">{{ item.firstName }}, {{ item.age }}</h2>
@@ -69,17 +128,21 @@ function decide(matchId, decision) {
 
                     <p v-if="item.about" class="rv-body">{{ item.about }}</p>
 
+                    <!-- ⚠️ NO :disabled TIED TO A SHARED FORM. One useForm
+                         instance was serving every card, so deciding on one
+                         introduction greyed out the buttons on all of them —
+                         which reads as the page having frozen. Each decision
+                         now guards only its own card, and that card has already
+                         left the list by the time it would matter. -->
                     <div class="rv-actions">
                         <BaseButton
                             variant="primary"
-                            :disabled="form.processing"
                             @click="decide(item.matchId, 'approved')"
                         >
                             {{ $t('guardian_area.approve') }}
                         </BaseButton>
                         <BaseButton
                             variant="secondary"
-                            :disabled="form.processing"
                             @click="decide(item.matchId, 'declined')"
                         >
                             {{ $t('guardian_area.decline') }}

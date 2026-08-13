@@ -209,6 +209,7 @@
         "reason": "Why, if you would like to say",
         "reason_help": "She will not be shown this. It helps us if you are ever replaced.",
         "decided": "Thank you. Your decision has been recorded.",
+        "decision_failed": "That did not save, so nothing has been recorded. Your answer is still waiting below.",
         "confirm_heading": "One photograph, and you are done",
         "confirm_lead": "We need one photograph of you and :name together, holding this code. A person on our team checks it.",
         "confirm_code_label": "Write this down or show it on a screen",

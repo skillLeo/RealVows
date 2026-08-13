@@ -146,10 +146,62 @@ class GuardianGate
             return false;
         }
 
-        return $guardian->decisions()
-            ->where('decision', \App\Models\GuardianDecision::DECLINED)
-            ->where(fn ($q) => $q->whereNull('reason')->orWhere('reason', ''))
-            ->count() >= self::UNEXPLAINED_DECLINES_BEFORE_SUPPORT;
+        /*
+         * ⚠️ FIVE PEOPLE DECLINED, NOT FIVE ROWS WRITTEN.
+         *
+         * This counted rows. The decisions table is append-only by design, so
+         * rows and people are not the same number in two ordinary situations:
+         *
+         *   · A double tap on a slow connection writes the same decline twice.
+         *     Counting rows, the second tap moves a trusted contact one fifth
+         *     of the way toward the platform suggesting they are obstructing
+         *     somebody.
+         *
+         *   · A contact who declines, reconsiders and approves leaves the
+         *     decline in the sequence. Counting rows, the answer they withdrew
+         *     still counts against them.
+         *
+         * Neither is a pattern. The threshold is meant to describe five
+         * DIFFERENT introductions currently refused without explanation, so
+         * the current decision per introduction is what gets counted.
+         *
+         * Done in PHP rather than SQL because it is one trusted contact's own
+         * decisions — tens of rows, not thousands — and a window function here
+         * would be harder to read than the rule it encodes.
+         */
+        $all = $guardian->decisions()
+            ->orderByDesc('decided_at')
+            ->orderByDesc('id')
+            ->get();
+
+        /*
+         * ⚠️ ONLY DECISIONS THAT NAME AN INTRODUCTION CAN BE DE-DUPLICATED,
+         * AND THAT LIMIT IS THE POINT.
+         *
+         * My first attempt grouped everything, treating a null match_id as one
+         * bucket. That collapsed five separate gate-level declines into one and
+         * silently rewrote a rule this change had no business touching.
+         *
+         * Where match_id is present the subject is knowable, so the current
+         * answer for each introduction is what counts. Where it is absent there
+         * is no key to compare on, and inventing one would be guessing about
+         * evidence used to suggest somebody is obstructing a member. Those stay
+         * one row, one decision — exactly as before.
+         */
+        [$perIntroduction, $gateWide] = $all->partition(fn ($d) => $d->match_id !== null);
+
+        $current = $perIntroduction
+            ->groupBy('match_id')
+            ->map(fn ($forOneIntroduction) => $forOneIntroduction->first())
+            ->values()
+            ->concat($gateWide);
+
+        $unexplained = $current->filter(
+            fn ($decision) => $decision->decision === \App\Models\GuardianDecision::DECLINED
+                && trim((string) $decision->reason) === ''
+        );
+
+        return $unexplained->count() >= self::UNEXPLAINED_DECLINES_BEFORE_SUPPORT;
     }
 
     private function verifiedGuardianFor(User $member): ?Guardian

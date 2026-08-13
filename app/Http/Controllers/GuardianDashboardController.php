@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\RecordAuditLog;
 use App\Models\Guardian;
 use App\Models\GuardianDecision;
 use App\Models\MatchRecord;
@@ -28,7 +29,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class GuardianDashboardController extends Controller
 {
-    public function __construct(private readonly GuardianPresenter $presenter) {}
+    public function __construct(
+        private readonly GuardianPresenter $presenter,
+        private readonly RecordAuditLog $audit,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -71,6 +75,22 @@ class GuardianDashboardController extends Controller
             'reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        /*
+         * ⚠️ STILL create(), AND DELIBERATELY. See the docblock above.
+         *
+         * I replaced this with updateOrCreate and a unique index, on the
+         * grounds that a double press writes two rows. It does, and that is
+         * not the fault: the sequence IS the record here, and the support flow
+         * that judges whether a trusted contact is obstructing a member reads
+         * the whole of it. Collapsing rows would have deleted the evidence
+         * that flow exists to weigh.
+         *
+         * The real fault was never in this method. It is that
+         * Guardian::hasApproved() asked whether an approval row exists ANYWHERE
+         * in the sequence, so a contact who approved and then declined left the
+         * gate open on the answer they changed their mind about. Fixed there,
+         * where the sequence is read, not here where it is written.
+         */
         GuardianDecision::create([
             'guardian_id' => $guardian->id,
             'match_id' => $match->id,

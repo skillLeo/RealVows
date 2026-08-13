@@ -98,13 +98,44 @@ class Guardian extends Model
         return ! $this->is_appointed;
     }
 
-    /** Whether a decision has been recorded at this gate for this match. */
+    /**
+     * Whether the trusted contact's CURRENT answer at this gate is approval.
+     *
+     * ⚠️ THE LATEST DECISION, NOT ANY DECISION. THIS ASKED `exists()`.
+     *
+     * The decisions table is append-only on purpose — a changed mind writes a
+     * second row, and the support flow that judges an unreasonable trusted
+     * contact reads the whole sequence. That is the right shape for a log.
+     *
+     * But it means "has an approval ever been recorded" and "is this approved"
+     * are different questions, and this method was asking the first while every
+     * caller wanted the second. A contact who approved an introduction, thought
+     * better of it and declined left the approval row sitting in the sequence,
+     * so `exists()` kept returning true and the gate stayed open on the answer
+     * they had explicitly withdrawn.
+     *
+     * A person cannot take back a yes. That is not a small bug on a platform
+     * where the whole point of the role is to be able to say no.
+     *
+     * So the sequence is preserved and only its READING changes: the most
+     * recent row wins, which is what changing your mind means.
+     */
     public function hasApproved(string $gate, ?int $matchId = null): bool
     {
-        return $this->decisions()
+        $latest = $this->decisions()
             ->where('gate', $gate)
             ->when($matchId, fn ($q) => $q->where('match_id', $matchId))
-            ->where('decision', GuardianDecision::APPROVED)
-            ->exists();
+            /*
+             * ⚠️ id BREAKS THE TIE, AND IT HAS TO. decided_at is a second-
+             * resolution timestamp, so approving and immediately declining can
+             * produce two rows with the identical value — which is precisely
+             * the case this method exists to get right. Ordering by id as well
+             * makes the later insert the later decision, always.
+             */
+            ->orderByDesc('decided_at')
+            ->orderByDesc('id')
+            ->first();
+
+        return $latest?->decision === GuardianDecision::APPROVED;
     }
 }

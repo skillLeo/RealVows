@@ -3956,9 +3956,17 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   opacity: .22;
 }
 
+/* ⚠️ A HAIRLINE, NOT A SOLID. It was filled brass at .55 and read as a heavy
+ * diamond floating above the crown rather than as part of the building. The
+ * rest of the composition is drawn in 1px brass line; a solid mass in the
+ * middle of it is the one element not made of the same material. Outlined, it
+ * belongs to the arch it sits on. */
 .rv-meeting__keystone {
-  fill: var(--brass);
-  opacity: .55;
+  fill: none;
+  stroke: var(--brass-bright);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: .5;
 }
 
 .rv-meeting__bloom {
@@ -4066,7 +4074,28 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
         var(--cream) 58%
       );
       background-size: 300% 100%;
-      background-repeat: no-repeat;
+      /*
+       * ⚠️ THIS MUST TILE. IT MUST NEVER BE no-repeat.
+       *
+       * I wrote no-repeat here and it deleted the headline off the home page.
+       *
+       * #15 The Gleam sweeps background-position from 180% to -80%. With
+       * background-size 300%, a percentage position places the image at
+       * (container − image) × pct, so 180% puts it at [-3.6W, -0.6W] and -80%
+       * puts it at [1.6W, 4.6W]. Both are entirely outside the text box. With
+       * no-repeat that paints nothing, and since background-clip: text
+       * requires the text itself to be transparent, nothing painted means
+       * nothing visible: "Find your true soul mate." vanished 2.6 seconds
+       * after load, on the client's own home page.
+       *
+       * Tiling fixes it because the gradient is cream at 0% and cream at 100%,
+       * so tiles join invisibly and some tile always covers the glyphs.
+       *
+       * The @supports guard above was the right instinct aimed at the wrong
+       * failure. It protects a browser that cannot do background-clip: text.
+       * It cannot protect against a browser that does it perfectly to a
+       * gradient positioned off-screen.
+       */
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;

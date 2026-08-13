@@ -150,17 +150,30 @@ class PhotoController extends Controller
         // does not exist, because as far as this member is concerned it does not.
         abort_if($profileId === null, 404);
 
-        if ($photo->profile_id === $profileId) {
-            return;
-        }
-
-        $hasPaidToSeeThem = MatchRecord::query()
-            ->where('seeker_profile_id', $profileId)
-            ->where('matched_profile_id', $photo->profile_id)
-            ->where('status', MatchRecord::STATUS_UNLOCKED)
-            ->exists();
-
-        abort_unless($hasPaidToSeeThem, 404);
+        /*
+         * ⚠️ A MEMBER SEES THEIR OWN PHOTOGRAPHS AND NOBODY ELSE'S. EVER.
+         *
+         * This used to open for anybody who had UNLOCKED the introduction: pay
+         * for it, and the bytes were yours. That is no longer the rule. Nobody
+         * on this platform is on display to the person they are introduced to;
+         * the photographs go to the trusted contact, who looks and advises.
+         *
+         * ⚠️ REMOVING THE URL FROM THE PAYLOAD WOULD NOT HAVE BEEN ENOUGH, and
+         * this is the half that makes the rule real. MatchPresenter no longer
+         * issues signed links — but a link that was issued yesterday still
+         * verifies today, a photo id is a small integer somebody can type, and
+         * a screenshot of a devtools panel outlives any template change. The
+         * door has to be shut where the bytes are served, not where the anchor
+         * is drawn.
+         *
+         * ⚠️ THE MATCH STATUS IS NOW IRRELEVANT HERE, which is why the query
+         * is gone rather than tightened. There is no unlock, no payment and no
+         * mutual interest that turns another member's photographs into
+         * something this member may fetch. A guardian reads them through
+         * guardian.photo, which asks GuardianPresenter, which is a different
+         * door with a different rule.
+         */
+        abort_unless($photo->profile_id === $profileId, 404);
     }
 
     private function payload(Photo $photo): array

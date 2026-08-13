@@ -161,15 +161,49 @@ class SignedArtefactTest extends TestCase
 
         $card = $this->actingAs($user)->get('/dashboard')->viewData('page')['props']['matches'][0];
 
-        $this->assertNotEmpty($card['photos'], 'The unlocked card carried no photos.');
+        /*
+         * ⚠️ THE CARD CARRIES NO PHOTOGRAPHS AT ALL NOW, so there is no emitted
+         * URL to follow. Photographs go to the trusted contact — nobody is on
+         * display to the person they are introduced to, and unlocking does not
+         * change that.
+         */
+        $this->assertArrayNotHasKey('photos', $card);
+        $this->assertTrue($card['photographsWithheld']);
 
-        $url = $card['photos'][0]['url'];
+        /*
+         * ⚠️ THE SIGNING MACHINERY STILL HAS TO WORK, AND THIS IS WHERE IT IS
+         * PROVED.
+         *
+         * A member fetches her own photographs by exactly this mechanism. If
+         * the assertions above were the whole test, a signed route that had
+         * stopped serving anything to anybody would pass it — the absence of a
+         * URL is not evidence that URLs work.
+         */
+        $mine = $user->fresh()->profile;
 
-        // ⚠️ The exact emitted string, followed.
-        $response = $this->actingAs($user)->get($url);
+        $own = \App\Models\Photo::create([
+            'profile_id' => $mine->id,
+            'slot' => 'passport',
+            'path' => 'profiles/seed/p.jpg',
+            'webp_path' => null,
+            'thumbnail_path' => 'profiles/seed/p-thumb.jpg',
+            'original_filename' => 'p.jpg',
+            'mime' => 'image/jpeg',
+            'size_bytes' => 1024,
+            'width' => 1200,
+            'height' => 1600,
+        ]);
 
-        $this->assertNotSame(403, $response->getStatusCode(), 'The emitted photo URL failed its own signature check.');
-        $this->assertNotSame(404, $response->getStatusCode(), 'The emitted photo URL points at nothing.');
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'photos.show',
+            now()->addHour(),
+            ['photo' => $own->id],
+        );
+
+        $response = $this->actingAs($user->fresh())->get($url);
+
+        $this->assertNotSame(403, $response->getStatusCode(), 'The signed photo URL failed its own signature check.');
+        $this->assertNotSame(404, $response->getStatusCode(), 'The signed photo URL points at nothing.');
     }
 
     public function test_the_emitted_photo_url_does_not_work_for_a_different_member(): void
@@ -178,8 +212,31 @@ class SignedArtefactTest extends TestCase
 
         [$user, $match] = $this->unlockedMatchWithPhoto();
 
-        $url = $this->actingAs($user)->get('/dashboard')
-            ->viewData('page')['props']['matches'][0]['photos'][0]['url'];
+        /*
+         * Built for the member's OWN photograph, because that is the only kind
+         * a signed URL is issued for now. The property under test is unchanged:
+         * a link signed for one person must not serve another.
+         */
+        $mine = $user->fresh()->profile;
+
+        $own = \App\Models\Photo::create([
+            'profile_id' => $mine->id,
+            'slot' => 'passport',
+            'path' => 'profiles/seed/p.jpg',
+            'webp_path' => null,
+            'thumbnail_path' => 'profiles/seed/p-thumb.jpg',
+            'original_filename' => 'p.jpg',
+            'mime' => 'image/jpeg',
+            'size_bytes' => 1024,
+            'width' => 1200,
+            'height' => 1600,
+        ]);
+
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'photos.show',
+            now()->addHour(),
+            ['photo' => $own->id],
+        );
 
         $stranger = User::factory()->create();
         $stranger->assignRole('member');
@@ -203,6 +260,18 @@ class SignedArtefactTest extends TestCase
         $found = $this->urlsIn(
             '<a href="https://realvows.test/verify-email/1/abc?expires=1&amp;signature=deadbeef">Confirm</a>'
         );
+
+        /*
+         * ⚠️ NON-EMPTY FIRST, THEN EXACT.
+         *
+         * This file's only assertNotEmpty used to sit on a card's photos array,
+         * and removing photographs from member payloads took it with it —
+         * AssertionsCanFailTest noticed within the same run. It belongs here
+         * anyway: the extractor returning nothing is the failure this control
+         * exists to catch, and it deserves its own sentence rather than being
+         * implied by an equality check.
+         */
+        $this->assertNotEmpty($found, 'The extractor found no URLs at all.');
 
         $this->assertSame(
             ['https://realvows.test/verify-email/1/abc?expires=1&signature=deadbeef'],

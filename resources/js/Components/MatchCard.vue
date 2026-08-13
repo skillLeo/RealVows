@@ -35,7 +35,20 @@ const name = computed(() =>
         : props.match.firstName
 );
 
-const firstPhoto = computed(() => props.match.photos?.[0]?.url ?? null);
+/*
+ * ⚠️ NO PHOTOGRAPH REACHES THIS CARD, BY DESIGN.
+ *
+ * `match.photos` no longer exists in any member payload — the pictures go to
+ * the trusted contact, who looks and advises. This used to read
+ * `match.photos?.[0]?.url`, which under the new rule is permanently null: an
+ * <img> that never renders, and a card built around a hole.
+ *
+ * The initial in an arch replaces it. Not a placeholder avatar — a placeholder
+ * is an apology for a missing photograph, and nothing is missing here. The
+ * arch is the shape this product already owns, the letter is theirs, and
+ * together they occupy the space deliberately rather than by default.
+ */
+const initial = computed(() => (props.match.firstName ?? '?').trim().charAt(0).toUpperCase());
 
 /**
  * Scoped by record id so two visible cards can never share a name — a
@@ -70,16 +83,16 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
             <RvSeal on-flap breakable />
         </div>
 
-        <img
-            v-else-if="firstPhoto"
-            class="rv-match__photo"
-            :src="firstPhoto"
-            :alt="`${match.firstName}`"
-            loading="lazy"
-            decoding="async"
-        />
-
         <div class="rv-match__head">
+            <!-- ⚠️ AN ARCH WITH THEIR INITIAL, NOT AN AVATAR PLACEHOLDER.
+                 A grey silhouette says "a photograph should be here". Nothing
+                 should be here: the photographs are with the trusted contact,
+                 and this is the doorway the product has used since the home
+                 page. Drawn in CSS — no request, no layout shift. -->
+            <span v-if="isOpen" class="rv-plate" aria-hidden="true">
+                <span class="rv-plate__letter">{{ initial }}</span>
+            </span>
+
             <CompatibilityRing :score="match.score" small />
 
             <div class="rv-match__who">
@@ -94,6 +107,14 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
             <li v-for="line in match.commonalities" :key="line">{{ line }}</li>
         </ul>
 
+        <!-- ⚠️ THE ABSENCE IS EXPLAINED, NOT LEFT TO BE NOTICED.
+             A card with no picture and no comment on it reads as a card that
+             failed to load one. Said plainly, it reads as the product working
+             the way it promised. -->
+        <p v-if="isOpen && match.photographsWithheld" class="rv-match__withheld">
+            {{ $t('match.photos_with_contact') }}
+        </p>
+
         <div class="rv-match__foot">
             <BaseButton v-if="isOpen" :href="`/matches/${match.id}`" variant="secondary">
                 {{ $t('match.open') }}
@@ -106,6 +127,50 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
 </template>
 
 <style scoped>
+
+/* ── The plate ───────────────────────────────────────────────────────────
+   An arch with their initial in it, where the photograph used to be.
+
+   ⚠️ NOT A CIRCLE. Every product on earth puts an initial in a circle, and a
+   circle with a letter in it reads as "avatar, image failed". The arch is the
+   shape this product has used since the home page — a doorway you walk
+   through to something serious — so the same letter in the same brass reads
+   as deliberate rather than as a fallback. */
+.rv-plate {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 68px;
+    /* Arch: square below, semicircle above. */
+    border-radius: 27px 27px var(--r-sm, 8px) var(--r-sm, 8px);
+    border: 1px solid color-mix(in oklab, var(--brass) 55%, transparent);
+    /* Tone, never a shadow — the design system bans them, and depth here comes
+       from the ground being a shade warmer than the card. */
+    background: color-mix(in oklab, var(--brass) 9%, var(--card));
+}
+
+.rv-plate__letter {
+    font-family: var(--display);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--brass-ink);
+    /* Optical centring: the semicircular top makes a centred glyph read low. */
+    transform: translateY(2px);
+}
+
+/* ── The explanation ─────────────────────────────────────────────────────
+   Quiet, and above the actions rather than buried under them. It is a fact
+   about how the product works, not a warning. */
+.rv-match__withheld {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    padding-block-start: 2px;
+    border-block-start: 1px solid var(--hairline);
+    padding-top: 12px;
+}
+
 .rv-match__foot {
     display: flex;
     flex-wrap: wrap;

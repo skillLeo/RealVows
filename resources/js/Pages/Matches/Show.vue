@@ -5,7 +5,6 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import CompatibilityRing from '@/Components/CompatibilityRing.vue';
-import PhotoGallery from '@/Components/PhotoGallery.vue';
 import ReportSheet from '@/Components/ReportSheet.vue';
 import RvIcon from '@/Components/RvIcon.vue';
 
@@ -20,6 +19,14 @@ import RvIcon from '@/Components/RvIcon.vue';
 const props = defineProps({
     match: { type: Object, required: true },
 });
+
+/*
+ * ⚠️ THE LETTER STANDS WHERE THE PHOTOGRAPH DID. Not an avatar — nothing is
+ * missing here. The pictures are with the trusted contact by design, and an
+ * initial in the product's own arch says that far better than a grey
+ * silhouette apologising for an image that was never coming.
+ */
+const initial = computed(() => (props.match.firstName ?? '?').trim().charAt(0).toUpperCase());
 
 const fullName = computed(() =>
     [props.match.firstName, props.match.lastName].filter(Boolean).join(' ')
@@ -77,22 +84,34 @@ const block = () => {
 <template>
     <AppLayout :title="match.firstName">
         <div class="rv-payoff">
-            <!-- ── The face arrives first, and alone ────────────────────── -->
+            <!-- ── THE NAME ARRIVES FIRST, AND ALONE ──────────────────────
+                 This was a full-bleed photo gallery with the name laid over
+                 it. There are no photographs for a member any more — they are
+                 with the trusted contact — so a gallery here rendered an empty
+                 frame with a name floating on nothing.
+
+                 What is left is the thing that was always the point: a name, in
+                 the display face, at the size the photograph used to be. Set
+                 against the arch rather than in front of a picture. -->
             <div class="rv-payoff__media">
-                <PhotoGallery :photos="match.photos" :name="match.firstName">
-                    <template #overlay>
-                        <div class="rv-identity">
-                            <h1 class="rv-identity__name">{{ fullName }}</h1>
-                            <p class="rv-identity__meta">
-                                <span>{{ meta }}</span>
-                                <span v-if="match.verified" class="rv-identity__verified">
-                                    <RvIcon name="shield" :size="14" />
-                                    Verified
-                                </span>
-                            </p>
-                        </div>
-                    </template>
-                </PhotoGallery>
+                <div class="rv-portal">
+                    <span class="rv-portal__letter" aria-hidden="true">{{ initial }}</span>
+
+                    <div class="rv-identity">
+                        <h1 class="rv-identity__name">{{ fullName }}</h1>
+                        <p class="rv-identity__meta">
+                            <span>{{ meta }}</span>
+                            <span v-if="match.verified" class="rv-identity__verified">
+                                <RvIcon name="shield" :size="14" />
+                                Verified
+                            </span>
+                        </p>
+                    </div>
+
+                    <p v-if="match.photographsWithheld" class="rv-portal__note">
+                        {{ $t('match.photos_with_contact') }}
+                    </p>
+                </div>
             </div>
 
             <!-- ── Why them, then who they are ─────────────────────────── -->
@@ -227,6 +246,47 @@ const block = () => {
 </template>
 
 <style scoped>
+
+/* ── The portal ──────────────────────────────────────────────────────────
+   Where the photo gallery was. An arch, their initial, and their name at the
+   scale a face used to occupy — so the top of the page still has weight
+   rather than a hole where an image failed to arrive. */
+.rv-portal {
+    position: relative;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 18px;
+    min-height: clamp(280px, 42vh, 420px);
+    padding: 40px 28px;
+    text-align: center;
+    border-radius: var(--r);
+    border: 1px solid color-mix(in oklab, var(--brass) 34%, transparent);
+    /* Warm at the top, settling into the card below — the same light the home
+       page hero uses, and the only depth here since shadows are banned. */
+    background:
+        radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--brass) 16%, transparent), transparent 70%),
+        var(--card);
+}
+
+/* ⚠️ HUGE AND QUIET AT ONCE. Large enough to hold the space a photograph
+   held, faint enough that the NAME is what is read first — it is the letter's
+   job to fill the frame, not to be the subject. */
+.rv-portal__letter {
+    font-family: var(--display);
+    font-size: clamp(120px, 22vw, 200px);
+    line-height: .8;
+    color: color-mix(in oklab, var(--brass) 30%, transparent);
+    user-select: none;
+}
+
+.rv-portal__note {
+    max-width: 42ch;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+}
+
 .rv-payoff {
     display: grid;
     gap: 0;

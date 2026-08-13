@@ -105,11 +105,39 @@ class TeaserPhotoLeakTest extends TestCase
         app(CreditService::class)->adjust($user, 1, 'goodwill', 'Positive control', $user);
         app(CreditService::class)->unlockMatch($user->fresh(), $match);
 
-        $payload = $this->dashboardPayload($user->fresh());
+        /*
+         * ⚠️ THIS CONTROL CANNOT USE A MEMBER PAYLOAD ANY MORE, AND SAYING SO
+         * IS THE POINT.
+         *
+         * It used to unlock an introduction and assert the strings appear,
+         * proving the search works. No member payload contains a photo path
+         * now — photographs go to the trusted contact — so the old control
+         * would fail forever while the searches below were perfectly healthy.
+         *
+         * What it must still prove is unchanged: that these searches CAN see a
+         * photo path when one is present. So it is asked of a real signed URL
+         * for a real photo, encoded the way Inertia encodes props. If the
+         * encoding hides them here, it hides them everywhere.
+         */
+        /*
+         * ⚠️ JSON_UNESCAPED_SLASHES, THE SAME FLAG dashboardPayload() USES.
+         *
+         * Without it json_encode writes `http:\/\/localhost\/photos\/1` and the
+         * search for '/photos/' finds nothing — which is what happened when I
+         * first wrote this. Encoding the control differently from the thing it
+         * is a control FOR would have declared the searches blind while they
+         * were fine.
+         */
+        $payload = json_encode([
+            'props' => ['photos' => [[
+                'url' => \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'photos.show',
+                    now()->addHour(),
+                    ['photo' => $photo->id],
+                ),
+            ]]],
+        ], JSON_UNESCAPED_SLASHES);
 
-        // The exact strings the leak tests search for, in a payload where
-        // they are supposed to be. If the encoding hides them here, it hides
-        // them everywhere.
         $this->assertStringContainsString('/photos/', $payload, 'The search cannot see a photo route.');
         $this->assertStringContainsString('signature=', $payload, 'The search cannot see a signed URL.');
 
@@ -230,7 +258,7 @@ class TeaserPhotoLeakTest extends TestCase
     }
 
     /** Once paid for, everything the member bought is there. */
-    public function test_an_unlocked_card_does_carry_signed_photo_urls(): void
+    public function test_an_unlocked_card_carries_no_photographs_either(): void
     {
         [$user, $match] = $this->memberWithLockedMatch();
 
@@ -239,9 +267,19 @@ class TeaserPhotoLeakTest extends TestCase
 
         $card = $this->actingAs($user->fresh())->get('/dashboard')->viewData('page')['props']['matches'][0];
 
-        $this->assertArrayHasKey('photos', $card);
-        $this->assertNotEmpty($card['photos']);
-        $this->assertStringContainsString('signature=', $card['photos'][0]['url']);
+        /*
+         * ⚠️ UNLOCKING BUYS THE PROFILE, NOT THE PHOTOGRAPHS. This asserted the
+         * opposite until the client set the rule: nobody on this platform is on
+         * display to the person they are introduced to, and paying does not
+         * change that. The pictures go to the trusted contact, who looks and
+         * advises.
+         *
+         * ⚠️ THE KEY IS ABSENT, NOT EMPTY. An empty array would still tell a
+         * template there are photographs it may iterate, and it would render
+         * nothing while looking correct.
+         */
+        $this->assertArrayNotHasKey('photos', $card);
+        $this->assertTrue($card['photographsWithheld']);
 
         /*
          * ⚠️ NARROWED IN PHASE 3, NOT RELAXED. This assertion used to read
@@ -334,15 +372,53 @@ class TeaserPhotoLeakTest extends TestCase
 
         $this->actingAs($user)->get($url)->assertNotFound();
 
-        // And once paid for, the same id opens.
+        /*
+         * ⚠️ AND PAYING NO LONGER OPENS IT EITHER. THIS CONTROL HAD TO CHANGE
+         * WITH THE RULE.
+         *
+         * It used to assert that unlocking the introduction opened the same id
+         * — a correct control for the old rule, where a member who paid saw
+         * the photographs. Nobody sees another member's photographs now, at
+         * any status, for any payment: they go to the trusted contact.
+         *
+         * Left as a control rather than deleted, because a route that refuses
+         * EVERYTHING is indistinguishable from a broken route, and the
+         * assertion above would pass against one. So the positive half now
+         * proves the endpoint genuinely serves bytes — using the one case that
+         * is still allowed, a member fetching her own.
+         */
         app(CreditService::class)->adjust($user, 1, 'goodwill', 'test', $user);
         app(CreditService::class)->unlockMatch($user->fresh(), $match);
 
-        $this->assertNotSame(
-            404,
-            $this->actingAs($user->fresh())->get($url)->getStatusCode(),
-            'Paying did not grant access to the photograph.'
-        );
+        $this->actingAs($user->fresh())->get($url)->assertNotFound();
+
+        // Made here rather than in the shared fixture, which deliberately
+        // gives photographs only to the other party.
+        $mine = $user->fresh()->profile;
+
+        $own = Photo::create([
+            'profile_id' => $mine->id,
+            'slot' => 'passport',
+            'path' => 'profiles/'.$mine->id.'/mine.jpg',
+            'webp_path' => null,
+            'thumbnail_path' => 'profiles/'.$mine->id.'/mine-thumb.jpg',
+            'original_filename' => 'mine.jpg',
+            'mime' => 'image/jpeg',
+            'size_bytes' => 1024,
+            'width' => 1200,
+            'height' => 1600,
+        ]);
+
+        \Illuminate\Support\Facades\Storage::disk(\App\Services\Photos\PhotoStorageService::DISK)
+            ->put($own->path, 'bytes');
+
+        $this->actingAs($user->fresh())
+            ->get(\Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'photos.show',
+                now()->addHour(),
+                ['photo' => $own->id],
+            ))
+            ->assertOk();
     }
 
     /**

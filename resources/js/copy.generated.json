@@ -22,6 +22,7 @@
         "incomplete_body": "You are :percent% of the way there. Once it is complete and verified, we start looking."
     },
     "match": {
+        "photos_with_contact": "Their photographs are with your trusted contact, who will look and advise you.",
         "locked": "Open this introduction",
         "open": "See their profile",
         "why": "Why we chose them for you",

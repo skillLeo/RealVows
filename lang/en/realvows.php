@@ -60,6 +60,15 @@ return [
     ],
 
     'match' => [
+        /*
+         * ⚠️ STATED, NOT LEFT TO BE NOTICED. A card with no picture and no
+         * comment on it reads as a card that failed to load one. Said plainly,
+         * it reads as the product working the way it promised.
+         *
+         * It says who DOES see them rather than only who does not — the rule
+         * is that somebody responsible looks properly, not that nobody looks.
+         */
+        'photos_with_contact' => 'Their photographs are with your trusted contact, who will look and advise you.',
         'locked' => 'Open this introduction',
         'open' => 'See their profile',
         'why' => 'Why we chose them for you',

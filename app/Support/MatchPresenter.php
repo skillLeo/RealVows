@@ -117,7 +117,32 @@ class MatchPresenter
             'education' => $them?->education,
             'interests' => $them?->interests ?? [],
             'languages' => $them?->languages ?? [],
-            'photos' => $this->signedPhotos($them?->photos ?? collect()),
+            /*
+             * ⚠️ PHOTOGRAPHS DO NOT GO TO THE MEMBER. THEY GO TO THE TRUSTED
+             * CONTACT, WHO LOOKS AND ADVISES.
+             *
+             * This is the client's rule and it is a religious one: nobody here
+             * is on display to the person they are introduced to. The pictures
+             * exist so a member can be verified as real and so the person
+             * responsible for them can look properly — not so two strangers
+             * can appraise each other.
+             *
+             * ⚠️ THE KEY IS ABSENT, NOT EMPTY, AND THAT IS THE WHOLE DESIGN.
+             *
+             * An empty `photos` array still says "there are photographs and
+             * you got none of them", and every template that iterates it would
+             * silently render nothing while looking correct. Omitting the key
+             * means a component that reaches for it fails loudly in
+             * development instead of quietly in production — the same reason
+             * GuardianPresenter ADDS photographs for a family contact rather
+             * than removing them for an appointed one.
+             *
+             * ⚠️ AND IT IS DECIDED HERE, at the one place a member's payload is
+             * built. A rule enforced in a Vue component is a rule about the
+             * drawing, not about the data: the JSON would still carry signed
+             * URLs to every photograph, one devtools panel away.
+             */
+            'photographsWithheld' => true,
             'unlockedAt' => $match->unlocked_at?->format('j F Y'),
             'verified' => $them?->isVerified() ?? false,
 

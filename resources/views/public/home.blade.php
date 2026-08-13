@@ -33,7 +33,18 @@
          The art is no longer a panel. It is behind everything, full bleed, and
          the words sit inside its arch. One composition instead of two columns
          competing for the same attention. --}}
-    <section class="rv-hero rv-on-dark" data-hero>
+    {{-- ⚠️ NOT rv-on-dark ANY MORE. The hero is cream.
+
+         Every band of it was oxblood, and a deep maroon field reads closer to
+         sombre than to celebration. Christian wedding language is ivory, white
+         and gold; Muslim wedding language is rich colour WITH gold and light.
+         Ivory ground, brass line and oxblood type is the register both share,
+         and it is the one an invitation is actually printed in.
+
+         The oxblood has not been thrown away — it is the ink and the button
+         now, and the page still closes on a full-bleed oxblood panel. It has
+         gone from being the room to being the writing in it. --}}
+    <section class="rv-hero" data-hero>
         {{-- Behind the words, full bleed. Declared first so it paints first;
              it is positioned absolutely and takes part in no layout. --}}
         @include('public.partials.the-meeting')
@@ -102,7 +113,7 @@
                 @endif
 
                 <div>
-                    <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
+                    <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
                 </div>
 
                 {{-- ⚠️ THE THREE FACTS GO LAST AND STAY SMALL. Centred, they
@@ -269,7 +280,7 @@
             </p>
 
             <div>
-                <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
+                <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
             </div>
         </div>
     </section>

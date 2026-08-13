@@ -1596,7 +1596,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    */
   min-height: min(72svh, 760px);
   padding: clamp(36px, 5vh, 64px) clamp(20px, 5vw, 64px);
-  background: var(--oxblood-deep);
+  background: var(--cream);
   overflow: hidden;
 }
 
@@ -1682,12 +1682,15 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * width. A px value here would be the viewport-units bug again, wearing a
  * different hat.
  *
- * 7% ≈ 48px at full width. The arch is 560 wide at 75px above the springing, so
- * the headline still clears the curve on both sides with room to spare.
+ * 13% ≈ 88px at full width, which is most of the arch's 175 rise. The limit is
+ * the curve itself: at 88px above the springing the arch is still 540 wide, and
+ * the topmost line — the italic eyebrow, about 210 — clears it easily. The
+ * headline sits lower, where the arch has opened to 658 against its 515, so it
+ * never touches either side.
  */
 .rv-hero__copy-inner {
   width: 100%;
-  margin: -7% 0 0;
+  margin: -13% 0 0;
   align-items: center;
   text-align: center;
 }
@@ -1712,7 +1715,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-weight: 500;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--brass);
+  /* ⚠️ brass-ink, NOT brass. Undarkened brass reaches only 2.69:1 on cream —
+     below AA for normal text. This is the token that exists for exactly this
+     case, and the hero going light is precisely when it starts to matter. */
+  color: var(--brass-ink);
 }
 
 /* ⚠️ THE RULE IS SYMMETRICAL NOW. Ranged left it grew from its left end and
@@ -3998,11 +4004,13 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   contain: paint;
   /* Deepest at the corners, warming toward the middle where the light is. A
      flat fill is what made this read as a coloured rectangle. */
+  /* Warmest where the words are, cooling to plain cream at the corners. The
+     light is now daylight through a window rather than a candle in a crypt. */
   background:
-    radial-gradient(120% 100% at 50% 47%,
-      color-mix(in oklab, var(--oxblood) 34%, var(--oxblood-deep)) 0%,
-      var(--oxblood-deep) 58%,
-      color-mix(in oklab, #000 20%, var(--oxblood-deep)) 100%);
+    radial-gradient(115% 95% at 50% 44%,
+      color-mix(in oklab, var(--brass) 13%, var(--card)) 0%,
+      var(--cream) 58%,
+      color-mix(in oklab, var(--brass) 7%, var(--cream)) 100%);
 }
 
 .rv-meeting__svg {
@@ -4022,8 +4030,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-meeting__grain {
   position: absolute;
   inset: 0;
-  opacity: .05;
-  mix-blend-mode: overlay;
+  /* ⚠️ multiply, NOT overlay. Overlay lightens as much as it darkens, which on
+     an ivory ground washes out to nothing; multiply lays the grain as tooth in
+     the paper, which is what it is for. */
+  opacity: .055;
+  mix-blend-mode: multiply;
   pointer-events: none;
 }
 
@@ -4052,7 +4063,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    a fill="url(#rv-mashrabiya)" presentation attribute, and any CSS fill on this
    selector beats that attribute and erases the entire screen. */
 .rv-meeting__screen {
-  opacity: .34;
+  opacity: .5;
 }
 
 /* ── The arch ────────────────────────────────────────────────────────── */
@@ -4080,7 +4091,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-meeting__keystone {
   fill: none;
-  stroke: var(--brass-bright);
+  stroke: var(--brass-ink);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
   opacity: .6;
@@ -4103,7 +4114,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  */
 .rv-meeting__path {
   fill: none;
-  stroke: var(--brass-bright);
+  /* ⚠️ brass, NOT brass-bright. brass-bright is a highlight for dark panels; on
+     ivory it is barely a tint. The line that draws the arch has to be the one
+     you can actually watch. */
+  stroke: var(--brass);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
@@ -4156,9 +4170,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     .rv-hero .rv-d1 {
       background-image: linear-gradient(
         100deg,
-        var(--cream) 42%,
-        var(--brass-bright) 50%,
-        var(--cream) 58%
+        var(--oxblood) 42%,
+        var(--brass-ink) 50%,
+        var(--oxblood) 58%
       );
       background-size: 300% 100%;
       /*

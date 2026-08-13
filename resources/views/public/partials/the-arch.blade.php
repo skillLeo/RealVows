@@ -35,8 +35,8 @@
     <svg viewBox="0 0 720 210" preserveAspectRatio="xMidYMid meet" focusable="false">
         <defs>
             <radialGradient id="rv-keystone-bloom">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity="1" />
-                <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
+                <stop offset="0%"   stop-color="var(--brass)" stop-opacity="1" />
+                <stop offset="100%" stop-color="var(--brass)" stop-opacity="0" />
             </radialGradient>
         </defs>
 

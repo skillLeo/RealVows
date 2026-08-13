@@ -177,6 +177,23 @@ class Navigation
             : collect();
 
         $sections = [
+            /*
+             * ⚠️ ITS OWN SECTION, ABOVE EVERYTHING, WITH ONE ITEM IN IT.
+             *
+             * The overview is not a queue and not a setting, and filing it
+             * under either would make it the fifth thing in a list of four
+             * rather than the place you land. It also has to be first because
+             * the wordmark points at whatever the first item is — the logo
+             * should go to the overview, not to whichever queue happened to
+             * sort highest.
+             */
+            [
+                'key' => 'overview',
+                'label' => 'Overview',
+                'items' => [
+                    ['key' => 'dashboard', 'label' => 'Dashboard', 'href' => '/admin', 'visible' => $user->can('verifications.view')],
+                ],
+            ],
             [
                 'key' => 'review',
                 'label' => 'Review',

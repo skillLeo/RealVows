@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\MatchAuditController;
 use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\ReportQueueController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TrustedContactQueueController;
 use App\Http\Controllers\Admin\VerificationController;
@@ -148,6 +149,18 @@ Route::middleware(['auth', 'guardian'])->prefix('trusted-contact-dashboard')->na
 */
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    /*
+     * ⚠️ THE OVERVIEW SITS BEHIND THE WEAKEST STAFF PERMISSION ON PURPOSE.
+     *
+     * Every figure on it is already scoped by ReviewerScope, so a reviewer
+     * sees their own half and is told so on the page. Gating it on something
+     * stronger would leave the first screen in the sidebar 404ing for the
+     * people who live in the sidebar.
+     */
+    Route::middleware('admin:verifications.view')->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    });
+
     Route::middleware('admin:verifications.view')->group(function () {
         Route::get('/verifications', [VerificationController::class, 'index'])->name('verifications');
         Route::get('/verifications/{verification}', [VerificationController::class, 'show'])->name('verifications.show');

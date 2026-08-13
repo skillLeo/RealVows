@@ -6,35 +6,34 @@
 
     ── THE IDEA: THE SCREEN ──────────────────────────────────────────────────
 
-    A mashrabiya is the carved lattice screen in Islamic architecture — the
-    window you can see out of but not into. It is the architecture of parda.
+    A lattice screen with light behind it, and the lattice thins where the words
+    are, as though it had been opened just there. The words sit in the opening.
+    Two planes and a light between them is where the depth comes from — no
+    shadow is used or needed, which matters, because shadows are banned.
 
-    That is the whole concept, and it is the product:
+    ⚠️ IT WAS A MASHRABIYA, AND THAT WAS A MISTAKE.
 
-      · It is what modesty LOOKS like as a building, so the Muslim half of the
-        audience recognises it instantly and the Western half reads it as
-        ornament and craft. One shape, both audiences, no compromise between
-        them — the same trick the arch was already pulling.
-      · It is entirely non-figurative. Octagons and squares. There is no living
-        thing depicted anywhere in this file, so the halal question never has
-        to be asked, let alone answered.
-      · It is the product's actual mechanic. Nobody here is on display. You are
-        seen through a screen, by people who have been checked, and an
-        introduction is the screen opening.
+    The first version used an octagon-and-square tessellation because it is
+    Islamic screenwork — the architecture of parda, chosen deliberately so the
+    Muslim half of the audience would recognise it.
 
-    So: a warm light behind, a brass lattice in front, and the lattice THINS
-    where the words are, as though the screen has been opened just there. The
-    words sit in the opening. Two planes and a light between them is where the
-    depth comes from — no shadow is used or needed.
+    That is exactly why it was wrong. This platform serves Muslims AND
+    Christians, and an Islamic geometric lattice is not neutral: to a Christian
+    visitor it says "this is a Muslim site" before a single word is read. The
+    arch works for both audiences because a mosque and a church genuinely share
+    it. The lattice had no such property, and picking a motif that belongs to
+    one half of the market is a market decision made by accident.
 
-    ⚠️ NO STARS, AND THE RULE WAS CHECKED RATHER THAN ASSUMED.
+    A diagonal diaper is the honest version of the same idea. Crossed diagonals
+    forming a lozenge field are Gothic tracery and Victorian tile AND Islamic
+    screenwork AND the guilloche on a wedding invitation. Nobody reads it as
+    belonging to one faith, because it does not. It is also quieter, which the
+    composition needed anyway.
 
-    The obvious Islamic pattern is a girih rosette, and a girih rosette is an
-    eight-pointed star. The design system bans star shapes outright — the
-    product removed date-of-birth matching and will not have that idea creep
-    back as decoration. An octagon-and-square tessellation is as authentic, as
-    common in real screenwork, and contains no star at any scale. The ban is
-    kept to the letter, not argued with.
+    ⚠️ NO STARS. The design system bans star shapes — date-of-birth matching was
+    removed so that idea could not return as decoration — and the obvious
+    Islamic pattern, a girih rosette, is an eight-pointed star. A lozenge field
+    contains no star at any scale. The ban is kept to the letter.
 
     ── THE ARCH IS STILL THE ARCH ────────────────────────────────────────────
 
@@ -57,39 +56,27 @@
         <defs>
             {{-- ── The lattice ──────────────────────────────────────────────
 
-                 ⚠️ EVERY EDGE IS DRAWN EXACTLY ONCE. THAT IS WHY THIS IS SIX
-                 SEGMENTS AND NOT ONE OCTAGON.
+                 ⚠️ TWO STROKES. THAT IS THE ENTIRE SCREEN.
 
-                 A closed octagon in a tile shares its flat edges with the next
-                 tile along, so every vertical and horizontal in the screen
-                 gets painted twice — double alpha, and the lattice reads as a
-                 plaid of alternating line weights. Drawing the left flat and
-                 the top flat only, plus all four diagonals, tiles into a
-                 perfectly even screen: the right and bottom flats arrive from
-                 the neighbouring tiles.
+                 The diagonals run corner to corner, so they join the diagonals
+                 of the neighbouring tiles into unbroken lines across the whole
+                 field — no edge is ever painted twice and there is no seam to
+                 find. The octagon this replaced needed six carefully chosen
+                 segments to avoid drawing its shared flats twice; a lozenge
+                 field needs none of that care, which is usually the sign of the
+                 right primitive.
 
-                 14.64 and 35.36 are 50 × (2 − √2)/2 and its complement — the
-                 vertices of a regular octagon 50 wide. --}}
-            <pattern id="rv-mashrabiya" width="50" height="50" patternUnits="userSpaceOnUse">
-                {{-- ⚠️ THIS PATH CARRIES ITS OWN CLASS, AND IT HAS TO.
+                 ⚠️ THE PATH CARRIES ITS OWN CLASS, AND IT HAS TO.
 
-                     Pattern content inherits down the DOM — from <pattern>, to
-                     <defs>, to <svg>. It does NOT inherit from the element that
-                     references the pattern. Styling the <rect> therefore styles
-                     nothing inside here, which is a silent failure: the screen
-                     simply does not appear and no error is raised anywhere.
-
-                     Worse, `fill: none` on that rect actively DELETES the
-                     screen, because a CSS declaration beats the fill="url(...)"
-                     presentation attribute. Both mistakes shipped together and
-                     the hero rendered as an empty maroon field. --}}
-                <path class="rv-meeting__lattice"
-                      d="M0 35.36 L0 14.64
-                         M14.64 0 L35.36 0
-                         M0 14.64 L14.64 0
-                         M35.36 0 L50 14.64
-                         M50 35.36 L35.36 50
-                         M14.64 50 L0 35.36" />
+                 Pattern content inherits down the DOM — <pattern>, <defs>,
+                 <svg> — and never from the element referencing the pattern.
+                 Styling the <rect> reaches nothing in here. Worse, a `fill`
+                 declaration on that rect DELETES the screen, because CSS beats
+                 the fill="url(...)" presentation attribute. Both mistakes
+                 shipped together once and the hero rendered as an empty field
+                 with no error raised anywhere. --}}
+            <pattern id="rv-diaper" width="44" height="44" patternUnits="userSpaceOnUse">
+                <path class="rv-meeting__lattice" d="M0 0 L44 44 M44 0 L0 44" />
             </pattern>
 
             {{-- The screen is opened where the words are. White shows the
@@ -107,14 +94,14 @@
 
             {{-- The light behind the screen. --}}
             <radialGradient id="rv-meeting-glow" cx=".5" cy=".47" r=".5">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity=".26" />
+                <stop offset="0%"   stop-color="var(--brass)" stop-opacity=".26" />
                 <stop offset="38%"  stop-color="var(--brass)"        stop-opacity=".11" />
                 <stop offset="100%" stop-color="var(--brass)"        stop-opacity="0" />
             </radialGradient>
 
             <radialGradient id="rv-meeting-bloom">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity="1" />
-                <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
+                <stop offset="0%"   stop-color="var(--brass)" stop-opacity="1" />
+                <stop offset="100%" stop-color="var(--brass)" stop-opacity="0" />
             </radialGradient>
 
         </defs>
@@ -124,7 +111,7 @@
         <circle class="rv-meeting__candle" cx="600" cy="470" r="420" fill="url(#rv-keystone-bloom)" />
 
         <g mask="url(#rv-meeting-screen)">
-            <rect class="rv-meeting__screen" width="1200" height="1000" fill="url(#rv-mashrabiya)" />
+            <rect class="rv-meeting__screen" width="1200" height="1000" fill="url(#rv-diaper)" />
         </g>
 
     </svg>

@@ -29,10 +29,31 @@
 
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="1" stroke-linecap="round" stroke-linejoin="round" focusable="false">
-        {{-- A four-point star inside a diamond: the same geometry as the
-             8px-radius language, rotated. --}}
+        {{--
+            ⚠️ A QUATREFOIL, NOT A STAR. THIS WAS A FOUR-POINT STAR AND IT
+            BROKE THE PRODUCT'S OWN RULE.
+
+            The design system bans star shapes outright — date-of-birth-derived
+            matching was removed precisely so that idea could not creep
+            back in as decoration — and then the separator ornament, which
+            repeats on every marketing page, was a four-point star. The rule was
+            being enforced everywhere except on the one mark that appears most.
+
+            A quatrefoil is the correct replacement rather than merely a safe
+            one. Four circles on a cross is a form BOTH traditions built for
+            centuries: it is the Gothic window tracery of a cathedral and it is
+            the rosette of an Islamic screen, and it carries no sky-borne
+            reading in either. Same visual weight, same diamond footprint, none
+            of the association.
+
+            The lobes are semicircles: the chord from (12,4) to (20,12) is
+            √128 ≈ 11.31, so r = 5.66 makes each arc exactly half a circle. A
+            smaller radius would be silently scaled up by the renderer and the
+            four lobes would stop matching.
+        --}}
         <path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z" opacity=".55" />
-        <path d="M12 7.5c.7 2.6 1.2 3.1 3.8 3.8-2.6.7-3.1 1.2-3.8 3.8-.7-2.6-1.2-3.1-3.8-3.8 2.6-.7 3.1-1.2 3.8-3.8Z" />
+        <path d="M12 4 A5.66 5.66 0 0 1 20 12 A5.66 5.66 0 0 1 12 20
+                 A5.66 5.66 0 0 1 4 12 A5.66 5.66 0 0 1 12 4 Z" />
     </svg>
 
     @if ($rules)

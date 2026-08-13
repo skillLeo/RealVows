@@ -53,6 +53,27 @@ function setUpViewTransitions() {
     router.on('start', () => {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+        /*
+         * ⚠️ NEVER IN THE ADMIN SHELL, AND THE REASON IS NOT TASTE.
+         *
+         * The slide is a phone idiom: content moves left going forward and
+         * right coming back, matching a stack of screens the thumb pushes
+         * through. It reads as native there.
+         *
+         * On the staff screens the sidebar is permanent and every destination
+         * is visible at once. There is no forward and no back — you are simply
+         * looking at a different section of the same page — so an 18px lurch
+         * on every sidebar click is a twitch, not a transition. The client's
+         * words were that it "feels very bad", and he is describing motion
+         * that is answering a question nobody asked.
+         *
+         * Detected from the DOM rather than the URL: AdminLayout renders
+         * .rv-admin and nothing else does, so this stays right if the admin
+         * ever moves off the /admin prefix, and a member's screens are
+         * untouched by it.
+         */
+        if (document.querySelector('.rv-admin')) return;
+
         // startViewTransition wants the DOM change inside its callback, but
         // Inertia's swap happens later — so the transition is held open on a
         // promise and released when the new page has actually rendered.

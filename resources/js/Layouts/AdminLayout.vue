@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import RvLogo from '@/Components/RvLogo.vue';
 import AccountMenu from '@/Components/AccountMenu.vue';
@@ -102,6 +102,20 @@ const open = ref(false);
 watch(current, () => {
     open.value = false;
 });
+
+/*
+ * ⚠️ ESCAPE CLOSES IT, because the drawer now covers the whole screen
+ * including the control that opened it. A full-screen overlay with no keyboard
+ * way out is a trap, and the scrim is not reachable by keyboard at all.
+ */
+function onKeydown(event) {
+    if (event.key === 'Escape' && open.value) {
+        open.value = false;
+    }
+}
+
+onMounted(() => document.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
@@ -164,6 +178,17 @@ watch(current, () => {
                 :class="{ 'is-open': open }"
                 aria-label="Administration"
             >
+                <!-- ⚠️ ONLY EXISTS WHILE THE DRAWER DOES. On a desktop the
+                     sidebar is permanent and has nothing to close, so a close
+                     button there would be a control that does nothing. -->
+                <div class="rv-admin__close">
+                    <span class="rv-admin__close-label">Sections</span>
+                    <button type="button" class="rv-admin__close-btn" @click="open = false">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="rv-sr-only">Close</span>
+                    </button>
+                </div>
+
                 <div v-for="section in sections" :key="section.key" class="rv-admin__group">
                     <h2 class="rv-admin__group-label">{{ section.label }}</h2>
 
@@ -290,9 +315,9 @@ watch(current, () => {
     top: 62px;
     max-height: calc(100dvh - 62px);
     overflow-y: auto;
-    padding: 28px 16px 40px;
+    padding: 24px 14px 40px;
     display: grid;
-    gap: 28px;
+    gap: 18px;
     align-content: start;
     /* Tone, not a shadow. Shadows are banned by the design system, so the
        separation between navigation and work is a single hairline and a
@@ -301,15 +326,64 @@ watch(current, () => {
     border-inline-end: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
 }
 
-.rv-admin__group-label {
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .13em;
+/*
+ * ⚠️ THE SECTIONS WERE FOUR LISTS SEPARATED BY WHITESPACE ALONE.
+ *
+ * At a glance that reads as one long list with odd gaps in it, and the labels
+ * — set small, grey and uppercase — were quieter than the links beneath them,
+ * so the thing naming the group was the least visible thing in it.
+ *
+ * A hairline above each heading does the separating, so the gap can come down
+ * and the column tightens up. Brass on the label, because it is the only
+ * colour in the system that reads as a heading without competing with the
+ * active item's oxblood.
+ */
+/* Hidden on a desktop; the mobile block below turns it on. */
+.rv-admin__close {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 8px 14px 12px;
+    border-block-end: 1px solid color-mix(in oklab, var(--ink) 9%, transparent);
+}
+
+.rv-admin__close-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
     text-transform: uppercase;
     color: var(--ink-soft);
+}
+
+.rv-admin__close-btn {
+    /* 44px, the touch-target floor this project measures rather than assumes. */
+    min-width: 44px;
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 0;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.rv-admin__group + .rv-admin__group {
+    padding-block-start: 18px;
+    border-block-start: 1px solid color-mix(in oklab, var(--ink) 9%, transparent);
+}
+
+.rv-admin__group-label {
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--brass-ink);
     padding-inline: 12px;
-    margin-block-end: 8px;
+    margin-block-end: 10px;
 }
 
 .rv-admin__list {
@@ -408,26 +482,41 @@ watch(current, () => {
 
     .rv-admin__body { grid-template-columns: minmax(0, 1fr); }
 
+    /*
+     * ⚠️ inset: 0 AND ABOVE THE BAR — NOT OFFSET BELOW IT.
+     *
+     * This was pinned with `inset-block: 62px 0`, a hardcoded guess at the
+     * bar's height, at a z-index BELOW it. Two things were wrong and they
+     * compounded: the review banner and the gateway banner sit above the bar,
+     * so the bar is not at 62px and often not near it — and being underneath
+     * meant the drawer slid out behind the header rather than over it, which
+     * is what read as "buggy".
+     *
+     * A drawer that covers everything cannot be measured wrong. It carries its
+     * own close control, because the toggle that opened it is now underneath.
+     */
     .rv-admin__nav {
         position: fixed;
-        inset-block: 62px 0;
-        inset-inline-start: 0;
-        width: min(300px, 84vw);
-        z-index: 25;
+        inset: 0 auto 0 0;
+        width: min(320px, 86vw);
+        z-index: 60;
         transform: translateX(-102%);
         transition: transform 220ms var(--ease-entrance, ease);
         max-height: none;
+        padding-block-start: 16px;
+        overscroll-behavior: contain;
     }
 
     .rv-admin__nav.is-open { transform: translateX(0); }
 
     .rv-admin__scrim {
         position: fixed;
-        inset-block: 62px 0;
-        inset-inline: 0;
-        z-index: 24;
-        background: color-mix(in oklab, var(--ink) 38%, transparent);
+        inset: 0;
+        z-index: 59;
+        background: color-mix(in oklab, var(--ink) 44%, transparent);
     }
+
+    .rv-admin__close { display: flex; }
 
     .rv-admin__main { padding: 24px 20px 64px; }
 }

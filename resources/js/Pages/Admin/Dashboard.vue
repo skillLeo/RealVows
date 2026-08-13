@@ -79,8 +79,8 @@ const verificationSplit = computed(() =>
                  what needs width to be read at all — a fourteen-column chart
                  and a five-band distribution. Sorting by height instead would
                  have to be redone every time a card changes. -->
-            <div class="rv-dash">
-                <aside class="rv-dash__rail">
+            <div class="rv-adash">
+                <aside class="rv-adash__rail">
                     <!-- ⚠️ FIRST ON THE PAGE, ABOVE EVERY NUMBER. The client is
                          not technical. Charts tell him what is true; these tell
                          him what to do about it, in the order it matters.
@@ -200,7 +200,7 @@ const verificationSplit = computed(() =>
                     </BaseCard>
                 </aside>
 
-                <div class="rv-dash__main">
+                <div class="rv-adash__main">
                     <section class="rv-stack" style="gap: 12px">
                         <span class="rv-label">Waiting on you</span>
 
@@ -285,7 +285,7 @@ const verificationSplit = computed(() =>
    stretched across 900px leaves a canyon between the words and the action at
    the end of it, and the eye has to travel the whole way to find out what it
    can do. Narrow, the sentence and its link are one object. */
-.rv-dash {
+.rv-adash {
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(260px, 30%, 340px);
     gap: 24px;
@@ -294,7 +294,7 @@ const verificationSplit = computed(() =>
 
 /* Explicit placement, because the rail is FIRST in the markup so that a phone
    and a screen reader meet the actions before the charts. */
-.rv-dash__main {
+.rv-adash__main {
     grid-column: 1;
     grid-row: 1;
     display: grid;
@@ -302,7 +302,7 @@ const verificationSplit = computed(() =>
     align-content: start;
 }
 
-.rv-dash__rail {
+.rv-adash__rail {
     grid-column: 2;
     grid-row: 1;
     display: grid;
@@ -322,13 +322,13 @@ const verificationSplit = computed(() =>
    One column below 900 of ACTUAL width, and the rail keeps its source position
    — first — which is the right order when there is no room for two. */
 @container rv-admin-main (max-width: 900px) {
-    .rv-dash {
+    .rv-adash {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .rv-dash__main { grid-column: 1; grid-row: 2; }
+    .rv-adash__main { grid-column: 1; grid-row: 2; }
 
-    .rv-dash__rail {
+    .rv-adash__rail {
         grid-column: 1;
         grid-row: 1;
         position: static;
@@ -407,7 +407,7 @@ const verificationSplit = computed(() =>
 /* ⚠️ auto-fit would give the rail a single 300px-wide tile per row, which
    turns four short numbers into a column half a page long. Two up reads as a
    set. */
-.rv-dash__rail .rv-tiles {
+.rv-adash__rail .rv-tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 

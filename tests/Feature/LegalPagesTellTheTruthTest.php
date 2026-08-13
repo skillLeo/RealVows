@@ -102,6 +102,56 @@ class LegalPagesTellTheTruthTest extends TestCase
      * A test asserting the policy "mentions photographs" would have passed the
      * whole time the wrong sentence was on the page.
      */
+    /**
+     * ⚠️ EVERY PUBLIC PAGE, NOT ONLY THE LEGAL ONES.
+     *
+     * The same false claim was found in three separate documents: the privacy
+     * policy, the Terms, and the Questions page. All three were written when it
+     * was true and all three stayed after it stopped being true, because
+     * nothing ever asked a PAGE what it said about photographs.
+     *
+     * So the question is asked of every page a visitor can open, and the
+     * Questions page is checked against the live setting as well.
+     */
+    public function test_no_public_page_claims_members_see_photographs(): void
+    {
+        $offences = [];
+
+        foreach (['/', '/about', '/how-it-works', '/questions', '/privacy', '/terms', '/refunds', '/community-guidelines'] as $path) {
+            $text = strtolower($this->text($path));
+
+            foreach ([
+                'introduced to see your profile and your photographs',
+                'show them to members you are introduced to',
+                'only somebody you have been introduced to',
+            ] as $claim) {
+                if (str_contains($text, $claim)) {
+                    $offences[] = "{$path} → “{$claim}”";
+                }
+            }
+        }
+
+        $this->assertSame([], $offences, implode("\n  ", array_merge([
+            'These pages claim a member sees photographs of the person they are introduced to.',
+            'Whether that is true is a setting, and none of these sentences reads it.',
+        ], $offences)));
+    }
+
+    public function test_the_questions_page_follows_the_setting_too(): void
+    {
+        $this->level(PhotoVisibilityPolicy::NEVER);
+        $this->assertStringContainsString(
+            'nobody you are introduced to ever does',
+            $this->text('/questions'),
+        );
+
+        $this->level(PhotoVisibilityPolicy::AT_MUTUAL_INTEREST);
+        $this->assertStringContainsString(
+            'once you have both said yes',
+            $this->text('/questions'),
+        );
+    }
+
     public function test_no_legal_page_claims_members_see_photographs(): void
     {
         foreach (['/privacy', '/terms'] as $path) {

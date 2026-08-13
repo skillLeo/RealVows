@@ -42,8 +42,33 @@
                 ['Is everyone here real?',
                  'Everyone is checked before they can be matched. Nobody enters the matching pool unchecked.'],
 
-                ['Who can see my photographs?',
-                 'Only somebody you have been introduced to. They are never public and never findable by a search engine.'],
+                {{--
+                    ⚠️ THIS ANSWER WAS FALSE, AND IT WAS THE THIRD PLACE THE
+                    SAME FALSE SENTENCE WAS FOUND.
+
+                    It said "only somebody you have been introduced to", which
+                    is the opposite of what the product does. The privacy policy
+                    and the Terms carried the same claim. All three were written
+                    when it was true, and all three stayed after it stopped
+                    being true, because nothing in the suite ever asked a page
+                    what it said about photographs.
+
+                    ⚠️ IT COMES FROM THE POLICY OBJECT NOW, not from this file.
+                    Who may see a photograph is a setting, so any sentence typed
+                    here is correct only until the client's scholar answers. An
+                    unreadable setting yields the strictest sentence, so a
+                    database fault cannot make this page over-promise.
+                --}}
+                ['Who can see my photographs?', $photographAnswer],
+
+                ['Do I need somebody in my family to take part?',
+                 'Usually yes. You name a trusted contact, most often your father or your brother, and he looks at your introductions with you and advises you. If you have nobody to name, tell us and we will arrange somebody. You are never left out of this because of it.'],
+
+                ['What happens right after I join?',
+                 'You build your profile and send us your photographs. A person then checks you are real. Nothing is shown to anybody and no introduction is made until that is done.'],
+
+                ['When will I hear something?',
+                 'Introductions are not sent on a schedule and there is no queue position to watch. We introduce you when there is somebody worth introducing you to, which is the whole reason it is worth waiting for.'],
 
                 ['When does somebody learn my last name?',
                  'When you have both said you are interested. Not before, and not if only one of you has.'],

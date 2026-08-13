@@ -68,15 +68,28 @@
                  perfectly even screen: the right and bottom flats arrive from
                  the neighbouring tiles.
 
-                 29.29 and 70.71 are 100 × (2 − √2)/2 and its complement — the
-                 vertices of a regular octagon 100 wide. --}}
-            <pattern id="rv-mashrabiya" width="100" height="100" patternUnits="userSpaceOnUse">
-                <path d="M0 70.71 L0 29.29
-                         M29.29 0 L70.71 0
-                         M0 29.29 L29.29 0
-                         M70.71 0 L100 29.29
-                         M100 70.71 L70.71 100
-                         M29.29 100 L0 70.71" />
+                 14.64 and 35.36 are 50 × (2 − √2)/2 and its complement — the
+                 vertices of a regular octagon 50 wide. --}}
+            <pattern id="rv-mashrabiya" width="50" height="50" patternUnits="userSpaceOnUse">
+                {{-- ⚠️ THIS PATH CARRIES ITS OWN CLASS, AND IT HAS TO.
+
+                     Pattern content inherits down the DOM — from <pattern>, to
+                     <defs>, to <svg>. It does NOT inherit from the element that
+                     references the pattern. Styling the <rect> therefore styles
+                     nothing inside here, which is a silent failure: the screen
+                     simply does not appear and no error is raised anywhere.
+
+                     Worse, `fill: none` on that rect actively DELETES the
+                     screen, because a CSS declaration beats the fill="url(...)"
+                     presentation attribute. Both mistakes shipped together and
+                     the hero rendered as an empty maroon field. --}}
+                <path class="rv-meeting__lattice"
+                      d="M0 35.36 L0 14.64
+                         M14.64 0 L35.36 0
+                         M0 14.64 L14.64 0
+                         M35.36 0 L50 14.64
+                         M50 35.36 L35.36 50
+                         M14.64 50 L0 35.36" />
             </pattern>
 
             {{-- The screen is opened where the words are. White shows the
@@ -104,45 +117,16 @@
                 <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
             </radialGradient>
 
-            {{-- The arch fades out toward its feet rather than stopping at the
-                 bottom of the frame. A line that ends is a line; a line that
-                 fades is a building continuing past the edge. --}}
-            <linearGradient id="rv-meeting-jamb" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%"   stop-color="var(--brass)" stop-opacity="0" />
-                <stop offset="34%"  stop-color="var(--brass)" stop-opacity=".38" />
-                <stop offset="100%" stop-color="var(--brass)" stop-opacity=".38" />
-            </linearGradient>
         </defs>
 
         {{-- Light first, then the screen in front of it. --}}
         <rect width="1200" height="1000" fill="url(#rv-meeting-glow)" />
-        <circle class="rv-meeting__candle" cx="600" cy="470" r="420" fill="url(#rv-meeting-bloom)" />
+        <circle class="rv-meeting__candle" cx="600" cy="470" r="420" fill="url(#rv-keystone-bloom)" />
 
         <g mask="url(#rv-meeting-screen)">
             <rect class="rv-meeting__screen" width="1200" height="1000" fill="url(#rv-mashrabiya)" />
         </g>
 
-        {{-- ── The arch the invitation is set inside ─────────────────────── --}}
-        <path class="rv-meeting__jamb" d="M300 1000 L300 480 A300 300 0 0 1 900 480 L900 1000" />
-
-        {{-- ⚠️ THESE ARE HALVES OF ONE ARCH, NOT TWO LINES ON A FLOOR.
-             Each starts at its own base, climbs its own side, and the two
-             complete a single arch at the keystone. Two halves finishing one
-             arch is the union stated in the shape itself, using the motif the
-             product already owns — the doorway a mosque and a church share.
-             Nothing has to be explained. --}}
-        <path class="rv-meeting__path rv-meeting__path--left"
-              d="M300 1000 L300 480 A300 300 0 0 1 600 180" />
-        <path class="rv-meeting__path rv-meeting__path--right"
-              d="M900 1000 L900 480 A300 300 0 0 0 600 180" />
-
-        <circle class="rv-meeting__bloom" cx="600" cy="180" r="200" fill="url(#rv-meeting-bloom)" />
-
-        {{-- ⚠️ THE KEYSTONE SITS AT THE APEX, WHICH IS WHERE THE TWO HALVES
-             MEET. It is the wedge at the top, and it is the stone both halves
-             lean on, which is the entire reason it is the right shape for this
-             product. --}}
-        <path class="rv-meeting__keystone" d="M572 180 L600 146 L628 180 L600 214 Z" />
     </svg>
 
     {{-- ⚠️ STATIC GRAIN, IN ITS OWN SVG SO THE FILTER IS NEVER RE-EVALUATED

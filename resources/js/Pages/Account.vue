@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useAdminShell } from '@/shell';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import BaseCheckbox from '@/Components/BaseCheckbox.vue';
@@ -17,6 +19,14 @@ const props = defineProps({
 });
 
 const page = usePage();
+
+/*
+ * ⚠️ THE ONE SCREEN BOTH A MEMBER AND STAFF OPEN, so it is the one screen that
+ * has to choose its own chrome. Clicking "Your account" in the admin sidebar
+ * used to drop a reviewer into the member layout — sidebar gone, a top bar
+ * appearing with four links, and the account dropdown repeating them again.
+ */
+const Shell = useAdminShell();
 
 /**
  * The administration shortcuts come from the same server-built navigation
@@ -64,7 +74,7 @@ const logout = () => router.post('/logout');
 </script>
 
 <template>
-    <AppLayout title="Your account">
+    <component :is="Shell ? AdminLayout : AppLayout" title="Your account">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Your account</span>
@@ -268,7 +278,7 @@ const logout = () => router.post('/logout');
                 <Link href="/community-guidelines">Community Guidelines</Link>
             </p>
         </div>
-    </AppLayout>
+    </component>
 </template>
 
 <style scoped>

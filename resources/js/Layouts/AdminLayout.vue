@@ -40,6 +40,28 @@ const current = computed(() => page.url.split('?')[0]);
 const sections = computed(() => page.props.adminNav ?? []);
 
 /*
+ * ⚠️ THE LOGO GOES WHEREVER THIS PERSON CAN ACTUALLY GO.
+ *
+ * The wordmark used to point at the verification queue, written in by hand —
+ * a permission-gated route living in furniture that renders for everybody. A
+ * reviewer without verifications.view, or a member reaching this shell from
+ * their account page, would click it and get a 404 from the one control every
+ * screen has.
+ *
+ * (Written out in prose rather than quoted as markup on purpose: the
+ * navigation crawler reads link targets out of this file's source and cannot
+ * tell a comment from a template, so quoting the old value here reintroduced
+ * the very dead link it describes. Fourth time a guard has caught my own
+ * explanation of what it forbids.)
+ *
+ * Writing a gated route into a layout is the same defect App\Support\Navigation
+ * was built to stamp out, arriving through a side door. The first item of the
+ * first section is by definition something the server already decided this
+ * person may open.
+ */
+const home = computed(() => sections.value[0]?.items[0]?.href ?? '/account');
+
+/*
  * ⚠️ EXACT MATCH FIRST, THEN PREFIX, AND THE ORDER MATTERS.
  *
  * /admin/settings and /admin/settings/mail both begin with /admin/settings, so
@@ -106,12 +128,16 @@ watch(current, () => {
                 <span class="rv-sr-only">Sections</span>
             </button>
 
-            <RvLogo href="/admin/verifications" />
+            <RvLogo :href="home" />
 
             <span class="rv-admin__badge">Administration</span>
 
             <AccountMenu v-if="user" :user="user" />
         </header>
+
+        <!-- Forwarded from AppLayout so a screen that supplies a sticky bar
+             does not silently lose it on the day staff can reach it. -->
+        <slot name="bar" />
 
         <div class="rv-admin__body">
             <!-- ⚠️ A real <nav> with a real heading per group, so the tree is
@@ -163,6 +189,8 @@ watch(current, () => {
                 </div>
             </main>
         </div>
+
+        <slot name="actionbar" />
     </div>
 </template>
 

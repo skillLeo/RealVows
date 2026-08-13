@@ -18,6 +18,7 @@ use App\Models\Verification;
 use App\Services\Settings\RuntimeMailConfigurator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 
@@ -145,48 +146,41 @@ class EmailPreviewController extends Controller
         ];
     }
 
-    public function index(): Response
+    /**
+     * ⚠️ THE INDEX IS AN INERTIA PAGE. THE PREVIEWS THEMSELVES ARE NOT, AND
+     * THAT SPLIT IS DELIBERATE.
+     *
+     * This method used to return a hand-built HTML string with inline styles
+     * and no layout, so it rendered as a bare white page in the middle of the
+     * admin area. It looked broken because it sat outside everything.
+     *
+     * The reason it was raw is sound and applies to `show`, not here: a preview
+     * must render in a document carrying NONE of the product's CSS, or the
+     * app's stylesheet leaks in and the preview flatters the email — you are
+     * shown a layout Gmail will never produce. `show` therefore stays a bare
+     * document, and the links on this page open in a new tab to leave the
+     * Inertia app cleanly.
+     *
+     * This page previews nothing. It is a list and a form, so there is nothing
+     * for the shell to contaminate.
+     */
+    /*
+     * ⚠️ \Inertia\Response, fully qualified. `Response` in this file is
+     * Illuminate\Http\Response, which `show` still returns because a preview is
+     * a bare document. The two live side by side on purpose; naming this one
+     * explicitly is what keeps that legible.
+     */
+    public function index(): \Inertia\Response
     {
-        $rows = '';
-
-        foreach ($this->catalogue() as $key => $entry) {
-            $rows .= sprintf(
-                '<li style="margin:0 0 12px;"><a href="/admin/emails/%s">%s</a> '
-                    .'<span style="color:#6B5F62;font-size:13px;">— <a href="/admin/emails/%s?format=text">plain text</a></span></li>',
-                $key, e($entry['label']), $key,
-            );
-        }
-
-        return response(
-            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Email previews</title>'
-            .'<style>body{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:640px;margin:48px auto;padding:0 16px;line-height:1.6;color:#1F1518}'
-            .'h1{font-family:Georgia,serif;font-weight:400;color:#6B1834}code{background:#F2EFE9;padding:2px 6px;border-radius:4px}</style></head><body>'
-            .'<h1>Email previews</h1>'
-            .'<p><strong>A browser is not a mail client.</strong> These render correctly in Chrome '
-            .'no matter what is wrong with them. Use the send form below to check what actually '
-            .'arrives in Gmail, Apple Mail and Outlook.</p>'
-            ."<ul style=\"padding-left:20px;\">{$rows}</ul>"
-            .'<h2 style="font-family:Georgia,serif;font-weight:400;color:#6B1834;">Send a real one</h2>'
-            .'<form method="POST" action="/admin/emails/send">'
-            .csrf_field()
-            .'<p><select name="key" style="padding:8px;font-size:15px;">'
-            .implode('', array_map(
-                fn ($k, $e) => '<option value="'.$k.'">'.e($e['label']).'</option>',
-                array_keys($this->catalogue()),
-                $this->catalogue(),
-            ))
-            .'</select></p>'
-            .'<p><input type="email" name="to" placeholder="you@example.com" required '
-            .'style="padding:8px;font-size:15px;width:280px;"></p>'
-            .'<p><button type="submit" style="padding:10px 20px;font-size:15px;background:#6B1834;color:#fff;border:0;border-radius:8px;cursor:pointer;">Send it</button></p>'
-            .'</form>'
-            .'<p style="color:#6B5F62;font-size:14px;">Sends through whatever is configured in '
-            .'<code>Settings → Email</code>. If the driver is still <code>log</code>, it goes to '
-            .'<code>storage/logs</code> and nothing leaves the server.</p>'
-            .'</body></html>',
-            200,
-            ['Content-Type' => 'text/html'],
-        );
+        return Inertia::render('Admin/Emails', [
+            'emails' => collect($this->catalogue())
+                ->map(fn (array $entry, string $key) => [
+                    'key' => $key,
+                    'label' => $entry['label'],
+                ])
+                ->values()
+                ->all(),
+        ]);
     }
 
     public function show(Request $request, string $key): Response

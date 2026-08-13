@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
+import { useAdminShell } from '@/shell';
 import RvIcon from './RvIcon.vue';
 
 /**
@@ -19,7 +20,20 @@ const props = defineProps({
 
 const page = usePage();
 
-const links = computed(() => page.props.nav ?? []);
+/*
+ * ⚠️ EMPTY INSIDE THE ADMIN SHELL, AND THAT IS NOT A TIDY-UP.
+ *
+ * On a staff screen the sidebar already lists every destination, permanently,
+ * down the left. Repeating four of them in this dropdown put the same
+ * navigation on the page three times — bar, sidebar, menu — and left a reader
+ * to work out whether the three were the same thing or three different things.
+ *
+ * Where there is no sidebar, this menu is a real route to those pages on a
+ * narrow screen, so a member keeps them.
+ */
+const adminShell = useAdminShell();
+
+const links = computed(() => (adminShell.value ? [] : page.props.nav ?? []));
 
 const open = ref(false);
 const root = ref(null);
@@ -80,7 +94,7 @@ function logout() {
             <div v-if="open" class="rv-menu__panel" role="menu">
                 <span class="rv-menu__label">{{ user.email }}</span>
 
-                <span class="rv-menu__rule" />
+                <span v-if="links.length" class="rv-menu__rule" />
 
                 <button
                     v-for="link in links"

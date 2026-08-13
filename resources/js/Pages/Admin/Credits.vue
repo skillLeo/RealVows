@@ -83,6 +83,15 @@ function submit() {
 
             <div class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Ledger</span>
+
+                <!-- ⚠️ AN EMPTY LEDGER IS A FACT, NOT A BLANK.
+                     A heading with nothing under it reads as a failed load, and
+                     the reader's next move is to refresh and then to doubt the
+                     figure above it. Saying so costs one line. -->
+                <p v-if="!entries.length" class="rv-help">
+                    Nothing has been credited or deducted for this member yet.
+                </p>
+
                 <article v-for="entry in entries" :key="entry.id" class="rv-ledger">
                     <span class="rv-ledger__delta" :class="{ 'is-negative': entry.delta < 0 }">
                         {{ entry.delta > 0 ? '+' : '' }}{{ entry.delta }}

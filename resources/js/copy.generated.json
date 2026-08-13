@@ -227,7 +227,8 @@
         "tell_us": "Tell us what happened",
         "send": "Send",
         "sending": "Sending",
-        "open_heading": "Open with us"
+        "open_heading": "Open with us",
+        "nothing_open": "You have nothing open with us at the moment."
     },
     "writer": {
         "offer": "Tidy up my English",

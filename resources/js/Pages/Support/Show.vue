@@ -78,9 +78,22 @@ onMounted(() => {
                 </form>
             </BaseCard>
 
-            <BaseCard v-if="open.length">
+            <!-- ⚠️ THE CARD APPEARS EVEN WITH NOTHING IN IT, AND THAT IS THE
+                 POINT ON THIS PARTICULAR SCREEN.
+
+                 It was hidden entirely when there was nothing open, so somebody
+                 who had just sent a message saw the form, sent it, and found no
+                 trace of it anywhere — no list, no heading, nothing. On a
+                 support page, reached by a member who already feels unheard,
+                 silence is the worst possible answer. -->
+            <BaseCard>
                 <div class="rv-stack" style="gap: 12px">
                     <h2 class="rv-d3">{{ $t('support.open_heading') }}</h2>
+
+                    <p v-if="!open.length" class="rv-help">
+                        {{ $t('support.nothing_open') }}
+                    </p>
+
                     <p v-for="item in open" :key="item.id" class="rv-help">
                         {{ item.label }} · {{ item.at }}
                     </p>

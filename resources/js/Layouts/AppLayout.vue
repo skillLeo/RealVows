@@ -4,6 +4,8 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import RvLogo from '@/Components/RvLogo.vue';
 import BottomTabBar from '@/Components/BottomTabBar.vue';
 import AccountMenu from '@/Components/AccountMenu.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useAdminShell } from '@/shell';
 
 /**
  * Chrome for every authenticated screen.
@@ -30,9 +32,35 @@ const current = computed(() => page.url.split('?')[0]);
  * story. See App\Support\Navigation.
  */
 const links = computed(() => page.props.nav ?? []);
+
+/*
+ * ⚠️ STAFF GET THE SIDEBAR ON EVERY SCREEN, INCLUDING THIS ONE.
+ *
+ * The admin pages were moved to AdminLayout, but /dashboard and /account are
+ * shared — a member's screens that staff also open. So a reviewer working
+ * through the queue would click Matches, land here, and the sidebar would
+ * vanish and a top navigation bar take its place. Two different products in
+ * one session.
+ *
+ * Delegating here rather than editing each shared page means a screen added
+ * later cannot forget: it inherits the right chrome by using this layout at
+ * all. Member screens are untouched — for anybody with no staff areas this
+ * branch is never taken.
+ */
+const adminShell = useAdminShell();
 </script>
 
 <template>
+    <!-- ⚠️ ONE LAYOUT DELEGATING, NOT TWO LAYOUTS MERGED. AdminLayout stays
+         the only place staff chrome is defined, so a change to it can still
+         never reach a member. -->
+    <AdminLayout v-if="adminShell" :title="title">
+        <template #bar><slot name="bar" /></template>
+        <template #actionbar><slot name="actionbar" /></template>
+        <slot />
+    </AdminLayout>
+
+    <template v-else>
     <Head :title="title" />
 
     <a href="#rv-main" class="rv-skip">Skip to content</a>
@@ -99,6 +127,7 @@ const links = computed(() => page.props.nav ?? []);
 
         <BottomTabBar />
     </div>
+    </template>
 </template>
 
 <style scoped>

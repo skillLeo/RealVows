@@ -1560,16 +1560,42 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * The art moved behind the words instead of beside them, so there is one
  * composition rather than two columns competing for the same attention.
  */
+/*
+ * ⚠️ NOTHING IN THIS HERO IS SIZED FROM THE VIEWPORT ANY MORE, AND THAT IS THE
+ * WHOLE FIX FOR THE ZOOM BUG.
+ *
+ * The frame was `min(720px, 90vw, 66svh)` and the type was in px. Browser zoom
+ * shrinks the CSS viewport but leaves the type alone, so every zoom step made
+ * the frame smaller and the words relatively bigger until they burst out
+ * through the sides of their own arch. No choice of numbers fixes that, because
+ * the two were being measured by different rulers.
+ *
+ * The frame is now built out of the content: the crown is a block in normal
+ * flow, the legs are borders on the box under it. Both are exactly as big as
+ * the words inside them, at every zoom level, with no arithmetic involved.
+ *
+ * Where a limit is still needed it is in ch or %, which scale WITH the type,
+ * never against it.
+ */
 .rv-hero {
   position: relative;
   isolation: isolate;
   display: grid;
   place-items: center;
-  /* svh, not vh: on a phone browser vh includes the chrome that is about to
-     slide away, so the hero opens taller than the screen and the button is
-     under the fold on first paint. */
-  min-height: min(94svh, 940px);
-  padding: clamp(72px, 11vh, 128px) clamp(20px, 5vw, 64px);
+  /*
+   * ⚠️ A FLOOR, AND A LOW ONE. IT WAS 86svh AND THE HERO DID NOT FIT.
+   *
+   * Measured at a 1000 × 857 viewport, the hero came out 946px tall — the
+   * closing line was below the fold before the site header was even added. At
+   * 90% zoom the viewport grows to ~950 CSS px and it fits, which is exactly
+   * why it "only looked right at 90%". That was never an alignment fault; it
+   * was 90px of overflow.
+   *
+   * The floor is now low enough that the content decides the height on a
+   * laptop, and there is room left for the header above it.
+   */
+  min-height: min(72svh, 760px);
+  padding: clamp(36px, 5vh, 64px) clamp(20px, 5vw, 64px);
   background: var(--oxblood-deep);
   overflow: hidden;
 }
@@ -1577,33 +1603,108 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-hero__copy {
   position: relative;
   z-index: 1;
+  width: 100%;
   min-width: 0;
   display: flex;
   justify-content: center;
 }
 
+/* The invitation. 680px is the widest it was drawn to look right at; below
+   that it is simply the column it is given. */
+.rv-hero__frame {
+  width: 100%;
+  max-width: 680px;
+}
+
+/* ⚠️ aspect-ratio, NOT a height. The crown is a segment of a circle, so its
+   height is fixed by its width — 210/720 of it. Set any other way it stops
+   being an arc of a circle the moment the column changes width. */
+.rv-meeting__cap {
+  width: 100%;
+  aspect-ratio: 720 / 210;
+}
+
+.rv-meeting__cap > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/*
+ * ⚠️ THE LEGS ARE PSEUDO-ELEMENTS ON THIS BOX, AND THAT IS DELIBERATE.
+ *
+ * `top: 0; bottom: 0` on a child makes each leg exactly as tall as the content
+ * beside it — no height to compute, nothing to keep in sync, and it stays true
+ * when the founding-offer band appears or the copy wraps to another line. They
+ * sit at left: 0 and right: 0 of a box the same width as the crown, so they
+ * meet the arch precisely at its springing.
+ *
+ * The horizontal padding is the measure. Anything the text needs to clear the
+ * legs by is set here, once.
+ */
+.rv-hero__frame-body {
+  position: relative;
+  padding: 0 clamp(24px, 8%, 68px) clamp(24px, 4vw, 44px);
+}
+
+.rv-hero__frame-body::before,
+.rv-hero__frame-body::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  /* Fades out at the foot, so the arch reads as a building continuing past the
+     bottom of the frame rather than as a shape that stops. */
+  background: linear-gradient(180deg,
+    rgba(185, 145, 84, .42) 0%,
+    rgba(185, 145, 84, .42) 48%,
+    rgba(185, 145, 84, 0) 100%);
+}
+
+.rv-hero__frame-body::before { left: 0; }
+.rv-hero__frame-body::after  { right: 0; }
+
+/*
+ * ⚠️ THE NEGATIVE MARGIN IS THE POINT OF THE ARCH.
+ *
+ * The words used to begin at the springing — that is, UNDER the arch rather
+ * than inside it — which left the entire curve empty. On a 680 frame that is
+ * about 165px of nothing between the keystone and the first line, and it read
+ * as exactly what it was: a gap.
+ *
+ * Lifting the text into the opening is what makes this a frame instead of a
+ * decoration sitting on top of a paragraph.
+ *
+ * ⚠️ IT IS A PERCENTAGE, AND IT MUST STAY ONE. A percentage margin resolves
+ * against the containing block's WIDTH, so the lift is always the same fraction
+ * of the arch it is lifting into — at any zoom, any font size, any column
+ * width. A px value here would be the viewport-units bug again, wearing a
+ * different hat.
+ *
+ * 7% ≈ 48px at full width. The arch is 560 wide at 75px above the springing, so
+ * the headline still clears the curve on both sides with room to spare.
+ */
 .rv-hero__copy-inner {
   width: 100%;
-  max-width: 620px;
-  margin: 0;
+  margin: -7% 0 0;
   align-items: center;
   text-align: center;
 }
 
-/* ⚠️ ch UNITS ON A CENTRED MEASURE, NOT max-width IN PIXELS. Centred text needs
-   a tighter measure than ranged-left text does — the eye has to find the start
-   of each line rather than returning to a fixed edge. */
-.rv-hero .rv-d1 { max-width: 16ch; }
-.rv-hero__copy-inner .rv-lead { max-width: 42ch; }
+/* ⚠️ ch, NOT PIXELS. A ch is a fraction of the font size, so these measures
+   grow and shrink with the type — which is exactly what a zoom level changes.
+   A px max-width here is the same bug in a smaller place. */
+.rv-hero .rv-d1 { max-width: 15ch; }
+.rv-hero__copy-inner .rv-lead { max-width: 34ch; }
 
-/* The crest that opens the invitation. */
 .rv-hero__crest { line-height: 0; }
 
 .rv-hero__eyebrow {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px 32px;
+  gap: 12px 28px;
   margin: 0;
   padding-top: 20px;
   border-top: 1px solid rgba(185, 145, 84, .35);
@@ -1615,11 +1716,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 /* ⚠️ THE RULE IS SYMMETRICAL NOW. Ranged left it grew from its left end and
-   faded to the right, which is correct under left-aligned type and wrong under
-   centred type — it made the whole column look as though it had slipped. It
-   opens from the middle outward and fades at both ends. */
+   faded right, which is correct under left-aligned type and wrong under centred
+   type — it made the whole column look as though it had slipped. */
 .rv-hero__flourish {
-  width: min(180px, 40vw);
+  width: min(180px, 40%);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--brass), transparent);
   transform: scaleX(0);
@@ -3929,28 +4029,53 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* ── The screen ──────────────────────────────────────────────────────────
  *
- * ⚠️ THE STROKE GOES ON THE RECT, NOT INSIDE THE <pattern>.
+ * ⚠️ THE STROKE GOES ON THE PATTERN'S OWN PATH, NOT ON THE RECT.
  *
- * Stroke properties inherit into pattern content, so setting them once here
- * styles every tile in the screen. Set inside the pattern they would be frozen
- * at authoring time and could not answer to a media query — and the lattice
- * has to get lighter on a small screen, where the same line weight over a
- * smaller area reads as clutter rather than as craft.
+ * I wrote it on the rect first, on the assumption that stroke inherits into
+ * pattern content. It does not: pattern content inherits down the DOM, from
+ * <pattern> to <defs> to <svg>, and never from the element referencing it. The
+ * rect's declarations reached nothing — and its `fill: none` overrode the
+ * fill="url(#rv-mashrabiya)" attribute, because CSS beats presentation
+ * attributes. The screen vanished silently, with no error anywhere.
+ *
+ * Opacity still lives on the rect, which is correct: it is the screen's
+ * property, not the tile's, so a media query can lighten the whole lattice
+ * without touching the geometry.
  */
-.rv-meeting__screen {
+.rv-meeting__lattice {
+  fill: none;
   stroke: var(--brass);
   stroke-width: 1;
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  opacity: .3;
 }
 
-/* ── The arch the invitation is set inside ─────────────────────────────── */
+/* ⚠️ NO fill DECLARATION HERE, EVER. The rect is filled by the pattern through
+   a fill="url(#rv-mashrabiya)" presentation attribute, and any CSS fill on this
+   selector beats that attribute and erases the entire screen. */
+.rv-meeting__screen {
+  opacity: .34;
+}
+
+/* ── The arch ────────────────────────────────────────────────────────── */
 .rv-meeting__jamb {
   fill: none;
-  stroke: url(#rv-meeting-jamb);
+  stroke: var(--brass);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
+  opacity: .42;
+}
+
+/* The archivolt. A real arch is a band of concentric curves, and that second
+   line is most of what separates drawn architecture from a round-topped box. */
+.rv-meeting__jamb--inner { opacity: .2; }
+
+/* The course the arch springs from. Without it the arch is a hoop stuck in
+   the floor. */
+.rv-meeting__impost {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: .38;
 }
 
 .rv-meeting__keystone {
@@ -3963,10 +4088,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* ── The convergence ─────────────────────────────────────────────────────
  *
- * ⚠️ 1100 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
+ * ⚠️ 500 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
  *
- * Each half is a 520-unit upright plus a quarter of a 300-radius arc
- * (π × 300 ÷ 2 ≈ 471), so ≈ 991. If dasharray were shorter than the true
+ * Each half is half of a circular segment struck from radius 387 across a
+ * 720 chord: the arc subtends 2·asin(360/387) = 2.391 rad, so the whole arc is
+ * 387 × 2.391 ≈ 925 and each half ≈ 463. If dasharray were shorter than the true
  * length the dash would repeat and the arch would appear to draw itself twice.
  * Rounded up rather than measured with getTotalLength(), because this
  * composition ships no JavaScript — a number in a stylesheet cannot fail to
@@ -3981,8 +4107,8 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
-  stroke-dasharray: 1100;
-  stroke-dashoffset: 1100;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
   opacity: 0;
 }
 
@@ -4062,31 +4188,44 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   }
 }
 
+/*
+ * ⚠️ THE TWO HALVES FINISH 0.4s APART, NOT 1.2s.
+ *
+ * The offset was 36% and 42% of a 20s cycle — six percentage points, or one
+ * and a fifth seconds of one line sitting completed at the keystone while the
+ * other was still visibly crawling toward it. On the tall arch that read as
+ * intent. On this flat one it reads as a stall: long enough for the eye to
+ * decide something is wrong before the second line lands.
+ *
+ * Two points apart keeps the asymmetry — they still do not arrive together,
+ * which is the whole idea — but it now reads as one gesture with a slight lag
+ * rather than as two animations of different lengths.
+ */
 @keyframes rv-meet-left {
-  0%   { stroke-dashoffset: 1100; opacity: 0; }
+  0%   { stroke-dashoffset: 500; opacity: 0; }
   6%   { opacity: 1; }
-  /* Reaches the keystone first, then holds while the other climbs to it. */
-  36%  { stroke-dashoffset: 0; opacity: 1; }
+  /* Reaches the keystone first, then holds while the other closes the gap. */
+  34%  { stroke-dashoffset: 0; opacity: 1; }
   74%  { stroke-dashoffset: 0; opacity: 1; }
   90%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 1100; opacity: 0; }
+  100% { stroke-dashoffset: 500; opacity: 0; }
 }
 
 @keyframes rv-meet-right {
-  0%   { stroke-dashoffset: 1100; opacity: 0; }
-  8%   { opacity: 1; }
-  42%  { stroke-dashoffset: 0; opacity: 1; }
+  0%   { stroke-dashoffset: 500; opacity: 0; }
+  7%   { opacity: 1; }
+  36%  { stroke-dashoffset: 0; opacity: 1; }
   74%  { stroke-dashoffset: 0; opacity: 1; }
   90%  { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 1100; opacity: 0; }
+  100% { stroke-dashoffset: 500; opacity: 0; }
 }
 
 /* ⚠️ BARELY ABOVE AMBIENT. A bloom that reads as a glow belongs on a different
    product; this one should be noticed only if you were watching. */
 @keyframes rv-keystone-warm {
-  0%, 38%   { opacity: 0; }
-  46%       { opacity: .09; }
-  62%       { opacity: .05; }
+  0%, 34%   { opacity: 0; }
+  40%       { opacity: .09; }
+  58%       { opacity: .05; }
   74%, 100% { opacity: 0; }
 }
 
@@ -4102,7 +4241,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  */
 @media (prefers-reduced-motion: no-preference) {
   [data-arrival='pending'] .rv-meeting__screen,
-  [data-arrival='pending'] .rv-meeting__jamb { opacity: 0; }
+  [data-arrival='pending'] .rv-meeting__cap { opacity: 0; }
 
   [data-arrival='running'] .rv-meeting__screen {
     --arrive-y: 0;
@@ -4113,7 +4252,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     animation-delay: 200ms;
   }
 
-  [data-arrival='running'] .rv-meeting__jamb {
+  [data-arrival='running'] .rv-meeting__cap {
+    --arrive-y: 0;
+    --arrive-scale: .97;
     animation: rv-arrive var(--dur-ceremony) var(--ease) both;
     animation-delay: 620ms;
   }

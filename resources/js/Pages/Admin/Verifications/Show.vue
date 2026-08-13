@@ -85,6 +85,22 @@ const decided = props.verification.status === 'verified' || props.verification.s
                     <figcaption class="rv-label rv-label--brass">Verification photo</figcaption>
                 </figure>
 
+                <!-- ⚠️ SAID, NOT LEFT BLANK, AND ON THIS SCREEN IT MATTERS
+                     MORE THAN ANYWHERE ELSE.
+
+                     The selfie already says so when it is missing; the profile
+                     photographs did not. So a member with none produced a grid
+                     with one figure in it and empty space beside it, which is
+                     indistinguishable from four images that failed to load.
+
+                     The reviewer's job here is deciding whether a real person
+                     is who they say they are. Guessing whether they are looking
+                     at "no photographs" or "photographs I cannot see" is the
+                     one ambiguity this screen must never present. -->
+                <p v-if="!photos.length" class="rv-review__missing">
+                    This member has not added any profile photographs.
+                </p>
+
                 <figure v-for="photo in photos" :key="photo.id" class="rv-review__figure">
                     <img :src="photo.url" :alt="`${photo.title} photo`" loading="lazy" />
                     <figcaption class="rv-label">{{ photo.title }}</figcaption>

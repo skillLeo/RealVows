@@ -38,12 +38,25 @@
              it is positioned absolutely and takes part in no layout. --}}
         @include('public.partials.the-meeting')
 
-        <div class="rv-hero__copy">
-            <div class="rv-hero__copy-inner rv-stack" style="gap: 28px">
-                <div class="rv-hero__crest rv-arrive-step">
-                    @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
-                </div>
+        {{-- ⚠️ THE COPY IS INSIDE THE FRAME, NOT UNDERNEATH IT.
 
+             The arch used to be an absolutely-positioned overlay sized in
+             viewport units, which meant it agreed with the words at exactly one
+             window size and broke on any zoom. The crown is now a block in
+             normal flow above the text and the legs are borders on the box
+             around it, so the frame is built out of the content and cannot come
+             apart from it. --}}
+        <div class="rv-hero__copy">
+          <div class="rv-hero__frame">
+            @include('public.partials.the-arch')
+
+            <div class="rv-hero__frame-body">
+              <div class="rv-hero__copy-inner rv-stack" style="gap: 20px">
+                {{-- ⚠️ NO ORNAMENT HERE. The keystone at the crown of the arch,
+                     directly above this line, is already the mark that opens the
+                     invitation — a second lozenge 30px under it is the same
+                     gesture made twice, and it cost 54px of height on a screen
+                     that measured 90px short. --}}
                 <p class="rv-eyebrow rv-hero__eyebrow-line rv-arrive-step">For those who mean it</p>
 
                 <h1 class="rv-d1" data-arrival-words>Find your true soul mate.</h1>
@@ -100,7 +113,9 @@
                     <span>18+</span>
                     <span>Verified members</span>
                 </p>
+              </div>
             </div>
+          </div>
         </div>
 
         {{--

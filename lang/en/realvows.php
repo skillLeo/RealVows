@@ -350,6 +350,16 @@ return [
         'send' => 'Send',
         'sending' => 'Sending',
         'open_heading' => 'Open with us',
+
+        /*
+         * ⚠️ SHOWN INSTEAD OF HIDING THE WHOLE SECTION.
+         *
+         * The card used to disappear when there was nothing open, so somebody
+         * who had just written to us saw the form, sent it, and found no trace
+         * of it anywhere. On a page reached by a member who already feels
+         * unheard, silence is the worst available answer.
+         */
+        'nothing_open' => 'You have nothing open with us at the moment.',
     ],
 
     'writer' => [

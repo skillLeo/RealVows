@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MatchRecord;
 use App\Models\Verification;
 use App\Support\MatchPresenter;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,8 +24,32 @@ class DashboardController extends Controller
      * this returns was written for this one seeker by the engine. No search,
      * no filter, no sort, and no id anybody can enumerate.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): Response|RedirectResponse
     {
+        /*
+         * ⚠️ STAFF NEVER LAND ON THE MEMBER DASHBOARD.
+         *
+         * /dashboard, /admin and /admin/dashboard were three URLs showing two
+         * different things depending on which one you happened to type, and the
+         * sidebar's own Matches link pointed at this one. So a reviewer could
+         * be looking at a page titled "Your introductions" showing 0 — their
+         * own empty member account — while believing it described the platform.
+         * A dashboard that means something different depending on how you
+         * arrived at it is worse than not having one.
+         *
+         * There is one overview for staff and this redirects to it. Their own
+         * member-side figures are carried across as the "Your own account"
+         * panel there, so nothing is lost by never coming here.
+         *
+         * ⚠️ ASKED THROUGH ReviewerScope, NOT A ROLE CHECK. gendersFor()
+         * returns null only for unrestricted staff and an array for reviewers;
+         * a member never reaches this branch because they hold no staff role.
+         * Same rule as everywhere else: gate on what somebody may open.
+         */
+        if ($request->user()?->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $user = $request->user()->loadMissing('profile.verification');
         $profile = $user->profile;
         $verification = $profile?->verification;

@@ -238,7 +238,15 @@ class NavigationTest extends TestCase
      */
     public function test_the_browser_is_never_told_a_persons_role(): void
     {
-        $response = $this->actingAs($this->userWithRole('super_admin'))->get('/dashboard');
+        /*
+         * ⚠️ FOLLOWED, because /dashboard now redirects staff to the admin
+         * overview — three URLs used to show two different pages depending on
+         * how you arrived. What this test is about is the shared props, which
+         * are the same wherever it lands.
+         */
+        $response = $this->actingAs($this->userWithRole('super_admin'))
+            ->followingRedirects()
+            ->get('/dashboard');
 
         $props = $response->viewData('page')['props'];
 
@@ -285,7 +293,7 @@ class NavigationTest extends TestCase
 
             foreach (['/account', '/dashboard'] as $url) {
                 $found = [];
-                $scan($this->actingAs($user)->get($url)->viewData('page')['props'], $url);
+                $scan($this->actingAs($user)->followingRedirects()->get($url)->viewData('page')['props'], $url);
 
                 $this->assertSame(
                     [],
@@ -311,7 +319,7 @@ class NavigationTest extends TestCase
             // "\/admin\/settings" and a search for the plain path finds
             // nothing, so this assertion would pass even with the bug present.
             $payload = json_encode(
-                $this->actingAs($reviewer)->get($url)->viewData('page')['props'],
+                $this->actingAs($reviewer)->followingRedirects()->get($url)->viewData('page')['props'],
                 JSON_UNESCAPED_SLASHES
             );
 

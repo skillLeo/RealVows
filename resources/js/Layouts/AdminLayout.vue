@@ -32,6 +32,21 @@ defineProps({
     title: { type: String, default: null },
     // The small line above the page heading: "Review", "Configuration".
     eyebrow: { type: String, default: null },
+    /*
+     * ⚠️ OPT OUT OF THE READING-WIDTH CAP.
+     *
+     * Pages here are capped at 880px because a settings form or a queue is
+     * prose and controls, and a label whose input runs 1500px across is
+     * unreadable and unpleasant to fill in.
+     *
+     * A dashboard is the opposite: it is columns and charts, and the cap left
+     * 700px of empty page to the right of it on a large screen — worse the
+     * further you zoomed out, because the content stopped growing while the
+     * window did not. That is not a breakpoint problem and no amount of
+     * container-query tuning would have found it; the content simply refused
+     * the space it had.
+     */
+    wide: { type: Boolean, default: false },
 });
 
 const page = usePage();
@@ -183,7 +198,7 @@ watch(current, () => {
             <div v-if="open" class="rv-admin__scrim" @click="open = false" />
 
             <main id="rv-main" class="rv-admin__main">
-                <div class="rv-admin__page">
+                <div class="rv-admin__page" :class="{ 'is-wide': wide }">
                     <p v-if="eyebrow" class="rv-eyebrow">{{ eyebrow }}</p>
                     <slot />
                 </div>
@@ -355,15 +370,33 @@ watch(current, () => {
     background: color-mix(in oklab, var(--brass) 26%, transparent);
 }
 
+/* ⚠️ A CONTAINER, so pages inside can size themselves against the space they
+ * actually have rather than against the viewport.
+ *
+ * The sidebar is 264px wide and the padding another 64. A page using
+ * `@media (max-width: 1100px)` is therefore reasoning about 1100 while being
+ * handed 772 — every breakpoint out by the width of the furniture, and out by
+ * a DIFFERENT amount once the sidebar collapses to a drawer. That is not a
+ * number anybody can keep in their head, and it is why the dashboard read as
+ * cramped at widths where the arithmetic said it was fine. */
 .rv-admin__main {
     min-width: 0;
     padding: 32px 32px 72px;
+    container-type: inline-size;
+    container-name: rv-admin-main;
 }
 
 .rv-admin__page {
     max-width: 880px;
     display: grid;
     gap: 8px;
+}
+
+/* Still capped, but at a width a two-column dashboard can actually use. Beyond
+   about 1600px a grid stops reading as a layout and starts reading as things
+   drifting apart, so this is a limit rather than an absence of one. */
+.rv-admin__page.is-wide {
+    max-width: 1600px;
 }
 
 /* ── Narrow screens ──────────────────────────────────────────────────────

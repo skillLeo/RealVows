@@ -159,6 +159,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
      */
     Route::middleware('admin:verifications.view')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        /*
+         * ⚠️ AN ALIAS THAT REDIRECTS RATHER THAN RENDERS.
+         *
+         * /admin/dashboard is what anybody types who has ever used another
+         * admin panel, and a 404 there is a bad first impression. Rendering the
+         * same page at two URLs would be worse: two addresses for one screen
+         * means bookmarks disagree, the sidebar's active state has to know
+         * about both, and any future analytics counts one visit as two.
+         */
+        Route::redirect('/dashboard', '/admin');
     });
 
     Route::middleware('admin:verifications.view')->group(function () {

@@ -54,13 +54,13 @@ const verificationSplit = computed(() =>
 </script>
 
 <template>
-    <AdminLayout title="Dashboard" eyebrow="Overview">
+    <AdminLayout title="Dashboard" eyebrow="Overview" wide>
         <div class="rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 8px">
                 <h1 class="rv-d2">Dashboard</h1>
                 <!-- ⚠️ THE SCOPE IS STATED ON THE PAGE, ALWAYS. A gender-scoped
-                     reviewer seeing "18 members" must not read it as the size
-                     of the platform. A number without its scope is a number
+                     reviewer seeing "18 members" must not read it as the size of
+                     the platform. A number without its scope is a number
                      somebody will quote in a meeting. -->
                 <p class="rv-help">{{ scope.label }}</p>
             </header>
@@ -68,229 +68,211 @@ const verificationSplit = computed(() =>
             <!-- ⚠️ THE RAIL COMES FIRST IN THE MARKUP AND SECOND ON SCREEN.
                  Grid places it in the right-hand column on a wide viewport; in
                  source order it stays first, so on a phone — and to a screen
-                 reader, and in the tab order — the things needing attention
-                 are read before the charts describing them. Ordering by CSS
-                 alone would put the actions last for exactly the people who
-                 cannot see the layout. -->
+                 reader, and in the tab order — the things needing attention are
+                 met before the charts describing them. Ordering it visually with
+                 CSS alone would put the actions last for exactly the people who
+                 cannot see the layout.
+
+                 ⚠️ WHAT GOES IN WHICH COLUMN IS A RULE, NOT A BALANCING ACT.
+                 The rail holds what you ACT on: what needs you, your own
+                 account, and the two compact readings. The main column holds
+                 what needs width to be read at all — a fourteen-column chart
+                 and a five-band distribution. Sorting by height instead would
+                 have to be redone every time a card changes. -->
             <div class="rv-dash">
                 <aside class="rv-dash__rail">
+                    <!-- ⚠️ FIRST ON THE PAGE, ABOVE EVERY NUMBER. The client is
+                         not technical. Charts tell him what is true; these tell
+                         him what to do about it, in the order it matters.
+                         Written in PHP from the figures beside them rather than
+                         by a model — see App\Support\DashboardInsights for why
+                         that is a correctness decision and not a saving. -->
+                    <section class="rv-stack" style="gap: 12px">
+                        <span class="rv-label">What needs you</span>
 
-            <!-- ── What this means ────────────────────────────────────────
-                 ⚠️ FIRST ON THE PAGE, ABOVE EVERY NUMBER.
+                        <!-- ⚠️ DashboardInsights always returns at least one
+                             line — it falls back to "nothing needs you"
+                             precisely so this is never blank. This branch
+                             exists because that is a promise made in another
+                             file. Caught by EmptyStatesTest on this page. -->
+                        <p v-if="!insights.length" class="rv-help">
+                            No summary could be produced for this view.
+                        </p>
 
-                 The client is not technical. Charts tell him what is true;
-                 these tell him what to do about it, in the order it matters.
-                 Written in PHP from the figures below rather than by a model —
-                 see App\Support\DashboardInsights for why that is a
-                 correctness decision and not a saving. -->
-            <section class="rv-stack" style="gap: 12px">
-                <span class="rv-label">What needs you</span>
+                        <ul class="rv-insights">
+                            <li
+                                v-for="(insight, i) in insights"
+                                :key="i"
+                                class="rv-insight"
+                                :class="`rv-insight--${insight.tone}`"
+                            >
+                                <span class="rv-insight__text">{{ insight.text }}</span>
+                                <Link v-if="insight.href" :href="insight.href" class="rv-insight__go">
+                                    Open
+                                </Link>
+                            </li>
+                        </ul>
+                    </section>
 
-                <!-- ⚠️ DashboardInsights always returns at least one line —
-                     it falls back to "nothing needs you" precisely so this
-                     panel is never blank. This branch is here because that is a
-                     promise made in another file, and a heading with nothing
-                     under it is what the reader gets on the day it stops being
-                     kept. Caught by EmptyStatesTest on this very page. -->
-                <p v-if="!insights.length" class="rv-help">
-                    No summary could be produced for this view.
-                </p>
+                    <!-- Carried over from the member dashboard so /admin is
+                         somewhere you can stay. Absent for staff with no member
+                         profile of their own — see ownState() for why two
+                         permanent zeroes are worse than nothing. -->
+                    <section v-if="you" class="rv-stack" style="gap: 12px">
+                        <span class="rv-label">Your own account</span>
 
-                <ul class="rv-insights">
-                    <li
-                        v-for="(insight, i) in insights"
-                        :key="i"
-                        class="rv-insight"
-                        :class="`rv-insight--${insight.tone}`"
-                    >
-                        <span class="rv-insight__text">{{ insight.text }}</span>
-                        <Link v-if="insight.href" :href="insight.href" class="rv-insight__go">
-                            Open
-                        </Link>
-                    </li>
-                </ul>
-            </section>
+                        <div class="rv-tiles">
+                            <Link href="/dashboard" class="rv-tile">
+                                <span class="rv-tile__value" :class="{ 'is-zero': you.waiting === 0 }">{{ you.waiting }}</span>
+                                <span class="rv-tile__label">Introductions to open</span>
+                            </Link>
 
-            <!-- ── Your own account ───────────────────────────────────────
-                 Carried over from the member dashboard so /admin is somewhere
-                 you can stay. Absent entirely for staff with no member profile
-                 of their own — see ownState() for why two permanent zeroes are
-                 worse than nothing. -->
-            <section v-if="you" class="rv-stack" style="gap: 12px">
-                <span class="rv-label">Your own account</span>
+                            <Link href="/profile" class="rv-tile">
+                                <span class="rv-tile__value" :class="{ 'is-zero': you.completeness === 0 }">{{ you.completeness }}%</span>
+                                <span class="rv-tile__label">Your profile</span>
+                            </Link>
 
-                <div class="rv-tiles">
-                    <Link href="/dashboard" class="rv-tile">
-                        <span class="rv-tile__value" :class="{ 'is-zero': you.waiting === 0 }">
-                            {{ you.waiting }}
-                        </span>
-                        <span class="rv-tile__label">Introductions to open</span>
-                    </Link>
+                            <!-- ⚠️ Hidden while introductions are free. A credit
+                                 balance during the free period invites "why do I
+                                 have none?" about a currency nobody is spending. -->
+                            <Link v-if="!freePeriod" href="/purchases" class="rv-tile">
+                                <span class="rv-tile__value" :class="{ 'is-zero': you.credits === 0 }">{{ you.credits }}</span>
+                                <span class="rv-tile__label">Credits</span>
+                            </Link>
+                        </div>
+                    </section>
 
-                    <Link href="/profile" class="rv-tile">
-                        <span class="rv-tile__value" :class="{ 'is-zero': you.completeness === 0 }">
-                            {{ you.completeness }}%
-                        </span>
-                        <span class="rv-tile__label">Your profile</span>
-                    </Link>
+                    <BaseCard v-if="genderSplit">
+                        <div class="rv-stack" style="gap: 16px">
+                            <h2 class="rv-d3">Who has joined</h2>
+                            <RvDonut :data="genderSplit" empty-message="No members yet." />
+                        </div>
+                    </BaseCard>
 
-                    <!-- ⚠️ Hidden while introductions are free. A credit
-                         balance shown during the free period invites the
-                         question "why do I have none?" about a currency that
-                         is not being spent. -->
-                    <Link v-if="!freePeriod" href="/purchases" class="rv-tile">
-                        <span class="rv-tile__value" :class="{ 'is-zero': you.credits === 0 }">
-                            {{ you.credits }}
-                        </span>
-                        <span class="rv-tile__label">Credits</span>
-                    </Link>
-                </div>
-            </section>
+                    <!-- ⚠️ ABSENT, NOT EMPTY, for a scoped reviewer. They see one
+                         gender by design, so a split of it is a pie with one
+                         slice — a chart whose only message is that the reader is
+                         not allowed to see the rest. -->
+                    <BaseCard v-else>
+                        <div class="rv-stack" style="gap: 8px">
+                            <h2 class="rv-d3">Who has joined</h2>
+                            <p class="rv-help">
+                                The breakdown across the whole platform is not part of your
+                                review scope.
+                            </p>
+                        </div>
+                    </BaseCard>
 
-            <BaseCard v-if="genderSplit">
-                <div class="rv-stack" style="gap: 16px">
-                    <h2 class="rv-d3">Who has joined</h2>
-                    <RvDonut :data="genderSplit" empty-message="No members yet." />
-                </div>
-            </BaseCard>
+                    <BaseCard>
+                        <div class="rv-stack" style="gap: 16px">
+                            <h2 class="rv-d3">Introductions</h2>
 
-            <!-- ⚠️ ABSENT, NOT EMPTY, for a scoped reviewer. They see one
-                 gender by design, so a split of it is a pie with one slice
-                 — a chart whose only message is that the reader is not
-                 allowed to see the rest. -->
-            <BaseCard v-else>
-                <div class="rv-stack" style="gap: 8px">
-                    <h2 class="rv-d3">Who has joined</h2>
-                    <p class="rv-help">
-                        The breakdown across the whole platform is not part of your review
-                        scope.
-                    </p>
-                </div>
-            </BaseCard>
+                            <div class="rv-figures">
+                                <div>
+                                    <span class="rv-figure">{{ introductions.total }}</span>
+                                    <span class="rv-figure__label">Made</span>
+                                </div>
+                                <div>
+                                    <span class="rv-figure">{{ introductions.delivered }}</span>
+                                    <span class="rv-figure__label">Delivered</span>
+                                </div>
+                                <div>
+                                    <span class="rv-figure">{{ introductions.opened }}</span>
+                                    <span class="rv-figure__label">Opened</span>
+                                </div>
+                            </div>
+
+                            <!-- ⚠️ SAID, NOT DRAWN. There is no revenue during
+                                 the free period by design, and an empty money
+                                 chart reads as a broken one. -->
+                            <p v-if="freePeriod" class="rv-help">
+                                The free period is on, so nothing has been charged and
+                                {{ introductions.unlocked }}
+                                introduction<template v-if="introductions.unlocked !== 1">s</template>
+                                were opened at no cost.
+                            </p>
+                            <p v-else class="rv-help">
+                                {{ introductions.unlocked }}
+                                introduction<template v-if="introductions.unlocked !== 1">s</template>
+                                have been unlocked.
+                            </p>
+                        </div>
+                    </BaseCard>
                 </aside>
 
                 <div class="rv-dash__main">
+                    <section class="rv-stack" style="gap: 12px">
+                        <span class="rv-label">Waiting on you</span>
 
-            <!-- ── Who is waiting ─────────────────────────────────────────── -->
-            <section class="rv-stack" style="gap: 12px">
-                <span class="rv-label">Waiting on you</span>
+                        <p v-if="nothingWaiting" class="rv-help">
+                            Nothing is waiting. Every queue is clear.
+                        </p>
 
-                <p v-if="nothingWaiting" class="rv-help">
-                    Nothing is waiting. Every queue is clear.
-                </p>
-
-                <div class="rv-tiles">
-                    <Link v-for="tile in waiting" :key="tile.label" :href="tile.href" class="rv-tile">
-                        <span class="rv-tile__value" :class="{ 'is-zero': tile.value === 0 }">
-                            {{ tile.value }}
-                        </span>
-                        <span class="rv-tile__label">{{ tile.label }}</span>
-                    </Link>
-                </div>
-
-                <p v-if="queues.oldestWaitingDays !== null" class="rv-help">
-                    The longest anybody has been waiting for verification is
-                    <strong>{{ queues.oldestWaitingDays }}</strong>
-                    day<template v-if="queues.oldestWaitingDays !== 1">s</template>.
-                </p>
-            </section>
-
-            <!-- ── Members ────────────────────────────────────────────────── -->
-            <div class="rv-cols">
-                <BaseCard>
-                    <div class="rv-stack" style="gap: 16px">
-                        <h2 class="rv-d3">Members</h2>
-
-                        <div class="rv-figures">
-                            <div>
-                                <span class="rv-figure">{{ members.total }}</span>
-                                <span class="rv-figure__label">Total</span>
-                            </div>
-                            <div>
-                                <span class="rv-figure">{{ members.verified }}</span>
-                                <span class="rv-figure__label">Verified</span>
-                            </div>
-                            <div>
-                                <span class="rv-figure">{{ members.active }}</span>
-                                <!-- The definition travels with the number.
-                                     "Active" otherwise means whatever the
-                                     reader assumes it means. -->
-                                <span class="rv-figure__label">Signed in, 30 days</span>
-                            </div>
+                        <div class="rv-tiles">
+                            <Link v-for="tile in waiting" :key="tile.label" :href="tile.href" class="rv-tile">
+                                <span class="rv-tile__value" :class="{ 'is-zero': tile.value === 0 }">{{ tile.value }}</span>
+                                <span class="rv-tile__label">{{ tile.label }}</span>
+                            </Link>
                         </div>
 
-                        <RvDonut :data="verificationSplit" empty-message="No members yet." />
-                    </div>
-                </BaseCard>
-            </div>
+                        <p v-if="queues.oldestWaitingDays !== null" class="rv-help">
+                            The longest anybody has been waiting for verification is
+                            <strong>{{ queues.oldestWaitingDays }}</strong>
+                            day<template v-if="queues.oldestWaitingDays !== 1">s</template>.
+                        </p>
+                    </section>
 
-            <!-- ── Signups ────────────────────────────────────────────────── -->
-            <BaseCard>
-                <div class="rv-stack" style="gap: 16px">
-                    <div class="rv-stack" style="gap: 4px">
-                        <h2 class="rv-d3">Joining, last 14 days</h2>
-                        <p class="rv-help">Quiet days are drawn, not skipped.</p>
-                    </div>
+                    <BaseCard>
+                        <div class="rv-stack" style="gap: 16px">
+                            <h2 class="rv-d3">Members</h2>
 
-                    <RvBarChart
-                        :data="signupBars"
-                        :height="150"
-                        empty-message="Nobody has joined in the last fortnight."
-                    />
-                </div>
-            </BaseCard>
-
-            <!-- ── Profiles and introductions ─────────────────────────────── -->
-            <div class="rv-cols">
-                <BaseCard>
-                    <div class="rv-stack" style="gap: 16px">
-                        <h2 class="rv-d3">How complete profiles are</h2>
-                        <RvBarChart
-                            :data="completeness"
-                            :height="130"
-                            empty-message="No profiles yet."
-                        />
-                    </div>
-                </BaseCard>
-
-                <BaseCard>
-                    <div class="rv-stack" style="gap: 16px">
-                        <h2 class="rv-d3">Introductions</h2>
-
-                        <div class="rv-figures">
-                            <div>
-                                <span class="rv-figure">{{ introductions.total }}</span>
-                                <span class="rv-figure__label">Made</span>
+                            <div class="rv-figures">
+                                <div>
+                                    <span class="rv-figure">{{ members.total }}</span>
+                                    <span class="rv-figure__label">Total</span>
+                                </div>
+                                <div>
+                                    <span class="rv-figure">{{ members.verified }}</span>
+                                    <span class="rv-figure__label">Verified</span>
+                                </div>
+                                <div>
+                                    <span class="rv-figure">{{ members.active }}</span>
+                                    <!-- The definition travels with the number.
+                                         "Active" otherwise means whatever the
+                                         reader assumes it means. -->
+                                    <span class="rv-figure__label">Signed in, 30 days</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="rv-figure">{{ introductions.delivered }}</span>
-                                <span class="rv-figure__label">Delivered</span>
-                            </div>
-                            <div>
-                                <span class="rv-figure">{{ introductions.opened }}</span>
-                                <span class="rv-figure__label">Opened</span>
-                            </div>
+
+                            <RvDonut :data="verificationSplit" empty-message="No members yet." />
                         </div>
+                    </BaseCard>
 
-                        <!-- ⚠️ SAID, NOT DRAWN. There is no revenue during the
-                             free period by design, and an empty money chart
-                             reads as a broken one. -->
-                        <p v-if="freePeriod" class="rv-help">
-                            The free period is on, so nothing has been charged and
-                            {{ introductions.unlocked }} introduction<template
-                                v-if="introductions.unlocked !== 1"
-                            >s</template>
-                            were opened at no cost.
-                        </p>
-                        <p v-else class="rv-help">
-                            {{ introductions.unlocked }} introduction<template
-                                v-if="introductions.unlocked !== 1"
-                            >s</template>
-                            have been unlocked.
-                        </p>
-                    </div>
-                </BaseCard>
-            </div>
+                    <BaseCard>
+                        <div class="rv-stack" style="gap: 16px">
+                            <div class="rv-stack" style="gap: 4px">
+                                <h2 class="rv-d3">Joining, last 14 days</h2>
+                                <p class="rv-help">Quiet days are drawn, not skipped.</p>
+                            </div>
+
+                            <RvBarChart
+                                :data="signupBars"
+                                :height="150"
+                                empty-message="Nobody has joined in the last fortnight."
+                            />
+                        </div>
+                    </BaseCard>
+
+                    <BaseCard>
+                        <div class="rv-stack" style="gap: 16px">
+                            <h2 class="rv-d3">How complete profiles are</h2>
+                            <RvBarChart
+                                :data="completeness"
+                                :height="150"
+                                empty-message="No profiles yet."
+                            />
+                        </div>
+                    </BaseCard>
                 </div>
             </div>
         </div>
@@ -305,20 +287,26 @@ const verificationSplit = computed(() =>
    can do. Narrow, the sentence and its link are one object. */
 .rv-dash {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) clamp(260px, 30%, 340px);
+    gap: 24px;
     align-items: start;
 }
 
 /* Explicit placement, because the rail is FIRST in the markup so that a phone
    and a screen reader meet the actions before the charts. */
-.rv-dash__main { grid-column: 1; grid-row: 1; }
+.rv-dash__main {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    gap: 20px;
+    align-content: start;
+}
 
 .rv-dash__rail {
     grid-column: 2;
     grid-row: 1;
     display: grid;
-    gap: 28px;
+    gap: 20px;
     align-content: start;
     /* Follows down a long page. The queues are the reason this screen exists;
        scrolling to the completeness chart should not lose them. */
@@ -326,9 +314,14 @@ const verificationSplit = computed(() =>
     top: 90px;
 }
 
-/* One column below the breakpoint, and the rail keeps its source position —
-   first — which is the right order when there is no room for two. */
-@media (max-width: 1100px) {
+/* ⚠️ @container, NOT @media. These widths are the space this page is given,
+   which is the viewport minus a 264px sidebar and 64px of padding. Measured
+   against the viewport every one of them fired roughly 330px too late, so the
+   two columns stayed side by side while the main one was down to 400px.
+
+   One column below 900 of ACTUAL width, and the rail keeps its source position
+   — first — which is the right order when there is no room for two. */
+@container rv-admin-main (max-width: 900px) {
     .rv-dash {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -401,11 +394,13 @@ const verificationSplit = computed(() =>
     gap: 12px;
 }
 
-@media (max-width: 1400px) {
+/* Four tiles need ~150px each plus gaps; below that they are two, then one.
+   Both measured against the real column, not the window. */
+@container rv-admin-main (max-width: 1040px) {
     .rv-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (max-width: 560px) {
+@container rv-admin-main (max-width: 420px) {
     .rv-tiles { grid-template-columns: minmax(0, 1fr); }
 }
 

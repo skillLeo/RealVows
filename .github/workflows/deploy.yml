@@ -32,6 +32,17 @@ on:
       # GitHub will not dispatch a value that is not on the list. The
       # validation step below is the second line, for the API path and for the
       # day somebody adds a free-text input here without thinking about it.
+      # ⚠️ THE EMERGENCY DOOR, AND IT IS MEANT TO FEEL LIKE ONE.
+      #
+      # Defaults to no, and choosing yes is written into the run log next to
+      # the name of whoever chose it. It exists for a runner outage, not for a
+      # failing test. See the gate step below for what it cost to not have one.
+      ignore_ci:
+        description: 'Deploy even though CI did not pass (emergencies only)'
+        required: false
+        default: 'no'
+        type: choice
+        options: ['no', 'yes']
       seed_demo:
         description: 'Re-seed the demo members after deploying'
         required: false
@@ -71,6 +82,79 @@ jobs:
           CONFIRM: ${{ github.event.inputs.confirm }}
         run: |
           [ "$CONFIRM" = "DEPLOY" ] || { echo "::error::Type DEPLOY to confirm."; exit 1; }
+
+      # ══════════════════════════════════════════════════════════════════════
+      # ⚠️ A RED BUILD MAY NOT REACH MEMBERS. THIS IS NOT A FORMALITY.
+      # ══════════════════════════════════════════════════════════════════════
+      #
+      # On 2026-08-13 CI went red on f9c2652 and again on 1cecf0e. Both were
+      # deployed to the client's server anyway, because nothing here ever asked.
+      #
+      # ⚠️ AND THE FAILING TEST WAS THE ONE THAT MATTERED. It was
+      # PhotographsGoToTheContactTest::test_a_member_can_still_fetch_her_own —
+      # the positive control for the photograph rule. It failed on CI, on a
+      # clean checkout, on the very day the fault was introduced, with exactly
+      # the error a developer would later reproduce by hand: the suite faked a
+      # `private` disk that does not exist while the application reads `local`.
+      #
+      # So the machine did its job. Clean-clone CI already existed, already ran
+      # the whole suite on every push, and already caught it. What failed was
+      # that a human read a red tick and deployed regardless, twice, and the
+      # bug then hid for a further day behind a stray file in local storage.
+      #
+      # ⚠️ THE LESSON IS ENFORCEMENT, NOT CAPABILITY. Adding more tests would
+      # have changed nothing. This step is the fix: the deploy now refuses to
+      # run unless CI concluded `success` for THIS EXACT COMMIT.
+      #
+      # ⚠️ NO RESULT IS ALSO A REFUSAL. A commit CI never ran on is not a
+      # commit CI approved, and treating "unknown" as "fine" is how the whole
+      # gate becomes decorative.
+      #
+      # The override exists because a genuine emergency should not be blocked
+      # by a runner outage. It is deliberately noisy, it names who used it in
+      # the log, and using it to skip a real failure is the thing this comment
+      # exists to make unmistakable.
+      - name: Refuse to deploy a commit CI has not passed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          OVERRIDE: ${{ github.event.inputs.ignore_ci }}
+        run: |
+          set -euo pipefail
+
+          # ⚠️ `gh run list --commit` NEEDS THE FULL SHA. A short one matches
+          # nothing and returns "none", which this step treats as a refusal —
+          # so a mistake here does not open the door, it welds it shut and
+          # every deploy fails for a reason that looks like a policy decision.
+          #
+          # ${{ github.sha }} is always full, so the workflow is correct. This
+          # note exists because the gate was first tested by hand with short
+          # SHAs, refused the known-GOOD commit as well as the known-bad one,
+          # and would have read as working if only the bad one had been tried.
+          CONCLUSION=$(gh run list \
+            --workflow ci.yml \
+            --commit "$SHA" \
+            --limit 1 \
+            --json conclusion \
+            --jq '.[0].conclusion // "none"' \
+            -R "$GITHUB_REPOSITORY")
+
+          echo "CI for ${SHA:0:7}: ${CONCLUSION}"
+
+          if [ "$CONCLUSION" = "success" ]; then
+            exit 0
+          fi
+
+          if [ "$OVERRIDE" = "yes" ]; then
+            echo "::warning::CI is '${CONCLUSION}' for ${SHA:0:7} and ${GITHUB_ACTOR} chose to deploy anyway."
+            exit 0
+          fi
+
+          echo "::error::CI concluded '${CONCLUSION}' for ${SHA:0:7}. Refusing to deploy."
+          echo "A red build was deployed twice on 2026-08-13, and one of the failing tests was"
+          echo "the positive control for the photograph rule. Fix the build, or set the"
+          echo "'ignore_ci' input to yes and be recorded as having done so."
+          exit 1
 
       - uses: actions/checkout@v4
 

@@ -117,6 +117,27 @@ class Profile extends Model
     }
 
     /**
+     * ⚠️ WHOSE PHOTOGRAPHS THE MODESTY RULE IS ABOUT.
+     *
+     * The same set GuardianPolicy already uses to decide who must have a
+     * trusted contact at all, named once so the two rules cannot drift apart.
+     * If a gender is ever added to the enum, it is protected here until
+     * somebody decides otherwise, which is the safe direction to be wrong in.
+     */
+    public const PROTECTED_GENDERS = ['woman', 'non_binary'];
+
+    /**
+     * ⚠️ FAILS CLOSED ON A NULL GENDER. The column is nullable and an
+     * incomplete profile has no answer yet. "Not a woman" and "we do not know"
+     * are different facts, and only one of them is safe to act on.
+     */
+    public function photographsAreProtected(): bool
+    {
+        return $this->gender === null
+            || in_array($this->gender, self::PROTECTED_GENDERS, true);
+    }
+
+    /**
      * The matching pool. Verification gates everything: an unverified profile
      * can never be matched, matched to, or shown to anyone. Enforced here at
      * the query level so no controller can forget it.

@@ -60,16 +60,22 @@ class GuardianPresenter
         ];
 
         /*
-         * ⚠️ THE BRANCH. Photographs are ADDED for a family guardian rather
-         * than removed for an appointed one.
+         * ⚠️ THE BRANCH. Photographs are ADDED for a guardian entitled to them
+         * rather than removed for one who is not.
          *
          * That direction matters. "Unset the photos when appointed" fails open:
          * a new key added by somebody who has not read this file arrives in the
          * payload for everybody, and the appointed case leaks by default. This
          * way, a new photograph key that is not put inside this branch simply
          * does not reach anyone, which is the safe direction to be wrong in.
+         *
+         * ⚠️ THE SUBJECT IS NAMED, AND FOR A LONG TIME IT WAS NOT. This asked
+         * `maySeePhotographs()` — appointed or not — and then handed over
+         * `$other->photos` regardless of who $other was. A man's father or
+         * brother, acting as his trusted contact, was shown the WOMAN'S
+         * photographs. See Guardian::maySeePhotographsOf().
          */
-        if ($guardian->maySeePhotographs()) {
+        if ($guardian->maySeePhotographsOf($other)) {
             $payload['photos'] = $other->photos
                 ->map(fn ($photo) => [
                     'id' => $photo->id,
@@ -78,14 +84,21 @@ class GuardianPresenter
                 ->all();
         } else {
             /*
-             * Said plainly rather than left as a gap. An appointed guardian
-             * seeing an empty space would reasonably think the system is
-             * broken and ask for the photographs.
+             * Said plainly rather than left as a gap. A guardian seeing an
+             * empty space would reasonably think the system is broken and ask
+             * for the photographs.
+             *
+             * ⚠️ TWO REASONS, BECAUSE THEY ARE TWO DIFFERENT FACTS. Telling an
+             * appointed contact "her photographs are not yours to see" is
+             * correct; telling a father the same about his own daughter's
+             * introduction would be wrong and would read as a fault.
              */
             $payload['photographsWithheld'] = true;
-            $payload['photographsWithheldReason'] =
-                'Photographs are not shared with an appointed trusted contact. '
-                .'They are reviewed by our team and shown to the member directly.';
+            $payload['photographsWithheldReason'] = $guardian->is_appointed
+                ? 'Photographs are not shared with an appointed trusted contact. '
+                    .'They are reviewed by our team.'
+                : 'Photographs of a woman are shared only with her own trusted contact. '
+                    .'Everything else about this introduction is here for you to weigh.';
         }
 
         return $payload;
@@ -108,7 +121,7 @@ class GuardianPresenter
             'city' => $ward->city,
         ];
 
-        if ($guardian->maySeePhotographs()) {
+        if ($guardian->maySeePhotographsOf($ward)) {
             $payload['photos'] = $ward->photos
                 ->map(fn ($photo) => [
                     'id' => $photo->id,
@@ -126,9 +139,16 @@ class GuardianPresenter
      * ⚠️ THE GATE THE IMAGE ROUTE ASKS. Same rule, asked at the point the
      * bytes would be streamed, because a signed URL that escaped into a log or
      * a browser history must still be refused.
+     *
+     * ⚠️ IT TAKES THE SUBJECT, AND THE OLD ONE DID NOT. `mayStreamPhotograph($guardian)`
+     * asked only whether he was appointed, so a family contact who reached the
+     * route with any photo id belonging to a profile his ward had been matched
+     * to was served the bytes — including a woman's, to a man with no
+     * relationship to her. Withholding the URL upstream is not a rule while
+     * the route below it still answers.
      */
-    public function mayStreamPhotograph(Guardian $guardian): bool
+    public function mayStreamPhotographOf(Guardian $guardian, ?Profile $subject): bool
     {
-        return $guardian->maySeePhotographs();
+        return $guardian->maySeePhotographsOf($subject);
     }
 }

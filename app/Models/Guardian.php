@@ -82,20 +82,52 @@ class Guardian extends Model
     }
 
     /**
-     * ⚠️ THE ONE QUESTION THE PHOTOGRAPH RULE TURNS ON.
+     * ⚠️ THE PHOTOGRAPH RULE. IT ASKS TWO QUESTIONS, AND IT USED TO ASK ONE.
      *
-     * A family guardian is a mahram and may be shown the other party's
-     * photographs, because that is the role he is performing. An appointed
-     * guardian is a stranger the platform placed in that seat because the
-     * member had nobody to name, and showing him photographs of a woman he has
-     * no relationship to is precisely the harm this system exists to prevent.
+     * ── What it asked before ──────────────────────────────────────────────
      *
-     * Expressed as a method rather than read as a column at each call site, so
-     * there is one place to change it and one place to test.
+     * `maySeePhotographs()`, with no argument: is this contact appointed? A
+     * family contact got a yes and was handed whatever photographs the payload
+     * was carrying. The name promised an answer about photographs while the
+     * body answered a question about seats.
+     *
+     * ⚠️ THAT LEAKED, AND IT LEAKED THE EXACT THING THIS SYSTEM EXISTS TO
+     * PREVENT. A man may name a trusted contact too. When he did, his father
+     * or brother opened the dashboard and was shown the WOMAN'S photographs —
+     * a woman he is not related to, has never met, and has no standing over.
+     * Her pictures reached an unrelated man, by design, from the feature built
+     * to stop precisely that.
+     *
+     * ── What it asks now ──────────────────────────────────────────────────
+     *
+     * Both halves, and the subject is not optional:
+     *
+     *   1. Is he a family contact rather than an appointed stranger?
+     *   2. Are these photographs his to look at?
+     *
+     * His ward's, yes — he is her mahram and that is the entire role. A man's,
+     * yes — a man looking at a man's photograph is unremarkable and he cannot
+     * advise on a match he is not allowed to look at. A woman's, only if she
+     * is his ward. Never otherwise, at any gate, at any stage.
+     *
+     * ⚠️ THE ARGUMENT IS REQUIRED ON PURPOSE. A no-argument version left in
+     * place would go on being called, and the second question would go on
+     * being unasked. There is no way to ask this without naming the subject.
      */
-    public function maySeePhotographs(): bool
+    public function maySeePhotographsOf(?Profile $subject): bool
     {
-        return ! $this->is_appointed;
+        // An appointed contact is a stranger to everybody, including his ward.
+        if ($this->is_appointed || $subject === null) {
+            return false;
+        }
+
+        // His own ward. The mahram relationship the whole role rests on.
+        if ($subject->user_id === $this->member_id) {
+            return true;
+        }
+
+        // Anybody else on the platform. Her photographs are not his to see.
+        return ! $subject->photographsAreProtected();
     }
 
     /**

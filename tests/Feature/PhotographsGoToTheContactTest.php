@@ -6,6 +6,7 @@ use App\Models\MatchRecord;
 use App\Models\Photo;
 use App\Models\Profile;
 use App\Models\User;
+use App\Services\Photos\PhotoStorageService;
 use App\Support\MatchPresenter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -44,7 +45,7 @@ class PhotographsGoToTheContactTest extends TestCase
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Database\Seeders\SettingsSeeder::class);
 
-        Storage::fake('private');
+        Storage::fake(PhotoStorageService::DISK);
     }
 
     /** @return array{0: User, 1: MatchRecord, 2: Photo} */
@@ -69,7 +70,7 @@ class PhotographsGoToTheContactTest extends TestCase
             'height' => 1600,
         ]);
 
-        Storage::disk('private')->put($photo->path, 'bytes');
+        Storage::disk(PhotoStorageService::DISK)->put($photo->path, 'bytes');
 
         $match = MatchRecord::create([
             'seeker_profile_id' => $mine->id,
@@ -165,7 +166,7 @@ class PhotographsGoToTheContactTest extends TestCase
             'height' => 1600,
         ]);
 
-        Storage::disk('private')->put($own->path, 'bytes');
+        Storage::disk(PhotoStorageService::DISK)->put($own->path, 'bytes');
 
         $this->actingAs($me)
             ->get(URL::temporarySignedRoute('photos.show', now()->addHour(), ['photo' => $own->id]))

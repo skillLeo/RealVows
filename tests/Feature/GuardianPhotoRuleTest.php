@@ -8,6 +8,8 @@ use App\Models\Photo;
 use App\Models\Profile;
 use App\Models\User;
 use App\Support\GuardianPresenter;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\Scanners;
 use Tests\TestCase;
@@ -39,8 +41,8 @@ class GuardianPhotoRuleTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
     }
 
     private function scenario(bool $appointed): array
@@ -114,9 +116,13 @@ class GuardianPhotoRuleTest extends TestCase
 
     public function test_an_appointed_trusted_contact_cannot_stream_a_photograph(): void
     {
-        [$guardian] = $this->scenario(appointed: true);
+        [$guardian, , $ward, $other] = $this->scenario(appointed: true);
 
-        $this->assertFalse(app(GuardianPresenter::class)->mayStreamPhotograph($guardian));
+        $presenter = app(GuardianPresenter::class);
+
+        // Neither the other party's nor his own ward's. He is a stranger to both.
+        $this->assertFalse($presenter->mayStreamPhotographOf($guardian, $other));
+        $this->assertFalse($presenter->mayStreamPhotographOf($guardian, $ward));
     }
 
     /**
@@ -140,7 +146,7 @@ class GuardianPhotoRuleTest extends TestCase
         $this->assertNotEmpty($decoded['photos'], 'The photos array is present but empty.');
         $this->assertArrayNotHasKey('photographsWithheld', $decoded);
 
-        $this->assertTrue(app(GuardianPresenter::class)->mayStreamPhotograph($guardian));
+        $this->assertTrue(app(GuardianPresenter::class)->mayStreamPhotographOf($guardian, $other));
     }
 
     /**
@@ -162,5 +168,130 @@ class GuardianPhotoRuleTest extends TestCase
 
         $this->assertSame([], Scanners::photoPaths($payload));
         $this->assertStringNotContainsString('private-portrait', $payload);
+    }
+
+    /**
+     * ⚠️ THE MIRRORED SCENARIO, WHICH NOTHING IN THIS FILE USED TO BUILD.
+     *
+     * Every case above puts a WOMAN in the ward's seat, so the other party is
+     * always a man and the leak is invisible: a father seeing his daughter's
+     * suitor is the case the feature was designed around, and it is correct.
+     *
+     * Men may name a trusted contact too. Turn the scenario around — a man's
+     * father opening his son's introduction — and the other party is a WOMAN.
+     * The presenter handed over her photographs, because it asked only whether
+     * the contact was appointed and never whose pictures these were.
+     *
+     * ⚠️ THAT IS THE EXACT EXPOSURE THE GUARDIAN SYSTEM EXISTS TO PREVENT,
+     * PRODUCED BY THE GUARDIAN SYSTEM. Her photographs reached a man she has no
+     * relationship to, has never met, and never agreed to be seen by.
+     *
+     * @return array{0: Guardian, 1: MatchRecord, 2: Profile, 3: Profile}
+     */
+    private function mirroredScenario(): array
+    {
+        $memberUser = User::factory()->create();
+        $ward = Profile::factory()->man()->create(['user_id' => $memberUser->id]);
+        $other = Profile::factory()->woman()->create();
+
+        foreach ([$ward, $other] as $profile) {
+            Photo::create([
+                'profile_id' => $profile->id,
+                'slot' => 'passport',
+                'path' => 'profiles/'.$profile->id.'/private-portrait.jpg',
+                'webp_path' => 'profiles/'.$profile->id.'/private-portrait.webp',
+                'thumbnail_path' => 'profiles/'.$profile->id.'/private-portrait-thumb.jpg',
+                'original_filename' => 'portrait.jpg',
+                'mime' => 'image/jpeg',
+                'size_bytes' => 2048,
+                'width' => 1200,
+                'height' => 1600,
+            ]);
+        }
+
+        $guardian = Guardian::create([
+            'member_id' => $memberUser->id,
+            'name' => 'Yusuf Adeyemi',
+            'relationship' => 'father',
+            'is_appointed' => false,
+            'status' => Guardian::STATUS_VERIFIED,
+        ]);
+
+        $match = MatchRecord::create([
+            'seeker_profile_id' => $ward->id,
+            'matched_profile_id' => $other->id,
+            'total_score' => 87.25,
+            'score_breakdown' => ['components' => []],
+            'status' => MatchRecord::STATUS_TEASER,
+        ]);
+
+        return [$guardian, $match, $ward->fresh()->load('photos'), $other->fresh()->load('photos')];
+    }
+
+    public function test_a_mans_family_contact_never_receives_the_womans_photographs(): void
+    {
+        [$guardian, $match, , $her] = $this->mirroredScenario();
+
+        $payload = json_encode(app(GuardianPresenter::class)->introduction($guardian, $match, $her));
+
+        $this->assertSame(
+            [],
+            Scanners::photoPaths($payload),
+            'A woman\'s photographs were sent to the trusted contact of the man she was '
+                .'matched with. He is not related to her, and this is the exposure the whole '
+                .'system exists to prevent.'
+        );
+
+        $this->assertStringNotContainsString('private-portrait', $payload);
+        $this->assertStringContainsString('photographsWithheld', $payload);
+    }
+
+    public function test_the_bytes_are_refused_to_him_as_well(): void
+    {
+        /*
+         * ⚠️ THE SECOND DOOR. Her profile IS reachable from his ward's match
+         * rows, so the controller's reachability check passes and always did.
+         * Reachability answers "is this connected to him", never "is this his
+         * to see". If only the payload had changed, this would still serve.
+         */
+        [$guardian, , , $her] = $this->mirroredScenario();
+
+        $this->assertFalse(
+            app(GuardianPresenter::class)->mayStreamPhotographOf($guardian, $her),
+        );
+    }
+
+    public function test_but_he_still_sees_his_own_sons_photographs(): void
+    {
+        /*
+         * ⚠️ THE CONTROL FOR THE MIRRORED CASE. Both assertions above are
+         * absences, and a rule of "this guardian gets nothing" would satisfy
+         * them while breaking the father who is meant to be advising.
+         */
+        [$guardian, , $ward] = $this->mirroredScenario();
+
+        $payload = app(GuardianPresenter::class)->ward($guardian, $ward);
+
+        $this->assertNotEmpty($payload['photos'] ?? []);
+        $this->assertArrayNotHasKey('photographsWithheld', $payload);
+    }
+
+    public function test_and_the_withholding_says_which_rule_it_is(): void
+    {
+        /*
+         * The two withholdings are different facts and must not share a
+         * sentence. Telling a father "not shared with an appointed contact"
+         * about his own son's introduction would be false and would read as a
+         * fault in the page rather than as a rule.
+         */
+        [$guardian, $match, , $her] = $this->mirroredScenario();
+
+        $payload = app(GuardianPresenter::class)->introduction($guardian, $match, $her);
+
+        $this->assertStringContainsString(
+            'only with her own trusted contact',
+            $payload['photographsWithheldReason'],
+        );
+        $this->assertStringNotContainsString('appointed', $payload['photographsWithheldReason']);
     }
 }

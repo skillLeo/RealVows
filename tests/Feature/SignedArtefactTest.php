@@ -6,6 +6,7 @@ use App\Models\MatchRecord;
 use App\Models\Photo;
 use App\Models\Profile;
 use App\Models\User;
+use App\Services\Photos\PhotoStorageService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -174,8 +175,8 @@ class SignedArtefactTest extends TestCase
      */
     public function test_the_photo_url_the_serialiser_emitted_actually_serves_the_photo(): void
     {
-        Storage::fake('private');
-        Storage::disk('private')->put('profiles/seed/p.jpg', 'not-a-real-jpeg-but-a-real-file');
+        Storage::fake(PhotoStorageService::DISK);
+        Storage::disk(PhotoStorageService::DISK)->put('profiles/seed/p.jpg', 'not-a-real-jpeg-but-a-real-file');
 
         [$user, $match] = $this->unlockedMatchWithPhoto();
 
@@ -228,7 +229,7 @@ class SignedArtefactTest extends TestCase
 
     public function test_the_emitted_photo_url_does_not_work_for_a_different_member(): void
     {
-        Storage::fake('private');
+        Storage::fake(PhotoStorageService::DISK);
 
         [$user, $match] = $this->unlockedMatchWithPhoto();
 

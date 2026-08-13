@@ -132,7 +132,19 @@ class GuardianDashboardController extends Controller
     {
         $guardian = $this->guardianFor($request);
 
-        abort_unless($this->presenter->mayStreamPhotograph($guardian), 404);
+        /*
+         * ⚠️ THE SUBJECT IS LOADED BEFORE THE QUESTION IS ASKED. The gate used
+         * to be `mayStreamPhotograph($guardian)` — whether he was appointed —
+         * and the reachability check below was the only other test. Together
+         * they served a woman's photograph to the male trusted contact of the
+         * man she had been matched with, because her profile IS reachable from
+         * his ward's match rows. Reachability answers "is this connected to
+         * him", never "is this his to see".
+         */
+        abort_unless(
+            $this->presenter->mayStreamPhotographOf($guardian, $photo->profile),
+            404,
+        );
 
         $wardProfileId = $guardian->member->profile?->id;
 

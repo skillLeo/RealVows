@@ -169,7 +169,7 @@ class GuardianNominationTest extends TestCase
         $guardian = app(GuardianService::class)->requestAppointed($this->member());
 
         $this->assertTrue($guardian->is_appointed);
-        $this->assertFalse($guardian->maySeePhotographs());
+        $this->assertFalse($guardian->maySeePhotographsOf($guardian->member->profile));
     }
 
     public function test_accepting_an_invitation_creates_the_guardians_own_account(): void

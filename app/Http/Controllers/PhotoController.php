@@ -9,6 +9,7 @@ use App\Models\Photo;
 use App\Models\Verification;
 use App\Services\Photos\PhotoStorageService;
 use App\Services\Profile\ProfileCompleteness;
+use App\Support\PhotoVisibilityPolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class PhotoController extends Controller
     public function __construct(
         private readonly PhotoStorageService $storage,
         private readonly ProfileCompleteness $completeness,
+        private readonly PhotoVisibilityPolicy $visibility,
     ) {}
 
     public function store(UploadPhotoRequest $request): JsonResponse
@@ -65,7 +67,7 @@ class PhotoController extends Controller
      */
     public function show(Request $request, Photo $photo): StreamedResponse
     {
-        $this->authorizeOwnership($request, $photo);
+        $this->authorizeViewing($request, $photo);
 
         $wantsWebp = str_contains((string) $request->header('Accept'), 'image/webp');
         $path = $wantsWebp && $photo->webp_path ? $photo->webp_path : $photo->path;
@@ -174,6 +176,46 @@ class PhotoController extends Controller
          * door with a different rule.
          */
         abort_unless($photo->profile_id === $profileId, 404);
+    }
+
+    /**
+     * ⚠️ VIEWING IS A DIFFERENT QUESTION FROM OWNING, AND THEY MUST NOT SHARE A
+     * GATE.
+     *
+     * `authorizeOwnership` also guards DELETE. Widening it so a member can see
+     * an introduction's photographs would have let that member delete them too,
+     * which is a considerably worse bug than the one being fixed and would have
+     * looked like a one-word change.
+     *
+     * ⚠️ THE RULE ITSELF IS NOW A SETTING — see PhotoVisibilityPolicy, and read
+     * the note there on why this is the client's scholar's question and not an
+     * engineering one. The default is `never`, so unless somebody has changed
+     * it this method behaves exactly as ownership alone did.
+     */
+    private function authorizeViewing(Request $request, Photo $photo): void
+    {
+        $profileId = $request->user()->profile?->id;
+
+        abort_if($profileId === null, 404);
+
+        // Their own, always. Nothing about the introduction matters here.
+        if ($photo->profile_id === $profileId) {
+            return;
+        }
+
+        /*
+         * ⚠️ THE MATCH IS LOOKED UP FROM THE VIEWER'S OWN SEEKER ROWS. Asking
+         * "does a match exist between these two profiles" in either direction
+         * would answer yes for the row belonging to the OTHER person, and their
+         * trusted contact's approval is not this member's permission.
+         */
+        $match = MatchRecord::query()
+            ->where('seeker_profile_id', $profileId)
+            ->where('matched_profile_id', $photo->profile_id)
+            ->first();
+
+        abort_if($match === null, 404);
+        abort_unless($this->visibility->mayMemberSee($match), 404);
     }
 
     private function payload(Photo $photo): array

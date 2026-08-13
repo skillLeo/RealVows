@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Services\Settings\SettingsService;
 use Illuminate\Database\Seeder;
 
 class SettingsSeeder extends Seeder
@@ -40,28 +41,12 @@ class SettingsSeeder extends Seeder
             $setting->save();
         }
 
-        app(\App\Services\Settings\SettingsService::class)->flush();
+        app(SettingsService::class)->flush();
     }
 
     private function definitions(): array
     {
         $rows = [
-            /*
-             * ⚠️ THE TRUSTED-CONTACT REQUIREMENT IS UNSET ON PURPOSE.
-             *
-             * The client does not want it presented to men and believes many
-             * members will not have anybody to name. Compliance wants it. That
-             * argument is not settled, so it is a setting rather than a branch
-             * and it ships with no answer chosen.
-             *
-             * `off` is the seeded value, and it is the ABSENCE of a decision
-             * rather than a decision: it leaves the product behaving exactly as
-             * it did before the system existed. Choosing `required_all` here
-             * would resolve a live disagreement quietly, in a seeder, and
-             * present it as an implementation detail.
-             *
-             * The description says so in the words the person choosing needs.
-             */
             /*
              * ⚠️ TWO AI FEATURES, BOTH OFF UNTIL A KEY IS PASTED IN.
              *
@@ -156,6 +141,31 @@ class SettingsSeeder extends Seeder
                 ['key' => 'webhook_secret', 'label' => 'Webhook signing secret', 'type' => 'password', 'is_secret' => true, 'description' => 'From Resend → Webhooks → Signing secret. Starts whsec_. This is NOT the API key.'],
             ],
             'storage' => [
+                /*
+                 * ⚠️ FIRST IN THE GROUP BECAUSE IT IS THE ONLY ONE HERE THE
+                 * CLIENT WILL EVER NEED TO CHANGE. Everything below it is
+                 * infrastructure set once at launch.
+                 *
+                 * ⚠️ AND IT LIVES IN "Photo storage" RATHER THAN WITH THE
+                 * TRUSTED CONTACT RULES ON PURPOSE. Somebody looking for "who
+                 * can see the photographs" opens the photographs screen. A
+                 * setting filed where it is logically related but nobody would
+                 * look is the same defect as a setting with no screen at all —
+                 * see SettingsGroupsAreReachableTest for what that cost once
+                 * already.
+                 *
+                 * The default is `never`, which is the behaviour the product
+                 * ships with today. See App\Support\PhotoVisibilityPolicy for
+                 * why this is a dropdown rather than a rule: the answer is the
+                 * client's scholar's to give, and hardcoding the strict reading
+                 * decides the question by making the alternative expensive.
+                 */
+                ['key' => 'photo_visibility', 'label' => 'Who may see photographs', 'type' => 'select', 'options' => [
+                    'never' => 'Nobody but the trusted contact',
+                    'after_contact_approval' => 'The member, once their trusted contact approves',
+                    'at_mutual_interest' => 'The member, once both have said yes',
+                ], 'description' => 'Photographs always go to the reviewing team and to the member\'s own trusted contact. This decides whether the member themselves ever sees a photograph of the person they have been introduced to. Takes effect immediately and needs no deploy.'],
+
                 ['key' => 'driver', 'label' => 'Storage driver', 'type' => 'select', 'options' => ['local' => 'This server', 's3' => 'Amazon S3', 'r2' => 'Cloudflare R2']],
                 ['key' => 'key', 'label' => 'Access key', 'type' => 'password', 'is_secret' => true],
                 ['key' => 'secret', 'label' => 'Secret key', 'type' => 'password', 'is_secret' => true],
@@ -275,6 +285,21 @@ class SettingsSeeder extends Seeder
             ]),
             'mail.driver' => 'log',
             'storage.driver' => 'local',
+
+            /*
+             * ⚠️ SEEDED EXPLICITLY RATHER THAN LEFT TO THE POLICY'S FALLBACK.
+             *
+             * PhotoVisibilityPolicy already answers `never` for a missing row,
+             * so this changes no behaviour. It changes what the ADMIN SCREEN
+             * shows: an unset select renders with nothing chosen, which reads
+             * as "not configured yet" and invites somebody to pick a value
+             * without realising the strict one was already in force.
+             *
+             * The trusted-contact requirement was deliberately left unset for
+             * the opposite reason — it was a decision nobody had made. This one
+             * is a decision that HAS been made and can be seen to have been.
+             */
+            'storage.photo_visibility' => 'never',
             'payments.gateway' => 'powertranz',
             'payments.environment' => 'sandbox',
 

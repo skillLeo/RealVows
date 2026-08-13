@@ -112,7 +112,7 @@ const transitionName = computed(() => `match-card-${props.match.id}`);
              failed to load one. Said plainly, it reads as the product working
              the way it promised. -->
         <p v-if="isOpen && match.photographsWithheld" class="rv-match__withheld">
-            {{ $t('match.photos_with_contact') }}
+            {{ match.photographsWithheldReason || $t('match.photos_with_contact') }}
         </p>
 
         <div class="rv-match__foot">

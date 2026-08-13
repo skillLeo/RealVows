@@ -95,7 +95,32 @@ const block = () => {
                  against the arch rather than in front of a picture. -->
             <div class="rv-payoff__media">
                 <div class="rv-portal">
-                    <span class="rv-portal__letter" aria-hidden="true">{{ initial }}</span>
+                    <!-- ⚠️ PHOTOGRAPHS RENDER ONLY IF THE SERVER SENT ANY, AND
+                         WHETHER IT DOES IS A SETTING.
+
+                         Whether a member may ever see a photograph is the
+                         client's scholar's question, and the whole point of
+                         making it a setting is that his answer is a dropdown
+                         rather than a rebuild. A page with nowhere to draw a
+                         photograph would have made the permissive ruling a
+                         rebuild anyway, which is a way of deciding the question
+                         by making one answer expensive.
+
+                         The monogram below is the fallback and stays the
+                         default: at `never` the payload carries no photos key
+                         at all, so nothing here can render one. -->
+                    <ul v-if="match.photos?.length" class="rv-portal__photos">
+                        <li v-for="photo in match.photos" :key="photo.id">
+                            <img
+                                :src="photo.url"
+                                :alt="`${match.firstName}`"
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        </li>
+                    </ul>
+
+                    <span v-else class="rv-portal__letter" aria-hidden="true">{{ initial }}</span>
 
                     <div class="rv-identity">
                         <h1 class="rv-identity__name">{{ fullName }}</h1>
@@ -108,8 +133,15 @@ const block = () => {
                         </p>
                     </div>
 
+                    <!-- ⚠️ THE REASON COMES FROM THE SERVER, not from a fixed
+                         string. Whether a member ever sees a photograph is a
+                         setting now, and the sentence that explains the absence
+                         has to say which rule is in force. The old fixed line
+                         claimed the photographs were with the trusted contact,
+                         which is true at `never` and false at both other
+                         levels. The translation remains as the fallback. -->
                     <p v-if="match.photographsWithheld" class="rv-portal__note">
-                        {{ $t('match.photos_with_contact') }}
+                        {{ match.photographsWithheldReason || $t('match.photos_with_contact') }}
                     </p>
                 </div>
             </div>
@@ -278,6 +310,29 @@ const block = () => {
     line-height: .8;
     color: color-mix(in oklab, var(--brass) 30%, transparent);
     user-select: none;
+}
+
+/* ⚠️ ONLY EVER RENDERED WHEN THE SERVER SENT PHOTOGRAPHS, which at the shipped
+   default it never does. Sized to occupy the same block the monogram holds, so
+   the page has the same weight either way and switching the setting does not
+   change the layout underneath it. */
+.rv-portal__photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rv-portal__photos img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: calc(var(--r) - 6px);
+    border: 1px solid color-mix(in oklab, var(--brass) 28%, transparent);
+    display: block;
 }
 
 .rv-portal__note {

@@ -5,7 +5,8 @@ namespace App\Support;
 use App\Models\MatchRecord;
 use App\Models\Photo;
 use App\Models\Profile;
-use App\Support\ProfileOptions;
+use App\Services\Guardian\GuardianGate;
+use App\Services\Matching\MatchInterest;
 use Illuminate\Support\Facades\URL;
 
 /**
@@ -31,7 +32,10 @@ use Illuminate\Support\Facades\URL;
  */
 class MatchPresenter
 {
-    public function __construct(private readonly \App\Services\Matching\MatchInterest $interest) {}
+    public function __construct(
+        private readonly MatchInterest $interest,
+        private readonly PhotoVisibilityPolicy $photos,
+    ) {}
 
     /**
      * A locked introduction. Score, city, first name, rationale — the hook
@@ -142,7 +146,7 @@ class MatchPresenter
              * drawing, not about the data: the JSON would still carry signed
              * URLs to every photograph, one devtools panel away.
              */
-            'photographsWithheld' => true,
+            ...$this->photographs($match),
             'unlockedAt' => $match->unlocked_at?->format('j F Y'),
             'verified' => $them?->isVerified() ?? false,
 
@@ -237,7 +241,7 @@ class MatchPresenter
             return false;
         }
 
-        return app(\App\Services\Guardian\GuardianGate::class)
+        return app(GuardianGate::class)
             ->mayExchangeContact($seeker, $match);
     }
 
@@ -429,5 +433,49 @@ class MatchPresenter
     public function forCard(MatchRecord $match): array
     {
         return $match->isUnlocked() ? $this->full($match) : $this->teaser($match);
+    }
+
+    /**
+     * ⚠️ PHOTOGRAPHS ARE ADDED WHEN PERMITTED, NEVER REMOVED WHEN NOT.
+     *
+     * The direction is the safety property, and it is the same one
+     * GuardianPresenter uses. "Unset the photos unless allowed" fails open: a
+     * key added later by somebody who has not read this arrives in the payload
+     * for everybody, and the withheld case leaks by default. This way a new
+     * photograph key that is not put inside the permitted branch simply reaches
+     * nobody, which is the safe direction to be wrong in.
+     *
+     * ⚠️ AND WHEN WITHHELD, THE KEY IS ABSENT RATHER THAN EMPTY. An empty
+     * `photos` array still says "there are photographs and you got none of
+     * them", and every template that iterates it renders nothing while looking
+     * correct. Omitting it means a component that reaches for it fails loudly
+     * in development instead of quietly in production.
+     *
+     * @return array<string, mixed>
+     */
+    private function photographs(MatchRecord $match): array
+    {
+        if (! $this->photos->mayMemberSee($match)) {
+            return [
+                'photographsWithheld' => true,
+                'photographsWithheldReason' => $this->photos->explanation(),
+            ];
+        }
+
+        $them = $match->matched;
+
+        return [
+            'photos' => ($them?->photos ?? collect())
+                ->map(fn (Photo $photo) => [
+                    'id' => $photo->id,
+                    'url' => URL::temporarySignedRoute(
+                        'photos.show',
+                        now()->addHour(),
+                        ['photo' => $photo->id],
+                    ),
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 }

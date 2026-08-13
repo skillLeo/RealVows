@@ -41,8 +41,28 @@ class SignedArtefactTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Database\Seeders\SettingsSeeder::class);
+
+        /*
+         * ⚠️ AFTER THE SEEDER, NOT BEFORE IT.
+         *
+         * The seeded default became `required_female` when the client reduced
+         * the setting to two choices, and these tests build a woman with
+         * introductions — so she is held at the pool gate and every assertion
+         * about her matches finds an empty list. That is the gate working.
+         *
+         * I first set this BEFORE the seeder ran, which overwrote it and
+         * changed nothing. A setup line that is silently undone is worse than
+         * no line: the test still fails and the reason now looks wrong.
+         *
+         * `off` is not selectable in the admin any more but is still a valid
+         * level in code — it is the documented fail-open.
+         */
+        app(\App\Services\Settings\SettingsService::class)
+            ->set('guardian', \App\Support\GuardianPolicy::KEY, \App\Support\GuardianPolicy::OFF);
+
     }
 
     /** Pull every http(s) URL out of a rendered body. */

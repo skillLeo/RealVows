@@ -33,6 +33,47 @@ class UpdateSettingsRequest extends FormRequest
         ];
     }
 
+    /**
+     * ⚠️ A SELECT MUST RECEIVE ONE OF ITS OWN OPTIONS.
+     *
+     * Nothing checked this. `values.*` accepted any string up to 5000
+     * characters, so a POST could write any value at all into a dropdown
+     * setting — and the interface would then render a select matching nothing,
+     * which reads as empty rather than as wrong.
+     *
+     * It became urgent when "off" and "optional" were removed from the trusted
+     * contact requirement. Taking them out of the dropdown is only a rule if
+     * the endpoint refuses them too: otherwise one crafted request, or one
+     * stale script, silently disables every gate on the platform, leaves
+     * photographs with nobody to review them, and raises no error anywhere.
+     *
+     * Read from the setting's own stored options rather than a list here, so
+     * this cannot drift from what the seeder defines.
+     */
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $group = $this->input('group');
+
+            foreach ((array) $this->input('values', []) as $key => $value) {
+                $setting = \App\Models\Setting::where('group', $group)->where('key', $key)->first();
+
+                if (! $setting || $setting->type !== 'select' || $value === null || $value === '') {
+                    continue;
+                }
+
+                $allowed = array_keys($setting->options ?? []);
+
+                if ($allowed !== [] && ! in_array($value, $allowed, true)) {
+                    $validator->errors()->add(
+                        "values.{$key}",
+                        'Choose one of the options shown.'
+                    );
+                }
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

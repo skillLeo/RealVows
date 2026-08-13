@@ -87,12 +87,26 @@ class SettingsSeeder extends Seeder
             ],
 
             'guardian' => [
+                /*
+                 * ⚠️ TWO CHOICES, AND "OFF" IS NO LONGER ONE OF THEM.
+                 *
+                 * The client's decision: a trusted contact is what the product
+                 * IS, not a feature it offers. Off and optional were written
+                 * while nobody had decided, and leaving them selectable meant a
+                 * single mis-click could quietly turn the platform into an
+                 * ordinary dating site — every gate inert, photographs with
+                 * nobody to review them, and no error anywhere to show for it.
+                 *
+                 * ⚠️ THE CONSTANTS STAY IN GuardianPolicy AND MUST NOT BE
+                 * DELETED. `off` is still the documented fail-open when the
+                 * setting cannot be read — see the DO NOT "HARDEN" block there
+                 * — and existing rows may still hold either value. They are
+                 * unreachable from the interface, not absent from the system.
+                 */
                 ['key' => 'guardian_requirement', 'label' => 'Trusted contact requirement', 'type' => 'select', 'options' => [
-                    'off' => 'Off — not asked for at all',
-                    'optional' => 'Optional — members may add one',
                     'required_female' => 'Required for women',
                     'required_all' => 'Required for everyone',
-                ], 'description' => 'Nobody has chosen this yet. It is off, which means the product behaves exactly as it did before the trusted-contact system was built. Changing it takes effect immediately and needs no deploy.'],
+                ], 'description' => 'Who must name a trusted contact before they can be introduced to anybody. Everyone is offered one either way. Takes effect immediately and needs no deploy.'],
             ],
 
             'general' => [
@@ -289,7 +303,17 @@ class SettingsSeeder extends Seeder
             'packages.octet_credits' => '8',
             'packages.octet_price_cents' => '10000',
             'packages.octet_badge' => 'Best value',
-            'guardian.guardian_requirement' => 'off',
+            /*
+             * ⚠️ SEEDED ON, NOT OFF.
+             *
+             * This was 'off' from when nobody had decided the policy. Now that
+             * off is not selectable, seeding it would boot a fresh install with
+             * the whole trusted-contact system disabled AND a dropdown showing
+             * no matching option — a state the interface cannot describe and
+             * the client cannot diagnose. The default is the safer of the two
+             * real answers.
+             */
+            'guardian.guardian_requirement' => 'required_female',
             'ai.provider' => 'openai',
             'ai.risk_model' => 'gpt-4o-mini',
             'ai.writer_model' => 'gpt-4o-mini',

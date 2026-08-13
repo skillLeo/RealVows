@@ -35,6 +35,25 @@ class GuardianPolicy
 
     public const REQUIRED_FEMALE = 'required_female';
 
+    /*
+     * ⚠️ NEITHER OF THESE IS SELECTABLE ANY MORE, AND NEITHER MAY BE DELETED.
+     *
+     * The admin offers two levels: required for women, required for everyone.
+     * A trusted contact is what this product IS rather than a feature it
+     * offers, and leaving "off" one mis-click away meant every gate could be
+     * silently disabled with no error to show for it.
+     *
+     * They stay here for two reasons that are not sentimental:
+     *
+     *   · `off` is the documented fail-open below. If the settings table
+     *     cannot be read we return it deliberately — see the DO NOT "HARDEN"
+     *     block — and deleting the constant would take that decision with it.
+     *   · Rows written before this change may still hold either value, and a
+     *     level() that threw on its own historical data would take the
+     *     platform down rather than degrade.
+     *
+     * Unreachable from the interface is not the same as absent from the system.
+     */
     public const OPTIONAL = 'optional';
 
     public const OFF = 'off';

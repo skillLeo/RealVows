@@ -21,6 +21,44 @@ Do this on a real phone, on 4G rather than wifi if you can.
 | Banner weight | Markup + CSS measured | 7.4kb against a 25kb limit |
 | Haptic call sites | Source scan with a control | Exactly one module, three moments |
 | Reduced motion | CSS inspection | Full stop, not a slowdown |
+| Frame pacing at 4× CPU throttle | Headless Chrome over CDP, `scripts/frame-benchmark.mjs` | Median 8.3ms, worst 15.0ms on scrolling pages. Budget is 16.7ms |
+
+### The frame benchmark, in full
+
+Run it yourself with `node scripts/frame-benchmark.mjs` against a local server.
+It drives the Chrome already on the machine, so there is nothing to install.
+
+| Page | Median | p95 | Worst | Frames over 16.7ms | Scrolled |
+|---|---|---|---|---|---|
+| Home (public, no framework) | 8.3ms | 9.3ms | 9.9ms | 0 of 360 | 4332px |
+| Dashboard | 8.3ms | 9.2ms | 9.7ms | 0 of 360 | 4031px |
+| Introductions | 8.3ms | 9.2ms | 15.0ms | 0 of 359 | 3498px |
+| Admin dashboard | 8.4ms | 9.4ms | 11.6ms | 0 of 360 | 2294px |
+| Admin verifications | 8.4ms | 9.6ms | 42.7ms | 1 of 360 | 0px |
+
+**The throttle is verified, not assumed.** A fixed amount of work took 5ms
+unthrottled and 20ms throttled. Ratio exactly 4.0, and the run aborts if that
+ratio comes back below 1.5. The first version of that control span a loop until
+the wall clock said 200ms, which takes 200ms at every throttle rate by
+construction, and it reported a ratio of 1.01. I was one step from telling you
+CPU throttling does not work in this Chrome. The throttle was fine. The control
+was measuring its own exit condition.
+
+**Two honest limits.**
+
+The last row scrolled 0px. `AdminLayout` scrolls an inner container beside a
+fixed sidebar rather than scrolling the window, so that page was measured
+*static under load* rather than scrolling. Its 42.7ms outlier is a single frame
+on a page that was not moving, which is a weaker measurement than the four above
+it. The `scrolled` column is printed precisely so you can see which rows are
+which instead of taking my word for it.
+
+And headless Chrome does not lock `requestAnimationFrame` to a display refresh,
+which is why the medians sit near 8ms rather than 16.7ms. So this measures the
+cost of the render loop, not frames delivered to a screen. That is the right
+proxy for the question — a loop costing 8.3ms at 4× throttle has room inside a
+16.7ms budget — but it is a proxy, and the real phone in your hand is still the
+answer to §1 through §8 below.
 
 ---
 

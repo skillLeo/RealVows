@@ -4,6 +4,7 @@ import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useAdminShell } from '@/shell';
+import RvIcon from '@/Components/RvIcon.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import BaseCheckbox from '@/Components/BaseCheckbox.vue';
@@ -12,6 +13,7 @@ import PasswordField from '@/Components/PasswordField.vue';
 import VerifiedBadge from '@/Components/VerifiedBadge.vue';
 
 const props = defineProps({
+    hub: { type: Array, default: () => [] },
     account: { type: Object, required: true },
     countryCodes: { type: Array, required: true },
     notifications: { type: Object, default: () => ({}) },
@@ -84,6 +86,55 @@ const logout = () => router.post('/logout');
             <p v-if="page.props.flash?.success" class="rv-flash" role="status">
                 {{ page.props.flash.success }}
             </p>
+
+            <!-- ── The hub ──────────────────────────────────────────────────
+                 ⚠️ ABOVE THE FORMS, BECAUSE IT IS WHY MOST PEOPLE CAME.
+
+                 The bottom bar is four tabs and stays four. Everything else the
+                 product grew — the full introduction history, the trusted
+                 contact, receipts, help — lives here, and /introductions had no
+                 route in from any member screen at all.
+
+                 Each row carries its own state, because "Needed before we can
+                 introduce you" is the answer to the question the tap was going
+                 to ask. Rows come from the server so one cannot appear for
+                 somebody who would get a 404 opening it. -->
+            <!-- ⚠️ Structurally this cannot be empty today — two groups are
+                 unconditionally visible in MemberHub. The branch is here
+                 because that is a guarantee made in another file, and because
+                 a future policy that hid every row would otherwise leave this
+                 page silently smaller with nothing to explain it. -->
+            <p v-if="!hub.length" class="rv-help">
+                {{ $t('account.hub_empty') }}
+            </p>
+
+            <nav
+                v-for="group in hub"
+                :key="group.key"
+                class="rv-stack"
+                style="gap: 10px"
+                :aria-label="group.label"
+            >
+                <span class="rv-label">{{ group.label }}</span>
+
+                <ul class="rv-hub">
+                    <li v-for="item in group.items" :key="item.key">
+                        <Link :href="item.href" class="rv-hub__row">
+                            <RvIcon :name="item.icon" :size="18" class="rv-hub__icon" />
+
+                            <span class="rv-hub__text">
+                                <span class="rv-hub__label">{{ item.label }}</span>
+                                <!-- Absent, not empty. A row with a blank line
+                                     reserved under it reads as a value that
+                                     failed to load. -->
+                                <span v-if="item.status" class="rv-hub__status">{{ item.status }}</span>
+                            </span>
+
+                            <RvIcon name="arrow-right" :size="16" class="rv-hub__go" />
+                        </Link>
+                    </li>
+                </ul>
+            </nav>
 
             <BaseCard>
                 <div class="rv-stack" style="gap: 20px">
@@ -282,6 +333,77 @@ const logout = () => router.post('/logout');
 </template>
 
 <style scoped>
+
+/* ── The hub ─────────────────────────────────────────────────────────────
+   Rows, not cards. A card per destination would give six boxes equal visual
+   weight to the account forms below them, and this is an index — the reader is
+   scanning for one line, not comparing six things. */
+.rv-hub {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r);
+    background: var(--card);
+    overflow: hidden;
+}
+
+/* One hairline between rows, none at the ends — the container already has its
+   own border and a doubled edge is the commonest way a list like this looks
+   slightly wrong without anybody being able to say why. */
+.rv-hub li + li { border-block-start: 1px solid var(--hairline); }
+
+.rv-hub__row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    /* 56px tall: comfortably past the 44px touch floor, because these are the
+       primary targets on the screen and thumbs are imprecise on a bus. */
+    min-height: 56px;
+    padding: 12px 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 140ms var(--ease);
+}
+
+.rv-hub__row:hover,
+.rv-hub__row:focus-visible {
+    background: color-mix(in oklab, var(--oxblood) 5%, var(--card));
+}
+
+.rv-hub__icon {
+    flex: none;
+    color: var(--brass-ink);
+}
+
+.rv-hub__text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.rv-hub__label {
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* ⚠️ The status is the point of the row, so it is legible rather than faint —
+   ink-soft, not a 40% tint. It is the sentence that saves the tap. */
+.rv-hub__status {
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--ink-soft);
+}
+
+/* Quiet: an affordance, not an action. It says "this goes somewhere" and
+   should not compete with the label. */
+.rv-hub__go {
+    flex: none;
+    color: var(--ink-soft);
+    opacity: .55;
+}
+
 .rv-account__row {
     display: flex;
     flex-wrap: wrap;

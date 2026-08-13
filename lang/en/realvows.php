@@ -147,6 +147,13 @@ return [
     ],
 
     'account' => [
+        /*
+         * ⚠️ Structurally unreachable today: MemberHub always returns at least
+         * the introductions and help groups. It exists because that guarantee
+         * lives in another file, and a future policy that hid every row would
+         * otherwise shrink this page with nothing to explain why.
+         */
+        'hub_empty' => 'There is nothing else on your account yet.',
         'change_your_password' => 'Change your password',
         'signed_in_on_this' => 'Signed in on this device',
         'this_is_where_your' => 'This is where your matches are sent by WhatsApp.',

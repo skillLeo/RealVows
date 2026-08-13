@@ -33,6 +33,15 @@ class AccountController extends Controller
         $gender = $request->user()->profile?->gender;
 
         return Inertia::render('Account', [
+            /*
+             * ⚠️ THE INDEX OF EVERYTHING THAT IS NOT ONE OF THE FOUR TABS.
+             *
+             * The bottom bar is four and stays four. The surface outgrew it —
+             * /introductions was reachable from no member screen at all — so
+             * this page carries the rest. See App\Support\MemberHub.
+             */
+            'hub' => \App\Support\MemberHub::for($user),
+
             'trustedContact' => $policy->isOfferedTo($gender) ? [
                 'required' => $policy->isRequiredFor($gender),
                 'state' => app(\App\Services\Guardian\GuardianGate::class)->stateFor($request->user()),

@@ -84,6 +84,7 @@
         }
     },
     "account": {
+        "hub_empty": "There is nothing else on your account yet.",
         "change_your_password": "Change your password",
         "signed_in_on_this": "Signed in on this device",
         "this_is_where_your": "This is where your matches are sent by WhatsApp.",

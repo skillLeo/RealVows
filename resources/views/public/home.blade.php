@@ -19,12 +19,31 @@
 @section('content')
 
     {{-- ── Hero ─────────────────────────────────────────────────────────────
-         The photography is given more room than the words, and the words are
-         set the way an invitation sets them: a quiet italic line, then the
-         names, then the detail. --}}
+
+         ⚠️ IT IS AN INVITATION NOW, NOT A LANDING PAGE WITH A PICTURE BESIDE IT.
+
+         This was a fifty-fifty split: words on the left, art on the right,
+         divided by a hairline. That is the layout of every SaaS home page ever
+         built, and no wedding invitation has ever been set that way. An
+         invitation is CENTRED and symmetrical — ornament, a quiet italic line,
+         the words that matter, a rule, the detail, ornament — and the whole
+         thing sits inside a frame. Reading down the middle is what makes a page
+         feel addressed to you rather than sold to you.
+
+         The art is no longer a panel. It is behind everything, full bleed, and
+         the words sit inside its arch. One composition instead of two columns
+         competing for the same attention. --}}
     <section class="rv-hero rv-on-dark" data-hero>
+        {{-- Behind the words, full bleed. Declared first so it paints first;
+             it is positioned absolutely and takes part in no layout. --}}
+        @include('public.partials.the-meeting')
+
         <div class="rv-hero__copy">
             <div class="rv-hero__copy-inner rv-stack" style="gap: 28px">
+                <div class="rv-hero__crest rv-arrive-step">
+                    @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
+                </div>
+
                 <p class="rv-eyebrow rv-hero__eyebrow-line rv-arrive-step">For those who mean it</p>
 
                 <h1 class="rv-d1" data-arrival-words>Find your true soul mate.</h1>
@@ -73,18 +92,14 @@
                     <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
                 </div>
 
+                {{-- ⚠️ THE THREE FACTS GO LAST AND STAY SMALL. Centred, they
+                     read as the line at the foot of an invitation — where,
+                     when, who it is for — rather than as feature bullets. --}}
                 <p class="rv-hero__eyebrow">
                     <span>Soul mate first</span>
                     <span>18+</span>
                     <span>Verified members</span>
                 </p>
-
-                {{-- Settles the panel, which the arcade left leaning to the
-                     right. Arrives last, after everything with meaning in
-                     it. --}}
-                <div class="rv-hero__fleuron rv-arrive-step">
-                    @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
-                </div>
             </div>
         </div>
 
@@ -99,12 +114,7 @@
             It is replaced anyway. A page about people who have not met yet
             should not open with the faces of strangers, and every photograph
             of a person on a marketing page is a promise about who is inside.
-            "The Meeting" says the same thing with light, line and type: two
-            paths converging under a doorway.
         --}}
-        <div class="rv-hero__art">
-            @include('public.partials.the-meeting')
-        </div>
     </section>
 
     {{-- ── See what an introduction looks like ─────────────────────────────

@@ -97,9 +97,19 @@ class Navigation
                 'visible' => $isMember,
             ],
 
+            /*
+             * ⚠️ "CONFIGURATION", NOT "SETTINGS", AND THE RENAME IS A BUG FIX.
+             *
+             * A member's own account page is titled Settings. Staff saw two
+             * items meaning entirely different things — one holding a phone
+             * number and a password, the other holding the payment gateway and
+             * the mailbox credentials — under the same word, in the same bar.
+             * The client's note was that there were "too much tabs"; the deeper
+             * problem was that one of them was named after something else.
+             */
             [
-                'key' => 'settings',
-                'label' => 'Settings',
+                'key' => 'configuration',
+                'label' => 'Configuration',
                 'icon' => 'shield',
                 'href' => '/admin/settings',
                 'visible' => $user->can('settings.view'),
@@ -118,5 +128,143 @@ class Navigation
             fn (array $item) => collect($item)->except('visible')->all(),
             array_filter($items, fn (array $item) => $item['visible']),
         ));
+    }
+
+    /**
+     * The admin sidebar: every staff area, grouped by the job being done.
+     *
+     * ⚠️ SEVEN OF THESE HAD NO WAY IN.
+     *
+     * The top bar carries four items and always has. Meanwhile the admin
+     * routes grew to twelve, so trusted contacts, support, reports, payments,
+     * emails and credits existed, worked, were permission-gated correctly —
+     * and could only be reached by typing the URL. A reviewer could not find
+     * the trusted-contact queue that is their job.
+     *
+     * That is not a visual problem and a prettier tab strip would not have
+     * fixed it. Vertical space is what makes room for twelve things, which is
+     * the actual reason this is a sidebar rather than a nicer row of tabs.
+     *
+     * ⚠️ THE SAME RULE AS ABOVE: an item is gated on the permission the ROUTE
+     * enforces, never on a role. The permissions here were read off
+     * routes/web.php one at a time rather than guessed from the section name —
+     * `payments` and `emails` sit behind settings.update, not a payments
+     * permission, and guessing would have produced a link that 404s for
+     * exactly the person who needs it.
+     *
+     * @return list<array{key: string, label: string, items: list<array{key: string, label: string, href: string}>}>
+     */
+    public static function admin(?User $user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        /*
+         * ⚠️ ASKED ONLY WHEN IT WILL BE SHOWN.
+         *
+         * This prop is shared with every Inertia response, members included,
+         * and a member can never see the configuration section. Counting
+         * unfilled settings for them would be a query on every screen of the
+         * product to build a list that is then filtered away.
+         */
+        $outstanding = $user->can('settings.view')
+            ? \App\Models\Setting::query()
+                ->whereNull('value')
+                ->selectRaw('`group`, count(*) as total')
+                ->groupBy('group')
+                ->pluck('total', 'group')
+            : collect();
+
+        $sections = [
+            [
+                'key' => 'review',
+                'label' => 'Review',
+                'items' => [
+                    ['key' => 'verifications', 'label' => 'Verification queue', 'href' => '/admin/verifications', 'visible' => $user->can('verifications.view')],
+                    ['key' => 'trusted-contacts', 'label' => 'Trusted contacts', 'href' => '/admin/trusted-contacts', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'reports', 'label' => 'Reports', 'href' => '/admin/reports', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'support', 'label' => 'Support', 'href' => '/admin/support', 'visible' => $user->can('verifications.review')],
+                ],
+            ],
+            [
+                'key' => 'operations',
+                'label' => 'Operations',
+                'items' => [
+                    ['key' => 'matches', 'label' => 'Matches', 'href' => '/admin/matches', 'visible' => $user->can('matches.view')],
+                    ['key' => 'payments', 'label' => 'Payments', 'href' => '/admin/payments', 'visible' => $user->can('settings.update')],
+                    ['key' => 'emails', 'label' => 'Email previews', 'href' => '/admin/emails', 'visible' => $user->can('settings.update')],
+                ],
+            ],
+            [
+                'key' => 'configuration',
+                'label' => 'Configuration',
+                /*
+                 * ⚠️ THE EIGHT GROUPS COME FROM THE CONTROLLER THAT SERVES
+                 * THEM, not from a second list written out here. Two lists of
+                 * the same thing drift, and the drift shows up as a sidebar
+                 * item that 404s — which is the defect this whole class exists
+                 * to prevent.
+                 */
+                'items' => collect(\App\Http\Controllers\Admin\SettingsController::groups())
+                    ->map(fn (string $label, string $key) => [
+                        'key' => "settings.{$key}",
+                        'label' => $label,
+                        'href' => "/admin/settings/{$key}",
+                        /*
+                         * ⚠️ THE COUNT MOVED HERE FROM THE TAB STRIP RATHER
+                         * THAN BEING DROPPED WITH IT.
+                         *
+                         * It is how the client knows where his attention is
+                         * still needed — "this many values are still empty" —
+                         * and replacing the tabs without carrying it across
+                         * would have quietly removed the one piece of guidance
+                         * that screen offered.
+                         */
+                        'badge' => $outstanding[$key] ?? 0,
+                        'visible' => $user->can('settings.view'),
+                    ])
+                    ->values()
+                    ->all(),
+            ],
+
+            /*
+             * ⚠️ THE STAFF MEMBER'S OWN ACCOUNT, IN THE SIDEBAR WITH
+             * EVERYTHING ELSE.
+             *
+             * It is also in the account menu at the top right, and that is not
+             * a duplicate to be tidied away: the menu is where you go to sign
+             * out, the sidebar is where you go to change your password. Asking
+             * somebody to find their own settings inside an avatar dropdown,
+             * on the one screen that has a perfectly good list of destinations
+             * down the left, is hiding it for the sake of tidiness.
+             *
+             * Its own section rather than appended to Configuration, because
+             * this is the reviewer's password and phone number, not the
+             * platform's mailbox credentials. Those two things being called
+             * the same thing is what started this.
+             */
+            [
+                'key' => 'you',
+                'label' => 'You',
+                'items' => [
+                    ['key' => 'account', 'label' => 'Your account', 'href' => '/account', 'visible' => true],
+                ],
+            ],
+        ];
+
+        return array_values(array_filter(array_map(
+            fn (array $section) => [
+                'key' => $section['key'],
+                'label' => $section['label'],
+                'items' => array_values(array_map(
+                    fn (array $item) => collect($item)->except('visible')->all(),
+                    array_filter($section['items'], fn (array $item) => $item['visible']),
+                )),
+            ],
+            $sections,
+        // A section whose every item is hidden must not render as an empty
+        // heading. A reviewer sees "Review" and nothing else.
+        ), fn (array $section) => $section['items'] !== []));
     }
 }

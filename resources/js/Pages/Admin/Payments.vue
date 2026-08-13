@@ -1,6 +1,6 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 
 defineProps({
@@ -21,7 +21,7 @@ function voidIt(id) {
 </script>
 
 <template>
-    <AppLayout title="Payments">
+    <AdminLayout title="Payments">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <!--
                 ⚠️ Loud on purpose. Nobody should ever mistake a test
@@ -93,7 +93,7 @@ function voidIt(id) {
                 </article>
             </div>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

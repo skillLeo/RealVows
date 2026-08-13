@@ -1,6 +1,6 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import RvIcon from '@/Components/RvIcon.vue';
 
@@ -23,7 +23,7 @@ function sortBy(sort) {
 </script>
 
 <template>
-    <AppLayout title="Match log">
+    <AdminLayout title="Match log">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Administration</span>
@@ -83,7 +83,7 @@ function sortBy(sort) {
                 </Link>
             </div>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

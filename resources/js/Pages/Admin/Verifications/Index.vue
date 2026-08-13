@@ -1,6 +1,6 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import RvIcon from '@/Components/RvIcon.vue';
 
@@ -22,7 +22,7 @@ const FILTERS = [
 </script>
 
 <template>
-    <AppLayout title="Verification queue">
+    <AdminLayout title="Verification queue">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Administration</span>
@@ -114,7 +114,7 @@ const FILTERS = [
                 />
             </nav>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

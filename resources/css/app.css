@@ -1049,27 +1049,18 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 /*
- * ⚠️ THE HERO WAS TIPPING. The arcade made the right side dense while the
- * left ran out of content below the trust strip, so the whole panel leaned.
- * A single fleuron in that space is enough to settle it — the eye reads it as
- * the foot of the column and stops looking for more.
+ * ⚠️ .rv-hero__fleuron IS GONE, AND SO IS THE PROBLEM IT SOLVED.
  *
- * ⚠️ COPY MUST NEVER GO HERE. Anything with words in it becomes a third
- * thing to read after the headline and the trust strip, and the balance
- * problem is replaced by a hierarchy problem.
+ * It existed to settle a hero that was tipping: the arcade made the right side
+ * dense while the left ran out of content below the trust strip, so the whole
+ * panel leaned, and a fleuron dropped into the dead space stopped the eye
+ * looking for more.
+ *
+ * The hero is one centred column now. There is no left and right to tip
+ * between and no dead space to fill, so a prop holding up a wall that no longer
+ * exists is just a mark on the page. The ornament that opens the invitation is
+ * .rv-hero__crest, which is a different job: it announces, it does not balance.
  */
-.rv-hero__fleuron {
-  display: none;
-  opacity: .4;
-  /* Pushes to the foot of the copy column, which is where the dead space is. */
-  margin-top: auto;
-  padding-top: 24px;
-}
-
-/* Only desktop has the dead space this exists to fill. */
-@media (min-width: 1024px) {
-  .rv-hero__fleuron { display: block; }
-}
 
 /* ==========================================================================
    Editorial type — the wedding-invitation register
@@ -1557,31 +1548,64 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * phone width there is exactly one column and saying so removes the whole
  * class of question.
  */
+/*
+ * ⚠️ ONE COLUMN, CENTRED, FULL BLEED. IT WAS A FIFTY-FIFTY SPLIT.
+ *
+ * Words left, art right, hairline down the middle. That is the layout of every
+ * SaaS home page ever shipped, and no wedding invitation has ever been set that
+ * way. An invitation reads down the middle, symmetrically, inside a frame — and
+ * reading down the middle is what makes a page feel addressed to you rather
+ * than sold to you.
+ *
+ * The art moved behind the words instead of beside them, so there is one
+ * composition rather than two columns competing for the same attention.
+ */
 .rv-hero {
+  position: relative;
+  isolation: isolate;
   display: grid;
-  grid-template-columns: 1fr;
+  place-items: center;
+  /* svh, not vh: on a phone browser vh includes the chrome that is about to
+     slide away, so the hero opens taller than the screen and the button is
+     under the fold on first paint. */
+  min-height: min(94svh, 940px);
+  padding: clamp(72px, 11vh, 128px) clamp(20px, 5vw, 64px);
   background: var(--oxblood-deep);
-}
-
-@media (min-width: 880px) {
-  .rv-hero { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+  overflow: hidden;
 }
 
 .rv-hero__copy {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   display: flex;
-  align-items: center;
-  padding: clamp(56px, 8vw, 104px) clamp(20px, 5vw, 64px);
+  justify-content: center;
 }
-.rv-hero__copy-inner { width: 100%; max-width: 600px; margin-left: auto; }
-.rv-hero .rv-d1 { max-width: 14ch; }
+
+.rv-hero__copy-inner {
+  width: 100%;
+  max-width: 620px;
+  margin: 0;
+  align-items: center;
+  text-align: center;
+}
+
+/* ⚠️ ch UNITS ON A CENTRED MEASURE, NOT max-width IN PIXELS. Centred text needs
+   a tighter measure than ranged-left text does — the eye has to find the start
+   of each line rather than returning to a fixed edge. */
+.rv-hero .rv-d1 { max-width: 16ch; }
+.rv-hero__copy-inner .rv-lead { max-width: 42ch; }
+
+/* The crest that opens the invitation. */
+.rv-hero__crest { line-height: 0; }
 
 .rv-hero__eyebrow {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px 32px;
   margin: 0;
-  padding-top: 16px;
+  padding-top: 20px;
   border-top: 1px solid rgba(185, 145, 84, .35);
   font-size: var(--fs-body-3);
   font-weight: 500;
@@ -1590,15 +1614,16 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--brass);
 }
 
-/* A hairline that draws itself under the headline as the hero settles.
-   scaleX, never width — animating width relayouts the whole column on every
-   frame, and this page has a 1.5s budget on a mid-range phone. */
+/* ⚠️ THE RULE IS SYMMETRICAL NOW. Ranged left it grew from its left end and
+   faded to the right, which is correct under left-aligned type and wrong under
+   centred type — it made the whole column look as though it had slipped. It
+   opens from the middle outward and fades at both ends. */
 .rv-hero__flourish {
-  width: 140px;
+  width: min(180px, 40vw);
   height: 1px;
-  background: linear-gradient(90deg, var(--brass), transparent);
+  background: linear-gradient(90deg, transparent, var(--brass), transparent);
   transform: scaleX(0);
-  transform-origin: left center;
+  transform-origin: center;
   animation: rv-draw 900ms var(--ease) 260ms forwards;
 }
 @keyframes rv-draw { to { transform: scaleX(1); } }
@@ -1606,74 +1631,6 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-hero__eyebrow-line { --arrive-y: 14px; animation: rv-arrive 700ms var(--ease) both; }
 .rv-hero .rv-d1 { --arrive-y: 14px; animation: rv-arrive 800ms var(--ease) 90ms both; }
 .rv-hero__copy-inner .rv-lead { --arrive-y: 14px; animation: rv-arrive 800ms var(--ease) 200ms both; }
-
-/*
- * ⚠️ ONE COLUMN ON A PHONE.
- *
- * Two frames side by side on a 375px screen leaves each about 165px wide.
- * `object-fit: cover` then crops hard from both sides and cuts the faces
- * off — which is exactly what it was doing, and the whole point of these
- * photographs is the people in them. Found on a real device; no automated
- * check would have called it a bug, because nothing overflowed and nothing
- * failed. It just looked wrong.
- *
- * Stacked, each frame gets the full width and the couples are whole.
- */
-/*
- * ⚠️ THE ART COLUMN IS NOW A WRAPPER, NOT A GRID.
- *
- * It used to be the two-up grid itself. The grid moved into .rv-mosaic when
- * the pair became seven tiles, and leaving grid properties here would have
- * meant two elements competing to lay out the same children.
- */
-.rv-hero__art {
-  position: relative;
-  /*
-   * ⚠️ `min-width: 0` is load-bearing.
-   *
-   * A grid item defaults to `min-width: auto`, so it refuses to shrink below
-   * its content's intrinsic width — this track measured 390px inside a 375px
-   * viewport and pushed the page sideways. Images carry width attributes and
-   * that is what it was refusing to go below.
-   */
-  min-width: 0;
-  border-left: 1px solid var(--hairline);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-}
-
-/*
- * ⚠️ ON A PHONE THIS TRACK WAS TWENTY-FOUR PIXELS TALL.
- *
- * "The Meeting" is `position: absolute; inset: 0`, so it contributes no
- * height. Beside the copy that does not matter — the grid row is sized by the
- * copy column and the art stretches to match. Stacked, the art is its own row
- * with no in-flow children, and it collapsed to its own padding: the entire
- * hero composition was invisible on the device the whole product is built for,
- * and nothing failed, overflowed or errored to say so.
- *
- * An aspect ratio gives the row a height without giving the absolute child a
- * layout. 4/5 keeps the threshold's crown and the near floor inside the slice
- * at every phone width.
- */
-@media (max-width: 879px) {
-  .rv-hero__art {
-    aspect-ratio: 4 / 5;
-    max-height: 78vh;
-    border-left: 0;
-    border-top: 1px solid var(--hairline);
-    padding: 0;
-  }
-}
-
-@media (min-width: 880px) {
-  /* Beside the copy the art needs real margins. A flat 12px read as the
-     photographs bleeding off the page rather than sitting inside it. */
-  .rv-hero__art { padding: clamp(24px, 3vw, 44px); }
-}
 
 /* ==========================================================================
    THE HERO ARCADE
@@ -3911,47 +3868,41 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* --------------------------------------------------------------------------
    "The Meeting" — the hero composition
    --------------------------------------------------------------------------
-   One-point perspective. You stand inside a threshold and look down a lit
-   colonnade at a doorway of light. Two halves of the threshold climb their own
-   side and meet at the keystone, which warms. Then it rests. Roughly 20s.
+   A mashrabiya: the carved lattice screen you can see out of but not into. A
+   warm light behind it, a brass lattice in front, and the lattice thins where
+   the words are, as though the screen had been opened just there.
 
-   ⚠️ IT SHIPPED FLAT ONCE, AND FLAT IS WHY IT FAILED.
+   ⚠️ IT SHIPPED FLAT, THEN IT SHIPPED AS A CORRIDOR, AND BOTH WERE THE WRONG
+   PROBLEM. Flat was three rows of arches on a coloured rectangle. The corridor
+   that replaced it was beautiful and was still an empty room beside the words
+   rather than the thing the words are set inside. This is one composition: the
+   art is behind the invitation, full bleed, and the arch is its frame.
 
-   The first build was three rows of identical arches on a coloured rectangle
-   with a brass veil washed over the top. No light source, no floor, no
-   distance, and a hard seam where the veil ran out. Everything below is
-   organised around the four depth cues that replaced it — scale, atmosphere,
-   light falloff and occlusion — because none of them is a shadow, and shadows
-   are banned.
+   Depth is two planes and a light between them — screen in front, glow behind.
+   No shadow is used, because shadows are banned, and none is needed.
 
    ⚠️ TRANSFORM AND OPACITY ONLY. Nothing here may cause a layout pass: this is
    the first thing painted on a mid-range Android over 4G, and a hero that
    janks is worse than a hero that is still.
 
-   ⚠️ THE TWO HALVES ARE NOT SYMMETRICAL ON PURPOSE. Different durations, so one
-   arrives fractionally before the other and waits. Two people are not
-   symmetrical either.
-
    Motion catalogue: registered as marketing-only. It may loop, on the same
    argument as #15 and #16 — a marketing page has no task for a loop to compete
-   with. No new primitive was added; see the arrival block at the bottom.
+   with. No new primitive was added.
    -------------------------------------------------------------------------- */
 
 .rv-meeting {
   position: absolute;
   inset: 0;
+  z-index: 0;
   overflow: hidden;
   contain: paint;
-  /*
-   * The room behind the SVG. Darkest at the top where nothing is lit, warming
-   * toward the floor. A flat fill here is what made the panel read as a
-   * coloured rectangle rather than as a space.
-   */
+  /* Deepest at the corners, warming toward the middle where the light is. A
+     flat fill is what made this read as a coloured rectangle. */
   background:
-    linear-gradient(180deg,
-      color-mix(in oklab, #000 22%, var(--oxblood-deep)) 0%,
-      color-mix(in oklab, #000 8%, var(--oxblood-deep)) 46%,
-      color-mix(in oklab, var(--oxblood) 22%, var(--oxblood-deep)) 100%);
+    radial-gradient(120% 100% at 50% 47%,
+      color-mix(in oklab, var(--oxblood) 34%, var(--oxblood-deep)) 0%,
+      var(--oxblood-deep) 58%,
+      color-mix(in oklab, #000 20%, var(--oxblood-deep)) 100%);
 }
 
 .rv-meeting__svg {
@@ -3967,10 +3918,6 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * baseFrequency, or chaining it into feDisplacementMap, brings a mid-range
  * Android to a crawl — it is a documented trap, not a theoretical one. Rendered
  * once at numOctaves 2 and never touched again.
- *
- * It exists because shadows are banned and depth has to come from somewhere.
- * Tone, hairlines and a little film grain are what is left, and grain is what
- * stops a flat oxblood field reading as a coloured rectangle.
  */
 .rv-meeting__grain {
   position: absolute;
@@ -3980,63 +3927,30 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   pointer-events: none;
 }
 
-/* ── The colonnade ───────────────────────────────────────────────────────
+/* ── The screen ──────────────────────────────────────────────────────────
  *
- * ⚠️ THE OPACITY IS ON THE <use>, NOT ON THE <g> THAT ANIMATES.
+ * ⚠️ THE STROKE GOES ON THE RECT, NOT INSIDE THE <pattern>.
  *
- * The Arrival ends at `opacity: 1`. Put the depth fade on the same element and
- * the animation's own final frame flattens every bay to full strength on
- * arrival — the colonnade would build itself beautifully and then go flat. The
- * group carries the motion, the <use> inside it carries the distance.
+ * Stroke properties inherit into pattern content, so setting them once here
+ * styles every tile in the screen. Set inside the pattern they would be frozen
+ * at authoring time and could not answer to a media query — and the lattice
+ * has to get lighter on a small screen, where the same line weight over a
+ * smaller area reads as clutter rather than as craft.
  */
-.rv-meeting__bay {
-  /* Scaling about the vanishing point is what makes The Arrival read as depth
-     rather than as a zoom. transform-box is required: without it the origin is
-     resolved against the element's own bounding box, not the viewBox. */
-  transform-box: view-box;
-  transform-origin: 500px 470px;
-}
-
-.rv-meeting__bay > use {
-  fill: none;
-  stroke: var(--brass-bright);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  /* Atmospheric perspective: further is fainter. One number, one meaning. */
-  opacity: calc(.64 - var(--i) * .108);
-}
-
-.rv-meeting__aisle {
-  fill: none;
-  stroke: url(#rv-meeting-aisle);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.rv-meeting__course {
-  fill: none;
-  stroke: var(--brass-bright);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  opacity: .12;
-}
-
-/* ── The wall you are standing in ───────────────────────────────────────── */
-.rv-meeting__wall {
-  fill: color-mix(in oklab, #000 30%, var(--oxblood-deep));
-  opacity: .82;
-}
-
-/* A hairline, not a solid. The rest of the composition is drawn in 1px brass
-   line; a solid mass in the middle of it is the one element not made of the
-   same material. Kept faint on purpose — this is the trace the bright halves
-   walk over, and if it is as bright as they are there is nothing to watch. */
-.rv-meeting__jamb {
-  fill: none;
+.rv-meeting__screen {
   stroke: var(--brass);
   stroke-width: 1;
+  fill: none;
   vector-effect: non-scaling-stroke;
-  opacity: .18;
+  opacity: .3;
+}
+
+/* ── The arch the invitation is set inside ─────────────────────────────── */
+.rv-meeting__jamb {
+  fill: none;
+  stroke: url(#rv-meeting-jamb);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
 
 .rv-meeting__keystone {
@@ -4047,12 +3961,12 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   opacity: .6;
 }
 
-/* ── The convergence. ────────────────────────────────────────────────────
+/* ── The convergence ─────────────────────────────────────────────────────
  *
  * ⚠️ 1100 IS THE PATH LENGTH, ROUNDED UP, AND IT HAS TO BE AT LEAST THAT.
  *
- * Each half is a 570-unit upright plus a quarter of a 300-radius arc
- * (π × 300 ÷ 2 ≈ 471), so ≈ 1041. If dasharray were shorter than the true
+ * Each half is a 520-unit upright plus a quarter of a 300-radius arc
+ * (π × 300 ÷ 2 ≈ 471), so ≈ 991. If dasharray were shorter than the true
  * length the dash would repeat and the arch would appear to draw itself twice.
  * Rounded up rather than measured with getTotalLength(), because this
  * composition ships no JavaScript — a number in a stylesheet cannot fail to
@@ -4072,20 +3986,13 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   opacity: 0;
 }
 
-/* Both climb from their own base, so both offsets are positive. */
-.rv-meeting__path--left {
-  animation: rv-meet-left 20s var(--ease-entrance) infinite;
-}
-
-.rv-meeting__path--right {
-  animation: rv-meet-right 20s var(--ease-entrance) infinite;
-}
+.rv-meeting__path--left  { animation: rv-meet-left  20s var(--ease-entrance) infinite; }
+.rv-meeting__path--right { animation: rv-meet-right 20s var(--ease-entrance) infinite; }
 
 /* ── Light ───────────────────────────────────────────────────────────────
  *
- * The keystone warms as the halves meet. The far doorway breathes on The
- * Candlelight — it is the one light source in the room, and a light source
- * that is perfectly steady is a rectangle with a gradient in it.
+ * The keystone warms as the halves meet. The light behind the screen breathes
+ * on The Candlelight — a light source that is perfectly steady is a gradient.
  */
 .rv-meeting__bloom {
   opacity: 0;
@@ -4097,30 +4004,26 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   animation: rv-drift 9s ease-in-out infinite;
 }
 
-/* ── The candlelight. ────────────────────────────────────────────────────
+/* ── The candlelight on the headline ─────────────────────────────────────
  *
  * A single warm light crossing the headline, slowly, once every nine seconds.
  * Shadows are banned, so the only way to suggest a light source in the room is
  * to let one travel across something.
  *
  * ⚠️ NO NEW KEYFRAME. This is #15 The Gleam, already in the catalogue as
- * marketing-only and already permitted to loop. It was written for the photo
- * mosaic that R3 deleted, so until now it was a registered primitive animating
- * nothing at all. The sweep it describes is exactly this one.
+ * marketing-only and already permitted to loop.
  *
  * ⚠️ GUARDED BY @supports, AND THAT GUARD IS NOT OPTIONAL.
  *
  * background-clip: text works by painting the gradient and clipping it to the
  * glyphs, which requires the text itself to be transparent. In a browser that
  * does not support it, transparent text is simply invisible — the headline of
- * the home page disappears completely. Inside @supports, an unsupporting
- * browser never sees the transparency at all and keeps the cream it already
- * had. The -webkit- prefix is tested first because a large share of Android
- * WebViews still answer only to that one.
+ * the home page disappears completely. The -webkit- prefix is tested first
+ * because a large share of Android WebViews still answer only to that one.
  *
  * ⚠️ MARKETING ONLY. background-position repaints rather than compositing, so
  * this may never appear on an authenticated screen where somebody is trying to
- * finish a task. It is confined to the public hero headline.
+ * finish a task.
  */
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   @media (prefers-reduced-motion: no-preference) {
@@ -4139,20 +4042,14 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
        *
        * #15 The Gleam sweeps background-position from 180% to -80%. With
        * background-size 300%, a percentage position places the image at
-       * (container − image) × pct, so 180% puts it at [-3.6W, -0.6W] and -80%
-       * puts it at [1.6W, 4.6W]. Both are entirely outside the text box. With
-       * no-repeat that paints nothing, and since background-clip: text
-       * requires the text itself to be transparent, nothing painted means
+       * (container − image) × pct, so both ends are entirely outside the text
+       * box. With no-repeat that paints nothing, and since background-clip:
+       * text requires the text itself to be transparent, nothing painted means
        * nothing visible: "Find your true soul mate." vanished 2.6 seconds
        * after load, on the client's own home page.
        *
        * Tiling fixes it because the gradient is cream at 0% and cream at 100%,
        * so tiles join invisibly and some tile always covers the glyphs.
-       *
-       * The @supports guard above was the right instinct aimed at the wrong
-       * failure. It protects a browser that cannot do background-clip: text.
-       * It cannot protect against a browser that does it perfectly to a
-       * gradient positioned off-screen.
        */
       -webkit-background-clip: text;
       background-clip: text;
@@ -4193,36 +4090,40 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   74%, 100% { opacity: 0; }
 }
 
-/* ── The arrival: the room opens out of the far light ────────────────────
+/* ── The arrival: the screen resolves, then the arch is drawn ────────────
  *
- * ⚠️ THIS IS #1 THE ARRIVAL, AND IT WAS WORTH THE EFFORT NOT TO ADD #17.
+ * ⚠️ THIS IS #1 THE ARRIVAL. IT WAS WORTH THE EFFORT NOT TO ADD #17.
  *
- * "The colonnade builds itself in depth" sounds like a new primitive and is
- * not one. rv-arrive already animates transform and opacity from
- * --arrive-scale; point its transform-origin at the vanishing point and a
- * scale becomes a movement along the depth axis. The bays are staggered
- * furthest-first, so the light is there before the room is.
- *
+ * "The screen resolves out of the light" sounds like a new primitive and is
+ * not one — rv-arrive already animates opacity and a scale, and a screen that
+ * settles from 1.04 reads as a plane coming to rest just in front of you.
  * MotionCatalogueTest exists because this codebase once had nine names for one
  * idea. A tenth would have been easy to justify and wrong.
  */
 @media (prefers-reduced-motion: no-preference) {
-  [data-arrival='pending'] .rv-meeting__bay { opacity: 0; }
+  [data-arrival='pending'] .rv-meeting__screen,
+  [data-arrival='pending'] .rv-meeting__jamb { opacity: 0; }
 
-  [data-arrival='running'] .rv-meeting__bay {
+  [data-arrival='running'] .rv-meeting__screen {
     --arrive-y: 0;
-    --arrive-scale: .82;
-    animation: rv-arrive 900ms var(--ease-entrance) both;
-    /* Furthest bay first: (4 − depth). The whole colonnade lands inside the
-       900ms ceremony budget, after the headline's rule has drawn. */
-    animation-delay: calc(700ms + (4 - var(--i)) * 90ms);
+    --arrive-scale: 1.04;
+    transform-box: view-box;
+    transform-origin: 600px 470px;
+    animation: rv-arrive var(--dur-ceremony) var(--ease-settle) both;
+    animation-delay: 200ms;
+  }
+
+  [data-arrival='running'] .rv-meeting__jamb {
+    animation: rv-arrive var(--dur-ceremony) var(--ease) both;
+    animation-delay: 620ms;
   }
 }
 
-/* ── Mobile: the same room, fewer bays. The perspective still reads. ── */
+/* ── Small screens ───────────────────────────────────────────────────────
+   The same screen at the same scale over a smaller area reads as clutter
+   rather than as craft, so it is lightened rather than shrunk. */
 @media (max-width: 767px) {
-  .rv-meeting__course { display: none; }
-  .rv-meeting__bay:nth-of-type(4) { display: none; }
+  .rv-meeting__screen { opacity: .2; }
 }
 
 /* ⚠️ A FULL STOP, NOT A SLOWDOWN. The composition renders in its final state:

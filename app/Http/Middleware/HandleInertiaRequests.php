@@ -46,6 +46,17 @@ class HandleInertiaRequests extends Middleware
              */
             'nav' => Navigation::for($user),
 
+            /*
+             * ⚠️ A CLOSURE, for the same reason `freePeriod` below is one.
+             *
+             * This middleware runs on every web request including the Blade
+             * marketing pages, and building the admin sidebar asks the
+             * permission table several questions. Evaluated eagerly that is a
+             * handful of queries on the public home page, which is explicitly
+             * a page that reads no database at all.
+             */
+            'adminNav' => fn () => Navigation::admin($user),
+
             // Drives the review-build banner. Same switch as the one-click
             // logins, so the banner cannot be showing while they are off, or
             // the other way round.

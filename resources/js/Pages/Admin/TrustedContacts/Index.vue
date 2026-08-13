@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 
@@ -28,7 +28,7 @@ function decide(id, decision) {
 </script>
 
 <template>
-    <AppLayout title="Trusted contacts">
+    <AdminLayout title="Trusted contacts">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Administration</span>
@@ -148,7 +148,7 @@ function decide(id, decision) {
                 </div>
             </BaseCard>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

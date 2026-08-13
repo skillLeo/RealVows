@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Support\Navigation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -75,6 +76,105 @@ class NavigationTest extends TestCase
         }
     }
 
+    /**
+     * ⚠️ THE SAME WALK, FOR THE SIDEBAR, AND IT MATTERS MORE HERE.
+     *
+     * The top bar carries four items and was checked. The admin sidebar
+     * carries sixteen across four sections, including eight configuration
+     * groups whose hrefs are built by string concatenation — which is exactly
+     * the shape that produces a link to a group that does not exist.
+     *
+     * The permissions behind these were read off routes/web.php one at a time
+     * rather than inferred from section names. `payments` and `emails` sit
+     * behind settings.update, not a payments permission; guessing would have
+     * produced a sidebar link that 404s for precisely the person who needs it,
+     * which is the defect this whole class was written to stop.
+     */
+    #[DataProvider('staffRoles')]
+    public function test_every_admin_sidebar_item_opens(string $role): void
+    {
+        $user = $this->userWithRole($role);
+        $sections = Navigation::admin($user);
+
+        $this->assertNotEmpty($sections, "No admin sidebar was built for {$role}.");
+
+        $walked = 0;
+
+        foreach ($sections as $section) {
+            $this->assertNotEmpty(
+                $section['items'],
+                "The {$role} sidebar renders an empty '{$section['label']}' heading."
+            );
+
+            foreach ($section['items'] as $item) {
+                $response = $this->actingAs($user)->followingRedirects()->get($item['href']);
+
+                $this->assertSame(
+                    200,
+                    $response->getStatusCode(),
+                    "The {$role} sidebar offers {$item['label']} ({$item['href']}), which answered "
+                        ."{$response->getStatusCode()}."
+                );
+
+                $walked++;
+            }
+        }
+
+        /*
+         * ⚠️ PROVE THE WALK ACTUALLY WALKED. A sidebar that built no items
+         * would satisfy every assertion in the loop above by never entering
+         * it, and this file would report the navigation as sound.
+         */
+        $this->assertGreaterThanOrEqual(5, $walked, "Only {$walked} sidebar items were checked for {$role}.");
+    }
+
+    public function test_the_sidebar_carries_every_settings_group(): void
+    {
+        $sections = collect(Navigation::admin($this->userWithRole('super_admin')));
+
+        $configuration = $sections->firstWhere('key', 'configuration');
+
+        $this->assertNotNull($configuration, 'The owner has no configuration section.');
+
+        /*
+         * Compared against the controller that serves the groups, not against
+         * a list written out here. A second list would drift, and the drift
+         * shows up as a group nobody can reach.
+         */
+        $this->assertSame(
+            array_keys(SettingsController::groups()),
+            array_map(
+                fn (array $item) => str_replace('settings.', '', $item['key']),
+                $configuration['items'],
+            ),
+        );
+    }
+
+    public function test_a_reviewer_sees_only_the_sections_they_may_open(): void
+    {
+        $sections = collect(Navigation::admin($this->userWithRole('admin')));
+
+        // The control: a reviewer's job is the queues, so they must have them.
+        $this->assertNotNull($sections->firstWhere('key', 'review'));
+
+        // And must not be shown the platform's credentials.
+        $this->assertNull(
+            $sections->firstWhere('key', 'configuration'),
+            'A reviewer is being offered the configuration section.'
+        );
+    }
+
+    public function test_a_member_gets_no_admin_sidebar_at_all(): void
+    {
+        $sections = collect(Navigation::admin($this->userWithRole('member')));
+
+        /*
+         * A member holds no permissions, so every staff section filters away.
+         * What remains is their own account — and nothing else may appear.
+         */
+        $this->assertSame(['you'], $sections->pluck('key')->all());
+    }
+
     public function test_a_reviewer_is_not_offered_settings(): void
     {
         $reviewer = $this->userWithRole('admin');
@@ -84,15 +184,21 @@ class NavigationTest extends TestCase
 
         $keys = array_column(Navigation::for($reviewer), 'key');
 
-        $this->assertNotContains('settings', $keys);
+        $this->assertNotContains('configuration', $keys);
         $this->assertSame(['queue', 'matches', 'account'], $keys);
     }
 
-    public function test_an_owner_is_offered_settings(): void
+    public function test_an_owner_is_offered_configuration(): void
     {
         $keys = array_column(Navigation::for($this->userWithRole('super_admin')), 'key');
 
-        $this->assertSame(['queue', 'matches', 'settings', 'account'], $keys);
+        /*
+         * ⚠️ `configuration`, not `settings`. The member's own account page is
+         * titled Settings, so staff were shown two items meaning entirely
+         * different things — one holding a phone number, the other holding the
+         * payment gateway credentials — under the same word in the same bar.
+         */
+        $this->assertSame(['queue', 'matches', 'configuration', 'account'], $keys);
     }
 
     public function test_a_member_is_offered_the_member_tabs_and_no_admin_area(): void

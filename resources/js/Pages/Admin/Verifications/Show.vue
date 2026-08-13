@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import BaseRadio from '@/Components/BaseRadio.vue';
@@ -39,7 +39,7 @@ const decided = props.verification.status === 'verified' || props.verification.s
 </script>
 
 <template>
-    <AppLayout :title="`Reviewing ${member.name}`">
+    <AdminLayout :title="`Reviewing ${member.name}`">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <div>
                 <Link href="/admin/verifications" class="rv-link-action">← Back to the queue</Link>
@@ -141,7 +141,7 @@ const decided = props.verification.status === 'verified' || props.verification.s
                 </div>
             </div>
         </SheetModal>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

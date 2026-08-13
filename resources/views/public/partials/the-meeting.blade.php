@@ -1,209 +1,148 @@
 {{--
     ── "The Meeting" ─────────────────────────────────────────────────────────
 
-    ⚠️ NO PHOTOGRAPH OF ANY PERSON APPEARS ON THIS PAGE.
+    ⚠️ NO PHOTOGRAPH OF ANY PERSON APPEARS ON THIS PAGE, AND NOTHING HERE IS A
+    DRAWING OF A PERSON EITHER.
 
-    The hero was seven photographs of real people. It carried a genuine market
-    argument — two visibly Muslim tiles and two visibly Western ones, so both
-    audiences saw at a glance that the platform was for them — and it is gone
-    anyway, because a page about people who have not met yet should not open
-    with strangers' faces.
+    ── THE IDEA: THE SCREEN ──────────────────────────────────────────────────
 
-    ── THE IDEA ──────────────────────────────────────────────────────────────
+    A mashrabiya is the carved lattice screen in Islamic architecture — the
+    window you can see out of but not into. It is the architecture of parda.
 
-    The product already owns the arch: the one shape a mosque and a church
-    share, and the shape of a doorway you walk through to something serious.
+    That is the whole concept, and it is the product:
 
-    ⚠️ IT IS A ROOM NOW, NOT A DRAWING OF A ROOM.
+      · It is what modesty LOOKS like as a building, so the Muslim half of the
+        audience recognises it instantly and the Western half reads it as
+        ornament and craft. One shape, both audiences, no compromise between
+        them — the same trick the arch was already pulling.
+      · It is entirely non-figurative. Octagons and squares. There is no living
+        thing depicted anywhere in this file, so the halal question never has
+        to be asked, let alone answered.
+      · It is the product's actual mechanic. Nobody here is on display. You are
+        seen through a screen, by people who have been checked, and an
+        introduction is the screen opening.
 
-    The first version laid three rows of identical arches flat on a coloured
-    rectangle and washed the top of it in brass. Flat is the word: no light
-    source, no floor, no distance, and a hard horizontal seam where the veil
-    ran out. The client's note was "flop and ugly" and he was right.
+    So: a warm light behind, a brass lattice in front, and the lattice THINS
+    where the words are, as though the screen has been opened just there. The
+    words sit in the opening. Two planes and a light between them is where the
+    depth comes from — no shadow is used or needed.
 
-    This is one-point perspective. You are standing INSIDE a threshold looking
-    down a lit colonnade at a doorway of light at the far end. Everything is
-    scaled about a single vanishing point at (500, 470), which is what makes
-    the piers converge, the floor rise and the crowns fall on their own —
-    perspective is not drawn here, it is a consequence of the geometry.
+    ⚠️ NO STARS, AND THE RULE WAS CHECKED RATHER THAN ASSUMED.
 
-    Depth comes from four cues stacked, none of them a shadow:
-      · scale        — each bay is 0.74 of the one in front of it
-      · atmosphere   — each bay is fainter than the one in front of it
-      · light        — a warm source at the far end, falling off toward you
-      · occlusion    — the wall you stand in frames the whole thing
+    The obvious Islamic pattern is a girih rosette, and a girih rosette is an
+    eight-pointed star. The design system bans star shapes outright — the
+    product removed date-of-birth matching and will not have that idea creep
+    back as decoration. An octagon-and-square tessellation is as authentic, as
+    common in real screenwork, and contains no star at any scale. The ban is
+    kept to the letter, not argued with.
 
-    ── WHAT MOVES, AND WHY IT IS ALL ALREADY IN THE CATALOGUE ────────────────
+    ── THE ARCH IS STILL THE ARCH ────────────────────────────────────────────
 
-    Two halves climb their own side of the threshold and meet at the keystone.
-    Different durations on purpose: one arrives before the other and waits.
-    Two people are not symmetrical.
-
-    Nothing here needed a new @keyframes. The arcade arrives on The Arrival
-    (#1) with --arrive-scale, which reads as the room opening out of the far
-    light because each bay is scaled about the vanishing point. The far window
-    breathes on The Candlelight (#14). The keystone warms on rv-keystone-warm.
-    A seventeenth primitive would have been a new name for motion the
-    stylesheet could already describe.
+    Two halves climb their own side and meet at the keystone. Different
+    durations: one arrives before the other and waits. Two people are not
+    symmetrical. It is the best idea this product has and nothing above
+    replaces it — the arch is now the frame the invitation is set inside.
 
     ── CONSTRAINTS THIS FILE IS UNDER ────────────────────────────────────────
 
-    · Pure SVG and CSS. No canvas, no WebGL, no animation library. This page
-      ships no Vue and has to stay fast on a mid-range Android over 4G.
+    · Pure SVG and CSS. No canvas, no WebGL, no animation library.
     · Transform and opacity only. Nothing here can cause a layout pass.
-    · Under 25kb including the markup.
-    · Full stop under prefers-reduced-motion — the composition renders in its
-      final state, arch complete, keystone already warm.
+    · The lattice is ONE tile in a <pattern>, so the whole screen costs about
+      three hundred bytes and one paint no matter how large the viewport is.
+    · Full stop under prefers-reduced-motion.
     · Brass, oxblood and cream. No new tokens.
-    · ⚠️ NO STAR SHAPES AND NO CONSTELLATIONS. The product removed a
-      date-of-birth-derived matching component last week; a hero full of points
-      of light would put the imagery back as decoration. Architecture and
-      typography only.
 --}}
 <div class="rv-meeting" aria-hidden="true">
-    <svg class="rv-meeting__svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <svg class="rv-meeting__svg" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
         <defs>
-            {{-- The threshold: the arch you are standing in. It is the frame,
-                 the clip and the drawn line, so the three can never drift
-                 apart. --}}
-            <path id="rv-threshold" d="M200 1000 L200 430 A300 300 0 0 1 800 430 L800 1000 Z" />
+            {{-- ── The lattice ──────────────────────────────────────────────
 
-            <clipPath id="rv-meeting-opening">
-                <use href="#rv-threshold" />
-            </clipPath>
+                 ⚠️ EVERY EDGE IS DRAWN EXACTLY ONCE. THAT IS WHY THIS IS SIX
+                 SEGMENTS AND NOT ONE OCTAGON.
 
-            {{-- One bay, drawn once. Scaled about the vanishing point it
-                 becomes every bay in the colonnade. --}}
-            <g id="rv-bay">
-                <path d="M-300 530 L-300 -40 A300 300 0 0 1 300 -40 L300 530" fill="none" />
-            </g>
+                 A closed octagon in a tile shares its flat edges with the next
+                 tile along, so every vertical and horizontal in the screen
+                 gets painted twice — double alpha, and the lattice reads as a
+                 plaid of alternating line weights. Drawing the left flat and
+                 the top flat only, plus all four diagonals, tiles into a
+                 perfectly even screen: the right and bottom flats arrive from
+                 the neighbouring tiles.
 
-            <radialGradient id="rv-meeting-glow">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity=".5" />
-                <stop offset="34%"  stop-color="var(--brass)"        stop-opacity=".18" />
+                 29.29 and 70.71 are 100 × (2 − √2)/2 and its complement — the
+                 vertices of a regular octagon 100 wide. --}}
+            <pattern id="rv-mashrabiya" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M0 70.71 L0 29.29
+                         M29.29 0 L70.71 0
+                         M0 29.29 L29.29 0
+                         M70.71 0 L100 29.29
+                         M100 70.71 L70.71 100
+                         M29.29 100 L0 70.71" />
+            </pattern>
+
+            {{-- The screen is opened where the words are. White shows the
+                 lattice, black hides it; the hole is generous and very soft,
+                 because a hard edge would read as a spotlight. --}}
+            <radialGradient id="rv-meeting-open" cx=".5" cy=".47" r=".54">
+                <stop offset="0%"   stop-color="#000" />
+                <stop offset="46%"  stop-color="#000" />
+                <stop offset="78%"  stop-color="#888" />
+                <stop offset="100%" stop-color="#fff" />
+            </radialGradient>
+            <mask id="rv-meeting-screen">
+                <rect width="1200" height="1000" fill="url(#rv-meeting-open)" />
+            </mask>
+
+            {{-- The light behind the screen. --}}
+            <radialGradient id="rv-meeting-glow" cx=".5" cy=".47" r=".5">
+                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity=".26" />
+                <stop offset="38%"  stop-color="var(--brass)"        stop-opacity=".11" />
                 <stop offset="100%" stop-color="var(--brass)"        stop-opacity="0" />
             </radialGradient>
-
-            {{-- The doorway of light at the far end. Ends at zero so it has no
-                 bottom edge of its own — a light with an outline is a shape. --}}
-            <linearGradient id="rv-meeting-window" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity=".74" />
-                <stop offset="55%"  stop-color="var(--brass-bright)" stop-opacity=".34" />
-                <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
-            </linearGradient>
-
-            {{-- Side walls falling away into shadow. Shadows are banned as a
-                 component; this is tone, which is what is left. --}}
-            <linearGradient id="rv-meeting-walls" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%"   stop-color="#000" stop-opacity=".5" />
-                <stop offset="32%"  stop-color="#000" stop-opacity=".04" />
-                <stop offset="68%"  stop-color="#000" stop-opacity=".04" />
-                <stop offset="100%" stop-color="#000" stop-opacity=".5" />
-            </linearGradient>
-
-            {{-- Light falls off with distance from its source, so the floor at
-                 your feet is the darkest part of the room, not the brightest.
-                 Getting this backwards is what makes rendered light look
-                 painted on. --}}
-            <linearGradient id="rv-meeting-near" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#000" stop-opacity="0" />
-                <stop offset="62%"  stop-color="#000" stop-opacity="0" />
-                <stop offset="100%" stop-color="#000" stop-opacity=".42" />
-            </linearGradient>
-
-            {{-- ⚠️ THE LIGHT ON THE FLOOR IS TWO ELLIPSES, NOT A TRAPEZIUM.
-
-                 It was a polygon from the far door to the near corners, which
-                 is geometrically what light down an aisle does and which read
-                 as a carpet: a hard straight edge down each side that no
-                 gradient inside the shape can soften. Light has no edges. Two
-                 soft pools and the aisle hairlines carry the same perspective
-                 with nothing to catch the eye. --}}
-            <radialGradient id="rv-meeting-pool">
-                <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity=".16" />
-                <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
-            </radialGradient>
-
-            <linearGradient id="rv-meeting-aisle" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%"   stop-color="var(--brass)" stop-opacity=".4" />
-                <stop offset="100%" stop-color="var(--brass)" stop-opacity="0" />
-            </linearGradient>
 
             <radialGradient id="rv-meeting-bloom">
                 <stop offset="0%"   stop-color="var(--brass-bright)" stop-opacity="1" />
                 <stop offset="100%" stop-color="var(--brass-bright)" stop-opacity="0" />
             </radialGradient>
+
+            {{-- The arch fades out toward its feet rather than stopping at the
+                 bottom of the frame. A line that ends is a line; a line that
+                 fades is a building continuing past the edge. --}}
+            <linearGradient id="rv-meeting-jamb" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%"   stop-color="var(--brass)" stop-opacity="0" />
+                <stop offset="34%"  stop-color="var(--brass)" stop-opacity=".38" />
+                <stop offset="100%" stop-color="var(--brass)" stop-opacity=".38" />
+            </linearGradient>
         </defs>
 
-        {{-- ── Through the doorway ──────────────────────────────────────── --}}
-        <g clip-path="url(#rv-meeting-opening)">
-            <circle cx="500" cy="500" r="260" fill="url(#rv-meeting-glow)" />
+        {{-- Light first, then the screen in front of it. --}}
+        <rect width="1200" height="1000" fill="url(#rv-meeting-glow)" />
+        <circle class="rv-meeting__candle" cx="600" cy="470" r="420" fill="url(#rv-meeting-bloom)" />
 
-            <ellipse cx="500" cy="630" rx="130" ry="90" fill="url(#rv-meeting-pool)" />
-            <ellipse cx="500" cy="780" rx="330" ry="210" fill="url(#rv-meeting-pool)" opacity=".45" />
-
-            <path class="rv-meeting__window" d="M445 588 L445 468 A55 55 0 0 1 555 468 L555 588 Z"
-                  fill="url(#rv-meeting-window)" />
-            <circle class="rv-meeting__candle" cx="500" cy="500" r="170" fill="url(#rv-meeting-bloom)" />
-
-            {{-- The colonnade. --i is the depth index: it sets how faint the
-                 bay is and how late it arrives, so distance is one number. --}}
-            <g class="rv-meeting__bay" style="--i: 1"><use href="#rv-bay" transform="translate(500 470) scale(.74)"  /></g>
-            <g class="rv-meeting__bay" style="--i: 2"><use href="#rv-bay" transform="translate(500 470) scale(.548)" /></g>
-            <g class="rv-meeting__bay" style="--i: 3"><use href="#rv-bay" transform="translate(500 470) scale(.405)" /></g>
-            <g class="rv-meeting__bay" style="--i: 4"><use href="#rv-bay" transform="translate(500 470) scale(.30)"  /></g>
-
-            {{-- Floor courses at each bay's base. They compress toward the
-                 vanishing point because the bays do. --}}
-            <g class="rv-meeting__course">
-                <path d="M278 862 L722 862" />
-                <path d="M336 760 L664 760" />
-                <path d="M378 685 L622 685" />
-            </g>
-
-            <g class="rv-meeting__aisle">
-                <path d="M200 1000 L500 470" />
-                <path d="M800 1000 L500 470" />
-            </g>
-
-            <rect x="200" y="0" width="600" height="1000" fill="url(#rv-meeting-walls)" />
-            <rect x="200" y="0" width="600" height="1000" fill="url(#rv-meeting-near)" />
+        <g mask="url(#rv-meeting-screen)">
+            <rect class="rv-meeting__screen" width="1200" height="1000" fill="url(#rv-mashrabiya)" />
         </g>
 
-        {{-- ── The wall you are standing in ─────────────────────────────────
-             Even-odd against the threshold, so the opening is a hole rather
-             than a lighter rectangle. This is the occlusion cue: you are
-             inside something, looking out. --}}
-        <path class="rv-meeting__wall" fill-rule="evenodd"
-              d="M0 0 H1000 V1000 H0 Z M200 1000 L200 430 A300 300 0 0 1 800 430 L800 1000 Z" />
+        {{-- ── The arch the invitation is set inside ─────────────────────── --}}
+        <path class="rv-meeting__jamb" d="M300 1000 L300 480 A300 300 0 0 1 900 480 L900 1000" />
 
-        <circle class="rv-meeting__bloom" cx="500" cy="130" r="180" fill="url(#rv-meeting-bloom)" />
-
-        {{-- The faint permanent trace of the arch, so the finished shape is
-             visible the whole time and the bright brass is the part being
-             walked. --}}
-        <use class="rv-meeting__jamb" href="#rv-threshold" />
-
-        {{-- ── The two halves ───────────────────────────────────────────────
-
-             ⚠️ THESE ARE HALVES OF THE THRESHOLD, NOT TWO LINES ON A FLOOR.
-
+        {{-- ⚠️ THESE ARE HALVES OF ONE ARCH, NOT TWO LINES ON A FLOOR.
              Each starts at its own base, climbs its own side, and the two
              complete a single arch at the keystone. Two halves finishing one
              arch is the union stated in the shape itself, using the motif the
              product already owns — the doorway a mosque and a church share.
              Nothing has to be explained. --}}
         <path class="rv-meeting__path rv-meeting__path--left"
-              d="M200 1000 L200 430 A300 300 0 0 1 500 130" />
+              d="M300 1000 L300 480 A300 300 0 0 1 600 180" />
         <path class="rv-meeting__path rv-meeting__path--right"
-              d="M800 1000 L800 430 A300 300 0 0 0 500 130" />
+              d="M900 1000 L900 480 A300 300 0 0 0 600 180" />
+
+        <circle class="rv-meeting__bloom" cx="600" cy="180" r="200" fill="url(#rv-meeting-bloom)" />
 
         {{-- ⚠️ THE KEYSTONE SITS AT THE APEX, WHICH IS WHERE THE TWO HALVES
-             MEET. It used to sit at the CENTRE of the arc's circle, which is
-             architecturally a diamond floating in a doorway. A keystone is the
-             wedge at the top, and it is the stone both halves lean on, which
-             is the entire reason it is the right shape for this product. --}}
-        <path class="rv-meeting__keystone" d="M474 130 L500 100 L526 130 L500 160 Z" />
+             MEET. It is the wedge at the top, and it is the stone both halves
+             lean on, which is the entire reason it is the right shape for this
+             product. --}}
+        <path class="rv-meeting__keystone" d="M572 180 L600 146 L628 180 L600 214 Z" />
     </svg>
 
     {{-- ⚠️ STATIC GRAIN, IN ITS OWN SVG SO THE FILTER IS NEVER RE-EVALUATED

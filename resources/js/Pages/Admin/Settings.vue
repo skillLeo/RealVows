@@ -1,16 +1,14 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
-import { Link, router, useForm, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseField from '@/Components/BaseField.vue';
 import SegmentedControl from '@/Components/SegmentedControl.vue';
 import BaseCheckbox from '@/Components/BaseCheckbox.vue';
-import RvIcon from '@/Components/RvIcon.vue';
 
 const props = defineProps({
-    groups: { type: Array, required: true },
     activeGroup: { type: String, required: true },
     activeLabel: { type: String, required: true },
     fields: { type: Array, required: true },
@@ -103,11 +101,10 @@ const asOptions = (options) =>
 </script>
 
 <template>
-    <AppLayout title="Settings">
+    <AdminLayout title="Configuration" eyebrow="Configuration">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
-                <span class="rv-label">Administration</span>
-                <h1 class="rv-d2">Settings</h1>
+                <h1 class="rv-d2">{{ activeLabel }}</h1>
                 <p class="rv-lead" style="max-width: 56ch">
                     Everything RealVows connects to lives here. Change a value, save, and the next
                     email or upload uses it. Nothing needs to be deployed.
@@ -126,32 +123,6 @@ const asOptions = (options) =>
                 page. Add real mail, storage and gateway keys only after this goes live.
             </p>
 
-            <nav class="rv-tabs" aria-label="Settings groups">
-                <Link
-                    v-for="group in groups"
-                    :key="group.key"
-                    :href="`/admin/settings/${group.key}`"
-                    class="rv-tab"
-                    :class="{ 'is-active': group.key === activeGroup }"
-                    :aria-current="group.key === activeGroup ? 'page' : undefined"
-                >
-                    <span>{{ group.label }}</span>
-
-                    <!-- Same badge as the verification queue. A number means
-                         "this many still need a value"; the mark means the
-                         group is fully set. -->
-                    <span
-                        v-if="group.outstanding > 0"
-                        class="rv-tab__count"
-                        :title="`${group.outstanding} still to fill in`"
-                    >
-                        {{ group.outstanding }}
-                    </span>
-                    <span v-else class="rv-tab__count rv-tab__count--done" title="All set">
-                        <RvIcon name="check" :size="12" :stroke-width="2" />
-                    </span>
-                </Link>
-            </nav>
 
             <p
                 v-if="page.props.flash?.success || page.props.flash?.error"
@@ -253,21 +224,10 @@ const asOptions = (options) =>
                 </div>
             </form>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>
-.rv-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--hairline);
-}
-
-
-
-
 .rv-flash {
     margin: 0;
     padding: 16px 20px;

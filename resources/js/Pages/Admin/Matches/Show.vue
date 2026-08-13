@@ -1,5 +1,5 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import CompatibilityRing from '@/Components/CompatibilityRing.vue';
 
@@ -21,7 +21,7 @@ defineProps({
 </script>
 
 <template>
-    <AppLayout title="Match detail">
+    <AdminLayout title="Match detail">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap">
                 <CompatibilityRing :score="Math.round(match.score)" />
@@ -99,7 +99,7 @@ defineProps({
                 </BaseCard>
             </div>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

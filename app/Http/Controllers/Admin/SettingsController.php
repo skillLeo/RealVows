@@ -32,6 +32,21 @@ class SettingsController extends Controller
 
     private const TESTABLE = ['mail', 'storage'];
 
+    /**
+     * ⚠️ THE ONE LIST, READ BY BOTH THIS PAGE AND THE ADMIN SIDEBAR.
+     *
+     * Navigation::admin() renders a link per group. Writing those out a second
+     * time there would mean two lists of the same thing, and two lists of the
+     * same thing drift — the drift showing up as a sidebar item that 404s,
+     * which is the exact defect Navigation exists to prevent.
+     *
+     * @return array<string, string>
+     */
+    public static function groups(): array
+    {
+        return self::GROUPS;
+    }
+
     public function __construct(private readonly SettingsService $settings) {}
 
     public function index(Request $request, string $group = 'general'): Response
@@ -40,21 +55,19 @@ class SettingsController extends Controller
 
         // How many settings in each group still have no value. The tab badge
         // then means something — it tells the client where his attention is
-        // still needed, rather than just counting fields at him.
-        $outstanding = Setting::query()
-            ->whereNull('value')
-            ->selectRaw('`group`, count(*) as total')
-            ->groupBy('group')
-            ->pluck('total', 'group');
-
+        /*
+         * ⚠️ THE GROUP LIST AND ITS COUNTS MOVED TO THE SIDEBAR.
+         *
+         * Both used to be sent from here to draw a tab strip on this page.
+         * The strip is gone — nine tabs wrapped onto a second row and stopped
+         * being navigation — and Navigation::admin() renders the same eight
+         * groups with the same counts down the left instead.
+         *
+         * Sending them anyway would leave this page shipping a payload nothing
+         * reads, which is how a prop outlives the thing it was for and starts
+         * looking like a requirement to the next person.
+         */
         return Inertia::render('Admin/Settings', [
-            'groups' => collect(self::GROUPS)
-                ->map(fn ($label, $key) => [
-                    'key' => $key,
-                    'label' => $label,
-                    'outstanding' => (int) ($outstanding[$key] ?? 0),
-                ])
-                ->values(),
             'activeGroup' => $group,
             'activeLabel' => self::GROUPS[$group],
             'fields' => $this->settings->groupForDisplay($group),

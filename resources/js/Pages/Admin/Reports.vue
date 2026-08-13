@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 
@@ -29,7 +29,7 @@ const TABS = [
 </script>
 
 <template>
-    <AppLayout title="Reports">
+    <AdminLayout title="Reports">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Administration</span>
@@ -108,7 +108,7 @@ const TABS = [
                 </article>
             </div>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

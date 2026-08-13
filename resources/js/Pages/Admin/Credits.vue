@@ -1,6 +1,6 @@
 <script setup>
 import { useForm, usePage } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
 import BaseField from '@/Components/BaseField.vue';
 import BaseButton from '@/Components/BaseButton.vue';
@@ -25,7 +25,7 @@ function submit() {
 </script>
 
 <template>
-    <AppLayout title="Credits">
+    <AdminLayout title="Credits">
         <div class="rv-shell rv-section--app rv-stack" style="gap: 32px; max-width: 720px">
             <header class="rv-stack" style="gap: 12px">
                 <span class="rv-label">Administration</span>
@@ -96,7 +96,7 @@ function submit() {
                 </article>
             </div>
         </div>
-    </AppLayout>
+    </AdminLayout>
 </template>
 
 <style scoped>

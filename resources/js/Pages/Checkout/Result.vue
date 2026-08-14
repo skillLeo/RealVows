@@ -72,7 +72,7 @@ onMounted(() => {
                             <BaseButton :href="`/checkout/${packageKey}`" variant="primary">
                                 {{ $t('checkout.try_again') }}
                             </BaseButton>
-                            <BaseButton href="/packages" variant="secondary">
+                            <BaseButton v-if="!$page.props.freePeriod" href="/packages" variant="secondary">
                                 {{ $t('checkout.choose_a_different_package') }}
                             </BaseButton>
                         </div>

@@ -36,7 +36,7 @@ defineProps({
                 <div class="rv-stack" style="gap: 12px">
                     <h2 class="rv-d3">{{ $t('purchases.empty_heading') }}</h2>
                     <p class="rv-body">{{ $t('purchases.empty_body') }}</p>
-                    <BaseButton href="/packages" variant="secondary">See packages</BaseButton>
+                    <BaseButton v-if="!$page.props.freePeriod" href="/packages" variant="secondary">See packages</BaseButton>
                 </div>
             </BaseCard>
 

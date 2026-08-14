@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Services\Matching\Copy\RationaleWriter;
 use App\Support\ProfileOptions;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\PublicSurfaces;
 use Tests\Support\Scanners;
@@ -79,11 +81,41 @@ class MarriageLeadTest extends TestCase
             'surfaces' => ['/refunds'],
         ],
 
-        'A lasting relationship, leading to marriage' => [
-            'reason' => 'A profile option a member chooses for themselves. The other two lead '
-                .'on soul mate; this one names the destination because some members want to '
-                .'say exactly that. Stored key `serious_first` is untouched.',
-            'surfaces' => ['profile-options', '/profile'],
+        /*
+         * ⚠️ ALL THREE PURPOSE OPTIONS NAME MARRIAGE NOW, AND THE CLIENT ASKED
+         * FOR THAT EXPLICITLY.
+         *
+         * Two of them used to say only "my soul mate", which left marriage
+         * reading as one option among several — as though somebody could choose
+         * this platform for something short of it. In his words: the purpose of
+         * this site is finding couples for marriage, not dating or talking, so
+         * we should not offer another option instead of marriage.
+         *
+         * ⚠️ SOUL MATE STILL LEADS IN EVERY ONE OF THEM, which is the rule this
+         * file exists to hold. Marriage is the second clause, never the opening
+         * word, so both instructions are satisfied at once rather than one
+         * replacing the other.
+         *
+         * These are on a private, authenticated screen a member fills in about
+         * themselves, not on a marketing page.
+         */
+        'and marriage as soon as we are both sure' => [
+            'reason' => 'A profile option. Soul mate leads, marriage is the destination, and '
+                .'the three options now differ only in pace rather than in intention.',
+            'surfaces' => ['profile-options'],
+        ],
+
+        'and marriage without rushing it' => [
+            'reason' => 'The same option at a slower pace. Stored key `marriage_eventually` '
+                .'is untouched — it is in MatchingFieldsHash and renaming it would re-match '
+                .'the platform for a copy change.',
+            'surfaces' => ['profile-options'],
+        ],
+
+        'and marriage once we have taken our time' => [
+            'reason' => 'The third pace. Replaces "A lasting relationship, leading to '
+                .'marriage", which led on the relationship rather than on soul mate.',
+            'surfaces' => ['profile-options'],
         ],
     ];
 
@@ -91,8 +123,8 @@ class MarriageLeadTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
     }
 
     /**
@@ -130,9 +162,9 @@ class MarriageLeadTest extends TestCase
         $this->assertSame(
             [],
             $offences,
-            "Marriage-forward language is in the leading matter of a public page. The client "
-                ."asked for it demoted, not removed — move it later in the page and, if the "
-                ."sentence is a legitimate destination clause, add it to "
+            'Marriage-forward language is in the leading matter of a public page. The client '
+                .'asked for it demoted, not removed — move it later in the page and, if the '
+                .'sentence is a legitimate destination clause, add it to '
                 ."MarriageLeadTest::ALLOWED:\n  ".implode("\n  ", $offences)
         );
     }
@@ -172,8 +204,8 @@ class MarriageLeadTest extends TestCase
         $this->assertSame(
             [],
             $unexpected,
-            "Marriage-forward language appeared somewhere it is not accounted for. Either "
-                ."rewrite it in the soul mate register, or add it to MarriageLeadTest::ALLOWED "
+            'Marriage-forward language appeared somewhere it is not accounted for. Either '
+                .'rewrite it in the soul mate register, or add it to MarriageLeadTest::ALLOWED '
                 ."with a reason:\n  ".implode("\n  ", $unexpected)
         );
 
@@ -182,9 +214,9 @@ class MarriageLeadTest extends TestCase
         $this->assertSame(
             [],
             $stale,
-            "An entry in MarriageLeadTest::ALLOWED no longer matches anything. A list that "
-                ."outlives its subject permits nothing while still passing, which is "
-                ."indistinguishable from a working guard. Delete the entry or fix the "
+            'An entry in MarriageLeadTest::ALLOWED no longer matches anything. A list that '
+                .'outlives its subject permits nothing while still passing, which is '
+                .'indistinguishable from a working guard. Delete the entry or fix the '
                 ."copy:\n  ".implode("\n  ", $stale)
         );
     }
@@ -259,8 +291,8 @@ class MarriageLeadTest extends TestCase
                 [],
                 Scanners::marriageForwardTerms($sentence),
                 "The reader does not see [{$term}]. It carries the same weight as the word the "
-                    ."client objected to, and a guard that catches one spelling reports clean "
-                    ."while the register walks past it."
+                    .'client objected to, and a guard that catches one spelling reports clean '
+                    .'while the register walks past it.'
             );
         }
     }

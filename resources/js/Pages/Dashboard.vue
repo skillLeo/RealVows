@@ -21,6 +21,20 @@ const props = defineProps({
 
 const page = usePage();
 
+/*
+ * ⚠️ EVERY PURCHASE SURFACE IS HIDDEN DURING THE FREE PERIOD, NEVER DISABLED.
+ *
+ * `/packages` answers 404 while introductions are free — that is deliberate and
+ * documented. This page linked to it from three places anyway, so a member
+ * clicking "See packages" or "Open an introduction" got a 404 with no
+ * explanation. The public navigation already hides its Pricing link for exactly
+ * this reason; the member's own dashboard did not.
+ *
+ * `freePeriod` is shared with every Inertia response by HandleInertiaRequests.
+ * It was there the whole time and this page simply never asked.
+ */
+const freePeriod = computed(() => page.props.freePeriod === true);
+
 /**
  * Five states, decided once here rather than as a pile of v-ifs in the
  * template. Each one is designed — a marriage platform that renders a blank
@@ -200,7 +214,7 @@ const heading = computed(() => {
                                 <p class="rv-body">
                                     {{ $t('dashboard.all_open_body') }}
                                 </p>
-                                <BaseButton href="/packages" variant="secondary">See packages</BaseButton>
+                                <BaseButton v-if="!freePeriod" href="/packages" variant="secondary">See packages</BaseButton>
                             </div>
                         </BaseCard>
                     </template>
@@ -214,9 +228,12 @@ const heading = computed(() => {
                         <p v-if="credits === 0" class="rv-small" style="margin: 0">
                             {{ $t('dashboard.ready') }}
                         </p>
-                        <BaseButton href="/packages" :variant="credits === 0 ? 'primary' : 'secondary'">
+                        <BaseButton v-if="!freePeriod" href="/packages" :variant="credits === 0 ? 'primary' : 'secondary'">
                             {{ credits === 0 ? 'Open an introduction' : 'Add more' }}
                         </BaseButton>
+                        <p v-else class="rv-small" style="margin: 0">
+                            {{ $t('dashboard.nothing_to_buy') }}
+                        </p>
                     </div>
 
                     <div class="rv-rail-card">
@@ -229,7 +246,7 @@ const heading = computed(() => {
         </div>
 
         <!-- Contextual, and never shown when it would do nothing. -->
-        <Link v-if="state === 'needs-credits'" href="/packages" class="rv-fab rv-pressable">
+        <Link v-if="state === 'needs-credits' && !freePeriod" href="/packages" class="rv-fab rv-pressable">
             <RvIcon name="lock" :size="18" />
             <span>Open</span>
         </Link>

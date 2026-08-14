@@ -117,13 +117,31 @@ class ProfileOptions
      * hash, invalidate every stored profile hash and re-match the whole
      * platform — for a copy change. Only the right-hand side is copy.
      *
-     * The register follows the client: soul mate leads, marriage stays as the
-     * destination in the third option, which is his own phrasing.
+     * ⚠️ MARRIAGE APPEARS IN ALL THREE NOW, AND THE CLIENT ASKED FOR THAT.
+     *
+     * Two of the three used to say only "my soul mate", which left marriage
+     * reading as one option among several — as though a member could choose
+     * this platform for something short of it. In his words: the purpose of
+     * this site is finding couples for marriage, not dating or talking, so we
+     * should not offer another option instead of marriage.
+     *
+     * The three now differ only in PACE, which is a real thing to ask somebody
+     * and is what `marriage_timeline` is for. They no longer differ in
+     * intention, because there is only one intention here.
+     *
+     * ⚠️ SOUL MATE STILL LEADS. That is his older instruction and it has not
+     * been withdrawn: marriage is the destination at the end of the sentence,
+     * never the opening word. Both rules hold at once.
+     *
+     * ⚠️ THE KEYS DO NOT MOVE. `marriage_timeline` is in
+     * MatchingFieldsHash::FIELDS, so renaming one would change the hash,
+     * invalidate every stored profile hash and re-match the whole platform for
+     * a copy change. Only the right-hand side is copy.
      */
     public const RELATIONSHIP_GOAL = [
-        'marriage_soon' => 'My soul mate, as soon as I meet them',
-        'marriage_eventually' => 'My soul mate, without rushing it',
-        'serious_first' => 'A lasting relationship, leading to marriage',
+        'marriage_soon' => 'My soul mate, and marriage as soon as we are both sure',
+        'marriage_eventually' => 'My soul mate, and marriage without rushing it',
+        'serious_first' => 'My soul mate, and marriage once we have taken our time',
     ];
 
     public const DISTANCE_PREFERENCE = [
@@ -160,6 +178,7 @@ class ProfileOptions
     ];
 
     public const BIO_MIN_WORDS = 150;
+
     public const BIO_MAX_WORDS = 300;
 
     /**

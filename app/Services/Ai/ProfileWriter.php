@@ -52,7 +52,7 @@ class ProfileWriter
     }
 
     /**
-     * @return array{rewrite: string, model: string}|null  Null means keep the original.
+     * @return array{rewrite: string, model: string}|null Null means keep the original.
      */
     public function rewrite(string $original): ?array
     {
@@ -101,6 +101,28 @@ class ProfileWriter
                 );
             }
 
+            /*
+             * ⚠️ A REWRITE THAT IS SHORTER THAN THE ORIGINAL IS NOT A TIDY-UP.
+             *
+             * The bio has a 150-word floor, so a member who is already short and
+             * presses the button expects to move toward it. A model that
+             * "tidies" by cutting leaves them further from finishing than
+             * before, having spent one of their five daily attempts to get
+             * worse. The instruction says never return fewer words; this is what
+             * makes it true.
+             *
+             * Discarded rather than shown with a caution, for the same reason
+             * the fidelity gate discards: a member halfway through signing up
+             * accepts whatever is in front of them.
+             */
+            if (str_word_count($rewrite) < str_word_count($original)) {
+                return $this->abandon(
+                    'rewrite was shorter than the original ('
+                        .str_word_count($rewrite).' vs '.str_word_count($original).' words)',
+                    $original,
+                );
+            }
+
             return ['rewrite' => $rewrite, 'model' => $model];
         } catch (Throwable $e) {
             return $this->abandon($e->getMessage(), $original);
@@ -126,7 +148,13 @@ class ProfileWriter
         - Keep the author's voice. Fix grammar, spelling and word order.
         - Warm and dignified. Never romantic, flirtatious or suggestive.
         - British English. No em dashes, no semicolons, no exclamation marks.
-        - Similar length to the input. Do not pad.
+        - The profile needs at least 150 words. Work every point the author
+          made into a full, natural sentence and let their own material breathe.
+        - NEVER invent material to reach that length. If what they wrote cannot
+          honestly support 150 words, return what you have. A short honest
+          profile is better than a padded one, and the member will be told they
+          need to write more.
+        - Never return fewer words than you were given.
         PROMPT;
     }
 

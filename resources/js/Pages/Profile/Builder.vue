@@ -23,6 +23,7 @@ const props = defineProps({
     profile: { type: Object, required: true },
     completeness: { type: Number, required: true },
     missing: { type: Array, required: true },
+    missingByStep: { type: Object, default: () => ({}) },
     submittable: { type: Boolean, required: true },
     submittedAt: { type: String, default: null },
     photos: { type: Object, default: () => ({}) },
@@ -47,6 +48,30 @@ const AUTOSAVING_STEPS = ['personal', 'physical', 'lifestyle', 'values', 'prefer
 const model = ref({ ...props.profile[props.currentStep] });
 const liveCompleteness = ref(props.completeness);
 const liveMissing = ref(props.missing);
+const liveMissingByStep = ref(props.missingByStep);
+
+/*
+ * ⚠️ WHAT IS STILL SHORT ON THE STEP THE MEMBER IS ACTUALLY LOOKING AT.
+ *
+ * Every shortfall used to surface at the very end of a seven-step form. Somebody
+ * who left one field blank on step three reached the last screen, was refused,
+ * and had to work out for themselves which step the missing thing lived on.
+ *
+ * Telling them here means the refusal is next to the field, while they still
+ * remember what they were doing.
+ */
+const blocked = ref(false);
+
+const shortOnThisStep = computed(() => liveMissingByStep.value?.[props.step] ?? []);
+
+/*
+ * ⚠️ THE WARNING CLEARS ITSELF THE MOMENT THE STEP IS COMPLETE. A message that
+ * stays after the member has fixed the thing reads as the form being broken,
+ * and they stop trusting the next one.
+ */
+watch(shortOnThisStep, (still) => {
+    if (still.length === 0) blocked.value = false;
+});
 const liveSubmittable = ref(props.submittable);
 const direction = ref('forward');
 
@@ -58,6 +83,7 @@ const { status, errors, flush } = useAutosave(
     (body) => {
         liveCompleteness.value = body.completeness;
         liveMissing.value = body.missing;
+        liveMissingByStep.value = body.missingByStep ?? liveMissingByStep.value;
         liveSubmittable.value = body.submittable;
     }
 );
@@ -68,6 +94,7 @@ watch(
         model.value = { ...props.profile[step] };
         liveCompleteness.value = props.completeness;
         liveMissing.value = props.missing;
+        liveMissingByStep.value = props.missingByStep;
         liveSubmittable.value = props.submittable;
     }
 );
@@ -116,6 +143,7 @@ const shortSaveState = computed(
 function onPhotosUpdated(payload) {
     liveCompleteness.value = payload.completeness;
     liveMissing.value = payload.missing;
+    liveMissingByStep.value = payload.missingByStep ?? liveMissingByStep.value;
     liveSubmittable.value = payload.submittable;
 }
 
@@ -125,7 +153,31 @@ async function go(stepKey, movement) {
     router.visit(`/profile/${stepKey}`, { preserveScroll: false });
 }
 
-const next = () => (isLast.value ? submit() : go(props.stepKeys[index.value + 1], 'forward'));
+/*
+ * ⚠️ THE STEP HAS TO BE FINISHED BEFORE THE NEXT ONE OPENS.
+ *
+ * Advancing freely and refusing at the end is the thing the client asked to be
+ * fixed, and he is right: a member arriving at step seven and being told
+ * something is missing has no idea which step it was on. Autosave flushes first,
+ * so the answer typed a second ago counts.
+ *
+ * ⚠️ IT ANNOUNCES RATHER THAN JUST BLOCKING. A Continue button that quietly does
+ * nothing is indistinguishable from a broken one, and a member with no
+ * explanation presses it again and then leaves.
+ */
+const next = async () => {
+    if (autosaves.value) await flush();
+
+    if (shortOnThisStep.value.length > 0) {
+        blocked.value = true;
+
+        return;
+    }
+
+    blocked.value = false;
+
+    return isLast.value ? submit() : go(props.stepKeys[index.value + 1], 'forward');
+};
 const previous = () => index.value > 0 && go(props.stepKeys[index.value - 1], 'back');
 const jump = (i) => i !== index.value && go(props.stepKeys[i], i > index.value ? 'forward' : 'back');
 
@@ -190,6 +242,28 @@ async function submit() {
                         @updated="onPhotosUpdated"
                     />
                 </Transition>
+
+                <!--
+                    ⚠️ THE REFUSAL BELONGS ON THE STEP THAT CAUSED IT.
+
+                    Everything short used to be listed on the final screen, after
+                    seven steps, with no indication of which step it came from.
+                    The client's words: the user is confused about what is left
+                    or missed or wrong.
+
+                    Shown here it is next to the field, while they still remember
+                    what they were doing, and only after they press Continue — so
+                    a half-filled step they are still working on is never scolded.
+                -->
+                <p
+                    v-if="blocked && shortOnThisStep.length"
+                    class="rv-builder__missing"
+                    role="alert"
+                    aria-live="polite"
+                >
+                    <strong>{{ $t('profile.before_you_continue') }}</strong>
+                    {{ shortOnThisStep.join(', ') }}.
+                </p>
             </div>
         </div>
 

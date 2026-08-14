@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Profile\SaveProfileStep;
 use App\Actions\Verification\EnsureVerificationCode;
 use App\Http\Requests\Profile\SaveStepRequest;
+use App\Models\Guardian;
 use App\Models\Profile;
 use App\Services\Profile\ProfileCompleteness;
 use App\Support\ProfileOptions;
@@ -75,6 +76,7 @@ class ProfileBuilderController extends Controller
             'completeness' => $assessment['percent'],
             'missing' => $assessment['missing'],
             'submittable' => $assessment['missing'] === [],
+            'missingByStep' => $assessment['missingByStep'],
             'submittedAt' => $profile->submitted_at?->toIso8601String(),
         ]);
     }
@@ -103,6 +105,7 @@ class ProfileBuilderController extends Controller
             'completeness' => $assessment['percent'],
             'missing' => $assessment['missing'],
             'submittable' => $assessment['missing'] === [],
+            'missingByStep' => $assessment['missingByStep'],
         ]);
     }
 
@@ -136,6 +139,31 @@ class ProfileBuilderController extends Controller
             'status' => 'pending',
             'updated_at' => now(),
         ]);
+
+        /*
+         * ⚠️ STRAIGHT TO THE TRUSTED CONTACT, NOT TO THE DASHBOARD.
+         *
+         * Naming a trusted contact is not part of building a profile and it is
+         * the thing the whole platform turns on. Left as its own page reached
+         * from a menu, it is the step nobody takes: a member finishes seven
+         * steps, lands on a dashboard, feels finished, and never goes looking
+         * for it.
+         *
+         * ⚠️ THEY CAN SKIP IT, AND THAT MATTERS. This is a redirect, not a
+         * gate — the page explains who a trusted contact is and why, in plain
+         * words, and offers a way past. Forcing it would mean a member who has
+         * nobody to name simply cannot finish, which is precisely the person
+         * the appointed-contact path exists for.
+         */
+        $alreadyNamed = Guardian::where('member_id', $request->user()->id)
+            ->whereNot('status', Guardian::STATUS_REPLACED)
+            ->exists();
+
+        if (! $alreadyNamed) {
+            return redirect()->route('trusted-contact.show')
+                ->with('success', 'Your profile is with our team. A real person will check it, '
+                    .'usually within a day. There is one more thing worth doing while you wait.');
+        }
 
         return redirect()->route('dashboard')
             ->with('success', 'Your profile is with our team. A real person will check it, usually within a day.');

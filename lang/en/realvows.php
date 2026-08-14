@@ -30,6 +30,13 @@
 return [
 
     'dashboard' => [
+        /*
+         * ⚠️ SHOWN INSTEAD OF A PURCHASE BUTTON, NOT BESIDE ONE. `/packages`
+         * answers 404 while introductions are free, so the button that used to
+         * sit here sent members to a dead page.
+         */
+        'nothing_to_buy' => 'Introductions are free while we are getting started, so there is nothing to buy.',
+
         'update_your_photos' => 'Update your photos',
         'waiting_one' => 'One person is waiting to meet you.',
         'waiting_many' => ':count people are waiting to meet you.',
@@ -218,6 +225,9 @@ return [
     ],
 
     'profile' => [
+        // ⚠️ Shown on the step that is short, when Continue is pressed.
+        'before_you_continue' => 'Before you continue:',
+
         'a_photo_of_you' => 'A photo of you holding a handwritten note with the code below. A real person checks it. This is how we keep every profile genuine.',
         'these_are_absolute_anyone' => 'These are absolute. Anyone they apply to is removed before any scoring happens, so choose only what you genuinely could not live with.',
         'not_verified' => 'Not verified yet',
@@ -299,6 +309,29 @@ return [
         'rejected_because' => 'We could not confirm the person you named. :reason You can name somebody else below.',
         'heading' => 'Your trusted contact',
         'lead' => 'Someone who knows you, who can confirm you are who you say you are, and who looks at an introduction before you do.',
+        /*
+         * ⚠️ WRITTEN FOR SOMEBODY MEETING THE IDEA FOR THE FIRST TIME.
+         *
+         * A member now arrives here straight after finishing their profile
+         * rather than hunting for it in a menu, so this page has to introduce
+         * the whole concept in a few seconds — who this person is, why they
+         * exist, and that saying no is allowed.
+         *
+         * Plainly, in the second person, with no jargon. "Wali" and "mahram"
+         * are the right words and they are not the words a nervous
+         * twenty-four-year-old needs at this moment.
+         */
+        'who_they_are' => 'Somebody in your family, usually your father or your brother.',
+        'why_them' => 'They see an introduction before you do, and they tell you what they think. '
+            .'It means you are never weighing up a stranger on your own, and it is how families '
+            .'have always done this.',
+        'what_they_see' => 'They see who you have been introduced to. They cannot write to '
+            .'anybody, and they cannot see anything else about the platform.',
+        'if_nobody' => 'If there is nobody you can name, tell us and we will arrange somebody. '
+            .'You are never left out of this because of it.',
+        'skip_for_now' => 'I will do this later',
+        'skip_note' => 'You can add them whenever you like. Introductions start once they are '
+            .'confirmed.',
         'where_this_stands' => 'Where this stands',
         'name_somebody' => 'Name somebody',
         'their_name' => 'Their full name',

@@ -31,7 +31,20 @@ class ProfileCompleteness
     private const PHOTO_SLOTS = 4;
 
     /**
-     * @return array{percent: int, missing: array<int, string>}
+     * ⚠️ `missingByStep` EXISTS SO A MEMBER IS TOLD ON THE STEP THEY ARE ON.
+     *
+     * The flat `missing` list is correct and was the only thing returned, so
+     * every shortfall surfaced at the very END of a seven-step form. A member
+     * who left one field blank on step three reached the last screen, was
+     * refused, and had to work out for themselves which step the missing thing
+     * lived on. That is the client's own complaint and it is a fair one.
+     *
+     * Same computation, keyed by the step it belongs to, so the builder can
+     * refuse to advance while the CURRENT step is short and name what is short
+     * right there. Nothing about the flat list changes, because the final
+     * refusal is still the backstop.
+     *
+     * @return array{percent: int, missing: array<int, string>, missingByStep: array<string, list<string>>}
      */
     public function assess(Profile $profile): array
     {
@@ -40,6 +53,7 @@ class ProfileCompleteness
         $total = 0;
         $done = 0;
         $missing = [];
+        $byStep = [];
 
         foreach (self::REQUIRED as $step => $fields) {
             foreach ($fields as $field) {
@@ -49,6 +63,7 @@ class ProfileCompleteness
                     $done++;
                 } else {
                     $missing[] = $this->label($step, $field);
+                    $byStep[$step][] = $this->label($step, $field);
                 }
             }
         }
@@ -60,6 +75,7 @@ class ProfileCompleteness
                 $done++;
             } else {
                 $missing[] = $this->label('preferences', $field);
+                $byStep['preferences'][] = $this->label('preferences', $field);
             }
         }
 
@@ -71,20 +87,23 @@ class ProfileCompleteness
 
         if ($uploaded < self::PHOTO_SLOTS) {
             $shortfall = self::PHOTO_SLOTS - $uploaded;
-            $missing[] = $shortfall === 1
-                ? 'One more photo'
-                : "{$shortfall} more photos";
+            $line = $shortfall === 1 ? 'One more photo' : "{$shortfall} more photos";
+            $missing[] = $line;
+            $byStep['photos'][] = $line;
         }
 
         // The bio has a floor as well as a presence check — three words is
         // not a bio, and matching on it would be meaningless.
         if ($this->filled($profile->bio) && $this->wordCount($profile->bio) < ProfileOptions::BIO_MIN_WORDS) {
-            $missing[] = 'A slightly longer bio — at least '.ProfileOptions::BIO_MIN_WORDS.' words';
+            $line = 'A slightly longer bio — at least '.ProfileOptions::BIO_MIN_WORDS.' words';
+            $missing[] = $line;
+            $byStep['values'][] = $line;
         }
 
         return [
             'percent' => $total > 0 ? (int) round($done / $total * 100) : 0,
             'missing' => $missing,
+            'missingByStep' => $byStep,
         ];
     }
 

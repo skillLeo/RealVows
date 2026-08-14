@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import BaseCard from '@/Components/BaseCard.vue';
@@ -36,6 +36,34 @@ function reject() {
 }
 
 const decided = props.verification.status === 'verified' || props.verification.status === 'rejected';
+
+/*
+ * ⚠️ THE REVIEWER HAS TO BE ABLE TO LOOK PROPERLY.
+ *
+ * This screen decides whether a real person is who they say they are, by
+ * reading a handwritten code off a photograph and comparing a face against four
+ * others. At grid size that is guesswork, and there was no way to enlarge
+ * anything — no click, no zoom, no download.
+ *
+ * Escape closes it, because a viewer you cannot dismiss with the key everybody
+ * reaches for is the kind of thing people work around by reloading the page and
+ * losing their place in the queue.
+ */
+const viewing = ref(null);
+const viewingTitle = ref('');
+
+function open(url, title) {
+    viewing.value = url;
+    viewingTitle.value = title;
+}
+
+function onKey(event) {
+    if (event.key === 'Escape') viewing.value = null;
+}
+
+onMounted(() => window.addEventListener('keydown', onKey));
+onUnmounted(() => window.removeEventListener('keydown', onKey));
+
 </script>
 
 <template>
@@ -75,12 +103,26 @@ const decided = props.verification.status === 'verified' || props.verification.s
                  and large enough to actually compare faces. -->
             <div class="rv-review__grid">
                 <figure class="rv-review__figure rv-review__figure--selfie">
-                    <img
+                    <!--
+                        ⚠️ A THUMBNAIL IS NOT ENOUGH TO DO THIS JOB.
+                        The reviewer has to read a handwritten code off a
+                        photograph and compare a face against four others. At
+                        grid size that is guesswork, and guesswork here means
+                        approving somebody who is not who they say they are.
+                    -->
+                    <button
                         v-if="verification.selfieUrl"
-                        :src="verification.selfieUrl"
-                        alt="Verification photo: the member holding a handwritten code"
-                        loading="lazy"
-                    />
+                        type="button"
+                        class="rv-review__zoom"
+                        @click="open(verification.selfieUrl, 'Verification photo')"
+                    >
+                        <img
+                            :src="verification.selfieUrl"
+                            alt="Verification photo: the member holding a handwritten code"
+                            loading="lazy"
+                        />
+                        <span class="rv-review__zoomhint">Click to enlarge</span>
+                    </button>
                     <span v-else class="rv-review__missing">No verification photo uploaded</span>
                     <figcaption class="rv-label rv-label--brass">Verification photo</figcaption>
                 </figure>
@@ -102,9 +144,41 @@ const decided = props.verification.status === 'verified' || props.verification.s
                 </p>
 
                 <figure v-for="photo in photos" :key="photo.id" class="rv-review__figure">
-                    <img :src="photo.url" :alt="`${photo.title} photo`" loading="lazy" />
+                    <button type="button" class="rv-review__zoom" @click="open(photo.url, photo.title)">
+                        <img :src="photo.url" :alt="`${photo.title} photo`" loading="lazy" />
+                        <span class="rv-review__zoomhint">Click to enlarge</span>
+                    </button>
                     <figcaption class="rv-label">{{ photo.title }}</figcaption>
                 </figure>
+            </div>
+
+            <!--
+                ⚠️ FULL SIZE, IN THE PAGE, WITH A WAY OUT.
+
+                Opening in a new tab would work and would also hand the reviewer
+                a bare signed URL in their address bar, which is the sort of
+                thing that gets pasted into a message. This stays inside the
+                admin, closes on Escape or a click, and the download link is
+                deliberate rather than a side effect of right-clicking.
+            -->
+            <div
+                v-if="viewing"
+                class="rv-lightbox"
+                role="dialog"
+                aria-modal="true"
+                :aria-label="viewingTitle"
+                @click="viewing = null"
+            >
+                <div class="rv-lightbox__bar" @click.stop>
+                    <span class="rv-label rv-label--brass">{{ viewingTitle }}</span>
+                    <span class="rv-lightbox__actions">
+                        <a :href="viewing" download class="rv-lightbox__link">Download</a>
+                        <button type="button" class="rv-lightbox__link" @click="viewing = null">
+                            Close
+                        </button>
+                    </span>
+                </div>
+                <img :src="viewing" :alt="viewingTitle" class="rv-lightbox__img" @click.stop />
             </div>
 
             <BaseCard v-if="decided" quiet>
@@ -232,5 +306,83 @@ const decided = props.verification.status === 'verified' || props.verification.s
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+}
+</style>
+
+<style scoped>
+/* ⚠️ A BUTTON, NOT A DIV WITH A CLICK HANDLER. A reviewer using a keyboard has
+   to reach these too, and the focus ring is the only thing telling them where
+   they are. */
+.rv-review__zoom {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    position: relative;
+}
+
+.rv-review__zoomhint {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 6px 8px;
+    font-size: var(--fs-caption);
+    color: #fff;
+    background: rgba(0, 0, 0, .55);
+    opacity: 0;
+    transition: opacity .18s ease;
+}
+
+.rv-review__zoom:hover .rv-review__zoomhint,
+.rv-review__zoom:focus-visible .rv-review__zoomhint { opacity: 1; }
+
+.rv-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(12, 8, 9, .93);
+    cursor: zoom-out;
+}
+
+.rv-lightbox__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: auto;
+}
+
+.rv-lightbox__actions { display: flex; gap: 16px; align-items: center; }
+
+.rv-lightbox__link {
+    border: 0;
+    background: none;
+    color: #fff;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* ⚠️ `contain` rather than `cover`. Cropping the photograph is precisely what
+   must not happen when somebody is trying to read a code written in its
+   corner. */
+.rv-lightbox__img {
+    justify-self: center;
+    align-self: center;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    cursor: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rv-review__zoomhint { transition: none; }
 }
 </style>

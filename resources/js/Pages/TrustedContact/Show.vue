@@ -74,6 +74,28 @@ function submit() {
                 <p class="rv-lead" style="max-width: 56ch">{{ $t('trusted_contact.lead') }}</p>
             </header>
 
+            <!--
+                ⚠️ THE INTRODUCTION TO THE IDEA, NOT JUST THE FORM.
+
+                A member now lands here straight after finishing their profile
+                rather than finding it in a menu, so for most people this is the
+                first time they have met the concept at all. A form with no
+                explanation in front of it reads as one more thing being asked
+                of them, and they leave.
+
+                Only shown when they have not named anybody. Somebody who
+                already has a trusted contact does not need the idea explained
+                to them again every time they open the page.
+            -->
+            <BaseCard v-if="!current" accent>
+                <div class="rv-stack" style="gap: 14px">
+                    <p class="rv-body"><strong>{{ $t('trusted_contact.who_they_are') }}</strong></p>
+                    <p class="rv-body">{{ $t('trusted_contact.why_them') }}</p>
+                    <p class="rv-help">{{ $t('trusted_contact.what_they_see') }}</p>
+                    <p class="rv-help">{{ $t('trusted_contact.if_nobody') }}</p>
+                </div>
+            </BaseCard>
+
             <p
                 v-if="page.props.flash?.success"
                 class="rv-flash"

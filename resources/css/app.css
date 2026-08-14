@@ -1172,13 +1172,25 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* ⚠️ THE FOUNDING OFFER. The client wrote it in capitals; capitals shout, and
    this design system is built on restraint. Same emphasis, carried by the
    brass accent and a rule rather than by volume. */
+/* ⚠️ THIS BAND SITS ON THE LIGHT HERO, AND IT WAS PAINTED FOR A DARK ONE.
+   `--on-dark` is the near-white used on the maroon panels. On cream it is
+   invisible: the client saw an empty box with the words "free, permanently"
+   floating in it, because the <strong> used brass and everything around it
+   did not.
+
+   The hero was dark when this was written and became light later. Nothing
+   failed, nothing warned, and the sentence carrying the founding offer — the
+   one promise on the whole page — simply stopped being readable.
+
+   ⚠️ DO NOT "MATCH THE BRAND" BY LIGHTENING THIS AGAIN. The brass is an accent
+   on a light ground and cannot carry body text at this size. */
 .rv-founding {
   margin: 0;
   padding: 16px 20px;
   border-left: 2px solid var(--brass);
   font-size: var(--fs-body-2);
   line-height: 1.6;
-  color: var(--on-dark);
+  color: var(--ink);
   max-width: 44ch;
 }
 
@@ -1188,10 +1200,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   font-size: var(--fs-body-3);
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--brass-bright);
+  /* The deeper brass, not brass-bright — the bright one is for dark panels. */
+  color: var(--brass);
 }
 
-.rv-founding strong { color: var(--brass-bright); font-weight: 600; }
+.rv-founding strong { color: var(--ink); font-weight: 600; }
 
 /* ⚠️ #8 THE SETTLE, AND IT IS A TRANSITION — NOT A KEYFRAME.
    The catalogue lists it as "(transition) sheets and toasts", and the first

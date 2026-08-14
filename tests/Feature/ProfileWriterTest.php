@@ -6,9 +6,12 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Services\Ai\ProfileWriter;
 use App\Services\Settings\SettingsService;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -25,8 +28,8 @@ class ProfileWriterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
         Http::preventStrayRequests();
         RateLimiter::clear('profile-writer:1');
     }
@@ -99,11 +102,26 @@ class ProfileWriterTest extends TestCase
         }
     }
 
-    /** ⚠️ POSITIVE CONTROL: the gate is not simply rejecting everything. */
+    /**
+     * ⚠️ POSITIVE CONTROL: the gate is not simply rejecting everything.
+     *
+     * ⚠️ THE FIXTURE HAD TO GROW, AND THAT IS THE POINT OF THE NEW RULE. It
+     * returned a rewrite SHORTER than the original, which now counts as a
+     * failure: the bio has a 150-word floor, so a member who is already short
+     * and presses the button must not be moved further away from finishing.
+     *
+     * Every fact here is present in the original. Nothing is invented — the
+     * sentences are simply allowed to breathe, which is exactly what the
+     * instruction asks of the model.
+     */
     public function test_the_gate_lets_a_faithful_rewrite_through(): void
     {
         $this->enable();
-        $this->fakeRewrite('I am a teacher in Kingston. I enjoy cooking and reading books.');
+        $this->fakeRewrite(
+            'I am a teacher in Kingston. I enjoy cooking, and I enjoy reading books. '
+            .'I would like a family one day, and I am looking for somebody who is kind '
+            .'to people.'
+        );
 
         $this->assertNotNull(
             app(ProfileWriter::class)->rewrite(self::BIO),
@@ -185,8 +203,8 @@ class ProfileWriterTest extends TestCase
     /** ⚠️ The original column exists so a false claim can be traced to its author. */
     public function test_the_profile_can_store_the_members_own_words_separately(): void
     {
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('profiles', 'bio_original'));
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('profiles', 'bio_rewritten_by'));
+        $this->assertTrue(Schema::hasColumn('profiles', 'bio_original'));
+        $this->assertTrue(Schema::hasColumn('profiles', 'bio_rewritten_by'));
     }
 
     /**

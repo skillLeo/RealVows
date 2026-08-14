@@ -36,6 +36,37 @@ return [
             'serve' => true,
             'throw' => false,
             'report' => false,
+
+            /*
+             * ⚠️ WITHOUT THIS, EVERY PHOTOGRAPH UPLOADED THROUGH THE APP WAS
+             * INVISIBLE TO THE REVIEWER.
+             *
+             * Flysystem defaults a private directory to 0700 — owner only. The
+             * files land as deploy:www-data and php-fpm runs as www-data, so
+             * the web server could not TRAVERSE the directory it had just
+             * written through. `exists()` answered true from the console and
+             * the image route returned 500 in the browser.
+             *
+             * ⚠️ THE EFFECT WAS THAT VERIFICATION COULD NOT HAPPEN AT ALL. A
+             * member uploads four photographs, the reviewer opens the queue,
+             * and every image is broken. Seeded profiles worked, because those
+             * directories were created by a different process with a different
+             * umask — so the demo looked perfect and only real uploads failed.
+             *
+             * 0750 and 0640 are STRICTER than what the files had (0644) and
+             * looser than what the directories had (0700). Owner writes, the
+             * web server group reads, nobody else sees anything.
+             *
+             * ⚠️ THIS MUST STAY IN STEP WITH THE OWNERSHIP THE DEPLOY SETS.
+             * The deploy runs `chown -R deploy:www-data`. If php-fpm is ever
+             * moved to another user, these bytes become unreadable again and
+             * the symptom will be broken images rather than an error anybody
+             * can search for.
+             */
+            'permissions' => [
+                'file' => ['public' => 0644, 'private' => 0640],
+                'dir' => ['public' => 0755, 'private' => 0750],
+            ],
         ],
 
         'public' => [

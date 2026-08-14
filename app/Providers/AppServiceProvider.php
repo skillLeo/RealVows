@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Listeners\RefuseUndeliverableAddresses;
 use App\Services\Settings\SettingsService;
 use App\Services\Verification\ManualVerificationService;
 use App\Services\Verification\VerificationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +30,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+
+        /*
+         * ⚠️ ONE POINT EVERY MESSAGE PASSES THROUGH, so a send site added later
+         * cannot forget it. See RefuseUndeliverableAddresses for what the daily
+         * bounces to @realvows.test were costing a domain with no sending
+         * reputation to spare.
+         */
+        Event::listen(MessageSending::class, RefuseUndeliverableAddresses::class);
     }
 
     /**

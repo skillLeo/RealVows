@@ -72,6 +72,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    # ⚠️ `actions: read` IS WHAT LETS THE CI GATE BELOW ASK ANYTHING.
+    #
+    # The default GITHUB_TOKEN cannot read workflow runs, so the first run of
+    # that gate died on `HTTP 403: Resource not accessible by integration` and
+    # refused the deploy. It refused for the wrong reason and in the right
+    # direction, which is the only comfortable way to find this out.
+    #
+    # `contents: read` is spelled out too: naming any permission drops every
+    # unnamed one to none, so adding `actions` silently removes checkout's
+    # access unless it is listed.
+    permissions:
+      contents: read
+      actions: read
+
     env:
       APP_DIR: /var/www/realvows
       PHP: /usr/bin/php8.4
@@ -120,7 +134,14 @@ jobs:
           SHA: ${{ github.sha }}
           OVERRIDE: ${{ github.event.inputs.ignore_ci }}
         run: |
-          set -euo pipefail
+          # ⚠️ NO `set -e` ON THE QUERY ITSELF.
+          #
+          # The first version used `set -euo pipefail`, so when the API call
+          # returned 403 the step died on that line and the explanation below
+          # never printed. The operator saw a red step with a bare HTTP error
+          # and nothing telling them what it was for — a gate that refuses
+          # without saying why is only half a control.
+          set -uo pipefail
 
           # ⚠️ `gh run list --commit` NEEDS THE FULL SHA. A short one matches
           # nothing and returns "none", which this step treats as a refusal —
@@ -137,7 +158,7 @@ jobs:
             --limit 1 \
             --json conclusion \
             --jq '.[0].conclusion // "none"' \
-            -R "$GITHUB_REPOSITORY")
+            -R "$GITHUB_REPOSITORY" 2>&1) || CONCLUSION="unreadable: ${CONCLUSION}"
 
           echo "CI for ${SHA:0:7}: ${CONCLUSION}"
 

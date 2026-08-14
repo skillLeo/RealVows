@@ -45,10 +45,27 @@ class ErrorTrackingIsSafeTest extends TestCase
          * developer machine and every CI run into the client's project, which
          * is both noise and a small data leak.
          */
-        $this->assertNull(
-            env('SENTRY_LARAVEL_DSN'),
+        /*
+         * ⚠️ THIS ASSERTED `assertNull` AND PASSED ON MY MACHINE ONLY.
+         *
+         * My own .env has no Sentry key at all, so env() returned null and it
+         * was green. CI copies .env.example, which now carries
+         * `SENTRY_LARAVEL_DSN=` — an empty STRING — and it failed there
+         * immediately.
+         *
+         * Unset and set-to-empty both mean "Sentry is off", and only one of
+         * them is null. So the assertion was about my laptop rather than about
+         * the property.
+         *
+         * That is the eleventh failure shape reappearing inside a test written
+         * an hour after documenting it, in a file about safety. Normalised here
+         * so it says the same thing everywhere.
+         */
+        $this->assertSame(
+            '',
+            trim((string) config('sentry.dsn')),
             'A Sentry DSN is set in this environment. That is correct on the server and wrong '
-                .'in a committed .env.example or in CI.',
+                .'in a committed .env.example, in CI, or on a developer machine.',
         );
     }
 

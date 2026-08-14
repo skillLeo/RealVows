@@ -2,7 +2,10 @@
 
 namespace App\Support;
 
+use App\Http\Controllers\Admin\SettingsController;
+use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 /**
  * The single source of truth for what a signed-in person can navigate to.
@@ -154,6 +157,57 @@ class Navigation
      *
      * @return list<array{key: string, label: string, items: list<array{key: string, label: string, href: string}>}>
      */
+
+    /**
+     * Settings that are empty AND that somebody actually has to fill in.
+     *
+     * ⚠️ EMPTY IS NOT THE SAME AS OUTSTANDING, and counting it that way made
+     * the storage screen permanently look unfinished.
+     *
+     * Photographs are stored on this server, which is the client's decision and
+     * the correct one for a platform holding member photographs. The six S3 and
+     * R2 credential fields therefore MUST stay empty — filling them would be
+     * the mistake, not leaving them. The badge counted all six anyway, so the
+     * sidebar showed "6" against a screen that was already correctly
+     * configured, and the client reasonably read that as six jobs to do.
+     *
+     * ⚠️ A BADGE THAT IS WRONG IS WORSE THAN NO BADGE. It is the same failure
+     * as an alarm nobody can act on: a number that never reaches zero teaches
+     * the person reading it that the number means nothing, and then the WhatsApp
+     * and payments counts — which are real, and are waiting on Meta and a bank —
+     * stop being read too.
+     *
+     * ⚠️ EVERYTHING ELSE STILL COUNTS. The AI keys, the WhatsApp credentials and
+     * the payment gateway are all genuinely outstanding. This narrows one group
+     * that has a driver switch, and does not soften the rest.
+     *
+     * @return Collection<string, int>
+     */
+    private static function unfilledButActuallyNeeded(): Collection
+    {
+        $settings = Setting::query()
+            ->whereNull('value')
+            ->get(['group', 'key']);
+
+        $driver = Setting::where('group', 'storage')
+            ->where('key', 'driver')
+            ->value('value');
+
+        /*
+         * Only meaningful for a remote driver. Named here rather than derived,
+         * because "which fields does S3 need" is a fact about S3 and reading it
+         * out of a config file would make it look like a rule of ours.
+         */
+        $remoteOnly = ['key', 'secret', 'region', 'bucket', 'endpoint', 'url'];
+
+        return $settings
+            ->reject(fn ($row) => $row->group === 'storage'
+                && $driver === 'local'
+                && in_array($row->key, $remoteOnly, true))
+            ->groupBy('group')
+            ->map(fn ($rows) => $rows->count());
+    }
+
     public static function admin(?User $user): array
     {
         if (! $user) {
@@ -169,11 +223,7 @@ class Navigation
          * product to build a list that is then filtered away.
          */
         $outstanding = $user->can('settings.view')
-            ? \App\Models\Setting::query()
-                ->whereNull('value')
-                ->selectRaw('`group`, count(*) as total')
-                ->groupBy('group')
-                ->pluck('total', 'group')
+            ? self::unfilledButActuallyNeeded()
             : collect();
 
         $sections = [
@@ -223,7 +273,7 @@ class Navigation
                  * item that 404s — which is the defect this whole class exists
                  * to prevent.
                  */
-                'items' => collect(\App\Http\Controllers\Admin\SettingsController::groups())
+                'items' => collect(SettingsController::groups())
                     ->map(fn (string $label, string $key) => [
                         'key' => "settings.{$key}",
                         'label' => $label,
@@ -298,8 +348,8 @@ class Navigation
                 )),
             ],
             $sections,
-        // A section whose every item is hidden must not render as an empty
-        // heading. A reviewer sees "Review" and nothing else.
+            // A section whose every item is hidden must not render as an empty
+            // heading. A reviewer sees "Review" and nothing else.
         ), fn (array $section) => $section['items'] !== []));
     }
 }

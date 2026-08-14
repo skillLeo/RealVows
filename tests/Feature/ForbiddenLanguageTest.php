@@ -6,10 +6,17 @@ use App\Models\MatchRecord;
 use App\Models\Profile;
 use App\Models\ProfilePreference;
 use App\Models\Verification;
+use App\Services\Matching\CompatibilityScorer;
 use App\Services\Matching\Copy\CommonalityFinder;
 use App\Services\Matching\Copy\RationaleWriter;
 use App\Services\Matching\MatchGenerator;
+use App\Services\Settings\SettingsService;
+use App\Support\GuardianPolicy;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
+use PHPUnit\Framework\AssertionFailedError;
 use Tests\Support\Scanners;
 use Tests\TestCase;
 
@@ -54,8 +61,8 @@ class ForbiddenLanguageTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         /*
          * ⚠️ AFTER THE SEEDER, NOT BEFORE IT.
@@ -72,22 +79,64 @@ class ForbiddenLanguageTest extends TestCase
          * `off` is not selectable in the admin any more but is still a valid
          * level in code — it is the documented fail-open.
          */
-        app(\App\Services\Settings\SettingsService::class)
-            ->set('guardian', \App\Support\GuardianPolicy::KEY, \App\Support\GuardianPolicy::OFF);
+        app(SettingsService::class)
+            ->set('guardian', GuardianPolicy::KEY, GuardianPolicy::OFF);
 
+    }
+
+    /**
+     * ⚠️ WHOLE WORDS. A SUBSTRING CHECK FAILED ON THE WORD "CALIBRATION".
+     *
+     * This used assertStringNotContainsStringIgnoringCase, which matched `libra`
+     * inside "Calibration Technician" — an occupation Faker produces at random.
+     * So the build went red on a profile containing nothing wrong, and only on
+     * the runs where the dice landed that way.
+     *
+     * ⚠️ AN OVER-EAGER GUARD IS NOT A STRICTER GUARD. It is one that gets
+     * overridden, and a guard that has been overridden once is not a guard. The
+     * same reasoning is already written into Scanners::contractions, which
+     * refuses to flag a possessive apostrophe for exactly this reason.
+     *
+     * ⚠️ THE BOUNDARY IS ON THE FRONT ONLY, AND THE CONTROL IN THIS FILE IS
+     * WHAT FORCED THAT. A boundary at both ends broke every PREFIX in the list:
+     * `astrolog` is there precisely so it catches astrology, astrological and
+     * astrologer, and `\bastrolog\b` matches none of them.
+     *
+     * Leading boundary keeps both properties. "Calibration" is not flagged,
+     * because the `libra` inside it has a word character in front of it.
+     * "ASTROLOGY" still is.
+     */
+
+    /**
+     * ⚠️ A GLYPH HAS NO WORD BOUNDARY, so it cannot be looked for the same way
+     * as a word. `\b` needs a word character on one side, and ♌ is not one, so
+     * a boundary pattern silently never matches a sign glyph — which the
+     * control in this file caught within a minute of the boundaries going in.
+     *
+     * Words get a leading boundary. Everything else is a plain substring.
+     */
+    private static function appears(string $term, string $text): bool
+    {
+        if (preg_match('/^\w/u', $term) !== 1) {
+            return mb_strpos($text, $term) !== false;
+        }
+
+        return preg_match('/\b'.preg_quote($term, '/').'/iu', $text) === 1;
     }
 
     private function assertClean(string $text, string $where): void
     {
         foreach (self::TIER_1 as $term) {
-            $this->assertStringNotContainsStringIgnoringCase(
-                $term, $text, "Tier 1 term [{$term}] appeared in {$where}: \"{$text}\""
+            $this->assertFalse(
+                self::appears($term, $text),
+                "Tier 1 term [{$term}] appeared in {$where}: \"{$text}\""
             );
         }
 
         foreach (self::TIER_2 as $term) {
-            $this->assertStringNotContainsStringIgnoringCase(
-                $term, $text, "Tier 2 term [{$term}] appeared in generated copy in {$where}: \"{$text}\""
+            $this->assertFalse(
+                self::appears($term, $text),
+                "Tier 2 term [{$term}] appeared in generated copy in {$where}: \"{$text}\""
             );
         }
 
@@ -100,8 +149,8 @@ class ForbiddenLanguageTest extends TestCase
             [],
             Scanners::mechanismAdjacentTerms($text),
             "Mechanism-adjacent vocabulary appeared in {$where}. It is allowed on the marketing "
-                ."pages — the client wrote it himself — but inside generated match copy it reads "
-                ."as the name of a mechanism, and it is one letter-cluster from the term for the "
+                .'pages — the client wrote it himself — but inside generated match copy it reads '
+                .'as the name of a mechanism, and it is one letter-cluster from the term for the '
                 ."thing we are concealing: \"{$text}\""
         );
     }
@@ -137,7 +186,7 @@ class ForbiddenLanguageTest extends TestCase
 
             try {
                 $this->assertClean($text, 'the positive control');
-            } catch (\PHPUnit\Framework\AssertionFailedError) {
+            } catch (AssertionFailedError) {
                 $caught = true;
             }
 
@@ -232,7 +281,7 @@ class ForbiddenLanguageTest extends TestCase
     {
         $writer = app(RationaleWriter::class);
         $finder = app(CommonalityFinder::class);
-        $scorer = app(\App\Services\Matching\CompatibilityScorer::class);
+        $scorer = app(CompatibilityScorer::class);
 
         $seekers = Profile::factory()->count(20)->woman()->create();
         $candidates = Profile::factory()->count(20)->man()->create();
@@ -412,7 +461,7 @@ class ForbiddenLanguageTest extends TestCase
         $this->assertArrayNotHasKey('element', $profile->toArray());
 
         $this->assertFalse(
-            \Illuminate\Support\Facades\Schema::hasColumn('profiles', 'sign'),
+            Schema::hasColumn('profiles', 'sign'),
             'The profiles.sign column is back. The component that needed it was removed deliberately.'
         );
 

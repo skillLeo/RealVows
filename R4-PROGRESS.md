@@ -73,7 +73,7 @@ property of the work rather than of any one person's carelessness.
 
 | Item | Owner | Note |
 |---|---|---|
-| **One sentence on guardian presence** | The scholar | **The only thing blocking code.** Reading B is built and parked on `guardian-presence-reading-b`, unmerged, because the answer received was ambiguous and picking a reading is not mine to do |
+| ~~**One sentence on guardian presence**~~ | ~~The scholar~~ | **CLOSED BY DECISION, not by an answer.** The channel to the question kept returning "ask an AI", and an AI answer to this is not a ruling — which is the whole reason Reading B was parked rather than shipped. Holding a launch for an input that cannot arrive is worse than shipping the narrower behaviour and saying so. Live: a woman's introduction is mediated, a man's is not. The branch stays parked and merges in one line if a ruling ever comes |
 | ~~**Forward `info@realvows.com` to a phone**~~ | ~~Hassam~~ | **DONE.** Forwarder active to `hassam.dev.571@gmail.com`. The three RealVows alerts sitting unread in that mailbox were the proof the transport worked and nobody was listening; ten bounces beside them produced `RefuseUndeliverableAddresses` |
 | **OpenAI API key** | Hassam | Both AI features are finished and dormant |
 | **Sentry DSN** | Hassam | Wired and dormant. Free tier, fifteen minutes |

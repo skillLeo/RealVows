@@ -42,7 +42,7 @@ pass, reach mutual interest, see contact details, and block. **Not a dead end.**
 | ⏳ | **Verify the domain in Resend** — DNS is correct, button unpressed | **Client** | Blocks real sends |
 | ⏳ | Scope webhook to `email.*` events only | **Client** | 2 minutes |
 | ⏳ | Seven Meta templates approved | **Client** | **The only long pole left.** Drift against Meta is now checked weekly rather than remembered |
-| 🚫 | **One sentence from the scholar on guardian presence** | **Client** | The only thing blocking code. Reading B is built and parked on `guardian-presence-reading-b`, unmerged |
+| ✅ | **Guardian presence — shipped as the narrower reading** | Decided | **No longer blocking.** A woman's introduction goes through her trusted contact; a man's does not. Reading B, which would mediate both, stays built and parked on `guardian-presence-reading-b`. A ruling would merge it in one line — the absence of one is not a reason to hold the launch |
 | ⬜ | **Remove the "awaiting Meta review" line** from `partials/what-arrives.blade.php` the day the templates are approved | Hassam | Tied to the row above — the previous version of that line was stale for weeks and nothing could tell |
 | ⬜ | Demo members actually removed | Hassam | Run on launch day |
 | ⬜ | Five real-device checks | **Client** | |

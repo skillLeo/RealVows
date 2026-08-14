@@ -60,8 +60,18 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
+    /*
+     * ⚠️ NO LONGER BEHIND `verified`, BECAUSE IT IS WHERE WE TELL THEM.
+     *
+     * An unverified member has to be able to see that nothing happens until
+     * they confirm their address, and offer to resend. Gating the one screen
+     * that explains the gate leaves somebody bounced to a page that says only
+     * "check your email" with no way back to their own work.
+     *
+     * The dashboard shows state. It grants nothing: introductions, checkout and
+     * the pool all remain behind `verified` below.
+     */
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('verified')
         ->name('dashboard');
 
     Route::get('/account', [AccountController::class, 'index'])->name('account');
@@ -69,34 +79,54 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
     Route::post('/account/notifications', [AccountController::class, 'updateNotifications'])->name('account.notifications');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Building a profile, open to a member who has not confirmed their address
+    |--------------------------------------------------------------------------
+    |
+    | ⚠️ THESE CAME OUT OF THE `verified` GROUP DELIBERATELY.
+    |
+    | The client: "if someone has to go on their email first to confirm their
+    | email, then they might not bother with their profile." So a member builds
+    | first and confirms at the end, and every screen the building takes has to
+    | be open to them.
+    |
+    | ⚠️ WHAT THIS DOES NOT OPEN. Email verification stopped being a gate on the
+    | product and became a gate on the POOL — enforced in Profile::scopeMatchable
+    | at the query layer, so an unverified member is ABSENT from every candidate
+    | set rather than filtered out of one. The review queue is held in
+    | ProfileBuilderController::submit for the same reason, and introductions,
+    | checkout and packages all stay behind `verified` below.
+    |
+    | Read both of those notes before moving anything else out of that group.
+    */
+    Route::get('/profile', [ProfileBuilderController::class, 'show'])->name('profile');
+    Route::get('/profile/{step}', [ProfileBuilderController::class, 'show'])->name('profile.step');
+
+    // Autosave. PUT because it replaces the values of one step, and it is
+    // hit repeatedly while somebody is still typing.
+    Route::put('/profile/{step}', [ProfileBuilderController::class, 'save'])->name('profile.save');
+
+    Route::post('/profile/submit', [ProfileBuilderController::class, 'submit'])->name('profile.submit');
+
+    // Photos. Signed on top of auth on the read route, so a URL that
+    // escapes into a chat log stops working within the hour.
+    Route::post('/photos', [PhotoController::class, 'store'])->name('photos.store');
+    Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
+    Route::get('/photos/{photo}', [PhotoController::class, 'show'])
+        ->middleware('signed')
+        ->name('photos.show');
+
+    Route::post('/verification/selfie', [PhotoController::class, 'storeVerificationSelfie'])
+        ->name('verification.selfie');
+    Route::get('/verification/selfie/{verification}', [PhotoController::class, 'showVerificationSelfie'])
+        ->middleware('signed')
+        ->name('verification.selfie.show');
+    Route::post('/verification/code', [PhotoController::class, 'regenerateCode'])
+        ->name('verification.code');
+
     Route::middleware('verified')->group(function () {
         Route::get('/packages', [PackagesController::class, 'index'])->name('packages');
-
-        Route::get('/profile', [ProfileBuilderController::class, 'show'])->name('profile');
-
-        Route::get('/profile/{step}', [ProfileBuilderController::class, 'show'])->name('profile.step');
-
-        // Autosave. PUT because it replaces the values of one step, and it is
-        // hit repeatedly while somebody is still typing.
-        Route::put('/profile/{step}', [ProfileBuilderController::class, 'save'])->name('profile.save');
-
-        Route::post('/profile/submit', [ProfileBuilderController::class, 'submit'])->name('profile.submit');
-
-        // Photos. Signed on top of auth on the read route, so a URL that
-        // escapes into a chat log stops working within the hour.
-        Route::post('/photos', [PhotoController::class, 'store'])->name('photos.store');
-        Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
-        Route::get('/photos/{photo}', [PhotoController::class, 'show'])
-            ->middleware('signed')
-            ->name('photos.show');
-
-        Route::post('/verification/selfie', [PhotoController::class, 'storeVerificationSelfie'])
-            ->name('verification.selfie');
-        Route::get('/verification/selfie/{verification}', [PhotoController::class, 'showVerificationSelfie'])
-            ->middleware('signed')
-            ->name('verification.selfie.show');
-        Route::post('/verification/code', [PhotoController::class, 'regenerateCode'])
-            ->name('verification.code');
 
         /*
         |--------------------------------------------------------------------

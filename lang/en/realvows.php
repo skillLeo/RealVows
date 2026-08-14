@@ -31,6 +31,19 @@ return [
 
     'dashboard' => [
         /*
+         * ⚠️ THE ONE CLICK BETWEEN A FINISHED PROFILE AND BEING MATCHED.
+         *
+         * Said plainly and once. No duration, no step count, no "it only
+         * takes" — the client's objection was to language that makes a small
+         * thing sound like work before it has started.
+         */
+        'confirm_heading' => 'One last thing',
+        'confirm_body' => 'We have sent a link to :email. Introductions begin once you have '
+            .'opened it.',
+        'confirm_resend' => 'Send it again',
+        'confirm_resent' => 'Sent. It should arrive shortly.',
+
+        /*
          * ⚠️ SHOWN INSTEAD OF A PURCHASE BUTTON, NOT BESIDE ONE. `/packages`
          * answers 404 while introductions are free, so the button that used to
          * sit here sent members to a dead page.
@@ -219,7 +232,7 @@ return [
         'reset_heading' => 'Choose a new password',
         'reset_body' => 'Choose something you have not used here before.',
 
-        'verify_heading' => 'One quick confirmation',
+        'verify_heading' => 'One last thing',
         'verify_sent' => 'We have sent a link to',
         'verify_restart' => 'Log out and start again',
     ],

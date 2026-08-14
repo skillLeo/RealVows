@@ -307,7 +307,7 @@
                  returns 404 during the free period. It now describes what
                  actually happens now, and stays true when payments arrive. --}}
             <p class="rv-lead" style="max-width: 46ch">
-                Build your whole profile without paying anything. Your introductions are free while
+                Build your profile without paying anything. Your introductions are free while
                 we are getting started, and anything you receive in that time stays yours.
             </p>
 

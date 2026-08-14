@@ -473,8 +473,32 @@ class LegalController extends Controller
             [
                 'heading' => 'How long we keep it',
                 'body' => [
-                    'While your account is open, and for a short period afterwards so that an '
+                    /*
+                     * ⚠️ WAS "A SHORT PERIOD AFTERWARDS", WHICH IS NOT A
+                     * RETENTION PERIOD. A member cannot act on it and we cannot
+                     * be held to it, which is the same thing as not having one.
+                     */
+                    'While your account is open, and for thirty days afterwards so that an '
                         .'account closed by mistake can be restored.',
+
+                    /*
+                     * ⚠️ THE CATEGORY EMAIL VERIFICATION CREATED WHEN IT MOVED.
+                     *
+                     * A person can now build a profile before confirming their
+                     * address, which means an unconfirmed account can hold
+                     * photographs of a face and a trusted contact's mobile
+                     * number. The contact never signed up and cannot ask us for
+                     * anything, so the only protection they have is that we do
+                     * not keep it forever.
+                     *
+                     * ⚠️ TWELVE MONTHS AND A COMMAND THAT ENFORCES IT. See
+                     * ForgetAbandonedRegistrations, scheduled weekly. A number
+                     * written here with nothing carrying it out would be worse
+                     * than the vague sentence it replaced.
+                     */
+                    'If you register and never confirm your email address, we delete everything '
+                        .'you entered after twelve months. That includes your photographs and '
+                        .'anything you told us about a trusted contact.',
                     'When you delete your account we remove your profile, your photographs, your '
                         .'introductions and the record of your trusted contact.',
                     'We keep payment records for as long as tax and accounting law requires, even '

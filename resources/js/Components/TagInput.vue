@@ -94,7 +94,16 @@ function onKeydown(event) {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    height: 36px;
+
+    /*
+     * ⚠️ 44px BECAUSE THE BUTTON INSIDE IT REMOVES SOMETHING.
+     *
+     * This was 36px, which capped the remove button at 24px — measured at 375,
+     * 834 and 1440 and undersized at all three. A 24px target on a phone is a
+     * coin toss, and the cost of losing it is not a missed tap: it is an
+     * interest silently deleted, in a form somebody is halfway through.
+     */
+    height: 44px;
     padding: 0 8px 0 14px;
     border: 1px solid var(--hairline);
     border-radius: var(--r);
@@ -104,8 +113,21 @@ function onKeydown(event) {
 }
 
 .rv-tags__item button {
-    width: 24px;
-    height: 24px;
+    /*
+     * ⚠️ THE HIT AREA IS THE BUTTON, NOT A PSEUDO-ELEMENT.
+     *
+     * A ::after overlay would give a person the same 44px to tap and would
+     * leave the element itself measuring 24px, so every automated check —
+     * including scripts/measure-viewports.mjs — would keep reporting a failure
+     * that had been fixed. The background is transparent, so this looks exactly
+     * as it did: only the icon is visible.
+     *
+     * ⚠️ TALLER, NOT WIDER. Chips sit 8px apart horizontally, so a 44px-wide
+     * target would reach across into the next chip's label and a tap meant for
+     * one would delete another.
+     */
+    width: 32px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;

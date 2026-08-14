@@ -1,5 +1,9 @@
 {
     "dashboard": {
+        "confirm_heading": "One last thing",
+        "confirm_body": "We have sent a link to :email. Introductions begin once you have opened it.",
+        "confirm_resend": "Send it again",
+        "confirm_resent": "Sent. It should arrive shortly.",
         "nothing_to_buy": "Introductions are free while we are getting started, so there is nothing to buy.",
         "update_your_photos": "Update your photos",
         "waiting_one": "One person is waiting to meet you.",
@@ -125,7 +129,7 @@
         "send_again": "Send it again",
         "reset_heading": "Choose a new password",
         "reset_body": "Choose something you have not used here before.",
-        "verify_heading": "One quick confirmation",
+        "verify_heading": "One last thing",
         "verify_sent": "We have sent a link to",
         "verify_restart": "Log out and start again"
     },

@@ -77,6 +77,23 @@ class DashboardController extends Controller
             'firstName' => $profile?->first_name,
             'credits' => $user->creditBalance(),
 
+            /*
+             * ⚠️ THE STATE THAT DID NOT EXIST UNTIL EMAIL VERIFICATION MOVED.
+             *
+             * A member can now finish everything and still be waiting on one
+             * click, and until this key there was no way for the dashboard to
+             * say so. Silence there would read as the platform having lost
+             * their work, or worse, as it quietly ignoring them.
+             *
+             * ⚠️ IT SAYS SO WITHOUT NAGGING. The screen states the fact and
+             * offers a resend. It does not hide it, and it does not repeat
+             * itself — the client's whole objection to the old flow was being
+             * pushed toward an inbox.
+             */
+            'emailConfirmed' => $user->hasVerifiedEmail(),
+            'awaitingEmailConfirmation' => ! $user->hasVerifiedEmail()
+                && $profile?->submitted_at !== null,
+
             'verification' => [
                 'status' => $verification?->status ?? 'not_started',
                 'approvedAt' => $verification?->status === Verification::STATUS_VERIFIED

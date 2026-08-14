@@ -137,6 +137,30 @@ class TrustedContactController extends Controller
      */
     private function deliverInvitation(Guardian $guardian, string $token): void
     {
+        /*
+         * ⚠️ NOBODY ELSE IS CONTACTED UNTIL THE MEMBER'S OWN ADDRESS IS
+         * CONFIRMED.
+         *
+         * Email verification is no longer a gate on the product, so a member
+         * who has confirmed nothing can now reach this screen and name their
+         * father. Sending on that alone would mail a third person — who never
+         * signed up, and whose address we were given by somebody we have not
+         * yet confirmed is contactable at all.
+         *
+         * ⚠️ THE NOMINATION IS STILL SAVED. The member's work stands and the
+         * token is issued; only the message waits. Confirming the address is
+         * what releases it, with nothing to redo.
+         */
+        if (! $guardian->member?->hasVerifiedEmail()) {
+            \Illuminate\Support\Facades\Log::info('Trusted contact invitation held.', [
+                'guardian_id' => $guardian->id,
+                'why' => 'The member has not confirmed their own email address yet.',
+                'consequence' => 'Nothing is sent to the contact. It goes out when she confirms.',
+            ]);
+
+            return;
+        }
+
         if ($guardian->email) {
             Mail::to($guardian->email)->send(new TrustedContactInvitation($guardian, $token));
         }

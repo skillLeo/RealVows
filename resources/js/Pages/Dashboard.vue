@@ -35,6 +35,25 @@ const page = usePage();
  */
 const freePeriod = computed(() => page.props.freePeriod === true);
 
+/*
+ * ⚠️ RATE LIMITED ON THE SERVER, and disabled here only so a second press
+ * cannot happen while the first is in flight. The button is the courtesy; the
+ * throttle on `verification.send` is the control.
+ */
+const resending = ref(false);
+const resent = ref(false);
+
+const resendConfirmation = () => {
+    if (resending.value) return;
+    resending.value = true;
+
+    router.post('/email/verification-notification', {}, {
+        preserveScroll: true,
+        onSuccess: () => { resent.value = true; },
+        onFinish: () => { resending.value = false; },
+    });
+};
+
 /**
  * Five states, decided once here rather than as a pile of v-ifs in the
  * template. Each one is designed — a marriage platform that renders a blank
@@ -219,6 +238,33 @@ const heading = computed(() => {
                         </BaseCard>
                     </template>
                 </div>
+
+                <!--
+                    ⚠️ SAID BEFORE ANYTHING ELSE, BECAUSE NOTHING ELSE HAPPENS
+                    UNTIL IT IS DONE.
+
+                    A member can now finish their entire profile and still be
+                    one click away from being matched. Without this they would
+                    see a complete profile, a quiet dashboard, and no reason for
+                    the quiet — which reads as the platform having forgotten
+                    them.
+
+                    It states the fact and offers a resend. It does not nag, and
+                    it disappears the moment they open the link.
+                -->
+                <BaseCard v-if="$page.props.awaitingEmailConfirmation" accent>
+                    <div class="rv-stack" style="gap: 12px">
+                        <h2 class="rv-d3">{{ $t('dashboard.confirm_heading') }}</h2>
+                        <p class="rv-body">
+                            {{ $t('dashboard.confirm_body', { email: $page.props.auth?.user?.email }) }}
+                        </p>
+                        <div class="rv-actions">
+                            <BaseButton variant="secondary" @click="resendConfirmation" :disabled="resending">
+                                {{ resent ? $t('dashboard.confirm_resent') : $t('dashboard.confirm_resend') }}
+                            </BaseButton>
+                        </div>
+                    </div>
+                </BaseCard>
 
                 <!-- ── Right rail — a real second column at desktop ─────── -->
                 <aside class="rv-dash__rail rv-stack" style="gap: 24px">

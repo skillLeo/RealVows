@@ -116,7 +116,7 @@ class ProfileBuilderController extends Controller
      * without being told why is the kind of dead end that makes people give
      * up, so the refusal names exactly what is still missing, in plain words.
      */
-    public function submit(Request $request): RedirectResponse
+    public function submit(Request $request, \App\Services\Settings\RuntimeMailConfigurator $mail): RedirectResponse
     {
         $profile = $this->profileFor($request);
         $assessment = $this->completeness->assess($profile);
@@ -132,13 +132,41 @@ class ProfileBuilderController extends Controller
 
         $profile->forceFill(['submitted_at' => now()])->save();
 
-        // The verification record and its code are created alongside the
-        // photos step, so by this point the row already exists and is waiting
-        // in the queue.
-        $profile->verification()->getQuery()->where('status', '!=', 'verified')->update([
-            'status' => 'pending',
-            'updated_at' => now(),
-        ]);
+        /*
+         * ⚠️ THE VERIFICATION EMAIL SENDS HERE, NOT AT REGISTRATION.
+         *
+         * The client: "the whole thing is after the profile is done, and you
+         * say, thank you for creating your profile, welcome to RealVows, please
+         * click this link to confirm your email address."
+         *
+         * By this point they have written about themselves and uploaded
+         * photographs. Clicking a link is a small thing at the end rather than
+         * a toll on the way in.
+         */
+        if (! $request->user()->hasVerifiedEmail()) {
+            $mail->apply();
+            $request->user()->sendEmailVerificationNotification();
+        }
+
+        /*
+         * ⚠️ THE REVIEW QUEUE STAYS SHUT UNTIL THE ADDRESS IS CONFIRMED.
+         *
+         * A reviewer's time is the scarcest thing on this platform, and every
+         * row here is a real person opening real photographs. Somebody who
+         * typed an address they cannot receive mail at is not a member yet, and
+         * queueing them spends that time on a profile that may never become
+         * anybody.
+         *
+         * ⚠️ THE PROFILE IS STILL SUBMITTED. Their work is saved and complete —
+         * this holds the QUEUE, not the member. Confirming the address moves
+         * them into it with nothing to redo. See EmailVerificationController.
+         */
+        if ($request->user()->hasVerifiedEmail()) {
+            $profile->verification()->getQuery()->where('status', '!=', 'verified')->update([
+                'status' => 'pending',
+                'updated_at' => now(),
+            ]);
+        }
 
         /*
          * ⚠️ STRAIGHT TO THE TRUSTED CONTACT, NOT TO THE DASHBOARD.

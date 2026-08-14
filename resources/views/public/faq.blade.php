@@ -34,7 +34,7 @@
                  'Finding your soul mate. It is not a dating app and there is nothing to browse. You are introduced to a small number of people who genuinely fit, and the intention is that you stop needing us.'],
 
                 ['What does it cost?',
-                 'Joining is free and building your whole profile is free. Introductions are free while we are getting started, and anything you receive in that time stays yours permanently.'],
+                 'Joining is free and building your profile is free. Introductions are free while we are getting started, and anything you receive in that time stays yours permanently.'],
 
                 ['How do I meet somebody?',
                  'You do not search. We choose who you are introduced to and bring them to you by email and WhatsApp. There is no directory and no way to look somebody up.'],

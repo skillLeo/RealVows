@@ -211,3 +211,22 @@ Schedule::command('realvows:backup')
     ->dailyAt('02:20')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+/*
+ * ⚠️ THE RETENTION PERIOD IN THE PRIVACY POLICY, ENFORCED RATHER THAN STATED.
+ *
+ * Verification moving off the front door means an unconfirmed account can now
+ * hold photographs of somebody's face and a third party's mobile number. That
+ * category did not exist before and nothing was going to clear it.
+ *
+ * ⚠️ WEEKLY, NOT DAILY. Nothing here is urgent — the boundary is twelve months
+ * and a record crossing it on Tuesday can be forgotten on Sunday. A daily
+ * destructive task is a daily chance for a date bug to run.
+ *
+ * ⚠️ `--apply` IS PASSED HERE AND NOWHERE ELSE. Run by hand it reports and
+ * deletes nothing, so anybody investigating can see the list first.
+ */
+Schedule::command('realvows:forget-abandoned --apply')
+    ->weeklyOn(0, '04:40')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/scheduler.log'));

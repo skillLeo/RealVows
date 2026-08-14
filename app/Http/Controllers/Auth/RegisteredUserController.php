@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Profile;
 use App\Models\User;
-use App\Services\Settings\RuntimeMailConfigurator;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +21,7 @@ class RegisteredUserController extends Controller
         ]);
     }
 
-    public function store(RegisterRequest $request, RuntimeMailConfigurator $mail): RedirectResponse
+    public function store(RegisterRequest $request): RedirectResponse
     {
         $user = DB::transaction(function () use ($request) {
             $user = User::create([
@@ -47,15 +45,32 @@ class RegisteredUserController extends Controller
             return $user;
         });
 
-        // Mail settings live in the database, so they must be applied before
-        // anything is sent rather than read from config at boot.
-        $mail->apply();
-
-        event(new Registered($user));
-
+        /*
+         * ⚠️ NO VERIFICATION EMAIL HERE, AND NO TRIP TO AN INBOX.
+         *
+         * `event(new Registered($user))` sent it, and the member was then
+         * redirected to a page telling them to go and check their mail before
+         * they could do anything at all.
+         *
+         * The client's objection, and he is right: "if someone has to go on
+         * their email first to confirm their email, then they might not bother
+         * with their profile." Somebody who has typed a password and nothing
+         * else has invested nothing, and sending them away at that exact moment
+         * is where they stop.
+         *
+         * The email now sends when the profile is FINISHED — see
+         * ProfileBuilderController::submit. By then they have written about
+         * themselves and uploaded photographs, and clicking a link is a small
+         * thing at the end rather than a toll on the way in.
+         *
+         * ⚠️ THE GATE DID NOT DISAPPEAR, IT MOVED. Email verification was a
+         * gate on entering the PRODUCT and is now a gate on entering the POOL,
+         * enforced in Profile::scopeMatchable at the query layer. Read the note
+         * there before relaxing anything here.
+         */
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->route('profile');
     }
 
     /**

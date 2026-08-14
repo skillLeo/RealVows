@@ -147,6 +147,33 @@ class Profile extends Model
         return $query
             ->whereNotNull('submitted_at')
             ->whereHas('verification', fn ($q) => $q->where('status', Verification::STATUS_VERIFIED))
-            ->whereHas('user', fn ($q) => $q->where('is_active', true));
+            ->whereHas('user', fn ($q) => $q
+                ->where('is_active', true)
+
+                /*
+                 * ⚠️ EMAIL VERIFICATION IS NOW A GATE ON THE POOL, NOT ON THE
+                 * PRODUCT, AND THIS LINE IS WHAT MAKES THAT SAFE.
+                 *
+                 * It used to be enforced by middleware on the profile builder:
+                 * an unverified member could not build a profile at all, so
+                 * they could never reach a pool. The client is right that this
+                 * loses people — being sent to an inbox before you have built
+                 * anything is where somebody stops — so the builder is now open
+                 * to them.
+                 *
+                 * ⚠️ THAT MOVED THE FLOOR OUT FROM UNDER THE OLD GUARANTEE. The
+                 * check above is IDENTITY verification, the reviewed photograph
+                 * and code. It has never known anything about email. Without
+                 * this line, an unverified member could complete a profile, be
+                 * approved by a reviewer, and be matched — reachable for the
+                 * first time the moment the middleware came off.
+                 *
+                 * ⚠️ IN THE QUERY, NEVER IN THE PRESENTER. An unverified member
+                 * is ABSENT from the candidate set rather than filtered out of
+                 * its results. Same rule as the trusted-contact gate, same
+                 * reason: a filter is one forgotten call site from a leak, and
+                 * a row that was never selected cannot leak at all.
+                 */
+                ->whereNotNull('email_verified_at'));
     }
 }

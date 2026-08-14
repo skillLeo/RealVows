@@ -31,7 +31,21 @@ class AuthenticationTest extends TestCase
             'accepts_terms' => true,
         ]);
 
-        $response->assertRedirect('/verify-email');
+        /*
+         * ⚠️ STRAIGHT INTO THE BUILDER, NOT TO AN INBOX.
+         *
+         * This asserted `/verify-email`, which was correct until the client
+         * pointed out what it costs: "if someone has to go on their email first
+         * to confirm their email, then they might not bother with their
+         * profile." Somebody who has typed a password and nothing else has
+         * invested nothing, and sending them away at that moment is where they
+         * stop.
+         *
+         * The email now sends when the profile is finished. Email verification
+         * did not disappear — it moved from being a gate on the PRODUCT to a
+         * gate on the POOL, enforced in Profile::scopeMatchable.
+         */
+        $response->assertRedirect('/profile');
 
         $user = User::where('email', 'ayesha@example.com')->first();
 
@@ -42,6 +56,34 @@ class AuthenticationTest extends TestCase
         // a row to autosave into.
         $this->assertNotNull($user->profile);
         $this->assertInstanceOf(Profile::class, $user->profile);
+    }
+
+    /**
+     * ⚠️ NOTHING IS SENT AT REGISTRATION NOW, AND THAT IS THE WHOLE CHANGE.
+     *
+     * A test asserting the redirect alone would pass just as happily against a
+     * version that still mailed them on the way past — the member would simply
+     * find it waiting when they eventually looked, which is the behaviour the
+     * client asked to remove.
+     */
+    public function test_no_verification_email_is_sent_at_registration(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+
+        $this->post('/register', [
+            'email' => 'ayesha@example.com',
+            'password' => 'marriage9',
+            'password_confirmation' => 'marriage9',
+            'phone_country_code' => '+1',
+            'phone_number' => '876 5551234',
+            'is_adult' => true,
+            'accepts_terms' => true,
+        ]);
+
+        \Illuminate\Support\Facades\Notification::assertNothingSent();
+
+        // And they really are unverified, so the pool gate below has work to do.
+        $this->assertNull(User::where('email', 'ayesha@example.com')->first()->email_verified_at);
     }
 
     public function test_registration_requires_the_18_declaration_and_the_legal_acceptance(): void

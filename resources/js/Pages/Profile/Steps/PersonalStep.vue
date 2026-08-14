@@ -28,7 +28,7 @@ const YES_NO = [
 <template>
     <StepShell
         heading="Tell us about you."
-        lead="Seven steps, saved as you go. Nothing here is public until you are verified."
+        lead="Saved as you go. Nothing here is public until you are verified."
     >
         <BaseCard>
             <div class="rv-stack" style="gap: 24px">

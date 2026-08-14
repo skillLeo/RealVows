@@ -2,24 +2,24 @@
 
 namespace Database\Seeders;
 
-use App\Models\CreditLedgerEntry;
-use App\Models\Profile;
-use App\Models\User;
-use App\Models\Verification;
-use App\Services\Photos\PhotoStorageService;
-use App\Services\Profile\ProfileCompleteness;
 use App\Models\Guardian;
 use App\Models\MatchRecord;
+use App\Models\Profile;
 use App\Models\Report;
+use App\Models\User;
+use App\Models\Verification;
 use App\Services\Credits\CreditService;
 use App\Services\Matching\MatchGenerator;
 use App\Services\Payments\PurchaseService;
+use App\Services\Photos\PhotoStorageService;
+use App\Services\Profile\ProfileCompleteness;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -272,7 +272,6 @@ class DemoSeeder extends Seeder
         return $members;
     }
 
-
     /**
      * A trusted contact per demo member, and one member deliberately without.
      *
@@ -351,8 +350,26 @@ class DemoSeeder extends Seeder
             'email' => "guardian-of-{$prefix}{$index}@realvows.test",
             'phone' => null,
             'status' => $status,
+            /*
+             * ⚠️ THE FILE IS CREATED, NOT JUST NAMED. IT USED TO BE JUST NAMED.
+             *
+             * This wrote a path to `guardians/demo/together.jpg` and nothing
+             * ever put a file there. All twenty-two guardians on production
+             * pointed at one image that did not exist, so the admin route that
+             * streams it threw for every single one of them.
+             *
+             * ⚠️ THAT ROUTE IS THE PRIMARY CHECK IN THE WHOLE GUARDIAN SYSTEM.
+             * A reviewer approves a trusted contact by looking at the
+             * photograph of the two of them holding a code we issued minutes
+             * earlier. With no file, the one screen that check happens on
+             * 500s — and the seeder reported success, because a path in a
+             * column looks exactly like a photograph until somebody opens it.
+             *
+             * Found in the production error log, which had been recording it
+             * since the first seed and which nobody was reading.
+             */
             'joint_photo_path' => in_array($status, [Guardian::STATUS_SUBMITTED, Guardian::STATUS_VERIFIED], true)
-                ? 'guardians/demo/together.jpg'
+                ? $this->jointPhoto()
                 : null,
             'joint_photo_code' => strtoupper(Str::random(6)),
             'joint_photo_uploaded_at' => in_array($status, [Guardian::STATUS_SUBMITTED, Guardian::STATUS_VERIFIED], true)
@@ -400,6 +417,38 @@ class DemoSeeder extends Seeder
                 $this->recordSkip($scene);
             }
         }
+    }
+
+    /**
+     * A real file for the joint photograph, written once and shared.
+     *
+     * ⚠️ RETURNS null IF IT COULD NOT BE WRITTEN, and records a skip. A path
+     * pointing at nothing is worse than no path: the column says a photograph
+     * exists, the interface offers it, and only the person who clicks finds out.
+     * Null makes the absence visible on the screen where it matters.
+     */
+    private function jointPhoto(): ?string
+    {
+        $target = 'guardians/demo/together.jpg';
+        $disk = Storage::disk(PhotoStorageService::DISK);
+
+        if ($disk->exists($target)) {
+            return $target;
+        }
+
+        // Any scene will do — it stands in for two people photographed
+        // together, and the demo needs a real image rather than a real subject.
+        $source = storage_path('app/seed/scenes/scene-1.jpg');
+
+        if (! is_file($source)) {
+            $this->recordSkip($source);
+
+            return null;
+        }
+
+        $disk->put($target, (string) file_get_contents($source));
+
+        return $disk->exists($target) ? $target : null;
     }
 
     /**
@@ -451,7 +500,6 @@ class DemoSeeder extends Seeder
 
         return new UploadedFile($temp, basename($path), 'image/jpeg', null, true);
     }
-
 
     /**
      * ⚠️ EVERY STATE REACHABLE FROM THE LOGIN PANEL, WITHOUT BUYING OR

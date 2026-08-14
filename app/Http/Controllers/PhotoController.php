@@ -239,6 +239,24 @@ class PhotoController extends Controller
             'completeness' => $assessment['percent'],
             'missing' => $assessment['missing'],
             'submittable' => $assessment['missing'] === [],
+
+            /*
+             * ⚠️ THE BUILDER BLOCKS ON THIS, SO EVERY PAYLOAD THAT REFRESHES
+             * COMPLETENESS HAS TO CARRY IT.
+             *
+             * The profile builder refuses to advance while the CURRENT step is
+             * short, and it reads which step from `missingByStep`. Uploading a
+             * photograph changes exactly that, through this endpoint rather
+             * than through the autosave — so without this key a member who
+             * uploaded their fourth photo would still be told the photos step
+             * was incomplete until they reloaded the page.
+             *
+             * Three payloads refresh completeness: the two Inertia renders, the
+             * autosave, and this. A key added to one of them and not the others
+             * is a screen that is right until somebody does the one thing that
+             * goes through the odd path out.
+             */
+            'missingByStep' => $assessment['missingByStep'],
         ];
     }
 }

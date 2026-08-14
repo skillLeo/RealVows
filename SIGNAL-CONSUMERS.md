@@ -72,25 +72,54 @@ placeholder would turn a visible fault into a plausible-looking one.
 
 ---
 
-## The three with no consumer, stated plainly
+## The three that had no consumer — now they do
+
+**`realvows:report-silent-failures`, daily at 07:30.** Morning rather than
+night, because whoever reads it should be awake when it arrives. It covers all
+three: failed jobs, new error-level log lines, and undelivered messages.
+
+⚠️ **It sends nothing when there is nothing to say.** No daily "all is well".
+A message that always arrives and usually means nothing trains the person
+receiving it to archive it unread, and then the one that matters lands in that
+same habit. Its arrival is itself the signal.
+
+⚠️ **It fails noisy, unlike the photograph rule.** If the marker recording what
+was already reported is lost, it reports everything again rather than nothing. A
+duplicate alert costs a second of annoyance. A missed one is the entire failure
+being fixed.
+
+⚠️ **And it says the consequence, not the count.** "1 failed job" at seven in
+the morning tells nobody whether to care. "A member may be waiting for an
+introduction they were never actually sent" is the same fact, and it is
+actionable.
+
+### One thing found while building it
+
+Every operational alert used `Mail::raw`, and **`MailFake::raw()` is an empty
+method**. It records nothing, so under `Mail::fake()` a raw send is
+indistinguishable from no send at all — no test could ever prove an alert went
+out. That included the **credit ledger check, the money alarm**. Both now send a
+real `OperationalAlert` mailable, which is assertable and is audited alongside
+the other twelve emails.
+
+An alert that cannot be shown to fire is a close cousin of an alert nobody
+reads.
+
+---
+
+## What still needs a decision
 
 I have not invented listeners for these, because a listener nobody checks is the
-same problem wearing a hat. They need a decision, not code.
+same problem wearing a hat.
 
-**1. `laravel.log` — 32 error-level lines on production, unread.**
-Reading them today found the missing guardian photographs *and* the `--no-dev`
-seeder failure, both recorded honestly at the moment they happened. No error
-tracking is installed. The realistic options are Sentry's free tier, or a daily
-digest of new error lines to `info@realvows.com`. **Doing nothing is also a
-choice, and it should be a stated one.**
+**1. Whether a digest is enough, or whether error tracking is wanted.**
+The daily digest now carries new error lines, which closes the gap within 24
+hours. Sentry's free tier would close it within seconds and needs a DSN and a
+composer dependency. For a platform with no members yet, the digest is
+proportionate. That judgement should be revisited on the day real members
+arrive, and it is a decision rather than an oversight.
 
-**2. `failed_jobs` — nothing reads the table.**
-A job that fails three times lands here and stops. On this host that includes
-outbound email and WhatsApp delivery, so the failure mode is a member silently
-never hearing about an introduction. `realvows:show-deliveries` exists and must
-be run by hand.
-
-**3. `info@realvows.com` — the address every alert converges on.**
+**2. `info@realvows.com` — the address every alert converges on.**
 It is configured, SMTP works, and a test message was delivered from the server
 on 2026-08-14. **Whether a human opens it is the one thing I cannot verify.** If
 nobody does, the ledger alert is decoration and the row above it is a lie.

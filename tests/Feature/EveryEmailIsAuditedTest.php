@@ -6,6 +6,7 @@ use App\Mail\IntroductionDelivered;
 use App\Mail\IntroductionsUnlocked;
 use App\Mail\MatchWithdrawn;
 use App\Mail\MutualInterest;
+use App\Mail\OperationalAlert;
 use App\Mail\PurchaseReceipt;
 use App\Mail\SomeoneInterested;
 use App\Mail\TeaserExpiring;
@@ -275,6 +276,20 @@ class EveryEmailIsAuditedTest extends TestCase
             IntroductionsUnlocked::class => new IntroductionsUnlocked($user, count: 3),
             MatchWithdrawn::class => new MatchWithdrawn('Aisha', 'Omar'),
             MutualInterest::class => new MutualInterest($user, otherFirstName: 'Omar'),
+            /*
+             * ⚠️ AN OPERATIONAL ALERT, AND IT IS AUDITED LIKE THE REST. It goes
+             * to whoever runs the platform rather than to a member, and every
+             * rule here still applies: no image a mail client will fetch, no
+             * description of the verification method in a message that gets
+             * forwarded, and none of the vocabulary the client asked twice to
+             * be rid of.
+             */
+            OperationalAlert::class => new OperationalAlert(
+                subjectLine: 'RealVows: something failed quietly',
+                intro: 'Some things failed without anybody being told.',
+                sections: ['Failed background jobs' => ['1 job failed and stopped retrying.']],
+                outro: 'This message is only sent when something needs a person.',
+            ),
             PurchaseReceipt::class => new PurchaseReceipt($this->purchase($user)),
             SomeoneInterested::class => new SomeoneInterested($user),
             TeaserExpiring::class => new TeaserExpiring($user, count: 2, daysLeft: 7),

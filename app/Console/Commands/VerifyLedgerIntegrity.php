@@ -2,10 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\OperationalAlert;
 use App\Models\CreditLedgerEntry;
 use App\Models\User;
+use App\Services\Settings\RuntimeMailConfigurator;
+use App\Services\Settings\SettingsService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Walks every member's credit chain and proves nobody's balance drifted.
@@ -26,8 +30,8 @@ class VerifyLedgerIntegrity extends Command
     protected $description = 'Check every credit ledger chain against its running balance';
 
     public function __construct(
-        private readonly \App\Services\Settings\SettingsService $settings,
-        private readonly \App\Services\Settings\RuntimeMailConfigurator $mail,
+        private readonly SettingsService $settings,
+        private readonly RuntimeMailConfigurator $mail,
     ) {
         parent::__construct();
     }
@@ -112,13 +116,28 @@ class VerifyLedgerIntegrity extends Command
         try {
             $this->mail->apply();
 
-            \Illuminate\Support\Facades\Mail::raw(
-                "The nightly credit ledger check found ".count($problems)." discrepancies on ".config('app.url').".\n\n"
-                ."This means a member's recorded balance disagrees with the sum of their ledger, which should be "
-                ."impossible through the application. Someone should look at this today.\n\n"
-                .json_encode($problems, JSON_PRETTY_PRINT),
-                fn ($m) => $m->to($to)->subject('RealVows: credit ledger discrepancy found')
-            );
+            /*
+             * ⚠️ A MAILABLE RATHER THAN `Mail::raw`, AND THE REASON MATTERS
+             * MOST HERE OF ANYWHERE.
+             *
+             * MailFake::raw() is an empty method. Under Mail::fake() a raw send
+             * records nothing, so no test could ever prove this alert goes out
+             * — and this is the MONEY alarm. An alert that cannot be shown to
+             * fire is a close cousin of an alert nobody reads.
+             */
+            Mail::to($to)->send(new OperationalAlert(
+                subjectLine: 'RealVows: credit ledger discrepancy found',
+                intro: 'The nightly credit ledger check found '.count($problems)
+                    .' discrepancies on '.config('app.url').'.',
+                sections: [
+                    'What this means' => [
+                        "A member's recorded balance disagrees with the sum of their ledger,",
+                        'which should be impossible through the application.',
+                        'Someone should look at this today.',
+                    ],
+                    'The discrepancies' => explode("\n", json_encode($problems, JSON_PRETTY_PRINT) ?: ''),
+                ],
+            ));
 
             $this->line("Alert sent to {$to}.");
         } catch (\Throwable $e) {

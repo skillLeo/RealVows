@@ -154,3 +154,24 @@ Schedule::command('realvows:check-stored-files')
     ->dailyAt('04:17')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+/*
+ * ⚠️ THE ALERTS THAT HAD NO LISTENER.
+ *
+ * Failed jobs, error-level log lines and undelivered messages were all being
+ * detected correctly and consumed by nobody. `failed_jobs` is the sharp one: a
+ * job that fails three times stops, and on this host that includes outbound
+ * email, so the failure mode is a member waiting for an introduction the
+ * platform believes it sent.
+ *
+ * ⚠️ MORNING, NOT NIGHT. Whoever reads this should be awake when it arrives.
+ * An alert delivered at 03:40 is read at 09:00 anyway, having lost five hours
+ * for no reason.
+ *
+ * It sends nothing when there is nothing to say, so its arrival is itself the
+ * signal. See ReportSilentFailures for why that matters more than it sounds.
+ */
+Schedule::command('realvows:report-silent-failures')
+    ->dailyAt('07:30')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/scheduler.log'));

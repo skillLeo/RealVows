@@ -78,7 +78,7 @@ property of the work rather than of any one person's carelessness.
 | **OpenAI API key** | Hassam | Both AI features are finished and dormant |
 | **Sentry DSN** | Hassam | Wired and dormant. Free tier, fifteen minutes |
 | **Real-device walk** | Hassam | `DEVICE-WALK-LIST.md`. Nothing has ever been opened on a real phone |
-| **Meta business verification** | Umar | Gates every WhatsApp message |
+| **WhatsApp billing currency** | Umar | **DIAGNOSED, and it is not verification.** Every send is accepted by Meta and then fails asynchronously with `131042 Business eligibility payment issue` — "your WhatsApp Business account currency is not configured". Templates are approved, the number is VERIFIED, the API works, and no message can arrive until a currency and payment method are set on the WABA. Fix at business.facebook.com → Billing → the WhatsApp asset. Business verification is separately `not_verified`, which caps volume at 250 conversations/24h but is NOT what is blocking delivery |
 | **The bank** | Umar | Gates payments and the billing legal entity, which still prints `[PENDING]` deliberately |
 
 ---

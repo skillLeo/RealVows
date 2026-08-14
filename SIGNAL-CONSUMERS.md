@@ -133,3 +133,43 @@ Before adding an alarm, name its consumer. If you cannot, do not add it — writ
 down that the condition is unwatched instead. An honest gap is cheaper than a
 false sense of coverage, and this project has now paid for that lesson eleven
 times.
+
+---
+
+## WhatsApp delivery — the alarm that had no wire until 2026-08-14
+
+⚠️ **A send that reports success and fails a second later, to nobody.**
+
+`MetaCloudSender::sendTemplate` returns `sent: true` on an HTTP 200. That 200
+means Meta **accepted** the message, not that it delivered one. Delivery and
+failure are reported asynchronously over the webhook — and **no app was
+subscribed to the WABA**, so `GET /{waba}/subscribed_apps` returned `{"data":[]}`
+and every status Meta ever produced was posted into the void.
+
+The endpoint itself was perfect the whole time: `GET /webhook/whatsapp` echoed
+Meta's challenge with a 200 on the first try, signature validation works. The
+wire was never connected at the other end.
+
+**What that cost:** every WhatsApp delivery row would have sat at `accepted`
+forever, and the platform would have believed it had told members things they
+never received. The first symptom would have been a member saying nobody ever
+wrote to them.
+
+**How it was found:** the client asked for a test message. It sent clean four
+times — `sent: true`, real message IDs, a resolved `wa_id` proving the recipient
+is a genuine WhatsApp account — and arrived never. Subscribing the app and
+registering the callback URL turned a silent nothing into one line:
+
+```
+131042  Business eligibility payment issue
+"your WhatsApp Business account currency is not configured"
+```
+
+**Consumer:** `WhatsAppWebhookController` → `whatsapp-webhook.log`, and the
+delivery rows it updates. Now genuinely connected, verified by a real `failed`
+status arriving from `173.252.95.35` with a valid signature.
+
+⚠️ **The rule it re-earns:** a 200 from a provider is a receipt for the request,
+never for the outcome. Anything that reports success before the work happens
+needs the second half wired before it is trusted, and this one was trusted for
+weeks.

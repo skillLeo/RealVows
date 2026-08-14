@@ -41,11 +41,18 @@ pass, reach mutual interest, see contact details, and block. **Not a dead end.**
 | ✅ | Resend switch + webhook receiving live events | Hassam | Live, verified |
 | ⏳ | **Verify the domain in Resend** — DNS is correct, button unpressed | **Client** | Blocks real sends |
 | ⏳ | Scope webhook to `email.*` events only | **Client** | 2 minutes |
-| ⏳ | Seven Meta templates approved | **Client** | **The only long pole left** |
+| ⏳ | Seven Meta templates approved | **Client** | **The only long pole left.** Drift against Meta is now checked weekly rather than remembered |
+| 🚫 | **One sentence from the scholar on guardian presence** | **Client** | The only thing blocking code. Reading B is built and parked on `guardian-presence-reading-b`, unmerged |
 | ⬜ | **Remove the "awaiting Meta review" line** from `partials/what-arrives.blade.php` the day the templates are approved | Hassam | Tied to the row above — the previous version of that line was stale for weeks and nothing could tell |
 | ⬜ | Demo members actually removed | Hassam | Run on launch day |
 | ⬜ | Five real-device checks | **Client** | |
 | ⬜ | Backup taken and restore tested | Hassam | |
+| ✅ | **realvows.skillleo.com taken off the public internet** | Hassam | 301 to realvows.com. It was still serving a pre-R3 build with the astrology engine and photographs shown to members |
+| ✅ | Deploy refuses a commit CI has not passed | Hassam | A red build was deployed twice on 2026-08-13 |
+| ✅ | Failed jobs, error lines and undelivered messages reach a person | Hassam | `realvows:report-silent-failures`, daily 07:30, silent unless something needs acting on |
+| ✅ | The credit-ledger alert **proven to land in a real inbox** | Hassam | Forced a discrepancy on production and read the message back over IMAP |
+| ⏳ | **Forward `info@realvows.com` to a phone** | **Client / Hassam** | Every alert converges there. Unforwarded, the alerting is decoration |
+| ⏳ | Sentry DSN pasted in | **Hassam** | Wired and dormant. Free tier, fifteen minutes. Without it, errors surface next morning rather than in seconds |
 
 ## Blocking payments (not the free launch)
 
@@ -66,11 +73,11 @@ documentation and handover.
 
 | | |
 |---|---|
-| ✅ | **521 tests, 0 failures**, 9 skipped (PowerTranz, loudly) |
+| ✅ | **774 tests, 0 failures**, 9 skipped (PowerTranz, loudly) |
 | ✅ | `PositiveControlsAreAliveTest` green |
 | ✅ | Zodiac reader green over 60+ source files **and rendered output** |
 | ✅ | Web root exposure green against production, in the deploy pipeline |
-| ✅ | Cron confirmed firing (queue drains, watchdog armed) |
+| ✅ | Cron confirmed firing (queue drains, watchdog armed) — **and its output no longer goes to `/dev/null`**, which it did for months |
 | ✅ | Maintenance watchdog verified by deliberately stranding the app (`MaintenanceWatchdogTest`) |
 
 ---

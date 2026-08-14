@@ -89,7 +89,40 @@ class WhatsAppTemplateDriftTest extends TestCase
             ->assertFailed();
     }
 
+    /**
+     * ⚠️ THE EXAMPLE MUST BE A TEMPLATE WE ACTUALLY SEND.
+     *
+     * This used `phone_verification_code`, which is declared for a feature that
+     * was never built and is now marked `planned` — so removing it from Meta's
+     * response stopped being a failure and the control silently passed for the
+     * wrong reason.
+     *
+     * A missing template only matters when something sends it. The example is
+     * now one that does: `mutual_interest` is the message telling two people
+     * they have both said yes, and losing it means that message fails with error
+     * 132000 for every member, silently.
+     */
     public function test_it_catches_a_template_meta_has_never_approved(): void
+    {
+        $payload = $this->metaPayload();
+
+        $payload['data'] = array_values(array_filter(
+            $payload['data'],
+            fn (array $t) => $t['name'] !== 'mutual_interest',
+        ));
+
+        Http::fake(['graph.facebook.com/*' => Http::response($payload)]);
+
+        $this->artisan('realvows:whatsapp-templates-check')
+            ->expectsOutputToContain('mutual_interest')
+            ->assertFailed();
+    }
+
+    /**
+     * ⚠️ AND THE OTHER DIRECTION: a PLANNED template that Meta lacks is not a
+     * failure, or the check reports one forever and nobody reads it again.
+     */
+    public function test_a_planned_template_meta_lacks_is_not_a_failure(): void
     {
         $payload = $this->metaPayload();
 
@@ -101,8 +134,8 @@ class WhatsAppTemplateDriftTest extends TestCase
         Http::fake(['graph.facebook.com/*' => Http::response($payload)]);
 
         $this->artisan('realvows:whatsapp-templates-check')
-            ->expectsOutputToContain('phone_verification_code')
-            ->assertFailed();
+            ->expectsOutputToContain('planned')
+            ->assertSuccessful();
     }
 
     public function test_it_catches_a_template_that_is_not_approved_yet(): void

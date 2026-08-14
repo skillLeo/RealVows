@@ -264,4 +264,51 @@ class RiskScoringTest extends TestCase
             return true;
         });
     }
+
+    /**
+     * ⚠️ THE MODEL MUST NEVER RESTATE OR REINTERPRET A FLAG.
+     *
+     * With a live key, given "signed in from the same device as the member",
+     * the narrator wrote: "automated flags suggesting a close relationship with
+     * the member."
+     *
+     * That is the OPPOSITE of what the signal means. Same device suggests one
+     * person operating both accounts, which is the strongest fraud indicator in
+     * this system, and a reviewer reading "close relationship" would approve.
+     *
+     * ⚠️ NO TEST COULD HAVE FOUND THAT. It was a true, fluent, harmless-looking
+     * sentence, produced by a working feature, and it was dangerous. It was
+     * found by reading the live output — which is the whole argument for reading
+     * a model's output before real members depend on it.
+     *
+     * What a test CAN hold is the instruction. If somebody loosens the prompt
+     * back into asking for a summary, paraphrase returns and so does this.
+     */
+    public function test_the_prompt_forbids_reinterpreting_a_flag(): void
+    {
+        $source = file_get_contents(base_path('app/Services/Risk/RiskNarrator.php'));
+
+        foreach ([
+            'DO NOT restate' => 'the instruction not to restate the flags',
+            'soften' => 'the instruction not to soften them',
+            'reinterpret' => 'the instruction not to reinterpret them',
+            'CHECK next' => 'the instruction to name what to check instead',
+            'empty summary' => 'permission to say nothing when there is nothing to add',
+        ] as $needle => $what) {
+            $this->assertStringContainsString(
+                $needle,
+                $source,
+                "The risk narrator prompt has lost {$what}. Asked to summarise, the model "
+                    .'paraphrases, and paraphrasing a fraud signal is how "same device" became '
+                    .'"a close relationship".',
+            );
+        }
+
+        // ⚠️ And it must not have gone back to asking for a summary of them.
+        $this->assertStringNotContainsString(
+            '"summary": "two sentences at most"',
+            $source,
+            'The prompt asks for a summary of the flags again.',
+        );
+    }
 }

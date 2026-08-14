@@ -114,6 +114,19 @@ class CheckWhatsAppTemplates extends Command
             $expected = count($ours['variables']);
 
             if (! isset($live[$name])) {
+                /*
+                 * ⚠️ PLANNED IS NOT DRIFT. A template declared for a feature
+                 * that is not built breaks nothing, and counting it made this
+                 * check report a failure on every run forever — which is how a
+                 * check stops being read, so the run where a real template IS
+                 * revoked looks like all the others.
+                 */
+                if ($ours['planned'] ?? false) {
+                    $this->line(sprintf('  <fg=gray>planned</>   %-24s not submitted to Meta yet, and nothing sends it.', $name));
+
+                    continue;
+                }
+
                 $this->line(sprintf('  <fg=red>absent</>    %-24s Meta has no template by this name.', $name));
                 $problems++;
 

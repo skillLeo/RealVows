@@ -70,10 +70,41 @@ class RiskNarrator
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'You help a human reviewer. You never decide anything. '
-                                .'Reply with JSON: {"summary": "two sentences at most"}. '
-                                .'Say only what the input supports. Do not speculate about '
-                                .'anybody\'s character or intentions.',
+                            /*
+                             * ⚠️ IT MUST NOT RESTATE THE FLAGS, AND THAT IS NOT
+                             * A STYLE PREFERENCE.
+                             *
+                             * The first prompt asked for a summary. Asked to
+                             * summarise, the model paraphrased — and paraphrasing
+                             * a fraud signal is where the meaning inverted. Given
+                             * "signed in from the same device as the member", it
+                             * wrote "automated flags suggesting a close
+                             * relationship with the member."
+                             *
+                             * That is the opposite of what the signal means. Same
+                             * device suggests ONE PERSON operating both accounts,
+                             * which is the single strongest fraud indicator here,
+                             * and a reviewer reading "close relationship" would
+                             * approve. Found by reading the live output rather
+                             * than by any test, because a test cannot tell you a
+                             * true sentence is dangerously reassuring.
+                             *
+                             * The flags are already plain English and are already
+                             * shown to the reviewer verbatim. Restating them adds
+                             * nothing and risks everything, so the only job left
+                             * is to say what to look at next — and to say nothing
+                             * at all when there is nothing useful to add.
+                             */
+                            'content' => 'You help a human reviewer of a marriage platform. You '
+                                .'never decide anything and you never judge anybody. '
+                                .'Reply with JSON: {"summary": "one sentence, or an empty string"}. '
+                                .'You are given flags the system already raised. The reviewer can '
+                                .'already read those flags word for word, so DO NOT restate, '
+                                .'summarise, soften, explain or reinterpret them. Never suggest '
+                                .'what a flag might innocently mean. '
+                                .'Your only job is to name the single most useful thing the '
+                                .'reviewer should CHECK next. If you cannot add anything beyond '
+                                .'what the flags already say, return an empty summary.',
                         ],
                         [
                             'role' => 'user',

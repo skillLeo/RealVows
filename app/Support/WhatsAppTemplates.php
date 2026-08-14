@@ -175,12 +175,48 @@ class WhatsAppTemplates
          * from, and Meta's authentication format does not permit the extra
          * text.
          */
+        /*
+         * ⚠️ DECLARED, NOT SUBMITTED, AND NOTHING SENDS IT YET.
+         *
+         * Phone verification over WhatsApp is designed and not built: no code
+         * path anywhere sends this, and Meta has never been asked to approve it.
+         *
+         * ⚠️ SO IT IS MARKED `planned` RATHER THAN LEFT TO FAIL THE DRIFT CHECK.
+         * Left unmarked it reported "1 of 7 templates disagree with Meta" on
+         * every single run, forever, for a feature nobody is waiting on. A check
+         * that can never reach zero is the same fault as a badge that never
+         * clears: it teaches the person reading it that the number means
+         * nothing, and then the run where a template genuinely IS revoked looks
+         * exactly like the fifty before it.
+         *
+         * Remove this flag on the day it is submitted, and the check will start
+         * holding Meta to it.
+         */
         'phone_verification_code' => [
             'category' => self::AUTHENTICATION,
+            'planned' => true,
             'variables' => ['code'],
             'body' => 'Your RealVows verification code is {{1}}. It expires in ten minutes.',
         ],
     ];
+
+    /**
+     * Templates that have been submitted to Meta and are expected to exist.
+     *
+     * ⚠️ A PLANNED TEMPLATE IS NOT DRIFT. Drift is a template this code SENDS
+     * that Meta no longer holds, which breaks a real message to a real member.
+     * A template designed for a feature that is not built breaks nothing, and
+     * counting it as a failure is how the whole check stops being read.
+     *
+     * @return list<string>
+     */
+    public static function submittedNames(): array
+    {
+        return array_keys(array_filter(
+            self::TEMPLATES,
+            fn (array $t) => ! ($t['planned'] ?? false),
+        ));
+    }
 
     /** @return list<string> */
     public static function names(): array

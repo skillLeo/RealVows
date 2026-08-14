@@ -7,10 +7,15 @@ use App\Models\GuardianDecision;
 use App\Models\MatchRecord;
 use App\Models\Profile;
 use App\Models\User;
+use App\Models\Verification;
 use App\Services\Matching\CandidatePool;
+use App\Services\Matching\MatchGenerator;
 use App\Services\Settings\SettingsService;
 use App\Support\GuardianPolicy;
+use App\Support\GuardianPresenter;
 use App\Support\MatchPresenter;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -31,8 +36,8 @@ class GuardianGateEnforcementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
     }
 
     private function setLevel(string $level): void
@@ -50,7 +55,7 @@ class GuardianGateEnforcementTest extends TestCase
             'submitted_at' => now(),
         ]);
 
-        \App\Models\Verification::factory()->verified()->create(['profile_id' => $profile->id]);
+        Verification::factory()->verified()->create(['profile_id' => $profile->id]);
 
         return $profile->fresh();
     }
@@ -151,7 +156,7 @@ class GuardianGateEnforcementTest extends TestCase
         $candidate = $this->matchable('man');
         $this->verifiedGuardianFor($candidate);
 
-        $written = app(\App\Services\Matching\MatchGenerator::class)->generateFor($seeker->fresh());
+        $written = app(MatchGenerator::class)->generateFor($seeker->fresh());
 
         $this->assertSame(0, $written, 'Introductions were generated for a member who is gated.');
 
@@ -160,7 +165,7 @@ class GuardianGateEnforcementTest extends TestCase
 
         $this->assertGreaterThan(
             0,
-            app(\App\Services\Matching\MatchGenerator::class)->generateFor($seeker->fresh()),
+            app(MatchGenerator::class)->generateFor($seeker->fresh()),
             'The generator writes nothing even for a gated-through member, so the zero above '
                 .'proves nothing about the gate.'
         );
@@ -293,10 +298,34 @@ class GuardianGateEnforcementTest extends TestCase
 
         $released = app(MatchPresenter::class)->full($match->fresh());
 
+        /*
+         * ⚠️ THE CONTROL MOVED, BECAUSE THE RELEASE MOVED. It used to assert
+         * the MEMBER receives the details once the gate opens. She does not any
+         * more: the client's scholar ruled that a family guardian must be
+         * present for the conversation rather than merely permitting it, so the
+         * details go to him and he makes the introduction.
+         *
+         * The control's job is unchanged — prove the gate opens rather than
+         * being permanently shut — so it follows the release to where the
+         * release now happens. Left asserting the old behaviour it would have
+         * failed for the right reason and read like a regression.
+         */
+        $this->assertArrayNotHasKey('contact', $released, 'Details reached the member directly.');
+        $this->assertTrue(
+            $released['contactWithTrustedContact'],
+            'The contact gate never opens, so the refusal above proves nothing.'
+        );
+
+        $held = app(GuardianPresenter::class)->introduction(
+            $guardian->fresh(),
+            $match->fresh(),
+            $other,
+        );
+
         $this->assertArrayHasKey(
             'contact',
-            $released,
-            'The contact gate never opens, so the refusal above proves nothing.'
+            $held,
+            'Nobody holds the contact details at all, so the introduction is a dead end.'
         );
     }
 }

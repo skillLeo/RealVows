@@ -128,6 +128,41 @@ function decide(matchId, decision) {
 
                     <p v-if="item.about" class="rv-body">{{ item.about }}</p>
 
+                    <!--
+                        ⚠️ THE DETAILS ARRIVE HERE ONCE HE HAS APPROVED, BECAUSE
+                        HE IS THE ONE MAKING THE INTRODUCTION.
+
+                        The client's scholar ruled that approving an exchange is
+                        not the same as being present for it, except where the
+                        guardian is unjust, not Muslim, or has died. Outside
+                        those, the platform stops being the channel and he
+                        becomes it.
+
+                        The member's own screen no longer shows a phone number
+                        and tells her he holds it. If this block were missing,
+                        that sentence would point at nothing: she cannot proceed,
+                        he has nothing to pass on, and the introduction simply
+                        ends at the last gate with nobody holding anything.
+                    -->
+                    <div v-if="item.contactIsYoursToPass" class="rv-card rv-card--accent rv-stack" style="gap: 8px">
+                        <span class="rv-label rv-label--brass">{{ $t('guardian_area.contact_heading') }}</span>
+                        <p class="rv-help">{{ $t('guardian_area.contact_help') }}</p>
+                        <dl class="rv-facts">
+                            <template v-if="item.contact.lastName">
+                                <dt>Family name</dt>
+                                <dd>{{ item.contact.lastName }}</dd>
+                            </template>
+                            <template v-if="item.contact.phone">
+                                <dt>Phone</dt>
+                                <dd><a :href="`tel:${item.contact.phone.replace(/\s+/g, '')}`">{{ item.contact.phone }}</a></dd>
+                            </template>
+                            <template v-if="item.contact.email">
+                                <dt>Email</dt>
+                                <dd><a :href="`mailto:${item.contact.email}`">{{ item.contact.email }}</a></dd>
+                            </template>
+                        </dl>
+                    </div>
+
                     <!-- ⚠️ NO :disabled TIED TO A SHARED FORM. One useForm
                          instance was serving every card, so deciding on one
                          introduction greyed out the buttons on all of them —

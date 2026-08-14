@@ -203,6 +203,8 @@
         "accept_submitting": "Creating your account"
     },
     "guardian_area": {
+        "contact_heading": "How to reach them",
+        "contact_help": "These have come to you rather than to her, so that you can make the introduction yourself. Speak with her about how she would like to go from here.",
         "dashboard_heading": "Introductions for :name",
         "dashboard_lead": "You are asked to look at each introduction before she does. Take your time.",
         "nothing_yet": "There is nothing waiting for you.",

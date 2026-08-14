@@ -262,6 +262,26 @@ const block = () => {
                     </dl>
                 </BaseCard>
 
+                <!--
+                    ⚠️ WHEN THE TRUSTED CONTACT HOLDS THEM INSTEAD.
+
+                    The client's scholar ruled that a family guardian must be
+                    PRESENT for the conversation rather than merely permitting
+                    it, so the surname and phone number go to him and he makes
+                    the introduction.
+
+                    Without this block a member who has said yes, been approved
+                    three times, and reached the end of the flow would find
+                    nothing at all and reasonably conclude the product had
+                    broken. Every other gate in this system that withholds
+                    something also says why; this is the last and the most
+                    consequential.
+                -->
+                <BaseCard v-else-if="match.contactWithTrustedContact" accent>
+                    <h2 class="rv-display rv-display--sm">{{ $t('respond.contact_heading') }}</h2>
+                    <p class="rv-body">{{ match.contactWithTrustedContactReason }}</p>
+                </BaseCard>
+
                 <div class="rv-payoff__quiet">
                     <BaseButton variant="ghost" @click="reportOpen = true">
                         {{ $t('report.heading') }}

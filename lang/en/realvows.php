@@ -335,6 +335,16 @@ return [
      * other than their ward and the person she was introduced to.
      */
     'guardian_area' => [
+        /*
+         * ⚠️ THE INTRODUCTION IS HIS TO MAKE NOW. The scholar ruled that
+         * approving an exchange is not the same as being present for it, so
+         * these details come to him rather than to his ward, and the wording
+         * has to say plainly that acting on them is the expectation.
+         */
+        'contact_heading' => 'How to reach them',
+        'contact_help' => 'These have come to you rather than to her, so that you can make the '
+            .'introduction yourself. Speak with her about how she would like to go from here.',
+
         'dashboard_heading' => 'Introductions for :name',
         'dashboard_lead' => 'You are asked to look at each introduction before she does. Take your time.',
         'nothing_yet' => 'There is nothing waiting for you.',

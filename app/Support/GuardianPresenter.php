@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Guardian;
 use App\Models\MatchRecord;
 use App\Models\Profile;
+use App\Services\Matching\MatchInterest;
 
 /**
  * Everything a trusted contact is allowed to see, and nothing else.
@@ -126,7 +127,22 @@ class GuardianPresenter
          * him a woman's phone number to pass on would be a worse exposure than
          * the one this rule exists to prevent.
          */
-        if (! $guardian->is_appointed && $guardian->hasApproved(Guardian::GATE_CONTACT, $match->id)) {
+        /*
+         * ⚠️ MUTUAL INTEREST IS STILL REQUIRED, AND THIS SHIPPED WITHOUT IT.
+         *
+         * The first version asked only whether he had approved at the contact
+         * gate, so a trusted contact who approved early held the other person's
+         * surname and phone number before that person had said yes to anything.
+         * One-sided interest reveals nothing to ANYBODY — that rule did not stop
+         * applying because a later gate was added in front of it.
+         *
+         * Caught by test_one_sided_interest_still_releases_nothing_to_anybody,
+         * which was written in the same commit as the leak and is the reason the
+         * branch was tested rather than merely written.
+         */
+        $mutual = app(MatchInterest::class)->isMutual($match);
+
+        if ($mutual && ! $guardian->is_appointed && $guardian->hasApproved(Guardian::GATE_CONTACT, $match->id)) {
             // ⚠️ A SEPARATE NAME. Reassigning $other from a Profile to a User
             // works today and quietly changes the type under anything added
             // below it, which is how a photograph key ends up reading the wrong

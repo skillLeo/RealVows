@@ -54,7 +54,25 @@ class ForbiddenLanguageTest extends TestCase
     public const TIER_2 = [
         'fire sign', 'air sign', 'earth sign', 'water sign',
         'fire and air', 'earth and water', 'cardinal', 'mutable',
-        'element', 'elemental', 'modality',
+
+        /*
+         * ⚠️ `element` ON ITS OWN WAS TOO GREEDY, AND FAKER PROVED IT.
+         *
+         * It matched "Elementary and Secondary School Administrators", an
+         * occupation Faker generates at random, so the build went red on a
+         * profile containing nothing wrong — and only on the runs where the
+         * dice landed that way. Exactly the same shape as `libra` inside
+         * "Calibration" two commits ago.
+         *
+         * The mechanism vocabulary is the ELEMENT PAIRED WITH A NAME, and each
+         * pairing is listed rather than trusting one greedy stem. `elemental`
+         * stays because there is no innocent English word that begins with it.
+         *
+         * ⚠️ THE CI GREP HAS ALWAYS USED `elemental` AND NEVER `element`. The
+         * two lists had drifted, and the stricter one was the wrong one.
+         */
+        'fire element', 'air element', 'earth element', 'water element',
+        'elemental', 'modality',
     ];
 
     protected function setUp(): void

@@ -281,6 +281,80 @@ class UnverifiedCanBuildButNotBeMatchedTest extends TestCase
         Mail::assertSent(\App\Mail\TrustedContactInvitation::class);
     }
 
+    /**
+     * ⚠️ THE HOLD IS DEFEATED ONE MORNING LATER IF THE REMINDER DOES NOT KNOW
+     * ABOUT IT, AND THE REMINDER HAS NO REASON TO KNOW.
+     *
+     * GuardianService writes `status => invited` when a member names somebody.
+     * That was true the instant it was written until R5, because naming a
+     * contact required a confirmed account and the message left in the same
+     * request. RemindTrustedContacts was entitled to read `invited` as "we have
+     * written to this person" and it did.
+     *
+     * Holding the invitation broke that invariant without touching the file
+     * that depends on it. The father would have received the daily chase for an
+     * introduction he was never told about.
+     */
+    public function test_the_daily_reminder_does_not_chase_a_held_invitation(): void
+    {
+        Mail::fake();
+
+        $user = $this->member(emailVerified: false);
+
+        $this->actingAs($user)->post('/trusted-contact', [
+            'name' => 'Yusuf Rahman',
+            'relationship' => 'father',
+            'email' => 'yusuf@gmail.com',
+            'phone' => '+18761234567',
+        ]);
+
+        // ⚠️ The row really does say `invited`, which is the whole trap. If this
+        // fixture stopped being written that way the test below would pass for
+        // a reason that has nothing to do with the reminder.
+        $this->assertDatabaseHas('guardians', [
+            'member_id' => $user->id,
+            'status' => \App\Models\Guardian::STATUS_INVITED,
+        ]);
+
+        $this->travel(8)->days();
+        $this->artisan('realvows:remind-trusted-contacts')->assertSuccessful();
+
+        Mail::assertNothingSent();
+        Mail::assertNothingQueued();
+    }
+
+    /**
+     * ⚠️ POSITIVE CONTROL. A reminder that had simply stopped working would
+     * satisfy the assertion above perfectly, and every trusted contact on the
+     * platform would quietly stop being chased.
+     */
+    public function test_the_reminder_still_chases_a_contact_who_was_really_invited(): void
+    {
+        Mail::fake();
+
+        $user = $this->member(emailVerified: true);
+
+        $this->actingAs($user)->post('/trusted-contact', [
+            'name' => 'Yusuf Rahman',
+            'relationship' => 'father',
+            'email' => 'yusuf@gmail.com',
+            'phone' => '+18761234567',
+        ]);
+
+        $this->travel(8)->days();
+        $this->artisan('realvows:remind-trusted-contacts')->assertSuccessful();
+
+        $any = fn (\Illuminate\Mail\Mailable $m) => true;
+        $chased = Mail::sent($any)->count() + Mail::queued($any)->count();
+
+        $this->assertGreaterThan(
+            0,
+            $chased,
+            'The daily reminder chased nobody at all, so the assertion above is measuring a '
+                .'broken command rather than a respected hold.',
+        );
+    }
+
     public function test_the_verification_email_is_sent_on_completion(): void
     {
         /*

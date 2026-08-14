@@ -41,6 +41,28 @@ class RemindTrustedContacts extends Command
         $pending = Guardian::query()
             ->whereIn('status', [Guardian::STATUS_INVITED, Guardian::STATUS_REGISTERED])
             ->where('is_appointed', false)
+
+            /*
+             * ⚠️ A ROW MARKED `invited` HAS NOT NECESSARILY BEEN INVITED, AND
+             * THIS COMMAND USED TO BE ENTITLED TO ASSUME IT HAD.
+             *
+             * GuardianService writes `status => invited` when the member names
+             * somebody, and until R5 that was always true the instant it was
+             * written, because naming a contact required a confirmed account and
+             * the message went out in the same request.
+             *
+             * R5 holds that message until the member confirms their own address.
+             * The row still says `invited`. So without this line, the daily
+             * reminder would have chased a father the platform had deliberately
+             * decided not to write to yet — defeating the hold entirely, one
+             * morning later, from a file that has nothing to do with it.
+             *
+             * ⚠️ THIS IS THE SAME SHAPE AS THE POOL. A guarantee held by
+             * something that never claimed to hold it: "a row marked invited was
+             * invited" was true by side effect, and nothing recorded that anyone
+             * depended on it. See LOAD-BEARING-GUARANTEES.md.
+             */
+            ->whereHas('member', fn ($q) => $q->whereNotNull('email_verified_at'))
             ->whereNotNull('email')
             ->get();
 

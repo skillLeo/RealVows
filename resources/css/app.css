@@ -4231,7 +4231,28 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  */
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   @media (prefers-reduced-motion: no-preference) {
-    .rv-hero .rv-d1 {
+    /*
+     * ⚠️ NEVER WHILE THE HEADLINE IS SPLIT INTO WORDS. THIS DELETED THE
+     * HEADLINE OFF THE LIVE HOME PAGE, AND ONLY ON A FIRST VISIT.
+     *
+     * The Gleam paints its gradient on the h1 and clips it to the h1's own
+     * glyphs, which is why the text must be transparent. The arrival sequence
+     * replaces that text with `.rv-word` spans, and `.rv-word` is
+     * `display: inline-block` — an inline-block descendant paints its own text
+     * in its own box, so the parent's clip never reaches it. The spans inherit
+     * `transparent` and have no background to be clipped, and paint nothing.
+     *
+     * ⚠️ WHY IT LOOKED LIKE A COLOUR BUG. The second load reads
+     * `sessionStorage`, skips the split entirely, and the clip works perfectly
+     * — so it was invisible cold and correct on refresh, which reads as a
+     * flash of unstyled text and is nothing of the kind.
+     *
+     * ⚠️ AND WHY :has IS SAFE HERE. Where it is unsupported this whole
+     * selector is invalid and the rule is dropped, so the headline renders
+     * solid oxblood with no gleam. The failure direction is a missing
+     * flourish, never missing words.
+     */
+    .rv-hero .rv-d1:not(:has(.rv-word)) {
       background-image: linear-gradient(
         100deg,
         var(--oxblood) 42%,

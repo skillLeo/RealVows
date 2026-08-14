@@ -75,6 +75,29 @@
         root.setAttribute('data-arrival', 'running');
     });
 
+    /* ⚠️ PUT THE HEADLINE BACK TOGETHER WHEN THE WORDS HAVE LANDED.
+     *
+     * The Gleam clips a gradient to the h1's own glyphs, and it cannot reach
+     * text sitting inside `.rv-word` spans, because an inline-block descendant
+     * paints its own text. Leaving the spans in place meant the gleam had
+     * nothing to clip and the headline was invisible for the whole of a first
+     * visit — the CSS is guarded against that now, so the worst case here is a
+     * headline with no gleam rather than no headline.
+     *
+     * This restores the plain sentence so the flourish can run as designed.
+     * `lastDelay + duration` with a small margin: 620ms + 420ms.
+     */
+    if (heading) {
+        var whole = heading.textContent;
+
+        setTimeout(function () {
+            /* Only if nothing else has touched it since. */
+            if (heading.querySelector('.rv-word')) {
+                heading.textContent = whole;
+            }
+        }, 1200);
+    }
+
     try {
         sessionStorage.setItem('rv.arrival', '1');
     } catch (e) { /* nothing to do */ }

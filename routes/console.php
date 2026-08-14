@@ -195,3 +195,19 @@ Schedule::command('realvows:whatsapp-templates-check')
     ->weeklyOn(1, '05:10')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+/*
+ * ⚠️ A BACKUP NOBODY HAS RESTORED IS A FILE, NOT A BACKUP.
+ *
+ * There were none at all before this. mysqldump exits zero on a truncated
+ * write, on a permissions fault halfway through, and on a table it quietly
+ * skipped — so every run restores what it just took into a scratch schema and
+ * compares row counts table by table before calling it a backup.
+ *
+ * 02:20 so it finishes well before the ledger check at 03:40 and the morning
+ * report at 07:30, and so a bad night is already in the digest by breakfast.
+ */
+Schedule::command('realvows:backup')
+    ->dailyAt('02:20')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/scheduler.log'));

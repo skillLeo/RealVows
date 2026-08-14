@@ -7,7 +7,9 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Services\Risk\GuardianRiskScorer;
 use App\Services\Risk\RiskAssessment;
-use App\Services\Risk\RiskNarrator;
+use App\Services\Settings\SettingsService;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -25,8 +27,8 @@ class RiskScoringTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed(SettingsSeeder::class);
         Http::preventStrayRequests();
     }
 
@@ -113,6 +115,68 @@ class RiskScoringTest extends TestCase
         $this->assertCount(2, $assessment->reasons);
     }
 
+    /**
+     * ⚠️ A CONTACT INVITED YESTERDAY IS NOT THE RISKIEST THING ON THE QUEUE.
+     *
+     * Found by reading a full run of real scores rather than by any test. Both
+     * signals fired regardless of whether the person had been given the chance:
+     * fifty points for a photograph nobody had asked them for, twenty-five for
+     * not signing in to an account that did not exist yet. Seventy-five. HIGH.
+     *
+     * So every brand-new invitation looked like the most dangerous record in
+     * the system. A reviewer opens it, finds nothing wrong, and learns within a
+     * week that HIGH means nothing — the same failure as an alert nobody reads,
+     * arriving through a number instead of an email.
+     */
+    public function test_a_freshly_invited_contact_is_not_penalised_for_being_early(): void
+    {
+        $assessment = app(GuardianRiskScorer::class)->score($this->guardian([
+            'status' => Guardian::STATUS_INVITED,
+            'joint_photo_path' => null,
+            'user_id' => null,
+        ]));
+
+        $this->assertSame(0, $assessment->score, implode("\n", [
+            'A contact invited yesterday scored for a photograph they cannot upload and an',
+            'account they have not been asked to make yet. That measures elapsed time, not risk.',
+        ]));
+        $this->assertSame(RiskAssessment::BAND_LOW, $assessment->band());
+        $this->assertSame([], $assessment->reasons);
+    }
+
+    public function test_a_registered_contact_is_given_room_to_upload(): void
+    {
+        // They have just made their account and are on the way to the upload
+        // screen. Absent is the expected state, not a finding.
+        $assessment = app(GuardianRiskScorer::class)->score($this->guardian([
+            'status' => Guardian::STATUS_REGISTERED,
+            'joint_photo_path' => null,
+        ]));
+
+        $this->assertSame(0, $assessment->score);
+    }
+
+    /**
+     * ⚠️ THE CONTROL WITHOUT WHICH THE TWO ABOVE ARE INDISTINGUISHABLE FROM
+     * DELETING THE SIGNAL.
+     *
+     * Narrowing when a rule fires is one edit away from switching it off, and
+     * the demo data contains no verified-without-photograph case, so a full run
+     * would look identical either way. This is the case that must still score,
+     * and it is the most serious one in the whole scorer: somebody was approved
+     * without the check that approval is supposed to rest on.
+     */
+    public function test_a_verified_contact_with_no_photograph_still_scores(): void
+    {
+        $assessment = app(GuardianRiskScorer::class)->score($this->guardian([
+            'status' => Guardian::STATUS_VERIFIED,
+            'joint_photo_path' => null,
+        ]));
+
+        $this->assertSame(50, $assessment->score, 'The photograph signal has been switched off rather than narrowed.');
+        $this->assertContains('No joint photograph has been uploaded.', $assessment->reasons);
+    }
+
     /** ⚠️ The strongest signal: one device operating both accounts. */
     public function test_the_same_device_as_the_member_is_scored(): void
     {
@@ -162,7 +226,7 @@ class RiskScoringTest extends TestCase
      */
     public function test_a_failing_provider_degrades_to_rules_only(): void
     {
-        app(\App\Services\Settings\SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
+        app(SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
         Http::fake(['api.openai.com/*' => Http::response('upstream error', 500)]);
 
         $assessment = app(GuardianRiskScorer::class)->score(
@@ -179,7 +243,7 @@ class RiskScoringTest extends TestCase
      */
     public function test_no_photograph_or_surname_is_sent_to_the_provider(): void
     {
-        app(\App\Services\Settings\SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
+        app(SettingsService::class)->set('ai', 'openai_api_key', 'sk-test-key');
 
         Http::fake([
             'api.openai.com/*' => Http::response([

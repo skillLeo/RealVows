@@ -175,3 +175,23 @@ Schedule::command('realvows:report-silent-failures')
     ->dailyAt('07:30')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+/*
+ * ⚠️ TEMPLATE DRIFT IS SILENT AND EXPENSIVE, SO IT IS ASKED WEEKLY RATHER THAN
+ * REMEMBERED.
+ *
+ * The templates were compared against Meta by hand, once. Editing an approved
+ * template invalidates its approval, and a template that stops matching what
+ * this code sends fails at the moment of sending — which on this platform means
+ * a member never hearing about an introduction, with the failure landing in
+ * failed_jobs where until today nobody was looking.
+ *
+ * ⚠️ IT SAYS NOTHING WHILE WHATSAPP IS UNCONFIGURED. Meta business verification
+ * is the client's to complete and may take weeks. A weekly red line for a known
+ * blocker is how a check trains people to skip it, and then the week it matters
+ * looks like all the others.
+ */
+Schedule::command('realvows:whatsapp-templates-check')
+    ->weeklyOn(1, '05:10')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/scheduler.log'));

@@ -68,12 +68,30 @@ class GuardianRiskScorer
             $reasons[] = 'Signed in from the same device as the member.';
         }
 
-        if (! $guardian->joint_photo_path) {
+        /*
+         * ⚠️ ONLY ONCE THE PHOTOGRAPH IS ACTUALLY DUE. THIS USED TO FIRE ALWAYS.
+         *
+         * Reading a full run of real scores is what found this. A contact who
+         * was invited yesterday has no account and cannot upload anything, and
+         * both signals below fired on them anyway: fifty points for a
+         * photograph they were never asked for, twenty-five for not signing in
+         * to an account that does not exist yet. Seventy-five points. HIGH.
+         *
+         * ⚠️ SO EVERY BRAND-NEW INVITATION LOOKED LIKE THE RISKIEST THING ON
+         * THE QUEUE. A reviewer would open it, find nothing wrong, and learn
+         * within a week that HIGH means nothing — which is the same failure as
+         * an alert nobody reads, arriving through a number instead of an email.
+         *
+         * A missing photograph is only evidence once somebody has had the
+         * chance to send one. Before that it is a description of where they are
+         * in the flow.
+         */
+        if (! $guardian->joint_photo_path && $this->photographIsDue($guardian)) {
             $points += self::SIGNALS['joint_photo_missing'];
             $reasons[] = 'No joint photograph has been uploaded.';
         }
 
-        if (! $guardian->user_id) {
+        if (! $guardian->user_id && $guardian->status !== Guardian::STATUS_INVITED) {
             $points += self::SIGNALS['never_signed_in'];
             $reasons[] = 'Has never created their own account or signed in independently.';
         }
@@ -113,6 +131,26 @@ class GuardianRiskScorer
             // failed. No key is the feature being off, not an outage.
             modelUnavailable: $configured && $narration === null,
         );
+    }
+
+    /**
+     * Has this contact reached the point where a joint photograph is expected?
+     *
+     * ⚠️ INVITED AND REGISTERED ARE NOT SUSPICIOUS, THEY ARE EARLY. An invited
+     * contact has no account. A registered one has just made theirs and is on
+     * their way to the upload screen. Scoring either of them for an absent
+     * photograph measures elapsed time, not risk.
+     *
+     * ⚠️ VERIFIED WITH NO PHOTOGRAPH IS THE SERIOUS CASE and it stays scored.
+     * That means somebody was approved without the check that approval is
+     * supposed to rest on, which is worth every one of the fifty points.
+     */
+    private function photographIsDue(Guardian $guardian): bool
+    {
+        return ! in_array($guardian->status, [
+            Guardian::STATUS_INVITED,
+            Guardian::STATUS_REGISTERED,
+        ], true);
     }
 
     /**

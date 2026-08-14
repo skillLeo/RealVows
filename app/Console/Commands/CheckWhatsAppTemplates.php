@@ -57,10 +57,23 @@ class CheckWhatsAppTemplates extends Command
         $token = trim((string) $settings->get('whatsapp', 'access_token', ''));
 
         if ($waba === '' || $token === '') {
-            $this->error('Set the business account ID and access token first.');
-            $this->line('  Both live in /admin/settings under WhatsApp.');
+            /*
+             * ⚠️ NOT CONFIGURED IS NOT A FAILURE, AND THIS IS THE DIFFERENCE
+             * BETWEEN A USEFUL WEEKLY CHECK AND ONE NOBODY READS.
+             *
+             * WhatsApp is blocked on Meta's business verification, which is the
+             * client's to complete and may take weeks. This command is now
+             * scheduled, so returning FAILURE here would put a red line in the
+             * scheduler log every single week for a reason everybody already
+             * knows — and the week it finally means something, it would look
+             * exactly like the fifty weeks before it.
+             *
+             * Silent while unconfigured. Loud the moment there is real drift.
+             */
+            $this->line('WhatsApp is not configured yet, so there is nothing to compare.');
+            $this->line('  Set the business account ID and access token in /admin/settings.');
 
-            return self::FAILURE;
+            return self::SUCCESS;
         }
 
         try {

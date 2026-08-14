@@ -14,6 +14,7 @@
         "intervention/image": "^4.2",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
+        "sentry/sentry-laravel": "^4.27",
         "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {

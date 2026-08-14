@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\Settings\SettingsService;
 use App\Support\WhatsAppTemplates;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -24,7 +25,7 @@ class WhatsAppTemplateDriftTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $settings = app(SettingsService::class);
         $settings->set('whatsapp', 'business_account_id', '1553517519889000');
@@ -166,14 +167,48 @@ class WhatsAppTemplateDriftTest extends TestCase
             ->assertSuccessful();
     }
 
+    /**
+     * ⚠️ THE PROPERTY IS "IT MUST NOT CLAIM THEY MATCH", NOT "IT MUST EXIT
+     * NON-ZERO".
+     *
+     * This asserted a failure exit code, which was right while the command was
+     * only ever run by hand. It is now scheduled weekly, and a red line every
+     * Monday for a blocker everybody already knows about — Meta business
+     * verification, which is the client's to complete and may take weeks — is
+     * precisely how a check trains people to skip it. Then the week it means
+     * something, it looks like all the others.
+     *
+     * So the exit code relaxed and the real guarantee tightened: it makes no
+     * request, it says plainly that it could not compare, and it never reports
+     * agreement it did not verify. Guessing was always the thing being
+     * forbidden.
+     */
     public function test_it_refuses_to_guess_when_there_are_no_credentials(): void
     {
         app(SettingsService::class)->set('whatsapp', 'access_token', '');
 
         Http::fake();
 
-        $this->artisan('realvows:whatsapp-templates-check')->assertFailed();
+        $this->artisan('realvows:whatsapp-templates-check')
+            ->expectsOutputToContain('not configured yet, so there is nothing to compare')
+            ->assertSuccessful();
 
+        // It cannot have learned anything, because it asked nobody.
         Http::assertNothingSent();
+    }
+
+    /**
+     * ⚠️ AND THE CONTROL: silence while unconfigured must not become silence
+     * when there IS drift. Relaxing an exit code is one step from removing the
+     * alarm, and the two states have to be distinguishable.
+     */
+    public function test_it_still_fails_loudly_when_a_template_has_actually_drifted(): void
+    {
+        $payload = $this->metaPayload();
+        $payload['data'][0]['status'] = 'REJECTED';
+
+        Http::fake(['graph.facebook.com/*' => Http::response($payload)]);
+
+        $this->artisan('realvows:whatsapp-templates-check')->assertFailed();
     }
 }

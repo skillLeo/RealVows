@@ -147,7 +147,27 @@
          The only thing on this page a visitor DOES rather than reads. It sits
          directly under the hero because interaction before commitment is the
          most reliable thing there is for turning a reader into a member. --}}
-    @include('public.partials.introduction-demo')
+    {{--
+        ⚠️ THE INTRODUCTION DEMONSTRATION IS GONE, AND IT WAS THE BEST-BUILT
+        THING ON THIS PAGE.
+
+        It rendered a working imitation of an introduction arriving: the card,
+        the name, the score, the sentence explaining the match, and a tap to
+        open it. It was the most persuasive section here.
+
+        It also told every visitor exactly what an introduction looks like when
+        it lands, which is the one thing the client asked twice not to disclose:
+        "tell them they will receive an email and a WhatsApp, but do not give
+        them an idea what it will say or what it will look like."
+
+        A rendered mock says more than any sentence would, and it is harder to
+        notice in review because it is markup rather than prose.
+
+        The partial is left in the repository rather than deleted. If he ever
+        decides the demonstration is worth the disclosure, it is one line —
+        and PublicPagesDescribeNoMechanismTest will fail until somebody has
+        that conversation on purpose.
+    --}}
 
     {{-- ── The promise ─────────────────────────────────────────────────────
          One line, centred, given a whole band to itself. A page that never
@@ -174,7 +194,7 @@
             @foreach ([
                 ['diamond', 'Free to join', 'Build your entire profile without paying anything.'],
                 ['check', 'Verified identity', 'Nobody is introduced to you unchecked.'],
-                ['four', 'Four photos', 'Enough to show who you are, few enough to finish in one sitting.'],
+                ['four', 'Seen by the right people', 'Your photographs go to the person you trust, never to a stranger.'],
                 ['envelope', 'Email and WhatsApp', 'Your introductions come to you, wherever you are.'],
             ] as [$icon, $title, $body])
                 <div class="rv-trust__item rv-stack" style="gap: 16px" data-reveal>
@@ -222,11 +242,23 @@
                 <p class="rv-eyebrow">Not a guess</p>
                 <h2 class="rv-d2" style="max-width: 22ch">Compatibility, measured properly.</h2>
                 <span class="rv-underline" style="max-width: 200px"></span>
+                {{--
+                    ⚠️ WHAT IT PROMISES, NOT HOW IT IS CALCULATED.
+
+                    This used to walk through the inputs and say both sides were
+                    weighed. All of it was true and none of it was ours to
+                    publish: the client has asked three times for less, and
+                    explaining the scoring is the single most natural thing to
+                    write on a page about matching, which is exactly why it
+                    keeps coming back.
+
+                    The promise a member cares about survives. Nobody needs the
+                    arithmetic to understand that a match is not one person's
+                    wishes imposed on another.
+                --}}
                 <p class="rv-lead" style="max-width: 54ch">
-                    Every introduction begins with a compatibility score out of 100. It is built
-                    from what you tell us: the values you rank highest, the life you are working
-                    towards, and what you are looking for in somebody else. Both sides are weighed.
-                    A match is never one person's wishes imposed on another.
+                    Every introduction here is chosen deliberately, and it is chosen for both of
+                    you. A match is never one person's wishes imposed on another.
                 </p>
             </div>
 

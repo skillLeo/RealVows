@@ -20,11 +20,11 @@
 
     <span class="rv-mark__rule-row">
         <span class="rv-mark__rule"></span>
-        <span class="rv-mark__rule-label">Out of 100</span>
+        <span class="rv-mark__rule-label">Compatibility</span>
         <span class="rv-mark__rule"></span>
     </span>
 
     <p class="rv-mark__caption">
-        Built from what both people told us about their values, their pace and the life they want.
+        Every introduction is chosen for both people, never for one.
     </p>
 </div>

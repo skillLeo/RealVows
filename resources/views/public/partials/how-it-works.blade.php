@@ -39,7 +39,7 @@
          promise, in nine words. --}}
     <div class="rv-grid rv-grid--3" data-stagger>
         @foreach ([
-            ['01', 'Build your free profile', 'Seven guided steps, saved as you go. It costs nothing.'],
+            ['01', 'Build your free profile', 'Guided the whole way, saved as you go. It costs nothing.'],
             ['02', 'Get verified', 'A real person confirms your identity before anyone is introduced to you.'],
             ['03', 'Receive your introductions', 'We choose them and bring them to you. There is nothing to search.'],
         ] as [$number, $title, $body])

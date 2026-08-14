@@ -67,6 +67,57 @@ class GuardianGate
     }
 
     /**
+     * ⚠️ DOES THE TRUSTED CONTACT MAKE THE INTRODUCTION HIMSELF, RATHER THAN
+     * MERELY PERMITTING IT?
+     *
+     * ── The client's scholar answered this, and the answer changed the flow ──
+     *
+     * The question put to him was whether a guardian APPROVING an exchange is
+     * the same as a guardian being PRESENT for it. Until now the product
+     * assumed it was: he approved at the third gate, the surname and phone
+     * number appeared on the member's own screen, and the two of them spoke
+     * privately with nobody else involved. He gated the meeting. He did not
+     * attend it.
+     *
+     * The ruling was that approving is NOT the same, except in specific
+     * circumstances: where the guardian is unjust, is not Muslim, or has died.
+     * Outside those, he must be present.
+     *
+     * ⚠️ AND THOSE CIRCUMSTANCES ARE EXACTLY WHAT `is_appointed` ALREADY MEANS.
+     * A member reaches an appointed contact precisely when there is no family
+     * guardian able to stand for her: nobody to name, or nobody suitable. So
+     * the exception the ruling carves out is a flag this system has held from
+     * the beginning, and no new concept is needed to express it.
+     *
+     *   · Family contact  → he receives the details and introduces them.
+     *   · Appointed contact → the member receives them directly, as before.
+     *   · No contact required → unchanged.
+     *
+     * ⚠️ THIS IS A JUDGEMENT ABOUT MEN AND THE CLIENT MAY REVERSE IT. Mediation
+     * is applied to anybody holding a verified family contact rather than to
+     * women alone. The requirement is `required_female`, so in practice a man
+     * only has one if he chose to name one, and routing his introduction
+     * through the person he chose is the consistent reading. Narrowing it to
+     * women is a one-line change if he wants that instead.
+     */
+    public function contactIsMediated(User $member): bool
+    {
+        $guardian = $this->verifiedGuardianFor($member);
+
+        if ($guardian === null) {
+            return false;
+        }
+
+        /*
+         * ⚠️ AN APPOINTED CONTACT NEVER MEDIATES, and the reason is the same
+         * one that keeps photographs from him. He is a stranger the platform
+         * placed in that seat. Handing him a woman's phone number so he could
+         * pass it on would be a worse exposure than the one being prevented.
+         */
+        return ! $guardian->is_appointed;
+    }
+
+    /**
      * What the member should be told, in their own words.
      *
      * ⚠️ NEVER LET A FLOW DEADLOCK WITH NO VISIBLE REASON (B8). A member whose

@@ -60,15 +60,16 @@ placeholder would turn a visible fault into a plausible-looking one.
 
 | Signal | Raised by | Goes to | Consumer | If nobody reads it |
 |---|---|---|---|---|
-| **Credit ledger discrepancy** | `realvows:verify-ledger`, daily 03:40 | Email to `admin_notification_email` | `info@realvows.com` — **transport verified working 2026-08-14** | A member's balance disagrees with their ledger and nobody knows. Money. |
+| **Credit ledger discrepancy** | `realvows:verify-ledger`, daily 03:40 | `OperationalAlert` to `admin_notification_email` | `info@realvows.com` — **transport verified working 2026-08-14** | A member's balance disagrees with their ledger and nobody knows. Money. |
 | **Stored file missing** | `realvows:check-stored-files`, daily 04:17 | `scheduler.log`, non-zero exit | Scheduler log | A screen 500s for whoever clicks it. This is how the 22 guardian photos hid. |
-| **Broken pipeline** | `realvows:maintenance-watchdog`, every minute | `laravel.log` at error level | **Nothing tails this** | See below. |
-| **Failed jobs** | Queue, `--tries=3` | `failed_jobs` table | **Nothing reads this table** | See below. |
-| **Delivery failure** | `MessageDelivery` rows, `status=failed` | Database | Admin Deliveries screen | Visible only if somebody opens it. |
+| **Broken pipeline** | `realvows:maintenance-watchdog`, every minute | `laravel.log` at error level | `realvows:report-silent-failures`, daily 07:30 | Was: nobody. The site sits on a maintenance page and nothing says so. |
+| **Failed jobs** | Queue, `--tries=3` | `failed_jobs` table | `realvows:report-silent-failures`, daily 07:30 | Was: nobody. **A member waits for an introduction that was never sent.** |
+| **Delivery failure** | `MessageDelivery` rows, `status=failed` | Database | `realvows:report-silent-failures`, plus the admin screen | Was: visible only to somebody who opened the screen and thought to look. |
 | **Payment mismatch** | `realvows:reconcile-payments`, hourly | `scheduler.log` | Scheduler log | A purchase settles and no credit is granted. |
-| **Uncaught exception** | Laravel handler | `laravel.log` at error | **Nothing. No error tracking is wired.** | See below. |
+| **Uncaught exception** | Laravel handler | `laravel.log` at error | `realvows:report-silent-failures`, daily 07:30 | Was: nobody. 32 lines sat unread, including the 22 broken photographs. |
 | **CI failure** | GitHub Actions | Run status | **Deploy now refuses to run** | Was: deployed anyway, twice. |
 | **Deploy failure** | GitHub Actions | Run status | Whoever dispatched it | Manual dispatch, so someone is watching. |
+| **Silent-failure report has no recipient** | `realvows:report-silent-failures` | `laravel.log` at critical, and the console | The scheduler log | The reporter would itself become a signal arriving nowhere. Said out loud instead. |
 
 ---
 

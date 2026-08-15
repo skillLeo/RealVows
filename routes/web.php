@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\MatchAuditController;
 use App\Http\Controllers\Admin\PaymentAdminController;
 use App\Http\Controllers\Admin\ReportQueueController;
+use App\Http\Controllers\Admin\StaffIntroductionController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TrustedContactQueueController;
@@ -228,6 +229,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::middleware('admin:matches.view')->group(function () {
         Route::get('/matches', [MatchAuditController::class, 'index'])->name('matches');
         Route::get('/matches/{match}', [MatchAuditController::class, 'show'])->name('matches.show');
+    });
+
+    /*
+     * ⚠️ THE INTRODUCTIONS NOBODY IN THE FAMILY CAN MAKE.
+     *
+     * A woman with an appointed trusted contact has no relative to carry an
+     * introduction, and the scholar's ruling forbids the two speaking directly.
+     * Staff carry it and are recorded by name as having been present. See
+     * StaffIntroductionController for why an approval row was not enough.
+     */
+    Route::middleware('admin:verifications.review')->group(function () {
+        Route::get('/introductions', [StaffIntroductionController::class, 'index'])
+            ->name('introductions');
+        Route::post('/introductions/{match}', [StaffIntroductionController::class, 'store'])
+            ->name('introductions.made');
     });
 
     /*

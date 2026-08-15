@@ -250,6 +250,7 @@ class Navigation
                 'items' => [
                     ['key' => 'verifications', 'label' => 'Verification queue', 'icon' => 'check', 'href' => '/admin/verifications', 'visible' => $user->can('verifications.view')],
                     ['key' => 'trusted-contacts', 'label' => 'Trusted contacts', 'icon' => 'users', 'href' => '/admin/trusted-contacts', 'visible' => $user->can('verifications.review')],
+                    ['key' => 'introductions', 'label' => 'Introductions to make', 'icon' => 'message', 'href' => '/admin/introductions', 'visible' => $user->can('verifications.review')],
                     ['key' => 'reports', 'label' => 'Reports', 'icon' => 'flag', 'href' => '/admin/reports', 'visible' => $user->can('verifications.review')],
                     ['key' => 'support', 'label' => 'Support', 'icon' => 'lifebuoy', 'href' => '/admin/support', 'visible' => $user->can('verifications.review')],
                 ],

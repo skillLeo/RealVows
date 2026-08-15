@@ -226,7 +226,7 @@ class MatchPresenter
              * matter how many gates have opened, because the platform is no
              * longer the channel. See GuardianGate::contactIsMediated().
              */
-            ...($mutual && $this->contactReleased($match) && ! $this->mediated($match) ? [
+            ...($mutual && $this->contactReleased($match) && $this->mediation($match) === GuardianGate::MEDIATION_NONE ? [
                 'lastName' => $them?->last_name,
                 'contact' => $this->contact($them),
             ] : []),
@@ -239,11 +239,28 @@ class MatchPresenter
              * failed. Every gate in this system that withholds something also
              * says why, and this is the last and most consequential one.
              */
-            ...($mutual && $this->contactReleased($match) && $this->mediated($match) ? [
-                'contactWithTrustedContact' => true,
-                'contactWithTrustedContactReason' =>
-                    'Your trusted contact has their details and will make the introduction '
-                    .'himself. Speak to him about how you would like to go from here.',
+            /*
+             * ⚠️ THE SCHOLAR FORBADE THE PLATFORM ARRANGING THE CONVERSATION,
+             * NOT THE INTRODUCTION ITSELF.
+             *
+             * His words: "arranging conversation between the two is not
+             * permitted in Shariah. Whatever necessary matters need to be
+             * satisfied should be handled through the women of the household."
+             *
+             * A trusted contact speaking to the man is not "the two" speaking.
+             * That is permitted, and it is how a rishta has always worked. So
+             * nothing here is a dead end — somebody is carrying it, and the
+             * member is told who.
+             */
+            ...($mutual && $this->contactReleased($match) && $this->mediation($match) !== GuardianGate::MEDIATION_NONE ? [
+                'introductionIsBeingMade' => true,
+                'introductionIsBeingMadeBy' => $this->mediation($match),
+                'introductionIsBeingMadeReason' => $this->mediation($match) === GuardianGate::MEDIATION_STAFF
+                    ? 'RealVows is making this introduction for you. You will not receive their '
+                        .'details yourself, and somebody here is handling it.'
+                    : 'Your trusted contact is making this introduction for you. You will not '
+                        .'receive their details yourself. Speak to him about how you would like '
+                        .'to go from here.',
             ] : []),
 
             /*
@@ -261,16 +278,74 @@ class MatchPresenter
      * from every member on a platform where the requirement is off — a feature
      * nobody switched on silently breaking a feature everybody uses.
      */
+    /**
+     * ⚠️ BOTH SIDES, AND ASKING ONLY THE SEEKER WAS A LEAK IN THE OTHER
+     * DIRECTION.
+     *
+     * A match is two rows, one per person. This used to ask only whether the
+     * seeker of THIS row had cleared their own gate — so on the man's row it
+     * asked about the man, who is not required to have a trusted contact at
+     * all, and answered yes the moment interest was mutual.
+     *
+     * The result: he received her surname, email and phone BEFORE her trusted
+     * contact had approved the contact gate, and whether or not the man was
+     * ever meant to hold them. Her guardian's decision is recorded against HER
+     * row, so nothing on his row ever consulted it.
+     *
+     * ⚠️ HER GUARDIAN'S DECISION LIVES ON HER ROW, WHICH IS WHY THE RECIPROCAL
+     * LOOKUP IS HERE RATHER THAN A SECOND CALL WITH THE SAME MATCH.
+     */
     private function contactReleased(MatchRecord $match): bool
     {
         $seeker = $match->seeker?->user;
+        $other = $match->matched?->user;
 
-        if (! $seeker) {
+        if (! $seeker || ! $other) {
             return false;
         }
 
-        return app(GuardianGate::class)
-            ->mayExchangeContact($seeker, $match);
+        $gate = app(GuardianGate::class);
+
+        if (! $gate->mayExchangeContact($seeker, $match)) {
+            return false;
+        }
+
+        $reciprocal = app(\App\Services\Matching\MatchInterest::class)->reciprocal($match);
+
+        /*
+         * ⚠️ NO RECIPROCAL ROW MEANS NO RELEASE. It cannot be mutual without
+         * one, and defaulting to "released" here would hand over details on the
+         * strength of a row that does not exist.
+         */
+        if ($reciprocal === null) {
+            return false;
+        }
+
+        return $gate->mayExchangeContact($other, $reciprocal);
+    }
+
+    /**
+     * ⚠️ MEDIATION IS A PROPERTY OF THE PAIR, NOT OF WHOEVER IS LOOKING.
+     *
+     * If either person is mediated, then NEITHER receives the other's details —
+     * otherwise the rule holds on her screen and is defeated on his, and the
+     * two are talking anyway. The seeker's own mediation is checked first
+     * because it decides what they are told, not merely whether.
+     */
+    private function mediation(MatchRecord $match): string
+    {
+        $gate = app(GuardianGate::class);
+
+        $seeker = $match->seeker?->user;
+        $other = $match->matched?->user;
+
+        $mine = $seeker ? $gate->mediationFor($seeker) : GuardianGate::MEDIATION_NONE;
+
+        if ($mine !== GuardianGate::MEDIATION_NONE) {
+            return $mine;
+        }
+
+        return $other ? $gate->mediationFor($other) : GuardianGate::MEDIATION_NONE;
     }
 
     /**
@@ -278,12 +353,12 @@ class MatchPresenter
      * member only ever holds the seeker side of their own rows, so there is no
      * other person this could be about.
      */
-    private function mediated(MatchRecord $match): bool
-    {
-        $seeker = $match->seeker?->user;
-
-        return $seeker !== null && app(GuardianGate::class)->contactIsMediated($seeker);
-    }
+    /**
+     * ⚠️ RETIRED. Was single-sided and asked only about the seeker of this row,
+     * which is what let the man receive her details. `mediation()` replaces it
+     * and asks about the pair. Kept as a named absence rather than deleted so
+     * that anybody following an old call site finds this note.
+     */
 
     /**
      * How to reach somebody, once both people have agreed to be reachable.

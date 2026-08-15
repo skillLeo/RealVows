@@ -100,21 +100,62 @@ class GuardianGate
      * through the person he chose is the consistent reading. Narrowing it to
      * women is a one-line change if he wants that instead.
      */
-    public function contactIsMediated(User $member): bool
+    /** Nobody stands between these two. Details move directly. */
+    public const MEDIATION_NONE = 'none';
+
+    /** Her own trusted contact holds the details and approaches on her behalf. */
+    public const MEDIATION_GUARDIAN = 'guardian';
+
+    /** RealVows staff hold them and make the introduction, recorded as present. */
+    public const MEDIATION_STAFF = 'staff';
+
+    /**
+     * ⚠️ WHO STANDS BETWEEN THESE TWO PEOPLE, AND THE SCHOLAR SETTLED IT.
+     *
+     * His ruling: "Meeting in seclusion, or demanding to look repeatedly, and
+     * also ARRANGING CONVERSATION BETWEEN THE TWO, is not permitted in Shariah.
+     * Whatever necessary matters need to be satisfied should be handled through
+     * the women of the household."
+     *
+     * So the question is never "has somebody approved" — it is "who carries
+     * this". Approval is not presence.
+     *
+     * ── ⚠️ AN APPOINTED CONTACT NOW MEDIATES, VIA STAFF ──────────────────
+     *
+     * This method used to return false for an appointed contact, which meant a
+     * woman with no family to name received the man's surname, email and phone
+     * on her own screen and could contact him directly. That was defended as
+     * the scholar's own exception — he permits a guardian being bypassed where
+     * one is unjust, not Muslim, or dead.
+     *
+     * ⚠️ THE EXCEPTION DOES NOT REACH THIS CASE. "No family to name" is not
+     * "guardian is unjust, non-Muslim, or dead", and the ruling names no
+     * exception at all to conversation between the two. So the woman with the
+     * least family was getting the least protection, which is exactly backwards.
+     * Staff carry it instead.
+     */
+    public function mediationFor(User $member): string
     {
         $guardian = $this->verifiedGuardianFor($member);
 
         if ($guardian === null) {
-            return false;
+            return self::MEDIATION_NONE;
         }
 
         /*
-         * ⚠️ AN APPOINTED CONTACT NEVER MEDIATES, and the reason is the same
-         * one that keeps photographs from him. He is a stranger the platform
-         * placed in that seat. Handing him a woman's phone number so he could
-         * pass it on would be a worse exposure than the one being prevented.
+         * ⚠️ THE APPOINTED CONTACT STILL RECEIVES NOTHING. He is a stranger the
+         * platform placed in that seat, and handing him a woman's phone number
+         * so he could pass it on would be a worse exposure than the one being
+         * prevented. Staff carry it, and are recorded as having done so.
          */
-        return ! $guardian->is_appointed;
+        return $guardian->is_appointed
+            ? self::MEDIATION_STAFF
+            : self::MEDIATION_GUARDIAN;
+    }
+
+    public function contactIsMediated(User $member): bool
+    {
+        return $this->mediationFor($member) !== self::MEDIATION_NONE;
     }
 
     /**

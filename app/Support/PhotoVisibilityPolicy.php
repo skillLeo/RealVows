@@ -70,6 +70,40 @@ class PhotoVisibilityPolicy
     /** Once both people have said yes to each other. */
     public const AT_MUTUAL_INTEREST = 'at_mutual_interest';
 
+    /**
+     * ⚠️ THE SCHOLAR CONSTRAINED THIS SETTING PERMANENTLY, AND THE CONSTRAINT
+     * OUTLIVES WHATEVER VALUE IS CHOSEN TODAY.
+     *
+     * His ruling: "It should be clear that permission is for ONE GLANCE.
+     * Meeting in seclusion, or demanding to look REPEATEDLY, and also arranging
+     * conversation between the two, is not permitted in Shariah."
+     *
+     * And separately: looking is "not religiously necessary. If only the women
+     * of the household see her, that is also sufficient."
+     *
+     * ⚠️ SO `never` IS RELIGIOUSLY SAFE AND NOTHING HAS TO CHANGE. Viewing is
+     * better but not obligatory, and the household route satisfies it entirely.
+     *
+     * ⚠️ AND ANY FUTURE VALUE MUST BE A SINGLE VIEW, NOT A STANDING PERMISSION.
+     *
+     * This is the part that is easy to lose. A stored image a member can reopen
+     * whenever they like is repeated looking with extra steps, no matter which
+     * gate released it. Relaxing this setting therefore means building a
+     * one-view mechanism — shown once, then gone — and not merely flipping a
+     * value from `never` to something else.
+     *
+     * ⚠️ DO NOT "HARDEN" THIS BY ADDING A VALUE HERE AND TREATING THE WORK AS
+     * DONE. PhotoVisibilityIsConstrainedTest fails the moment this list changes,
+     * so that whoever adds one has to come and read this first.
+     *
+     * @var list<string>
+     */
+    public const VALUES = [
+        self::NEVER,
+        self::AFTER_CONTACT_APPROVAL,
+        self::AT_MUTUAL_INTEREST,
+    ];
+
     /** @return list<string> */
     public static function levels(): array
     {

@@ -277,9 +277,10 @@ const block = () => {
                     something also says why; this is the last and the most
                     consequential.
                 -->
-                <BaseCard v-else-if="match.contactWithTrustedContact" accent>
-                    <h2 class="rv-display rv-display--sm">{{ $t('respond.contact_heading') }}</h2>
-                    <p class="rv-body">{{ match.contactWithTrustedContactReason }}</p>
+                <BaseCard v-else-if="match.introductionIsBeingMade" accent>
+                    <!-- Not "how to get in touch" — she is not the one getting in touch. -->
+                    <h2 class="rv-display rv-display--sm">{{ $t('respond.introduction_heading') }}</h2>
+                    <p class="rv-body">{{ match.introductionIsBeingMadeReason }}</p>
                 </BaseCard>
 
                 <div class="rv-payoff__quiet">

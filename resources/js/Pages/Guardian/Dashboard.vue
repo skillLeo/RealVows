@@ -144,7 +144,7 @@ function decide(matchId, decision) {
                         he has nothing to pass on, and the introduction simply
                         ends at the last gate with nobody holding anything.
                     -->
-                    <div v-if="item.contactIsYoursToPass" class="rv-card rv-card--accent rv-stack" style="gap: 8px">
+                    <div v-if="item.contactIsYoursToApproach" class="rv-card rv-card--accent rv-stack" style="gap: 8px">
                         <span class="rv-label rv-label--brass">{{ $t('guardian_area.contact_heading') }}</span>
                         <p class="rv-help">{{ $t('guardian_area.contact_help') }}</p>
                         <dl class="rv-facts">

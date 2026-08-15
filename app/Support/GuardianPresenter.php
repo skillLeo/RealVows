@@ -155,7 +155,33 @@ class GuardianPresenter
                 'phone' => $otherUser?->fullPhone(),
             ]);
 
-            $payload['contactIsYoursToPass'] = true;
+            /*
+             * ⚠️ RENAMED FROM `contactIsYoursToPass`, AND THE OLD NAME WAS THE
+             * THING THE SCHOLAR FORBADE.
+             *
+             * His ruling: "arranging conversation between the two is not
+             * permitted in Shariah. Whatever necessary matters need to be
+             * satisfied should be handled through the women of the household."
+             *
+             * "Yours to pass" instructs him to hand these details to his ward so
+             * that she and the man can talk. That is the platform arranging the
+             * conversation, through one extra pair of hands. The mechanism was
+             * right and only the instruction was wrong.
+             *
+             * ⚠️ HE APPROACHES, HE DOES NOT FORWARD. A trusted contact speaking
+             * to the man is not "the two" speaking — that is permitted, and it
+             * is how a rishta has always worked.
+             *
+             * ⚠️ DO NOT "HARDEN" THIS BY RESTORING THE OLD NAME OR MEANING. It
+             * reads like a small wording change and it is the difference between
+             * a mediated introduction and a forwarded phone number. The name is
+             * deliberately one that cannot be misread as forwarding.
+             */
+            $payload['contactIsYoursToApproach'] = true;
+
+            $payload['contactInstruction'] =
+                'These are yours to use yourself, on her behalf. Speak to him directly if you '
+                .'are willing to take this further. Please do not pass these details to her.';
         }
 
         return $payload;

@@ -155,8 +155,17 @@ return [
         'final' => 'Both answers are final, and we only tell someone when the interest is mutual.',
         'passed_state' => 'You passed on this introduction.',
         'interested_state' => 'You said you are interested. We will tell you if they say the same.',
-        'mutual_state' => 'You are both interested. Their details are below.',
+        /*
+         * ⚠️ "THEIR DETAILS ARE BELOW" IS FALSE WHENEVER SOMEBODY IS MEDIATING.
+         *
+         * Which, under the current setting, is every introduction involving a
+         * woman. She was told to look for something that was never going to be
+         * there, and the scholar's ruling makes that the normal case rather than
+         * the exception. Stated neutrally it is true in both.
+         */
+        'mutual_state' => 'You are both interested.',
         'contact_heading' => 'How to get in touch',
+        'introduction_heading' => 'The introduction is being made for you',
         'block' => 'Never show me this person',
         'block_confirm' => 'We will not show you this person again, and they are never told.',
     ],
@@ -387,9 +396,21 @@ return [
          * these details come to him rather than to his ward, and the wording
          * has to say plainly that acting on them is the expectation.
          */
-        'contact_heading' => 'How to reach them',
-        'contact_help' => 'These have come to you rather than to her, so that you can make the '
-            .'introduction yourself. Speak with her about how she would like to go from here.',
+        'contact_heading' => 'How to reach him',
+
+        /*
+         * ⚠️ THE SCHOLAR RULED ON THIS EXACT SENTENCE.
+         *
+         * "Arranging conversation between the two is not permitted in Shariah.
+         * Whatever necessary matters need to be satisfied should be handled
+         * through the women of the household."
+         *
+         * The old wording told him to make the introduction and then to speak
+         * with her about going from here, which reads as an instruction to hand
+         * the details over. He approaches the man himself. He does not forward.
+         */
+        'contact_help' => 'These have come to you rather than to her. Speak to him yourself if '
+            .'you are willing to take this further, and please do not pass these details on to her.',
 
         'dashboard_heading' => 'Introductions for :name',
         'dashboard_lead' => 'You are asked to look at each introduction before she does. Take your time.',

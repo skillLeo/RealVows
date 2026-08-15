@@ -153,10 +153,17 @@ class TrustedContactMakesTheIntroductionTest extends TestCase
 
         $payload = app(MatchPresenter::class)->full($match);
 
-        $this->assertTrue($payload['contactWithTrustedContact']);
+        $this->assertTrue($payload['introductionIsBeingMade']);
         $this->assertStringContainsString(
-            'will make the introduction',
-            $payload['contactWithTrustedContactReason'],
+            'is making this introduction for you',
+            $payload['introductionIsBeingMadeReason'],
+        );
+
+        // ⚠️ And she is told she will not be receiving them herself, so the
+        // absence reads as the design rather than as a page that failed.
+        $this->assertStringContainsString(
+            'will not receive their details yourself',
+            $payload['introductionIsBeingMadeReason'],
         );
     }
 
@@ -171,7 +178,13 @@ class TrustedContactMakesTheIntroductionTest extends TestCase
 
         $payload = app(GuardianPresenter::class)->introduction($guardian, $match, $him);
 
-        $this->assertTrue($payload['contactIsYoursToPass']);
+        $this->assertTrue($payload['contactIsYoursToApproach']);
+
+        /*
+         * ⚠️ AND HE IS TOLD NOT TO FORWARD THEM. The flag alone is a mechanism;
+         * the sentence is what stops him doing the one thing the ruling forbids.
+         */
+        $this->assertStringContainsString('do not pass these details to her', $payload['contactInstruction']);
         $this->assertSame('Adeyemi', $payload['contact']['lastName']);
         $this->assertSame('omar@example.com', $payload['contact']['email']);
         $this->assertStringContainsString('8765550123', $payload['contact']['phone']);
@@ -199,23 +212,42 @@ class TrustedContactMakesTheIntroductionTest extends TestCase
 
     // ── The exceptions the ruling names ──────────────────────────────────
 
-    public function test_an_appointed_contact_does_not_mediate_and_she_receives_them(): void
+    /**
+     * ⚠️ REVERSED BY THE SCHOLAR'S RULING, AND THIS TEST USED TO ASSERT THE
+     * OPPOSITE.
+     *
+     * It read `test_an_appointed_contact_does_not_mediate_and_she_receives_them`
+     * and asserted that a woman with an appointed contact received the man's
+     * surname and email on her own screen. The defence was the scholar's own
+     * carve-out: he permits a guardian being bypassed where one is unjust, not
+     * Muslim, or dead, which is roughly when somebody is given an appointed
+     * contact.
+     *
+     * ⚠️ THE CARVE-OUT DOES NOT REACH THIS CASE, and the newer ruling closes
+     * it: "arranging conversation between the two is not permitted in Shariah"
+     * — with no exception named. "No family to name" is also not the same fact
+     * as "guardian is unjust, non-Muslim, or dead".
+     *
+     * The effect of the old reading was that the woman with the least family
+     * received the least protection, which is backwards. Staff carry it now.
+     */
+    public function test_an_appointed_contact_means_staff_mediate_rather_than_nobody(): void
     {
-        /*
-         * ⚠️ THE EXCEPTION, AND IT IS THE POSITIVE CONTROL FOR THE WHOLE FILE.
-         *
-         * The ruling carved out the guardian who is unjust, not Muslim, or
-         * dead, which is exactly when a member is given an appointed contact.
-         * Without this case, every assertion above would pass against a product
-         * that had simply stopped releasing contact details to anybody.
-         */
         [$match] = $this->mutualIntroduction(appointed: true);
 
         $payload = app(MatchPresenter::class)->full($match);
 
-        $this->assertArrayNotHasKey('contactWithTrustedContact', $payload);
-        $this->assertSame('Adeyemi', $payload['lastName']);
-        $this->assertSame('omar@example.com', $payload['contact']['email']);
+        $this->assertArrayNotHasKey('lastName', $payload, 'His surname reached a woman whose contact is appointed.');
+        $this->assertArrayNotHasKey('contact', $payload, 'His phone number reached her directly.');
+
+        $this->assertTrue($payload['introductionIsBeingMade']);
+        $this->assertSame(
+            \App\Services\Guardian\GuardianGate::MEDIATION_STAFF,
+            $payload['introductionIsBeingMadeBy'],
+            'A woman with an appointed contact must be mediated by staff, not left to contact '
+                .'him herself and not left at a dead end.',
+        );
+        $this->assertStringContainsString('RealVows is making this introduction', $payload['introductionIsBeingMadeReason']);
     }
 
     public function test_an_appointed_contact_is_never_handed_them_to_pass_on(): void
@@ -233,13 +265,29 @@ class TrustedContactMakesTheIntroductionTest extends TestCase
         $this->assertStringNotContainsString('8765550123', json_encode($payload));
     }
 
-    public function test_a_member_who_needs_no_contact_is_unaffected(): void
+    /**
+     * ⚠️ THE POSITIVE CONTROL, AND ITS PREMISE HAD TO CHANGE.
+     *
+     * It used to say a man on `required_female` is untouched because he has no
+     * trusted contact of his own. That is no longer true and should never have
+     * been: mediation is a property of the PAIR. Every match under
+     * `required_female` involves a woman, so every match is mediated, and
+     * asking only about the man is exactly the hole that let him receive her
+     * surname, email and phone.
+     *
+     * ⚠️ SO THE CONTROL MOVES TO A CONFIGURATION WHERE NOBODY IS MEDIATED. Its
+     * job is unchanged and still essential: prove the mechanism does not simply
+     * withhold contact from everybody forever, which is what every "the details
+     * did not reach them" assertion in this file would also be satisfied by.
+     */
+    public function test_with_no_requirement_at_all_the_details_move_normally(): void
     {
-        /*
-         * The second control. A man on `required_female` has no trusted contact
-         * and nothing about this ruling touches him. If mediation applied to
-         * everybody, contact exchange would be broken for half the platform.
-         */
+        app(\App\Services\Settings\SettingsService::class);
+        \App\Models\Setting::where('group', 'guardian')
+            ->where('key', 'guardian_requirement')
+            ->update(['value' => \App\Support\GuardianPolicy::OFF]);
+        app(\App\Services\Settings\SettingsService::class)->flush();
+
         $him = User::factory()->create();
         $him->assignRole('member');
         $his = Profile::factory()->man()->create(['user_id' => $him->id, 'submitted_at' => now()]);

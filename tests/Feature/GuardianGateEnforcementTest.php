@@ -252,6 +252,18 @@ class GuardianGateEnforcementTest extends TestCase
         $other = $this->matchable('man');
         $guardian = $this->verifiedGuardianFor($seeker);
 
+        /*
+         * ⚠️ THE MAN NEEDS ONE TOO UNDER REQUIRED_ALL, AND THE FIXTURE USED TO
+         * SKIP IT.
+         *
+         * Contact release is now a question about the PAIR rather than about
+         * whoever's row is being read, so a man with no verified contact under
+         * a policy that requires one holds the exchange shut — correctly. The
+         * old fixture only worked because his side was never consulted, which
+         * is the same gap that let him receive her surname and phone number.
+         */
+        $hisGuardian = $this->verifiedGuardianFor($other);
+
         $match = MatchRecord::create([
             'seeker_profile_id' => $seeker->id,
             'matched_profile_id' => $other->id,
@@ -287,10 +299,24 @@ class GuardianGateEnforcementTest extends TestCase
         );
         $this->assertArrayNotHasKey('lastName', $payload);
 
-        // ⚠️ CONTROL: the guardian approving the contact gate releases them.
+        // ⚠️ CONTROL: both trusted contacts approving releases the exchange.
         GuardianDecision::create([
             'guardian_id' => $guardian->id,
             'match_id' => $match->id,
+            'gate' => Guardian::GATE_CONTACT,
+            'decision' => GuardianDecision::APPROVED,
+            'decided_at' => now(),
+        ]);
+
+        // His decision lives on HIS row, which is why it is looked up rather
+        // than recorded against the same match id.
+        $hisRow = MatchRecord::where('seeker_profile_id', $other->id)
+            ->where('matched_profile_id', $seeker->id)
+            ->firstOrFail();
+
+        GuardianDecision::create([
+            'guardian_id' => $hisGuardian->id,
+            'match_id' => $hisRow->id,
             'gate' => Guardian::GATE_CONTACT,
             'decision' => GuardianDecision::APPROVED,
             'decided_at' => now(),
@@ -312,7 +338,7 @@ class GuardianGateEnforcementTest extends TestCase
          */
         $this->assertArrayNotHasKey('contact', $released, 'Details reached the member directly.');
         $this->assertTrue(
-            $released['contactWithTrustedContact'],
+            $released['introductionIsBeingMade'],
             'The contact gate never opens, so the refusal above proves nothing.'
         );
 

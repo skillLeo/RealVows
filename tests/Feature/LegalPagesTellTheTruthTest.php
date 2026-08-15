@@ -240,8 +240,30 @@ class LegalPagesTellTheTruthTest extends TestCase
         $text = strtolower($this->text('/terms'));
 
         $this->assertStringContainsString('we introduce, and we do not guarantee', $text);
+
+        /*
+         * ⚠️ AND THAT DETAILS DO NOT PASS DIRECTLY BETWEEN MEMBERS. A member
+         * who assumed they would is assuming a mechanism the product no longer
+         * has, and the terms are where that has to be said plainly.
+         */
         $this->assertStringContainsString(
-            'happens between the two of you',
+            'not passed between members directly',
+            $text,
+            'The Terms no longer say that contact details go through the trusted contact or '
+                .'through RealVows rather than directly between two members.',
+        );
+        /*
+         * ⚠️ WAS "happens between the two of you", WHICH THE SCHOLAR'S RULING
+         * MADE INACCURATE.
+         *
+         * Members do not exchange details with each other at all now. The
+         * exchange runs through a trusted contact, or through staff where that
+         * contact was appointed by us. The sentence this guard protects still
+         * has the same job — saying where our responsibility stops — and only
+         * its wording moved.
+         */
+        $this->assertStringContainsString(
+            'happens away from this platform',
             $text,
             'The Terms do not say that what follows a contact exchange is outside the platform. '
                 .'A member who assumed otherwise would be assuming a protection that does not '

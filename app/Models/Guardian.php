@@ -46,6 +46,18 @@ class Guardian extends Model
 
     public const GATE_CONTACT = 'contact_exchange';
 
+    /**
+     * ⚠️ NOT A GATE. THE RECORD THAT SOMEBODY WAS PRESENT.
+     *
+     * The three gates above are permissions: may she enter the pool, may this
+     * introduction be released, may contact move. This is the act itself —
+     * a named person stood between two people and made the introduction.
+     *
+     * It exists because the scholar distinguished approving from being present,
+     * and only a woman with an appointed contact needs staff to carry it.
+     */
+    public const GATE_INTRODUCTION_MADE = 'introduction_made';
+
     protected $guarded = [];
 
     protected function casts(): array

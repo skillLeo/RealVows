@@ -274,9 +274,22 @@ class LegalController extends Controller
                      * does not exist, and the honest thing is to say so on the
                      * page rather than let the assumption stand.
                      */
-                    'Once you and another member have exchanged contact details, anything that '
-                        .'follows happens between the two of you. It does not pass through this '
-                        .'platform, we do not see it, and we cannot act on it.',
+                    /*
+                     * ⚠️ MEMBERS DO NOT EXCHANGE DETAILS WITH EACH OTHER, AND
+                     * THE OLD SENTENCE SAID THEY DID.
+                     *
+                     * The exchange runs through the member's trusted contact,
+                     * or through RealVows staff where the contact was appointed
+                     * by us. Describing it as passing directly between two
+                     * members is a false statement in the one document a member
+                     * could hold us to.
+                     */
+                    'Contact details are not passed between members directly. They go to your '
+                        .'trusted contact, who makes the introduction, or to RealVows where your '
+                        .'trusted contact was appointed by us.',
+                    'Once an introduction has been made, anything that follows happens away from '
+                        .'this platform. It does not pass through us, we do not see it, and we '
+                        .'cannot act on it.',
                     'We take reasonable care to keep the platform running and your information '
                         .'safe. We cannot promise the service will never be interrupted.',
                     'Nothing in these terms limits any right you have under the law that cannot '

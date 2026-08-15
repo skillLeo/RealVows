@@ -71,8 +71,9 @@
         "final": "Both answers are final, and we only tell someone when the interest is mutual.",
         "passed_state": "You passed on this introduction.",
         "interested_state": "You said you are interested. We will tell you if they say the same.",
-        "mutual_state": "You are both interested. Their details are below.",
+        "mutual_state": "You are both interested.",
         "contact_heading": "How to get in touch",
+        "introduction_heading": "The introduction is being made for you",
         "block": "Never show me this person",
         "block_confirm": "We will not show you this person again, and they are never told."
     },
@@ -215,8 +216,8 @@
         "accept_submitting": "Creating your account"
     },
     "guardian_area": {
-        "contact_heading": "How to reach them",
-        "contact_help": "These have come to you rather than to her, so that you can make the introduction yourself. Speak with her about how she would like to go from here.",
+        "contact_heading": "How to reach him",
+        "contact_help": "These have come to you rather than to her. Speak to him yourself if you are willing to take this further, and please do not pass these details on to her.",
         "dashboard_heading": "Introductions for :name",
         "dashboard_lead": "You are asked to look at each introduction before she does. Take your time.",
         "nothing_yet": "There is nothing waiting for you.",

@@ -40,7 +40,16 @@ function togglePet(value, on) {
 
                 <span class="rv-rule rv-rule--soft" />
 
-                <BaseField v-model="model.religion" label="Religion" placeholder="Islam" />
+                <!--
+                    Was a free text box with "Islam" as a placeholder. Faith is
+                    now a hard filter on who may be introduced to whom, and a
+                    filter cannot read a box somebody typed "Sunni" into.
+                -->
+                <SegmentedControl
+                    v-model="model.religion"
+                    label="Religion"
+                    :options="options.religion"
+                />
 
                 <SegmentedControl
                     v-model="model.faith_importance"

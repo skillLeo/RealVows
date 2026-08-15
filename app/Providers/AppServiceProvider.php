@@ -29,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        /*
+         * ⚠️ ONE POINT EVERY PUBLIC PAGE READS, SO A NEW PAGE CANNOT FORGET.
+         *
+         * The alternative is each template calling the setting itself, which is
+         * a call somebody omits on the eighth page — and the failure there is a
+         * public promise of a channel the platform cannot use.
+         */
+        \Illuminate\Support\Facades\View::composer('public.*', function ($view) {
+            $view->with('whatsappDelivery', app(\App\Support\WhatsAppDelivery::class)->isOn());
+        });
+
         $this->configureRateLimiting();
 
         /*

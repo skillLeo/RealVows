@@ -197,6 +197,17 @@ class ProfileOptions
         return [
             'gender' => self::forSelect(self::GENDER),
             'bodyType' => self::forSelect(self::BODY_TYPE),
+            /*
+             * ⚠️ RELIGION WAS AN OPEN TEXT BOX UNTIL R6, AND THAT IS WHY THE
+             * FAITH RULE COULD NOT BE TRUSTED.
+             *
+             * The placeholder said "Islam", so a woman was as likely to type
+             * "Muslim" or "Sunni". Those do not equal 'Islam' in SQL, read as
+             * not-Muslim, and matched her with non-Muslim men — the rule
+             * defeated by a lowercase letter. FaithRule carries synonyms for
+             * the rows already written; this stops new ones being created.
+             */
+            'religion' => self::forSelect(\App\Support\FaithRule::OPTIONS),
             'faithImportance' => self::forSelect(self::FAITH_IMPORTANCE),
             'frequency' => self::forSelect(self::FREQUENCY),
             'hasChildren' => self::forSelect(self::HAS_CHILDREN),

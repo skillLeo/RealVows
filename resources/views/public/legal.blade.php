@@ -135,9 +135,9 @@
             --}}
             <h2 class="rv-d3">How introductions reach you</h2>
             <p class="rv-body">
-                RealVows chooses who you are introduced to, and introductions reach you by email
-                and WhatsApp. There is no directory to browse and no way to search for other
-                members.
+                RealVows chooses who you are introduced to, and introductions reach you by
+                email{{ ($whatsappDelivery ?? false) ? ' and WhatsApp' : '' }}. There is no
+                directory to browse and no way to search for other members.
             </p>
 
             <h2 class="rv-d3">Your data</h2>

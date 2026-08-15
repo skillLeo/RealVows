@@ -176,6 +176,7 @@ class SettingsSeeder extends Seeder
             ],
             // Consumed in Phase 3.
             'whatsapp' => [
+                ['key' => 'delivery_enabled', 'label' => 'WhatsApp delivery is switched on', 'type' => 'toggle', 'description' => 'Governs what the PUBLIC PAGES promise. Leave this off until a message has actually been delivered. While it is off the site says introductions arrive by email and does not mention WhatsApp at all, because a public page must never promise a channel the platform cannot use.'],
                 ['key' => 'provider', 'label' => 'Provider', 'type' => 'select', 'options' => ['meta' => 'Meta Cloud API', 'twilio' => 'Twilio']],
                 ['key' => 'phone_number_id', 'label' => 'Phone number ID', 'type' => 'text'],
                 ['key' => 'business_account_id', 'label' => 'Business account ID', 'type' => 'text'],

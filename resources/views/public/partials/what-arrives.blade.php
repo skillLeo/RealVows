@@ -58,34 +58,40 @@
             </div>
         </figure>
 
-        <figure class="rv-arrives__card">
-            <figcaption class="rv-eyebrow">And on WhatsApp</figcaption>
+        {{--
+            ⚠️ THE WHOLE CARD GOES, NOT JUST THE WORD.
 
-            <div class="rv-arrives__mock">
-                <p class="rv-arrives__body">
-                    And on your phone, wherever you are. Open it when the time is right.
-                </p>
-            </div>
-        </figure>
+            Softening the caption while leaving a second card standing would
+            still show a visitor two places an introduction arrives. The card is
+            the promise here, so the card is what is conditional.
+        --}}
+        @if ($whatsappDelivery ?? false)
+            <figure class="rv-arrives__card">
+                <figcaption class="rv-eyebrow">And on WhatsApp</figcaption>
+
+                <div class="rv-arrives__mock">
+                    <p class="rv-arrives__body">
+                        And on your phone, wherever you are. Open it when the time is right.
+                    </p>
+                </div>
+            </figure>
+        @endif
     </div>
 
     {{--
-        ⚠️ THIS LINE HAS AN EXPIRY AND SOMEBODY HAS TO REMOVE IT.
+        ⚠️ THE NOTE THAT EXPIRED, AND IT WENT STALE EXACTLY AS PREDICTED.
 
-        The previous version read "WhatsApp delivery arrives in a later release.
-        Email is working today" — written before WhatsApp existed and still on
-        the live page long after it was built. It undersold the product on the
-        page that sells it, and nothing in the build had any way to know.
+        It said WhatsApp "switches on as soon as Meta finishes reviewing our
+        message templates". Meta finished. All six templates are approved and
+        have been for some time. The sentence was written knowing it would
+        become a lie and carried as somebody's job to remove, and it survived
+        anyway — which is what usually happens to a line that depends on a
+        person remembering.
 
-        This replacement is honest as of today: the seven message templates are
-        with Meta for review and WhatsApp delivery cannot switch on until they
-        come back approved. The day they do, this line becomes the same kind of
-        lie the last one was. It is carried as an owned item in
-        LAUNCH-CHECKLIST.md so the removal is somebody's job rather than
-        somebody's memory.
+        ⚠️ IT IS GONE RATHER THAN CORRECTED. A note explaining why a channel is
+        missing only makes sense while the page is still promising that channel.
+        The delivery flag now removes every mention of WhatsApp when it cannot
+        send, so there is no gap left to explain and nothing here to go stale a
+        second time. The truth is carried by a setting instead of a sentence.
     --}}
-    <p class="rv-small rv-arrives__note" data-reveal>
-        Email introductions are working today. WhatsApp switches on as soon as Meta finishes
-        reviewing our message templates.
-    </p>
 </section>

@@ -165,8 +165,20 @@ class LegalController extends Controller
                     'We introduce you to other members we believe you are compatible with. We '
                         .'choose who you are introduced to. There is no directory, no search, and '
                         .'no way to browse other members.',
-                    'Introductions reach you by email and by WhatsApp, if you have given us a '
-                        .'number and agreed to receive them there.',
+                    /*
+                     * ⚠️ THE TERMS DESCRIBE WHAT ACTUALLY HAPPENS, NOT WHAT IS
+                     * BUILT.
+                     *
+                     * WhatsApp is finished and cannot send: every message is
+                     * accepted by Meta and then fails on a billing setting. A
+                     * term of service naming a delivery channel that has never
+                     * delivered anything is a false statement in the one
+                     * document a member could hold us to.
+                     */
+                    app(\App\Support\WhatsAppDelivery::class)->isOn()
+                        ? 'Introductions reach you by email and by WhatsApp, if you have given us '
+                            .'a number and agreed to receive them there.'
+                        : 'Introductions reach you by email.',
                     'We do not promise that you will meet anyone, that anyone will reply, or that '
                         .'any introduction will lead anywhere. We stand behind the care taken in '
                         .'choosing, and nothing beyond that.',

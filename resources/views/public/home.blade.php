@@ -14,7 +14,8 @@
     over rendered output and keeps the allow-list of legitimate uses current.
 --}}
 @section('title', 'Find your true soul mate')
-@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every member verified, introductions brought to your email and WhatsApp.')
+{{-- ⚠️ The channel named here must be one the platform can actually use. --}}
+@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every member verified, introductions brought to your email'.($whatsappDelivery ?? false ? ' and WhatsApp' : '').'.')
 
 @section('content')
 
@@ -195,7 +196,7 @@
                 ['diamond', 'Free to join', 'Build your entire profile without paying anything.'],
                 ['check', 'Verified identity', 'Nobody is introduced to you unchecked.'],
                 ['four', 'Seen by the right people', 'Your photographs go to the person you trust, never to a stranger.'],
-                ['envelope', 'Email and WhatsApp', 'Your introductions come to you, wherever you are.'],
+                ['envelope', ($whatsappDelivery ?? false) ? 'Email and WhatsApp' : 'Straight to your email', 'Your introductions come to you, wherever you are.'],
             ] as [$icon, $title, $body])
                 <div class="rv-trust__item rv-stack" style="gap: 16px" data-reveal>
                     <span class="rv-icon-box">@include('public.partials.icon', ['name' => $icon])</span>

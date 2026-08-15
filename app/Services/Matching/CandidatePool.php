@@ -4,7 +4,9 @@ namespace App\Services\Matching;
 
 use App\Models\MatchRecord;
 use App\Models\Profile;
+use App\Support\FaithRule;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
 /**
@@ -45,6 +47,7 @@ class CandidatePool
         $this->noExistingRow($query, $seeker);       // 11.
         $this->guardianVerified($query);             // 12.
         $this->notBlocked($query, $seeker);          // 12.
+        $this->faith($query, $seeker);               // 13.
 
         return $query;
     }
@@ -84,6 +87,97 @@ class CandidatePool
      * empties the pool for everybody, so the level is checked first and the
      * clause is not added at all when nothing is required.
      */
+    /**
+     * ⚠️ CONDITION THIRTEEN, AND THE ONE THAT SHOULD HAVE BEEN HERE FIRST.
+     *
+     * Faith lived only in Lifestyle scoring, as part of seventeen points out of
+     * a hundred. A Muslim woman was therefore introduced to non-Muslim men by
+     * default, every night, and nothing on any screen warned her. That is
+     * forbidden by consensus with no difference of opinion in any school, and it
+     * was the ordinary behaviour of this code rather than a misuse of it.
+     *
+     * ⚠️ IN THE QUERY, WHICH IS THE WHOLE POINT. Scoring can be outweighed —
+     * a low faith score loses to height and hobbies and the introduction is made
+     * anyway. A condition here means the row is ABSENT rather than ranked low,
+     * and absent cannot be outweighed by anything.
+     *
+     * ⚠️ BOTH SIDES, NOT THE SEEKER'S. Applying only the seeker's rule would
+     * leave the same forbidden pairing reachable from the other direction: a
+     * Hindu man seeking would still be handed a Muslim woman, because his side
+     * carries no restriction. See FaithRule::permits, which is symmetric.
+     *
+     * Religion stays in scoring as well. Filtering answers "may these two be
+     * introduced" and scoring answers "how well suited are they". Different
+     * questions, and the second one is still worth asking.
+     */
+    private function faith(Builder $query, Profile $seeker): void
+    {
+        /*
+         * ⚠️ AN UNSTATED RELIGION ON THE SEEKER RESTRICTS NOBODY. Instructed,
+         * and unreachable in practice: religion is required to submit a profile
+         * and an unsubmitted profile is already out of the pool.
+         */
+        if (trim((string) $seeker->religion) === '') {
+            return;
+        }
+
+        $muslim = FaithRule::islamValues();
+        $book = FaithRule::peopleOfTheBookValues();
+
+        $query->where(function (Builder $outer) use ($seeker, $muslim, $book) {
+            // ── The seeker's own rule, applied to the candidate.
+            if (FaithRule::isMuslim($seeker->religion)) {
+                if (FaithRule::appliesWomanRule($seeker->gender)) {
+                    // A Muslim woman: Muslim men only.
+                    $outer->whereIn($this->lowerReligion(), $muslim);
+                } else {
+                    // A Muslim man: Muslim, Christian or Jewish.
+                    $outer->whereIn($this->lowerReligion(), array_merge($muslim, $book));
+                }
+            }
+        });
+
+        /*
+         * ── The CANDIDATE's own rule, applied back to the seeker. This is the
+         * half a seeker-only reading would miss.
+         */
+        $query->where(function (Builder $outer) use ($seeker, $muslim, $book) {
+            $womanGenders = FaithRule::womanSideGenders();
+
+            // A Muslim woman candidate is only permissible if the seeker is a
+            // Muslim man. If he is not, exclude every Muslim woman outright.
+            if (! (FaithRule::isMuslim($seeker->religion) && ! FaithRule::appliesWomanRule($seeker->gender))) {
+                $outer->where(function (Builder $q) use ($muslim, $womanGenders) {
+                    $q->whereNotIn($this->lowerReligion(), $muslim)
+                        ->orWhereNotIn('profiles.gender', $womanGenders);
+                });
+            }
+
+            // A Muslim man candidate may only be paired with a Muslim,
+            // Christian or Jewish seeker.
+            if (! FaithRule::isMuslim($seeker->religion) && ! FaithRule::isPeopleOfTheBook($seeker->religion)) {
+                $outer->where(function (Builder $q) use ($muslim, $womanGenders) {
+                    $q->whereNotIn($this->lowerReligion(), $muslim)
+                        ->orWhereIn('profiles.gender', $womanGenders);
+                });
+            }
+        });
+    }
+
+    /**
+     * ⚠️ COMPARED LOWERCASE AND TRIMMED, BECAUSE THIS COLUMN WAS FREE TEXT.
+     *
+     * `religion` was an open box with "Islam" as a placeholder until R6. A woman
+     * who typed "muslim" or "Islam " does not equal 'Islam' in SQL, would read
+     * as not-Muslim, and would be matched with non-Muslim men — this rule
+     * defeated by whitespace. The synonym lists in FaithRule cover the wording;
+     * this covers the case and the padding.
+     */
+    private function lowerReligion(): \Illuminate\Database\Query\Expression
+    {
+        return DB::raw('lower(trim(profiles.religion))');
+    }
+
     private function guardianVerified(Builder $query): void
     {
         $policy = app(\App\Support\GuardianPolicy::class);

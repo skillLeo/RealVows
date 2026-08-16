@@ -8,6 +8,7 @@ use App\Jobs\AnnounceMutualInterest;
 use App\Jobs\AnnounceSomeoneInterested;
 use App\Models\MatchRecord;
 use App\Services\Credits\CreditService;
+use App\Services\Guardian\GuardianGate;
 use App\Services\Matching\MatchInterest;
 use App\Support\FreePeriod;
 use App\Support\MatchPresenter;
@@ -133,7 +134,37 @@ class MatchController extends Controller
             return redirect()->route('dashboard');
         }
 
+        /*
+         * ⚠️ HER ACCEPTANCE IS RECORDED BEFORE ANYTHING IS ASKED OF HER.
+         *
+         * The trusted contact is requested at this moment now rather than at
+         * signup. It would be natural to ask first and save afterwards, and it
+         * would be wrong: a woman who closes the tab on that question loses her
+         * decision entirely, and the introduction sits looking untouched by
+         * somebody who had in fact said yes.
+         *
+         * ⚠️ SO THE WRITE HAPPENS HERE, UNCONDITIONALLY, AND THE QUESTION COMES
+         * AFTER. Being asked twice costs her a moment. Losing the answer costs
+         * her the introduction.
+         */
         $mutual = $interest->express($match);
+
+        /*
+         * ⚠️ AND NOBODY IS TOLD WHILE SHE IS STILL BEING ASKED.
+         *
+         * Until a verified trusted contact exists, this introduction cannot
+         * proceed no matter what the other person does. Telling him somebody is
+         * interested would start a wait he can do nothing about, on a decision
+         * that may never complete — and telling him it is mutual would be worse,
+         * because the contact gate will still refuse to release anything.
+         *
+         * Silence here is not a hold on her. Her answer is already saved above.
+         */
+        if (app(GuardianGate::class)->awaitingTrustedContact($request->user())) {
+            return redirect()
+                ->route('trusted-contact.show')
+                ->with('accepted_match', $match->id);
+        }
 
         /*
          * ⚠️ THE OTHER PERSON IS TOLD HERE AND NOWHERE ELSE, AND ONLY WHEN IT

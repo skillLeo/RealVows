@@ -62,7 +62,15 @@
                 ['Who can see my photographs?', $photographAnswer],
 
                 ['Do I need somebody in my family to take part?',
-                 'Usually yes. You name a trusted contact, most often your father or your brother, and he looks at your introductions with you and advises you. If you have nobody to name, tell us and we will arrange somebody. You are never left out of this because of it.'],
+                 'You are not asked about this when you join. You build your profile, get verified and start receiving introductions first. When you accept one, we ask who you trust to look at it with you, most often a father or a brother.'],
+
+                {{-- ⚠️ ASKED PLAINLY, BECAUSE MOST OF THESE MEMBERS ARE REVERTS
+                     AND PREVIOUSLY MARRIED WOMEN WITH NOBODY TO NAME. This is
+                     the question that decided whether they signed up at all,
+                     and it deserves its own answer rather than a clause at the
+                     end of somebody else's. --}}
+                ['What if I have nobody to name?',
+                 'Then we will stand in that role ourselves. It is one click, we do not ask why, and nothing about your account changes. Your photographs are never shared with them.'],
 
                 ['What happens right after I join?',
                  'You build your profile and send us your photographs. A person then checks you are real. Nothing is shown to anybody and no introduction is made until that is done.'],

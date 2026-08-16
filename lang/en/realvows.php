@@ -37,6 +37,24 @@ return [
          * takes" — the client's objection was to language that makes a small
          * thing sound like work before it has started.
          */
+        /*
+         * ⚠️ SHE HAS ALREADY ACTED. NOTHING HERE MAY READ AS CHASING HER.
+         *
+         * The trusted contact is asked after acceptance, so this panel exists
+         * for the window in between. It says where things have got to and
+         * stops: no duration, no countdown, nothing suggesting she is late for
+         * something. She is waiting on a person, not on a deadline.
+         *
+         * ⚠️ AND NOT A WORD ABOUT WHY. The religious reasoning is ours to hold,
+         * not hers to be taught at the moment she is waiting on it.
+         */
+        'awaiting_contact_heading' => 'You have accepted this introduction',
+        'awaiting_contact_not_named' => 'Nothing moves until your trusted contact is in place. Tell us who you trust, or ask us to arrange somebody.',
+        'awaiting_contact_invited' => 'We have written to :name. Nothing moves until they accept.',
+        'awaiting_contact_in_progress' => 'We are confirming :name now. Nothing moves until that is done.',
+        'awaiting_contact_with_us' => 'We are arranging somebody for you. Nothing moves until that is done.',
+        'awaiting_contact_action' => 'Tell us who you trust',
+
         'confirm_heading' => 'One last thing',
         'confirm_body' => 'We have sent a link to :email. Introductions begin once you have '
             .'opened it.',
@@ -369,9 +387,18 @@ return [
         'invited_body' => 'We have invited them. They will create their own account and confirm they know you.',
         'arranging_heading' => 'We are arranging somebody',
         'arranging_body' => 'You told us you do not have anybody to name. We will arrange somebody and let you know. There is nothing for you to do.',
-        'none_heading' => 'If you do not have anybody',
-        'none_body' => 'That is common and it is not a problem. We will arrange somebody, and your photographs are never shared with them.',
-        'none_action' => 'I do not have a trusted contact',
+        /*
+         * ⚠️ NEVER IMPLY SHE SHOULD HAVE SOMEBODY.
+         *
+         * She is asked this straight after accepting an introduction now, so
+         * she is already invested and this is the moment she is most likely to
+         * feel she has failed a requirement. She has not. No reason is asked
+         * for and none is owed, and there is nothing here about the mosque, the
+         * imam or the community — we cannot know hers and must not pretend to.
+         */
+        'none_heading' => 'Or we can arrange somebody',
+        'none_body' => 'If there is nobody you would like to name, we will stand in that role ourselves. Nothing is asked of you and your photographs are never shared with them.',
+        'none_action' => 'Arrange somebody for me',
 
         'accept_heading_named' => ':name has asked you to be her trusted contact',
         'accept_heading_generic' => 'You have been named as a trusted contact',

@@ -94,6 +94,20 @@ class DashboardController extends Controller
             'awaitingEmailConfirmation' => ! $user->hasVerifiedEmail()
                 && $profile?->submitted_at !== null,
 
+            /*
+             * ⚠️ SHE HAS ACCEPTED SOMETHING AND IS WAITING ON HERSELF.
+             *
+             * The trusted contact is asked after acceptance now, so between
+             * those two moments an introduction she said yes to is sitting
+             * still. A member who is not told why concludes the platform lost
+             * it.
+             *
+             * ⚠️ HONEST, NOT NAGGING. It says where the invitation has got to
+             * and stops. No countdown and no pressure: she has already acted,
+             * and what she is waiting on is a person.
+             */
+            'awaitingTrustedContact' => $this->awaitingTrustedContact($user),
+
             'verification' => [
                 'status' => $verification?->status ?? 'not_started',
                 'approvedAt' => $verification?->status === Verification::STATUS_VERIFIED
@@ -146,5 +160,55 @@ class DashboardController extends Controller
              */
             'unsealed' => $request->session()->get('unsealed', []),
         ]);
+    }
+
+    /**
+     * Where her introduction has got to while the trusted contact is settled.
+     *
+     * ⚠️ RETURNS NULL UNLESS IT CONCERNS HER. A member this does not apply to
+     * is told nothing at all rather than being shown an empty panel.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function awaitingTrustedContact(\App\Models\User $user): ?array
+    {
+        if (! $this->gate->awaitingTrustedContact($user)) {
+            return null;
+        }
+
+        /*
+         * ⚠️ ONLY ONCE SHE HAS ACCEPTED SOMETHING. Before that there is nothing
+         * waiting and nothing to explain, and asking her out of the blue is the
+         * signup wall this release removed.
+         */
+        $accepted = \App\Models\MatchRecord::query()
+            ->where('seeker_profile_id', $user->profile?->id)
+            ->where('response', \App\Models\MatchRecord::RESPONSE_INTERESTED)
+            ->exists();
+
+        if (! $accepted) {
+            return null;
+        }
+
+        $guardian = \App\Models\Guardian::where('member_id', $user->id)
+            ->where('status', '!=', \App\Models\Guardian::STATUS_REPLACED)
+            ->latest('id')
+            ->first();
+
+        return [
+            /*
+             * ⚠️ THE ANSWERS SHE MIGHT NEED, AND NO MORE. Nobody named yet,
+             * somebody named and not yet accepted, or the team arranging one.
+             * Anything further is detail about a process she did not ask to be
+             * part of.
+             */
+            'stage' => match (true) {
+                $guardian === null => 'not_named',
+                (bool) $guardian->is_appointed => 'with_us',
+                $guardian->status === \App\Models\Guardian::STATUS_INVITED => 'invited',
+                default => 'in_progress',
+            },
+            'name' => $guardian?->is_appointed ? null : $guardian?->name,
+        ];
     }
 }

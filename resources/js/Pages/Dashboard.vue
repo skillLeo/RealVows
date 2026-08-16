@@ -252,6 +252,32 @@ const heading = computed(() => {
                     It states the fact and offers a resend. It does not nag, and
                     it disappears the moment they open the link.
                 -->
+                <!--
+                    ⚠️ SHE ACCEPTED, AND NOTHING MOVES UNTIL SHE IS SETTLED.
+
+                    Without this panel an introduction she said yes to simply
+                    sits there, and the reasonable conclusion is that the
+                    platform lost it. It states where things have got to and
+                    stops: no countdown, no pressure, nothing that implies she
+                    is late.
+                -->
+                <BaseCard v-if="$page.props.awaitingTrustedContact" accent>
+                    <div class="rv-stack" style="gap: 12px">
+                        <h2 class="rv-d3">{{ $t('dashboard.awaiting_contact_heading') }}</h2>
+
+                        <p class="rv-body">
+                            {{ $t('dashboard.awaiting_contact_' + $page.props.awaitingTrustedContact.stage,
+                                  { name: $page.props.awaitingTrustedContact.name }) }}
+                        </p>
+
+                        <div v-if="$page.props.awaitingTrustedContact.stage === 'not_named'" class="rv-actions">
+                            <Link href="/trusted-contact" class="rv-btn rv-btn--primary">
+                                {{ $t('dashboard.awaiting_contact_action') }}
+                            </Link>
+                        </div>
+                    </div>
+                </BaseCard>
+
                 <BaseCard v-if="$page.props.awaitingEmailConfirmation" accent>
                     <div class="rv-stack" style="gap: 12px">
                         <h2 class="rv-d3">{{ $t('dashboard.confirm_heading') }}</h2>

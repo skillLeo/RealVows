@@ -45,7 +45,26 @@ class CandidatePool
         $this->dealBreakers($query, $seeker);        // 8. and 9.
         $this->noPriorPass($query, $seeker);         // 10.
         $this->noExistingRow($query, $seeker);       // 11.
-        $this->guardianVerified($query);             // 12.
+        /*
+         * ⚠️ CONDITION TWELVE IS GONE, AND THIS IS THE ONE PLACE THAT RECORDS
+         * WHY.
+         *
+         * A woman used to need a verified trusted contact before she could be
+         * in this result set at all. She was asked at signup, before she had
+         * seen a single thing the product does.
+         *
+         * The client's members are largely reverts and previously married
+         * women with no father or brother to name. Asking first made the site
+         * look closed to them and they left before seeing anything.
+         *
+         * ⚠️ THE REQUIREMENT DID NOT GO. IT MOVED TO ACCEPTANCE. Nothing
+         * between here and there exposes anybody: a sealed teaser carries no
+         * photograph, no surname and no contact detail, the engine choosing two
+         * people is not a meeting, and accepting is a private decision on her
+         * own screen that the other person is never told about. The wali
+         * matters at the point of contact, and the contact gate has not moved a
+         * single step. See TheContactGateHasNotMovedTest.
+         */
         $this->notBlocked($query, $seeker);          // 12.
         $this->faith($query, $seeker);               // 13.
 

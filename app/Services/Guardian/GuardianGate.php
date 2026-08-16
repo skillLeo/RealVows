@@ -33,6 +33,40 @@ class GuardianGate
     public function __construct(private readonly GuardianPolicy $policy) {}
 
     /** May this member be matched at all? */
+    /**
+     * ⚠️ SHE HAS ACCEPTED AND WE STILL NEED TO KNOW WHO SHE TRUSTS.
+     *
+     * The requirement used to sit at pool entry, which meant asking a woman to
+     * name her father before she had seen a single thing the product does. Most
+     * of this platform's members are reverts and previously married women with
+     * nobody to name, so the site read as closed to them and they left.
+     *
+     * ⚠️ THE REQUIREMENT DID NOT SOFTEN. IT MOVED TO THE POINT IT PROTECTS.
+     * Nothing before acceptance exposes anybody — a sealed teaser has no
+     * photograph, no surname and no contact detail, and accepting is a private
+     * decision the other person is never told about. The wali matters at the
+     * point of contact, and `mayExchangeContact` has not moved a step.
+     */
+    public function awaitingTrustedContact(User $member): bool
+    {
+        if (! $this->policy->isRequiredFor($member->profile?->gender)) {
+            return false;
+        }
+
+        return $this->verifiedGuardianFor($member) === null;
+    }
+
+    /**
+     * ⚠️ RETAINED, BUT NOTHING GATES THE POOL WITH IT ANY MORE.
+     *
+     * Kept because the question is still meaningful to ask — an admin screen or
+     * a future policy level may want it — and because deleting it would leave
+     * the tests that describe the old behaviour with nothing to point at.
+     *
+     * ⚠️ DO NOT REINTRODUCE THIS INTO CandidatePool OR MatchGenerator. Putting
+     * it back in either place restores the signup wall this release removed,
+     * and it would do so silently: she would simply receive no introductions.
+     */
     public function mayEnterPool(User $member): bool
     {
         if (! $this->policy->isRequiredFor($member->profile?->gender)) {

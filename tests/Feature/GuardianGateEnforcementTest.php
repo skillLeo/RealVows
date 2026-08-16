@@ -84,7 +84,24 @@ class GuardianGateEnforcementTest extends TestCase
         $this->assertCount(1, app(CandidatePool::class)->for($seeker));
     }
 
-    public function test_a_woman_without_a_trusted_contact_is_not_in_the_pool_when_required(): void
+    /**
+     * ⚠️ INVERTED IN R8, NOT DELETED, AND THE INVERSION IS THE RECORD.
+     *
+     * This asserted 0: a woman without a trusted contact was absent from every
+     * candidate query. She was asked to name her father at signup, before she
+     * had seen a single thing the product does, and most of this platform's
+     * members are reverts and previously married women with nobody to name. The
+     * site read as closed to them and they left.
+     *
+     * ⚠️ THE REQUIREMENT MOVED TO ACCEPTANCE. IT DID NOT SOFTEN. Nothing before
+     * that point exposes anybody, and TheContactGateHasNotMovedTest holds the
+     * other half shut: no surname, email or phone without a verified contact
+     * who has approved.
+     *
+     * A deleted test would have left no trace that this behaviour ever existed
+     * or why it changed.
+     */
+    public function test_a_woman_without_a_trusted_contact_is_now_in_the_pool(): void
     {
         $this->setLevel(GuardianPolicy::REQUIRED_FEMALE);
 
@@ -92,34 +109,37 @@ class GuardianGateEnforcementTest extends TestCase
         $this->matchable('woman');
 
         $this->assertCount(
-            0,
+            1,
             app(CandidatePool::class)->for($seeker),
-            'An ungated member is still being offered as a candidate.'
+            'A woman with no trusted contact is being withheld from the pool. She is asked when '
+                .'she accepts an introduction now, so gating her here means she never receives '
+                .'one to accept.'
         );
     }
 
     /**
-     * ⚠️ POSITIVE CONTROL. The assertion above expects an empty pool, and an
-     * empty pool is also what a broken query, a missing verification or a wrong
-     * gender preference produces. This proves the ONLY thing standing between
-     * her and the pool was the trusted contact.
+     * ⚠️ ALSO INVERTED. It proved a verified contact was what ADMITTED her.
+     *
+     * Now a trusted contact makes no difference to pool membership in either
+     * direction, which is the point: naming one is no longer the price of being
+     * seen. It still decides everything at the contact gate.
      */
-    public function test_the_same_woman_enters_the_pool_once_her_contact_is_verified(): void
+    public function test_a_verified_contact_changes_nothing_about_pool_membership(): void
     {
         $this->setLevel(GuardianPolicy::REQUIRED_FEMALE);
 
         $seeker = $this->matchable('man');
         $candidate = $this->matchable('woman');
 
-        $this->assertCount(0, app(CandidatePool::class)->for($seeker));
+        $this->assertCount(1, app(CandidatePool::class)->for($seeker));
 
         $this->verifiedGuardianFor($candidate);
 
         $this->assertCount(
             1,
             app(CandidatePool::class)->for($seeker->fresh()),
-            'A verified trusted contact did not admit her, so the empty pool above proves '
-                .'nothing about the gate and only that the pool is empty.'
+            'Naming a trusted contact changed whether she is visible in the pool. It should '
+                .'change only what happens at the contact gate.'
         );
     }
 
@@ -148,7 +168,17 @@ class GuardianGateEnforcementTest extends TestCase
      * and is then told she is waiting — which reads as the product changing its
      * mind.
      */
-    public function test_no_introductions_are_generated_for_an_ungated_seeker(): void
+    /**
+     * ⚠️ INVERTED IN R8. It asserted 0 — the generator refused to write a single
+     * introduction for a member who had not named a trusted contact.
+     *
+     * That check lived in MatchGenerator alongside the one in CandidatePool,
+     * and removing only one of them would have been the worse outcome of the
+     * two: she would appear in everybody else's candidate query and still
+     * receive nothing herself, which looks exactly like a platform with nobody
+     * on it. Both went together.
+     */
+    public function test_introductions_are_generated_before_she_names_anybody(): void
     {
         $this->setLevel(GuardianPolicy::REQUIRED_ALL);
 
@@ -158,16 +188,30 @@ class GuardianGateEnforcementTest extends TestCase
 
         $written = app(MatchGenerator::class)->generateFor($seeker->fresh());
 
-        $this->assertSame(0, $written, 'Introductions were generated for a member who is gated.');
+        $this->assertGreaterThan(
+            0,
+            $written,
+            'Nothing was generated for a woman who has not named a trusted contact. She is '
+                .'asked when she accepts one, so she has to receive one first.'
+        );
 
-        // ⚠️ CONTROL: zero is also what a broken generator returns.
+        /*
+         * ⚠️ CONTROL: NAMING ONE MUST NOT BREAK GENERATION EITHER.
+         *
+         * A fresh candidate is needed because the first call already wrote a
+         * row for the only one available, and `noExistingRow` correctly refuses
+         * to introduce the same two people twice. Without a new person here
+         * this would assert against an exhausted pool and fail for a reason
+         * that has nothing to do with trusted contacts.
+         */
         $this->verifiedGuardianFor($seeker);
+        $this->verifiedGuardianFor($this->matchable('man'));
 
         $this->assertGreaterThan(
             0,
             app(MatchGenerator::class)->generateFor($seeker->fresh()),
-            'The generator writes nothing even for a gated-through member, so the zero above '
-                .'proves nothing about the gate.'
+            'The generator stopped writing once a trusted contact existed, so naming one now '
+                .'costs a member the introductions she was already receiving.'
         );
     }
 

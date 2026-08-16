@@ -219,10 +219,20 @@ class LegalController extends Controller
             [
                 'heading' => 'Your trusted contact',
                 'body' => [
-                    'You may be asked to name a trusted contact before you can be introduced to '
-                        .'anybody. This is a person who looks at your introductions and advises '
-                        .'you, and on this platform they are a participant with their own account '
-                        .'and their own obligations.',
+                    /*
+                     * ⚠️ THE ORDER CHANGED IN R8 AND THE TERMS SAID THE OLD ONE.
+                     *
+                     * "Before you can be introduced to anybody" described a
+                     * requirement at signup. It is asked when a member accepts
+                     * an introduction now, and a member reading the old wording
+                     * would expect a wall that is no longer there.
+                     */
+                    'When you accept an introduction, you are asked to name a trusted contact. '
+                        .'This is a person who looks at your introductions and advises you, and '
+                        .'on this platform they are a participant with their own account and '
+                        .'their own obligations.',
+                    'If there is nobody you would like to name, we will stand in that role '
+                        .'ourselves. You are never asked why.',
                     'They agree to these terms when they accept your invitation. They must be who '
                         .'you say they are, they must act in your interest, and they may not use '
                         .'their position to reach or contact anybody on your behalf.',

@@ -148,6 +148,19 @@ function submit() {
                  use it: somebody whose contact was turned down, or who has
                  heard nothing in a fortnight, was shown "You can name somebody
                  else" with no way to name anybody. -->
+            <!--
+                ⚠️ TWO OPTIONS, EQUALLY WEIGHTED, SIDE BY SIDE.
+
+                These used to be a full form card with a smaller card beneath
+                it, which reads as a real option and a fallback for people who
+                failed at the real one. Most members here are reverts and
+                previously married women with nobody to name, so the quieter
+                option is the one many of them need, and putting it second and
+                smaller tells them they are second and smaller.
+
+                Same grid track, same card, same button weight.
+            -->
+            <div class="rv-grid rv-grid--2" style="gap: 20px; align-items: start">
             <BaseCard v-if="canNominate">
                 <form class="rv-stack" style="gap: 24px" @submit.prevent="submit">
                     <h2 class="rv-d3">
@@ -225,12 +238,16 @@ function submit() {
                  published by a platform whose premise is that it publishes
                  none. -->
             <BaseCard v-if="!hasContact">
-                <div class="rv-stack" style="gap: 16px">
+                <div class="rv-stack" style="gap: 24px">
                     <h2 class="rv-d3">{{ $t('trusted_contact.none_heading') }}</h2>
                     <p class="rv-body">{{ $t('trusted_contact.none_body') }}</p>
+
+                    <!-- ⚠️ ONE CLICK, AND NOTHING IS ASKED. No form, no reason,
+                         no questions about her family. Anything more here is an
+                         explanation she owes somebody, and she owes nobody. -->
                     <div class="rv-actions">
                         <BaseButton
-                            variant="secondary"
+                            variant="primary"
                             :disabled="appointed.processing"
                             @click="appointed.post('/trusted-contact/appointed', { preserveScroll: true })"
                         >
@@ -239,6 +256,7 @@ function submit() {
                     </div>
                 </div>
             </BaseCard>
+            </div>
         </div>
     </AppLayout>
 </template>

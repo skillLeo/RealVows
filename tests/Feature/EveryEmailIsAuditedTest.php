@@ -9,6 +9,7 @@ use App\Mail\MutualInterest;
 use App\Mail\OperationalAlert;
 use App\Mail\PurchaseReceipt;
 use App\Mail\SomeoneInterested;
+use App\Mail\NameYourTrustedContact;
 use App\Mail\TeaserExpiring;
 use App\Mail\TrustedContactInvitation;
 use App\Mail\TrustedContactReminder;
@@ -292,6 +293,7 @@ class EveryEmailIsAuditedTest extends TestCase
             ),
             PurchaseReceipt::class => new PurchaseReceipt($this->purchase($user)),
             SomeoneInterested::class => new SomeoneInterested($user),
+            NameYourTrustedContact::class => new NameYourTrustedContact($user, daysWaiting: 3),
             TeaserExpiring::class => new TeaserExpiring($user, count: 2, daysLeft: 7),
             TrustedContactInvitation::class => new TrustedContactInvitation($guardian, 'a-token'),
             TrustedContactReminder::class => new TrustedContactReminder($guardian, 'a-token', isFinal: false),

@@ -141,6 +141,13 @@ class RemindTrustedContacts extends Command
             $reminded++;
         }
 
+        $nudged = $this->remindMembersWhoAcceptedAndNamedNobody($dry);
+
+        if ($nudged > 0) {
+            $this->info(sprintf('%s %d member%s who accepted and has named nobody yet.',
+                $dry ? 'Would remind' : 'Reminded', $nudged, $nudged === 1 ? '' : 's'));
+        }
+
         $this->info(sprintf(
             '%s %d reminder%s. %d trusted contact%s past %d days and left alone.',
             $dry ? 'Would send' : 'Sent',
@@ -152,5 +159,67 @@ class RemindTrustedContacts extends Command
         ));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * ⚠️ SHE SAID YES AND THEN WAS ASKED A QUESTION SHE HAS NOT ANSWERED.
+     *
+     * The trusted contact is requested at acceptance now, so a woman can accept
+     * an introduction and stop there. The introduction stays accepted and
+     * waiting — she acted, she is not ignoring it — but nothing can move, and
+     * the other person is never told anything at any point.
+     *
+     * ⚠️ TWICE, THEN NEVER AGAIN. Day three and day seven, and after that the
+     * platform stops. A prompt that keeps arriving is a platform arguing with a
+     * decision she is entitled to make by doing nothing, and this one concerns
+     * her family.
+     *
+     * ⚠️ AND IT IS DRIVEN BY responded_at, NOT BY A COUNTER. A counter is a
+     * second fact that can disagree with the first. The day she accepted is
+     * already recorded and cannot drift.
+     */
+    private function remindMembersWhoAcceptedAndNamedNobody(bool $dry): int
+    {
+        $gate = app(\App\Services\Guardian\GuardianGate::class);
+        $sent = 0;
+
+        $accepted = \App\Models\MatchRecord::query()
+            ->where('response', \App\Models\MatchRecord::RESPONSE_INTERESTED)
+            ->whereNotNull('responded_at')
+            ->with('seeker.user')
+            ->get()
+            ->unique(fn ($match) => $match->seeker?->user_id);
+
+        foreach ($accepted as $match) {
+            $member = $match->seeker?->user;
+
+            if (! $member || ! $gate->awaitingTrustedContact($member)) {
+                continue;
+            }
+
+            /*
+             * ⚠️ SOMEBODY WHO HAS NAMED ANYBODY AT ALL IS LEFT ALONE. She has
+             * answered the question, and what she is waiting on now is that
+             * person rather than herself. The block above chases them.
+             */
+            if (\App\Models\Guardian::where('member_id', $member->id)->exists()) {
+                continue;
+            }
+
+            $days = (int) $match->responded_at->diffInDays(now());
+
+            if (! in_array($days, [self::FIRST_REMINDER, self::SECOND_REMINDER], true)) {
+                continue;
+            }
+
+            if (! $dry) {
+                \Illuminate\Support\Facades\Mail::to($member->email)
+                    ->send(new \App\Mail\NameYourTrustedContact($member, $days));
+            }
+
+            $sent++;
+        }
+
+        return $sent;
     }
 }

@@ -67,7 +67,20 @@ class AdminMessageController extends Controller
         $this->assertInScope($request, $user);
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:2000'],
+            /*
+             * ⚠️ THE ONE PLACE STAFF WRITE FREELY AND A MEMBER READS IT
+             * VERBATIM.
+             *
+             * Everything else a member sees is either in the repository, where
+             * the anti-drift readers can reach it, or in a settings field now
+             * covered by the same rule. This is neither: it goes from a text
+             * box straight to one person, with nobody between.
+             *
+             * A support reply is exactly where "act fast, only two left" would
+             * arrive first, written helpfully, by somebody who had never read
+             * the rule.
+             */
+            'body' => ['required', 'string', 'max:2000', new \App\Rules\NoPressureLanguage('That message')],
         ]);
 
         AdminMessage::create([

@@ -72,6 +72,38 @@ class UpdateSettingsRequest extends FormRequest
                 }
             }
         });
+
+        /*
+         * ⚠️ THE ANTI-DRIFT RULES ARE ENFORCED AGAINST THE REPOSITORY, AND A
+         * SETTINGS ROW IS NOT IN THE REPOSITORY.
+         *
+         * Every guard that keeps urgency and scarcity out of this product reads
+         * files. None of them can see this table. So an admin typing "Only 3
+         * left!" into a package badge reaches every member on the pricing page
+         * without a commit, without CI, and without anybody reviewing a line —
+         * which makes this text box the one hole in the whole guarantee.
+         *
+         * ⚠️ ONLY THE FIELDS A MEMBER ACTUALLY READS. Running this over an SMTP
+         * host or a terminal id would produce baffling errors on fields that
+         * cannot carry a sentence. See MemberFacingSettings.
+         */
+        $validator->after(function ($validator) {
+            $group = (string) $this->input('group');
+
+            foreach ((array) $this->input('values', []) as $key => $value) {
+                if (! \App\Support\MemberFacingSettings::covers($group, (string) $key)) {
+                    continue;
+                }
+
+                $rule = new \App\Rules\NoPressureLanguage(
+                    \App\Support\MemberFacingSettings::label($group, (string) $key)
+                );
+
+                $rule->validate("values.{$key}", $value, function (string $message) use ($validator, $key) {
+                    $validator->errors()->add("values.{$key}", $message);
+                });
+            }
+        });
     }
 
     public function messages(): array

@@ -67,8 +67,8 @@ class ProfileWriterTest extends TestCase
     public function test_a_faithful_rewrite_is_returned_with_the_original(): void
     {
         $this->enable();
-        $this->fakeRewrite('I am a teacher in Kingston. I enjoy cooking and reading. '
-            .'I would like a family one day, and someone kind to people.');
+        $this->fakeRewrite('I am a teacher in Kingston. I like cooking and reading books. '
+            .'I want a family one day, and someone who is kind to people.');
 
         $response = $this->actingAs($this->member())
             ->postJson('/profile/rewrite', ['bio' => self::BIO])
@@ -117,10 +117,15 @@ class ProfileWriterTest extends TestCase
     public function test_the_gate_lets_a_faithful_rewrite_through(): void
     {
         $this->enable();
+        /*
+         * ⚠️ A REAL PROOFREAD, NOT A REWORDING. This fixture used to swap
+         * "like" for "enjoy" and add "somebody who is looking", and it was
+         * called faithful. The member is told these stay their own words, so a
+         * synonym is now refused like any other word they did not type.
+         */
         $this->fakeRewrite(
-            'I am a teacher in Kingston. I enjoy cooking, and I enjoy reading books. '
-            .'I would like a family one day, and I am looking for somebody who is kind '
-            .'to people.'
+            'I am a teacher in Kingston. I like cooking and reading books. '
+            .'I want a family one day, and someone who is kind to people.'
         );
 
         $this->assertNotNull(

@@ -30,11 +30,23 @@ class ProfileWriterFidelityTest extends TestCase
     /** ⚠️ THE CASE THE FEATURE EXISTS FOR: rough English, tidied, nothing added. */
     public function test_a_faithful_rewrite_passes(): void
     {
+        /*
+         * ⚠️ THIS FIXTURE USED TO SWAP "like" FOR "enjoy" AND DROP "books",
+         * AND IT WAS CALLED FAITHFUL.
+         *
+         * Under the contract the client describes to members — it fixes your
+         * English and never puts words in your mouth — neither is allowed. A
+         * synonym is a word the member did not write, and a dropped noun is a
+         * fact a stranger will no longer read.
+         *
+         * So the fixture is now an actual proofread: capitals, articles,
+         * punctuation and verb agreement, and not one new idea.
+         */
         $original = 'i am teacher in Kingston. i like cooking and reading books. '
             .'i want family one day and someone who is kind.';
 
-        $rewrite = 'I am a teacher in Kingston. I enjoy cooking and reading. '
-            .'I would like a family one day, and someone kind.';
+        $rewrite = 'I am a teacher in Kingston. I like cooking and reading books. '
+            .'I want a family one day, and someone who is kind.';
 
         $this->assertSame([], $this->fidelity->unsupportedClaims($original, $rewrite));
         $this->assertTrue($this->fidelity->isFaithful($original, $rewrite));
@@ -49,7 +61,9 @@ class ProfileWriterFidelityTest extends TestCase
         $original = 'i am teacher. i like cooking.';
         $rewrite = 'I am a teacher in Montego Bay who loves to cook.';
 
-        $this->assertContains('Montego', $this->fidelity->unsupportedClaims($original, $rewrite));
+        // ⚠️ Reported lowercase: the check no longer depends on capitalisation,
+        // because most invention is not capitalised.
+        $this->assertContains('montego', $this->fidelity->unsupportedClaims($original, $rewrite));
         $this->assertFalse($this->fidelity->isFaithful($original, $rewrite));
     }
 
@@ -58,7 +72,7 @@ class ProfileWriterFidelityTest extends TestCase
         $original = 'i work in a bank. i am quiet person.';
         $rewrite = 'I work at Scotiabank and I am a quiet person.';
 
-        $this->assertContains('Scotiabank', $this->fidelity->unsupportedClaims($original, $rewrite));
+        $this->assertContains('scotiabank', $this->fidelity->unsupportedClaims($original, $rewrite));
     }
 
     /**
@@ -80,9 +94,21 @@ class ProfileWriterFidelityTest extends TestCase
      */
     public function test_ordinary_capitalised_words_are_not_treated_as_invented(): void
     {
+        /*
+         * ⚠️ THE INTENT SURVIVES AND THE FIXTURE DID NOT. It used to end with
+         * "When we meet, I would like it to matter" — an entire sentence the
+         * member never wrote, which the new rule refuses on "meet" and
+         * "matter". The point being made was about capitalised sentence
+         * openers, so the fixture now makes only that point.
+         */
         $original = 'i like quiet evenings and i am looking for someone serious.';
-        $rewrite = 'I like quiet evenings. The person I am looking for is serious. '
-            .'When we meet, I would like it to matter.';
+
+        /*
+         * Every content word here is the member's own, reordered and
+         * repunctuated. "Quiet" now opens a sentence and is capitalised for
+         * that reason alone, which is exactly the case being guarded.
+         */
+        $rewrite = 'Quiet evenings are what I like. I am looking for someone serious.';
 
         $this->assertSame(
             [],
@@ -129,7 +155,7 @@ class ProfileWriterFidelityTest extends TestCase
         $this->assertNotEmpty($found, 'The checker returns nothing for anything, so every empty '
             .'expectation above is vacuous.');
 
-        foreach (['Immaculate', 'Conception', 'Kingston', '2'] as $expected) {
+        foreach (['immaculate', 'conception', 'kingston', '2'] as $expected) {
             $this->assertContains($expected, $found);
         }
     }

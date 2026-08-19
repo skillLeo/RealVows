@@ -102,23 +102,44 @@ class ProfileWriter
             }
 
             /*
-             * ⚠️ A REWRITE THAT IS SHORTER THAN THE ORIGINAL IS NOT A TIDY-UP.
+             * ⚠️ THE OTHER HALF OF THE PROMISE: NOTHING MAY GO MISSING.
              *
-             * The bio has a 150-word floor, so a member who is already short and
-             * presses the button expects to move toward it. A model that
-             * "tidies" by cutting leaves them further from finishing than
-             * before, having spent one of their five daily attempts to get
-             * worse. The instruction says never return fewer words; this is what
-             * makes it true.
+             * "Never invent" and "never delete" are different guarantees and
+             * the first does not imply the second. A model that quietly drops
+             * "I have two children" has changed the profile a stranger will
+             * read as much as one that adds it.
              *
-             * Discarded rather than shown with a caution, for the same reason
-             * the fidelity gate discards: a member halfway through signing up
-             * accepts whatever is in front of them.
+             * ⚠️ THIS REPLACED A RAW WORD COUNT. The old check refused a
+             * rewrite shorter than the original, which cannot see a dropped
+             * fact — the same model pads elsewhere and the total is unchanged —
+             * and worse, it PUSHED the model to keep length, which is where
+             * padding comes from. This asks the exact question instead.
              */
-            if (str_word_count($rewrite) < str_word_count($original)) {
+            $dropped = $this->fidelity->droppedFacts($original, $rewrite);
+
+            if ($dropped !== []) {
+                return $this->abandon('dropped: '.implode(', ', $dropped), $original);
+            }
+
+            /*
+             * ⚠️ AND A CEILING, BECAUSE A PROOFREAD DOES NOT DOUBLE IN LENGTH.
+             *
+             * Every added word is a word the member did not write. The fidelity
+             * check already refuses novel vocabulary, so a large expansion can
+             * only be their own words repeated back at them — which reads as
+             * padding to anybody who knows what they typed.
+             *
+             * The allowance is proportional with a floor, because expanding
+             * contractions and splitting a run-on sentence genuinely add words,
+             * and a short bio would otherwise fail on two of them.
+             */
+            $before = str_word_count($original);
+            $after = str_word_count($rewrite);
+            $ceiling = max((int) ceil($before * 1.25), $before + 8);
+
+            if ($after > $ceiling) {
                 return $this->abandon(
-                    'rewrite was shorter than the original ('
-                        .str_word_count($rewrite).' vs '.str_word_count($original).' words)',
+                    "rewrite grew from {$before} to {$after} words, past the {$ceiling} allowed",
                     $original,
                 );
             }
@@ -137,24 +158,25 @@ class ProfileWriter
     private function instructions(): string
     {
         return <<<'PROMPT'
-        You tidy the English of a dating profile written by its own author.
+        You correct the spelling, grammar and punctuation of a profile written
+        by its own author. You are a proofreader, not a writer.
 
         Reply with JSON: {"rewrite": "..."}
 
         Rules:
-        - Use ONLY facts present in the input. Never add a job, a place, a
-          hobby, a family detail, a number, or any physical description.
+        - Use ONLY the words and facts already in the input. Never add a job, a
+          place, a hobby, a trait, a family detail, a number, or any physical
+          description.
+        - Do not swap a word for a nicer one. If they wrote "like", keep
+          "like". Their words are the point.
         - If the input is vague, leave it vague. Do not fill gaps.
         - Keep the author's voice. Fix grammar, spelling and word order.
         - Warm and dignified. Never romantic, flirtatious or suggestive.
         - British English. No em dashes, no semicolons, no exclamation marks.
-        - The profile needs at least 150 words. Work every point the author
-          made into a full, natural sentence and let their own material breathe.
-        - NEVER invent material to reach that length. If what they wrote cannot
-          honestly support 150 words, return what you have. A short honest
-          profile is better than a padded one, and the member will be told they
-          need to write more.
-        - Never return fewer words than you were given.
+        - Do NOT try to reach any length. You are not writing a profile and you
+          are not making one longer. Correct what is in front of you and stop.
+        - Never remove a fact the author gave. Every place, number, person,
+          job and interest they mentioned must still be there.
         PROMPT;
     }
 

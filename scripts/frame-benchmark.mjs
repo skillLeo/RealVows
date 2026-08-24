@@ -40,12 +40,14 @@ const RATE = Number(process.env.BENCH_CPU ?? 4);
  * `minHeight` is the guard. A page shorter than this could not have been the
  * page asked for, and the run fails rather than publishing the figure.
  */
+/*
+ * ⚠️ THE PROFILE IS SPECIFIED NOW, WHICH IS WHY THIS COULD NOT BE RUN BEFORE.
+ * 390 by 844, DPR 1, CPU throttled 4x. The two public pages carrying the most
+ * motion: home runs the orchestrated arrival, how-it-works carries the rail.
+ */
 const PAGES = [
-  { name: 'home (public, no framework)', path: '/', as: null, minHeight: 2000 },
-  { name: 'dashboard', path: '/dashboard', as: 'boy1', minHeight: 1200 },
-  { name: 'introductions', path: '/introductions', as: 'boy1', minHeight: 1200 },
-  { name: 'admin dashboard', path: '/admin', as: 'admin', minHeight: 1200 },
-  { name: 'admin verifications', path: '/admin/verifications', as: 'admin', minHeight: 1000 },
+  { name: 'home', path: '/', as: null, minHeight: 2000 },
+  { name: 'how it works', path: '/how-it-works', as: null, minHeight: 1200 },
 ];
 
 let nextId = 1;
@@ -104,10 +106,10 @@ const PROBE = `
        * ⚠️ SCROLLS THE WINDOW, AND THE ADMIN SHELL DOES NOT SCROLL THE WINDOW.
        *
        * AdminLayout scrolls an inner container beside a fixed sidebar, so
-       * window.scrollBy moves nothing there and `scrolled` comes back 0. The
+       * window.scrollBy moves nothing there and 'scrolled' comes back 0. The
        * frame timings on those pages are therefore a STATIC page under load,
        * not a scroll. That is still a real measurement and it is a weaker one,
-       * and the reported `scrolled` figure is what lets a reader tell which
+       * and the reported 'scrolled' figure is what lets a reader tell which
        * they are looking at rather than being told a scroll was measured.
        */
       window.scrollBy(0, 12);
@@ -159,8 +161,83 @@ async function main() {
   await send('Page.enable', {}, sessionId);
   await send('Runtime.enable', {}, sessionId);
   await send('Emulation.setDeviceMetricsOverride', {
-    width: 390, height: 844, deviceScaleFactor: 3, mobile: true,
+    width: 390, height: 844, deviceScaleFactor: 1, mobile: true,
   }, sessionId);
+
+  /*
+   * ⚠️ THE CONTROL FOR THE MEASUREMENT, NOT FOR THE THROTTLE.
+   *
+   * throttleControl below proves the CPU is genuinely slowed. It does not
+   * prove this harness can SEE a slow page. A probe that had stopped
+   * collecting gaps would report a flawless median forever, and a flawless
+   * median is exactly what a well-built page also reports.
+   *
+   * So a deliberately expensive element is injected and the frames must get
+   * measurably worse. If they do not, every figure below describes the
+   * harness rather than the page, and the run stops.
+   */
+  await send('Emulation.setCPUThrottlingRate', { rate: 1 }, sessionId);
+  await send('Page.navigate', { url: ORIGIN + '/' }, sessionId);
+  await new Promise((r) => setTimeout(r, 2500));
+  await send('Emulation.setCPUThrottlingRate', { rate: RATE }, sessionId);
+
+  const cleanRun = await send('Runtime.evaluate', {
+    expression: PROBE, awaitPromise: true, returnByValue: true,
+  }, sessionId);
+  const clean = summarise(cleanRun.result.value.gaps);
+
+  /*
+   * ⚠️ MAIN-THREAD WORK, NOT A BLURRY DIV.
+   *
+   * The first attempt injected twelve hundred blurred gradients and the
+   * control refused the run, which was the control being right: a filter is
+   * composited on the GPU and never touches the thread requestAnimationFrame
+   * is timed on. The probe was correct to see no change.
+   *
+   * A forced synchronous reflow on every scroll is jank the main thread
+   * genuinely feels: read a geometry property, write a style, repeat.
+   */
+  const JANK = '(() => {'
+    + 'window.__rvJank = () => {'
+    + '  const nodes = document.querySelectorAll("p, div, span, h1, h2, h3");'
+    + '  let sink = 0;'
+    + '  for (let pass = 0; pass < 6; pass++) {'
+    + '    for (let i = 0; i < nodes.length; i++) {'
+    + '      sink += nodes[i].getBoundingClientRect().top;'
+    + '      nodes[i].style.outlineOffset = (sink % 2) + "px";'
+    + '    }'
+    + '  }'
+    + '  return sink;'
+    + '};'
+    + 'window.addEventListener("scroll", window.__rvJank, { passive: true });'
+    + 'return true; })()';
+
+  await send('Runtime.evaluate', { expression: JANK, returnByValue: true }, sessionId);
+
+  const jankyRun = await send('Runtime.evaluate', {
+    expression: PROBE, awaitPromise: true, returnByValue: true,
+  }, sessionId);
+  const janky = summarise(jankyRun.result.value.gaps);
+
+  await send('Runtime.evaluate', {
+    expression: 'window.removeEventListener("scroll", window.__rvJank)',
+  }, sessionId);
+  await send('Emulation.setCPUThrottlingRate', { rate: 1 }, sessionId);
+
+  const sawIt = janky.worst > clean.worst * 1.25 || janky.over16 > clean.over16;
+
+  const jankControl = {
+    cleanWorst: clean.worst,
+    jankyWorst: janky.worst,
+    cleanOver16: clean.over16,
+    jankyOver16: janky.over16,
+    degradationDetected: sawIt,
+  };
+
+  if (!sawIt) {
+    throw new Error('The harness could not see deliberately injected jank. Every number it '
+      + 'reports describes the harness rather than the page.');
+  }
 
   const results = [];
   let signedInAs = null;
@@ -245,6 +322,7 @@ async function main() {
 
   console.log(JSON.stringify({
     cpuThrottle: RATE,
+    jankControl,
     throttleControl: { msAt1x: atOne, [`msAt${RATE}x`]: atRate, ratio: Number(ratio.toFixed(2)), throttleWorked },
     results,
   }, null, 2));

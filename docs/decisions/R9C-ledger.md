@@ -91,3 +91,33 @@ HAVE ASKED
 REVERSIBLE      Yes. One entry in a list.
 ```
 
+## 6 · The benchmark had never run, and the first jank control was wrong
+
+```
+WHAT I HIT      frame-benchmark.mjs did not parse. Backticks inside a comment
+                INSIDE the PROBE template literal closed the string, so the
+                file had been a syntax error since it was written.
+WHAT I DID      Escaped them, set the profile from §2.7, and ran it.
+WHY             It has been "outstanding for two rounds" partly because nobody
+                could run it. A script that cannot parse reports nothing, and
+                nothing looks the same as not getting round to it.
+WHAT I WOULD    None. It is a plain defect.
+HAVE ASKED
+REVERSIBLE      Yes, but reverting restores a file that cannot run.
+```
+
+## 7 · The first positive control for the benchmark was rejected by itself
+
+```
+WHAT I HIT      My injected jank was twelve hundred blurred gradients. The
+                control refused the run, saying the harness could not see it.
+WHAT I DID      Replaced it with a forced synchronous reflow on scroll.
+WHY             The control was right. A CSS filter is composited on the GPU
+                and never touches the thread requestAnimationFrame is timed on,
+                so the probe correctly saw no change. Reading geometry and
+                writing style in a loop is jank the main thread actually feels.
+WHAT I WOULD    None. The control caught my mistake, which is what it is for.
+HAVE ASKED
+REVERSIBLE      Yes.
+```
+

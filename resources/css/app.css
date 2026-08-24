@@ -139,6 +139,25 @@
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --ui:      'Inter', system-ui, -apple-system, sans-serif;
 
+  /*
+   * ⚠️ A DOCUMENTED EXTENSION, NOT DRIFT. R9, and the only display size added
+   * since the scale was locked.
+   *
+   * The locked ceiling is 56, and at 56 the home page hero reads as a heading
+   * rather than as a statement. The client's reference sets its hero
+   * considerably larger and that is the single thing it does better than us.
+   *
+   * ⚠️ THE CONDITIONS ARE PART OF THE TOKEN. Public marketing routes only, in
+   * the same family as The Gleam and The Ticker, and ONCE PER PAGE on the hero
+   * line. TypographyIsLockedTest proves it appears on no authenticated route
+   * and no more than once on a public one.
+   *
+   * ⚠️ DO NOT ADD A FOURTH DISPLAY SIZE. The scale is 56 / 40 / 28 and this
+   * sits outside it deliberately rather than extending it. A second exception
+   * is not an exception, it is a new scale.
+   */
+  --fs-display-hero: clamp(44px, 6.2vw, 76px);
+
   --fs-display-1: 56px;
   --fs-display-2: 40px;
   --fs-display-3: 28px;
@@ -322,6 +341,169 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   letter-spacing: -0.015em;
   font-variation-settings: 'opsz' 144, 'SOFT' 40, 'WONK' 1;
 }
+/*
+ * ⚠️ ONE LINE, ONE PAGE, PUBLIC ONLY. See --fs-display-hero for the conditions
+ * and the guard that enforces them.
+ */
+.rv-d-hero {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-display-hero);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--oxblood);
+  margin: 0;
+  text-wrap: balance;
+}
+
+/*
+ * ⚠️ THE HERO BADGE. Brass caps enclosed by a hairline, which is what makes it
+ * read as a mark rather than as a caption. Type is unchanged from --rv-eyebrow:
+ * 14px, +0.14em, weight 600.
+ */
+.rv-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  padding: 8px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+  margin: 0;
+}
+
+/*
+ * ⚠️ THE BREAK IS EXPLICIT AT EVERY WIDTH THAT MATTERS.
+ *
+ * "Find your true / soul mate." is the meaning break. Left to the container,
+ * 360 and 390 orphan "mate." onto a third line, which is the one thing the
+ * client notices immediately on his own phone.
+ */
+.rv-hero__break { display: block; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   R9 · PUBLIC PAGE COMPOSITION
+
+   Taken from the client reference: a centred column with wide gutters, a brass
+   eyebrow above every heading, one supporting line at about sixty characters,
+   then the grid. Expressed entirely in existing tokens.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ 1120, NOT THE 1200 THE APP USES. The reference's confidence comes largely
+   from the amount of nothing either side of the column. Public only, so the
+   authenticated shell is untouched. */
+.rv-shell--measure { max-width: 1120px; }
+
+/* One supporting line, roughly sixty characters, centred under a heading. */
+.rv-measure { max-width: 60ch; margin-inline: auto; }
+.rv-measure--tight { max-width: 18ch; }
+.rv-centred { text-align: center; }
+
+/* ⚠️ THE EYEBROW WITH FLANKING RULES. The reference uses short rules either
+   side on its section labels and a bare label elsewhere. Same type either way:
+   14px, +0.14em, weight 600, brass. */
+.rv-eyebrow--ruled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.rv-eyebrow--ruled::before,
+.rv-eyebrow--ruled::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--brass);
+  opacity: .55;
+}
+
+/* ⚠️ ALTERNATION IS SPARING. Cream, cream, card, cream, card, then the dark
+   band. Striping every section is what makes a long page read as a template. */
+.rv-tinted { background: var(--card); }
+
+/* ⚠️ EQUAL HEIGHTS COME FROM THE GRID, NOT FROM A MIN-HEIGHT. A magic number
+   here is a number that is wrong at the next breakpoint. */
+.rv-offer__card { height: 100%; }
+
+/*
+ * ⚠️ THE ASYMMETRIC COLUMN. Taller editorial column, one quiet panel beside
+ * it. This is the only thing taken from the two reference sections that were
+ * deleted, and it carries purpose rather than machinery.
+ */
+.rv-purpose {
+  display: grid;
+  gap: 48px;
+  align-items: start;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .rv-purpose { grid-template-columns: 1.35fr 1fr; gap: 64px; }
+}
+
+/* ⚠️ ELEVATION IS TONE AND HAIRLINE. One step of extra padding where the
+   reference uses a shadow, and nothing else. */
+.rv-purpose__panel {
+  padding: 40px;
+  background: var(--cream);
+  border-color: var(--hairline);
+}
+
+.rv-vow--panel { font-size: var(--fs-display-3); line-height: 1.3; }
+
+/* ── The footer ─────────────────────────────────────────────────────────── */
+
+.rv-pubfoot {
+  background: var(--card);
+  border-top: 1px solid var(--hairline-soft);
+  padding-block: 72px 32px;
+}
+
+.rv-pubfoot__grid {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .rv-pubfoot__grid { grid-template-columns: 1.6fr repeat(3, 1fr); gap: 32px; }
+}
+
+.rv-pubfoot__blurb { max-width: 34ch; color: var(--ink-soft); }
+
+.rv-pubfoot__col { display: flex; flex-direction: column; gap: 4px; }
+
+/* ⚠️ 44px MINIMUM, AND FOOTER LINKS ARE THE ONES THAT USUALLY FAIL. Padding
+   rather than height, so the text stays where the grid put it. */
+.rv-pubfoot__col a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.rv-pubfoot__col a:hover { color: var(--oxblood); text-decoration: underline; }
+
+.rv-pubfoot__legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline-soft);
+  font-size: 14px;
+  color: var(--ink-faint, var(--ink-soft));
+}
+
 .rv-d2 {
   font-size: clamp(30px, 5.4vw, var(--fs-display-2));
   line-height: 1.15;
@@ -1221,7 +1403,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-navsheet.is-open { opacity: 1; transform: none; }
 
-.rv-navsheet::backdrop { background: rgba(20, 6, 10, .55); }
+/* ⚠️ Was rgba(20, 6, 10, .55), a dark this palette does not contain. The
+   mobile menu backdrop is now oxblood-deep at the same weight: one hue fewer,
+   and it matches the panel it sits behind. */
+.rv-navsheet::backdrop { background: color-mix(in oklab, var(--oxblood-deep) 72%, transparent); }
 
 /* ⚠️ Reduced motion degrades to opacity under 200ms rather than merely
    slowing down. Nothing translates when this is set. */

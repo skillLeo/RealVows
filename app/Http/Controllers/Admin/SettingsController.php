@@ -95,6 +95,24 @@ class SettingsController extends Controller
             'activeLabel' => self::GROUPS[$group],
             'fields' => $this->settings->groupForDisplay($group),
             'testable' => in_array($group, self::TESTABLE, true),
+
+            /*
+             * ⚠️ THE PUBLIC PAGES READ A PROJECTION, AND A DEAD SCHEDULER LOOKS
+             * EXACTLY LIKE AN OFFER THAT RAN OUT.
+             *
+             * When the projection goes stale the founding band closes and the
+             * pricing link hides, which is the correct outcome and an entirely
+             * invisible one. Somebody could be losing real signups for two days
+             * with nothing on any screen to say so.
+             *
+             * ⚠️ IT ASKS THE PROJECTION RATHER THAN RE-DERIVING THE RULE. A
+             * second copy of the threshold on a dashboard is a number that
+             * disagrees with PublicState the day somebody tunes it.
+             */
+            'publicState' => [
+                'ageSeconds' => \App\Support\PublicState::ageInSeconds(),
+                'stale' => \App\Support\PublicState::isStaleNow(),
+            ],
         ]);
     }
 

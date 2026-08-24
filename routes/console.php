@@ -90,9 +90,23 @@ Schedule::command('realvows:maintenance-watchdog')
  * screen writes it on save; this is what makes a failed write self-repair
  * instead of leaving a projection that is confidently out of date.
  */
+/*
+ * ⚠️ THE LOCK WAS HOLDING FOR TWENTY-FOUR HOURS AND NOBODY CHOSE THAT.
+ *
+ * withoutOverlapping() defaults to 1440 minutes. It releases on a termination
+ * signal, so an ordinary restart is fine — but a hard crash, an OOM kill or a
+ * power loss leaves the lock in place for the rest of the day, and this command
+ * simply does not run again until it expires.
+ *
+ * That sits directly underneath the fifteen-minute staleness threshold in
+ * PublicState: the threshold correctly stops a stale projection being believed,
+ * and could do nothing at all about the twenty-four hours of staleness a stuck
+ * lock produces. Five minutes is generous for a command that finishes in
+ * milliseconds, and it caps the outage rather than the symptom.
+ */
 Schedule::command('realvows:project-public-state --quiet-if-unchanged')
     ->everyMinute()
-    ->withoutOverlapping();
+    ->withoutOverlapping(5);
 
 /*
  * ⚠️ DAILY, NOT EVERY MINUTE. A reminder is a message to a real person who did

@@ -11,6 +11,7 @@ import BaseCheckbox from '@/Components/BaseCheckbox.vue';
 const props = defineProps({
     activeGroup: { type: String, required: true },
     activeLabel: { type: String, required: true },
+    publicState: { type: Object, default: () => ({ ageSeconds: null, stale: false }) },
     fields: { type: Array, required: true },
     testable: { type: Boolean, default: false },
 });
@@ -110,6 +111,28 @@ const asOptions = (options) =>
                     email or upload uses it. Nothing needs to be deployed.
                 </p>
             </header>
+
+            <!--
+                ⚠️ THE PUBLIC PAGES READ A PROJECTION, NOT THE DATABASE.
+
+                When it goes stale the founding band closes and the pricing link
+                hides, which is correct and completely invisible: it looks
+                exactly like an offer that ran out. This is the one screen where
+                somebody would notice, so it says so here rather than only in a
+                log nobody opens.
+            -->
+            <p v-if="publicState.stale" class="rv-flash rv-flash--error" role="alert">
+                The public pages are ignoring their projection because it is out of date.
+                The founding offer is closed and the pricing link is hidden on every public page,
+                whatever the settings below say. The scheduler is probably not running.
+            </p>
+
+            <p v-else-if="publicState.ageSeconds !== null" class="rv-help">
+                Public pages are reading a projection written
+                {{ publicState.ageSeconds < 90
+                    ? 'less than two minutes ago'
+                    : Math.round(publicState.ageSeconds / 60) + ' minutes ago' }}.
+            </p>
 
             <!--
                 While the one-click sign-in is open, this page is reachable by

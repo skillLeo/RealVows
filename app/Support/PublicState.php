@@ -58,6 +58,14 @@ class PublicState
      * Kept out of the web root. `storage/` is writable on shared hosting and
      * is not served, so the projection cannot be fetched over HTTP.
      */
+    /**
+     * ⚠️ FIFTEEN MINUTES, AGAINST A WRITER THAT RUNS EVERY MINUTE.
+     *
+     * Fourteen consecutive missed runs are tolerated, and the longest a public
+     * page can carry a stale promise is a quarter of an hour.
+     */
+    public const STALE_AFTER_SECONDS = 900;
+
     public static function path(): string
     {
         return storage_path('app/public-state.php');
@@ -181,6 +189,90 @@ class PublicState
         return is_int($left) && $left > 0 ? $left : 0;
     }
 
+    /**
+     * How old the projection is, in seconds, or null when there is not one.
+     *
+     * ⚠️ THE ADMIN PANEL ASKS THIS RATHER THAN RE-DERIVING THE RULE. A second
+     * copy of "fifteen minutes" on a dashboard is a number that disagrees with
+     * this one the day somebody tunes it.
+     */
+    public static function ageInSeconds(): ?int
+    {
+        $path = self::path();
+
+        if (! is_file($path) || ! is_readable($path)) {
+            return null;
+        }
+
+        try {
+            $state = require $path;
+        } catch (Throwable) {
+            return null;
+        }
+
+        $written = $state['written_at'] ?? null;
+
+        if (! is_string($written) || $written === '') {
+            return null;
+        }
+
+        try {
+            return max(0, now()->diffInSeconds(\Illuminate\Support\Carbon::parse($written), false) * -1);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /** Whether the public pages are currently ignoring the projection on age. */
+    public static function isStaleNow(): bool
+    {
+        $age = self::ageInSeconds();
+
+        return $age === null || $age > self::STALE_AFTER_SECONDS;
+    }
+
+    private static function isStale(mixed $writtenAt): bool
+    {
+        if (! is_string($writtenAt) || $writtenAt === '') {
+            /*
+             * ⚠️ NO TIMESTAMP IS TREATED AS STALE. A projection that cannot say
+             * when it was written cannot be shown to be current, and this is a
+             * promise about a number.
+             */
+            return true;
+        }
+
+        try {
+            $age = now()->diffInSeconds(\Illuminate\Support\Carbon::parse($writtenAt), false) * -1;
+        } catch (Throwable) {
+            return true;
+        }
+
+        if ($age <= self::STALE_AFTER_SECONDS) {
+            return false;
+        }
+
+        /*
+         * ⚠️ THE STALE PATH IS LOUD, BECAUSE ITS CORRECT BEHAVIOUR IS INVISIBLE.
+         *
+         * Closing the band is the right outcome and it looks exactly like an
+         * offer that genuinely ran out. Without this line the scheduler can be
+         * dead for two days while real visitors are quietly refused an offer
+         * that is still open, and the first symptom is signups that did not
+         * happen.
+         */
+        Log::warning('Public state projection is stale and is being ignored.', [
+            'age_seconds' => $age,
+            'threshold_seconds' => self::STALE_AFTER_SECONDS,
+            'consequence' => 'The founding band is closed and the pricing link is hidden on '
+                .'every public page, whatever the database actually says.',
+            'likely_cause' => 'The scheduler is not running, or realvows:project-public-state is '
+                .'failing. Check the cron entry and the scheduler log.',
+        ]);
+
+        return true;
+    }
+
     /** @return array{free_period: bool, founding_places_left: ?int, written_at: string}|null */
     private static function read(): ?array
     {
@@ -197,6 +289,32 @@ class PublicState
         }
 
         if (! is_array($state) || ! array_key_exists('free_period', $state)) {
+            return null;
+        }
+
+        /*
+         * ⚠️ FAIL-CLOSED HANDLED UNREADABLE AND SAID NOTHING ABOUT STALE.
+         *
+         * A projection that cannot be parsed reads as closed, which is correct.
+         * A projection that parses perfectly and was written three days ago
+         * also reads as open, which is the same false statement arriving by a
+         * different door: the scheduler dies, the file sits there, and the home
+         * page keeps offering places that ran out on Tuesday.
+         *
+         * ⚠️ REJECTING ON AGE NEEDS NO NEW FAIL DIRECTION, WHICH IS WHY IT IS
+         * HERE RATHER THAN IN EACH GETTER. Every caller already handles null
+         * the way it should: freePeriodActive reads it as FREE, because
+         * over-promising free is honourable; foundingOfferOpen reads it as
+         * CLOSED, because a promise about a specific number must never be a
+         * guess. Returning null on age gives each of them the direction it
+         * already chose.
+         *
+         * ⚠️ FIFTEEN MINUTES AGAINST A ONE-MINUTE WRITER. That tolerates
+         * fourteen consecutive missed runs — a reboot, a slow host, a deploy —
+         * while capping the maximum lie at a quarter of an hour. Tighter and a
+         * single stalled minute flickers the band off for real visitors.
+         */
+        if (self::isStale($state['written_at'] ?? null)) {
             return null;
         }
 

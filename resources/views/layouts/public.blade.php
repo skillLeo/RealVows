@@ -57,19 +57,53 @@
         @yield('content')
     </main>
 
-    <footer class="rv-panel rv-pubfoot">
-        <div class="rv-shell rv-pubfoot__inner">
-            <span class="rv-logo__word rv-pubfoot__word">RealVows</span>
+    {{--
+        ⚠️ THE REFERENCE'S FOOTER SHAPE: brand blurb and logo on the left, link
+        columns beside it, a thin rule, then a legal bar.
 
-            <nav class="rv-pubfoot__nav" aria-label="Legal">
-                <a href="{{ route('how-it-works') }}">How it works</a>
-                <a href="{{ route('about') }}">About</a>
-                <a href="{{ route('faq') }}">Questions</a>
-                <a href="{{ route('legal.terms') }}">Terms of Service</a>
-                <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
-                <a href="{{ route('legal.guidelines') }}">Community Guidelines</a>
-                <a href="{{ route('legal.refunds') }}">Refunds</a>
-            </nav>
+        ⚠️ THREE COLUMNS, NOT FOUR. The reference's fourth is a blog, and there
+        is no blog route in this application. A navigation link to a page we do
+        not have is worse than no link, and FooterLinksResolveTest fails on any
+        route here that does not answer.
+    --}}
+    <footer class="rv-pubfoot">
+        <div class="rv-shell rv-shell--measure">
+            <div class="rv-pubfoot__grid">
+                <div class="rv-stack" style="gap: 16px">
+                    <span class="rv-logo__word rv-pubfoot__word">RealVows</span>
+                    <p class="rv-small rv-pubfoot__blurb">
+                        A small matchmaking platform for people who have decided what they are
+                        looking for. Free to join, and everyone here has been checked.
+                    </p>
+                </div>
+
+                <nav class="rv-pubfoot__col" aria-label="About RealVows">
+                    <p class="rv-eyebrow">RealVows</p>
+                    <a href="{{ route('how-it-works') }}">How it works</a>
+                    <a href="{{ route('about') }}">About</a>
+                    <a href="{{ route('faq') }}">Questions</a>
+                </nav>
+
+                <nav class="rv-pubfoot__col" aria-label="Legal">
+                    <p class="rv-eyebrow">Legal</p>
+                    <a href="{{ route('legal.terms') }}">Terms of Service</a>
+                    <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
+                    <a href="{{ route('legal.guidelines') }}">Community Guidelines</a>
+                    <a href="{{ route('legal.refunds') }}">Refunds</a>
+                </nav>
+
+                <nav class="rv-pubfoot__col" aria-label="Getting in touch">
+                    <p class="rv-eyebrow">Contact</p>
+                    <a href="{{ route('login') }}">Sign in</a>
+                    <a href="{{ route('register') }}">Create an account</a>
+                </nav>
+            </div>
+
+            <div class="rv-pubfoot__legal">
+                <span>&copy; {{ date('Y') }} RealVows. All rights reserved.</span>
+                {{-- ⚠️ THE AGE STATEMENT IS A REAL CONSTRAINT, NOT DECORATION. --}}
+                <span>Strictly for adults aged 18 and over.</span>
+            </div>
         </div>
     </footer>
 </body>

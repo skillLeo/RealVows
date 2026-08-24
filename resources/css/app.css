@@ -260,6 +260,10 @@
 
   /* The modal and menu backdrop. Derived from --ink, which is where the
      literal it replaces came from. */
+  /* Hover fill for controls sitting ON a dark panel. White at low alpha, so it
+     lightens whatever it is over instead of introducing a second hue. */
+  --on-dark-wash:  rgba(255, 255, 255, .12);
+
   --scrim:         rgba(31, 21, 24, .55);
 
   /*
@@ -763,9 +767,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--oxblood);
 }
 
-.rv-btn--outline:hover {
-  border-color: var(--brass-bright);
-  background: var(--brass-wash);
+/*
+ * ⚠️ EVERY HOVER ON THIS PAGE USED TO TURN GOLD, AND TWO OF THEM WENT BELOW AA.
+ *
+ * The client: "the hover color is making the text invisible, the color
+ * combination is too much messy". He is describing a real fault. This one put
+ * burgundy type on a brass wash and measured 4.01:1, under the 4.5 floor — the
+ * text genuinely got harder to read at the exact moment a pointer landed on it,
+ * which is the worst possible time for it to happen.
+ *
+ * ⚠️ A HOVER IS A STEP, NOT A COSTUME CHANGE. It should say "this is the thing
+ * under your cursor" and change nothing else. Deepening the border to burgundy
+ * and stepping the fill one grey does that, and keeps the type at 10:1.
+ */
+.rv-btn--outline:hover,
+.rv-btn--outline:focus-visible {
+  border-color: var(--oxblood);
+  background: var(--surface-low);
+  color: var(--oxblood);
 }
 
 .rv-hero__micro {
@@ -890,8 +909,22 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-on-dark .rv-lead,
 .rv-on-dark .rv-body { color: var(--on-dark); }
 .rv-on-dark .rv-small { color: var(--on-dark-soft); }
-.rv-on-dark a { color: var(--brass-bright); text-decoration-color: var(--hairline); }
-.rv-on-dark a:hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
+/*
+ * ⚠️ :not(.rv-btn) IS THE WHOLE FIX, AND WITHOUT IT THIS RULE EATS BUTTONS.
+ *
+ * `.rv-on-dark a` is specificity (0,1,1) and `.rv-btn--on-dark` is (0,1,0), so
+ * a blanket link colour was overriding the button's own. "Create your free
+ * account" on the closing band came out as brass type on a white fill and
+ * measured 2.07:1 — the client's report was "the button text and background
+ * color is too much invisible", and he was reading a real number.
+ *
+ * ⚠️ THIS IS A PROSE RULE. It exists to colour links inside a paragraph on a
+ * dark panel. A button is not prose: it brings its own fill and its own
+ * contrast, and anything that reaches past a component to repaint it will be
+ * wrong on the next component too.
+ */
+.rv-on-dark a:not(.rv-btn) { color: var(--brass-bright); text-decoration-color: var(--hairline); }
+.rv-on-dark a:not(.rv-btn):hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
 
 /* On an oxblood panel the undarkened brass is correct and passes at 5.18:1 */
 .rv-on-dark .rv-label--brass,
@@ -988,20 +1021,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-color: var(--hairline);
   color: var(--oxblood);
 }
-.rv-btn--secondary:hover {
-  border-color: var(--brass-bright);
-  background: color-mix(in oklab, var(--brass) 8%, var(--card));
+.rv-btn--secondary:hover,
+.rv-btn--secondary:focus-visible {
+  border-color: var(--oxblood);
+  background: var(--surface-low);
   color: var(--oxblood);
 }
 
 .rv-btn--ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--rose);
+  /* ⚠️ --oxblood, NOT --rose. Rose on white measures 4.6:1 — technically a pass
+     and visibly weak for a control. The accent on this site is the burgundy. */
+  color: var(--oxblood);
   padding: 0 24px;
 }
-.rv-btn--ghost:hover {
-  background: color-mix(in oklab, var(--rose) 9%, var(--card));
+.rv-btn--ghost:hover,
+.rv-btn--ghost:focus-visible {
+  background: var(--surface-low);
   color: var(--oxblood);
 }
 
@@ -1011,18 +1048,23 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-color: var(--brass);
   color: var(--brass-bright);
 }
-.rv-btn--outline-brass:hover {
-  border-color: var(--brass-bright);
-  background: color-mix(in oklab, var(--brass) 14%, transparent);
+.rv-btn--outline-brass:hover,
+.rv-btn--outline-brass:focus-visible {
+  border-color: var(--cream);
+  background: var(--on-dark-wash);
   color: var(--cream);
 }
 
-.rv-btn--on-dark {
-  background: var(--oxblood);
-  border-color: var(--brass);
-  color: var(--cream);
-}
-.rv-btn--on-dark:hover { background: var(--brass); border-color: var(--brass-bright); color: var(--oxblood-deep); }
+/*
+ * ⚠️ THE OLD .rv-btn--on-dark RULES WERE DELETED, NOT LEFT TO LOSE ON ORDER.
+ *
+ * They set a burgundy fill with a brass border that turned solid gold on
+ * hover. The replacement lives at the end of this file and was already
+ * overriding them on source order — which means the page looked right while
+ * two rules disagreed, and the next person to reorder this file would have
+ * reintroduced the gold without touching it. A rule that only works because
+ * of where it sits is a bug that has not happened yet.
+ */
 
 .rv-btn--ghost-on-dark {
   background: transparent;
@@ -1030,7 +1072,8 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--on-dark);
   padding: 0 24px;
 }
-.rv-btn--ghost-on-dark:hover { background: var(--brass-wash); color: var(--cream); }
+.rv-btn--ghost-on-dark:hover,
+.rv-btn--ghost-on-dark:focus-visible { background: var(--on-dark-wash); color: var(--cream); }
 
 .rv-btn[disabled],
 .rv-btn[aria-disabled='true'] {

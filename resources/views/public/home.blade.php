@@ -85,7 +85,14 @@
                      which reads as a mark rather than as a caption. Same brass
                      caps at the same tracking, so nothing about the type has
                      moved. --}}
-                <p class="rv-hero__badge rv-arrive-step">For those who mean it</p>
+                <p class="rv-hero__badge rv-arrive-step">
+                    {{-- ⚠️ THE DOT IS WHY THE REFERENCE'S PILL READS AS A MARK.
+                         An outlined pill of tracked caps is a caption with a
+                         border round it. One brass dot at the head of it turns
+                         the same words into a label, and it costs eight pixels. --}}
+                    <span class="rv-hero__badge-dot" aria-hidden="true"></span>
+                    <span>For those who mean it</span>
+                </p>
 
                 {{-- ⚠️ THE BREAK IS SET, NOT LEFT TO THE CONTAINER.
                      "Find your true / soul mate." breaks where the meaning
@@ -183,11 +190,24 @@
 
                      It collapses to two rows of two on a phone rather than
                      becoming a strip that scrolls sideways. --}}
+                {{-- ⚠️ THE ICONS ARE THE REFERENCE'S DEVICE AND THEY ARE NOT
+                     DECORATION. Four bare phrases separated by pipes read as a
+                     legal footer; the same four with a mark in front of each
+                     read as four things the product does. Each shape says the
+                     same thing as its words, so a reader who skips the type
+                     still gets the row. --}}
                 <ul class="rv-trustrail">
-                    <li>Free to join</li>
-                    <li>Everyone checked</li>
-                    <li>Soul mate first</li>
-                    <li>18 and over</li>
+                    @foreach ([
+                        ['gift', 'Free to join'],
+                        ['shield', 'Everyone checked'],
+                        ['rings', 'Soul mate first'],
+                        ['lock', '18 and over'],
+                    ] as [$icon, $label])
+                        <li>
+                            @include('public.partials.icon', ['name' => $icon, 'size' => 17])
+                            <span>{{ $label }}</span>
+                        </li>
+                    @endforeach
                 </ul>
               </div>
             </div>

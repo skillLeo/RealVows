@@ -23,6 +23,25 @@
             <path d="m4.5 12.5 5 5 10-11" />
             @break
 
+        {{-- ⚠️ R10. Three shapes the hero's trust rail needs. Drawn on the same
+             24-unit grid at the same 1.25 stroke as everything above, because a
+             rail of icons is only quiet if they were all drawn by one hand. --}}
+        @case('shield')
+            <path d="M12 3 20 6v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6l8-3Z" />
+            <path d="m8.5 12 2.5 2.5 4.5-5" />
+            @break
+
+        @case('gift')
+            <rect x="3" y="9" width="18" height="12" rx="1.5" />
+            <path d="M3 13.5h18M12 9v12" />
+            <path d="M12 9C10.5 5.5 8.5 3 7 4.5S8.5 9 12 9Zm0 0c1.5-3.5 3.5-6 5-4.5S15.5 9 12 9Z" />
+            @break
+
+        @case('rings')
+            <circle cx="9" cy="14" r="6" />
+            <circle cx="15" cy="14" r="6" />
+            @break
+
         @case('envelope')
             <rect x="2.5" y="5" width="19" height="14" rx="2" />
             <path d="m3 7 9 6 9-6" />

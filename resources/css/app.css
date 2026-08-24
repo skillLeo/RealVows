@@ -5015,3 +5015,45 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* The lead under a section heading, at the reference's size and colour. */
 .rv-section__head .rv-lead { font-size: var(--fs-body-1); line-height: 1.7; }
+
+/* ── R10 · The hero, against the reference ──────────────────────────────── */
+
+/*
+ * ⚠️ A FILLED PILL ON A HAIRLINE. Ours was transparent, so it took the ground
+ * behind it and disappeared into the arch outlines crossing at that height.
+ * The reference's sits on its own white and stays a distinct object.
+ */
+.rv-hero__badge { background: var(--card); }
+
+.rv-hero__badge-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--brass);
+}
+
+/*
+ * ⚠️ RULED ON BOTH EDGES. A rail closed on one side only reads as the bottom
+ * of the block above it; closed on both it reads as its own band, which is
+ * what holds the foot of the reference's hero together.
+ */
+.rv-trustrail {
+  border-bottom: 1px solid var(--hairline-soft);
+  padding-bottom: 24px;
+}
+.rv-trustrail li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+.rv-trustrail li svg { color: var(--brass-ink); flex: 0 0 auto; }
+
+/*
+ * ⚠️ THE LEAD IS GREY. It was --ink, the body colour, which put the sentence
+ * under the headline at the same weight as the paragraphs further down the
+ * page. In the reference it is clearly secondary to the headline and clearly
+ * above the microcopy, and --ink-soft is the token that already means that.
+ */
+.rv-hero .rv-lead { color: var(--ink-soft); }

@@ -5121,3 +5121,125 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-process__rail::before,
   .rv-process__rail::after { content: none; }
 }
+
+/* ── R10 · How the score is built ───────────────────────────────────────── */
+
+.rv-score {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+}
+@media (max-width: 899px) { .rv-score { grid-template-columns: 1fr; } }
+
+.rv-score__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rv-score__row {
+  background: var(--rose-wash);
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-lg);
+  padding: clamp(22px, 2.4vw, 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rv-score__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.rv-score__pct { font-size: 30px; color: var(--oxblood); }
+.rv-score__sign { font-size: .58em; vertical-align: super; }
+
+.rv-score__track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hairline-soft);
+  overflow: hidden;
+}
+/*
+ * ⚠️ THE BAR GROWS FROM NOTHING WHEN THE ROW ARRIVES, and the width it grows
+ * to is the weight itself, passed in as --w. Transitioning `width` on four
+ * rows at once is a layout animation on the compositor's critical path; a
+ * transform on a full-width element is not, so the fill is laid out at 100%
+ * and scaled down to --w instead.
+ */
+.rv-score__fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--oxblood);
+  transform: scaleX(var(--w));
+  transform-origin: left center;
+}
+[data-reveal] .rv-score__fill { transform: scaleX(0); }
+[data-reveal].is-in .rv-score__fill {
+  transform: scaleX(var(--w));
+  transition: transform 900ms var(--ease-entrance) 120ms;
+}
+
+.rv-score__panel {
+  background: var(--card);
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-lg);
+  padding: clamp(26px, 2.8vw, 38px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 96px;
+}
+@media (max-width: 899px) { .rv-score__panel { position: static; } }
+.rv-score__label { justify-content: flex-start; }
+.rv-score__label::before { content: none; }
+
+.rv-gauge { display: grid; place-items: center; gap: 4px; }
+.rv-gauge svg { width: min(100%, 260px); height: auto; display: block; }
+.rv-gauge__track,
+.rv-gauge__value {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+.rv-gauge__track { stroke: var(--hairline-soft); }
+.rv-gauge__value {
+  stroke: var(--oxblood);
+  /* pathLength="100" makes the dash units percent, so --to is the figure. */
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--to));
+}
+[data-reveal] .rv-gauge__value { stroke-dashoffset: 100; }
+[data-reveal].is-in .rv-gauge__value {
+  stroke-dashoffset: calc(100 - var(--to));
+  transition: stroke-dashoffset 1100ms var(--ease-entrance) 150ms;
+}
+
+.rv-gauge__figure {
+  margin: -46px 0 0;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.rv-gauge__figure .rv-numeral { font-size: 46px; }
+.rv-gauge__unit { font-size: var(--fs-body-3); color: var(--ink-soft); }
+
+/*
+ * ⚠️ NO MOTION FOR ANYONE WHO ASKED FOR NONE. The reveal class still lands, so
+ * the bars and the arc are drawn at their final values immediately rather than
+ * being left at zero — which is the failure mode that turns a motion
+ * preference into a blank page.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] .rv-score__fill,
+  [data-reveal].is-in .rv-score__fill { transform: scaleX(var(--w)); transition: none; }
+  [data-reveal] .rv-gauge__value,
+  [data-reveal].is-in .rv-gauge__value { stroke-dashoffset: calc(100 - var(--to)); transition: none; }
+}

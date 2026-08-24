@@ -358,6 +358,13 @@
          a public page. --}}
     @include('public.partials.how-it-works')
 
+    {{-- ── How the score is built ────────────────────────────────────────
+         The client's reference puts a scoring breakdown here and asked for the
+         same section "100% halal". Forty percent of theirs is derived from a
+         date of birth. Ours reads the real weights out of config/matching.php,
+         where that component no longer exists. See the partial for why the numbers are not typed. --}}
+    @include('public.partials.how-we-score')
+
     {{-- ── 6 · What it costs ─────────────────────────────────────────────
          ⚠️ THE PRICING GRID IS NOT REPRODUCED, AND THE REASON IS A RULE
          RATHER THAN A PREFERENCE.

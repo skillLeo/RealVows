@@ -57,15 +57,73 @@ class PublicPagesDescribeNoMechanismTest extends TestCase
         'on a note' => 'the verification method',
         'selfie with' => 'the verification method',
 
-        'built from what you tell us' => 'how the score is calculated',
-        'built from what both people told us' => 'how the score is calculated',
-        'the values you rank highest' => 'how the score is calculated',
-        'both sides are weighed' => 'how the score is calculated',
-        'out of 100' => 'how the score is calculated',
+        /*
+         * ⚠️ THE SCORING HALF OF THIS RULE WAS REVERSED BY THE CLIENT ON
+         * 2026-08-25, AND ONLY THAT HALF.
+         *
+         * Five phrases used to sit here forbidding any description of how a
+         * score is produced. He sent a screenshot of his reference's scoring
+         * breakdown and asked for it three times over — "exactly this section",
+         * "1000% resemblance", "our real form config" — so the page he is now
+         * asking for is the page these entries existed to prevent.
+         *
+         * The earlier instruction was "say less". This one is specific, later,
+         * and about a named section, so it wins. What he objected to before was
+         * marketing prose inventing machinery; what he has commissioned is a
+         * breakdown read out of config/matching.php that cannot say anything
+         * the engine is not doing.
+         *
+         * ⚠️ THE OTHER TWO HALVES ARE UNTOUCHED AND ARE NOT HIS TO WAIVE
+         * CASUALLY. The verification entries above stay because publishing an
+         * anti-fraud method publishes what somebody needs to prepare for it —
+         * that is a security property, not a presentation preference, and it
+         * survives any request to describe how checking works. The
+         * specification entries stay because they are promises we cannot keep.
+         *
+         * See test_the_verification_method_is_still_absolute below, which
+         * exists so this reversal cannot be quietly widened into that half.
+         */
 
         'four photos' => 'a specification rather than a promise',
         'seven guided steps' => 'a specification rather than a promise',
     ];
+
+    /**
+     * ⚠️ THE REVERSAL ABOVE MUST NOT SPREAD.
+     *
+     * One half of this rule was waived on a specific request about a specific
+     * section. The natural next edit — by somebody who reads the comment above
+     * and concludes the rule is negotiable — is to describe how verification
+     * works on the same page, for the same stated reason. It is not the same
+     * reason. This asserts the verification vocabulary is still refused, so
+     * that half fails loudly on its own rather than leaning on the list.
+     */
+    public function test_the_verification_method_is_still_absolute(): void
+    {
+        $forbidden = array_keys(array_filter(
+            self::MECHANISM,
+            fn (string $why) => $why === 'the verification method',
+        ));
+
+        $this->assertNotEmpty(
+            $forbidden,
+            'Every verification-method entry has been removed from the list. That half of the '
+                .'rule is a security property and was never the client\'s to waive.',
+        );
+
+        foreach (self::PAGES as $page) {
+            $text = Scanners::visibleText($this->get($page)->getContent());
+
+            foreach ($forbidden as $phrase) {
+                $this->assertStringNotContainsString(
+                    $phrase,
+                    mb_strtolower($text),
+                    "{$page} describes the verification method (\"{$phrase}\"). Publishing how "
+                        .'checking is done publishes what somebody needs in order to prepare for it.',
+                );
+            }
+        }
+    }
 
     public function test_no_public_page_explains_how_anything_works(): void
     {
@@ -137,8 +195,15 @@ class PublicPagesDescribeNoMechanismTest extends TestCase
      */
     public function test_the_reader_catches_a_mechanism_and_leaves_honest_copy_alone(): void
     {
-        $bad = strtolower('Take a photo holding the code we issued, and your score is built from '
-            .'what you tell us, out of 100.');
+        /*
+         * ⚠️ THE FIXTURE MOVED WHEN THE SCORING ENTRIES DID. It used to end
+         * "out of 100", which is no longer refused, so the control was asserting
+         * that the reader catches a phrase the reader is now supposed to allow.
+         * A positive control that tests a deleted rule fails for the wrong
+         * reason and gets "fixed" by deleting the control.
+         */
+        $bad = strtolower('Take a photo holding the code we issued, write it handwritten on a '
+            .'note, and send us four photos.');
 
         $caught = array_keys(array_filter(
             self::MECHANISM,
@@ -148,7 +213,8 @@ class PublicPagesDescribeNoMechanismTest extends TestCase
 
         $this->assertNotEmpty($caught, 'The reader saw nothing wrong with a paragraph of pure mechanism.');
         $this->assertContains('holding the code', $caught);
-        $this->assertContains('out of 100', $caught);
+        $this->assertContains('handwritten', $caught);
+        $this->assertContains('four photos', $caught);
 
         // And the other direction: ordinary honest copy must survive untouched.
         $good = strtolower('Everyone here has been checked before anyone is introduced to them. '

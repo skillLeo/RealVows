@@ -45,9 +45,9 @@
                  which is what gives the pale ground its warmth without becoming
                  a colour in its own right. --}}
             <radialGradient id="rv-meeting-bloom" cx=".5" cy=".40" r=".58">
-                <stop offset="0%" stop-color="var(--brass)" stop-opacity=".10" />
-                <stop offset="55%" stop-color="var(--brass)" stop-opacity=".04" />
-                <stop offset="100%" stop-color="var(--brass)" stop-opacity="0" />
+                <stop offset="0%" stop-color="var(--bloom)" stop-opacity=".55" />
+                <stop offset="55%" stop-color="var(--bloom)" stop-opacity=".22" />
+                <stop offset="100%" stop-color="var(--bloom)" stop-opacity="0" />
             </radialGradient>
 
             {{-- ⚠️ WHITE HERE IS LUMINANCE, NOT A COLOUR. A mask reads

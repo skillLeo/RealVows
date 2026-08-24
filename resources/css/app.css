@@ -151,7 +151,25 @@
    * every channel, so everything already checked against the old value keeps
    * at least the contrast it had.
    */
-  --oxblood-deep: #3E0021;   /* full-bleed panels, page backgrounds */
+  /*
+   * ⚠️ #480027 IS THE PANEL COLOUR. #3E0021 IS NOT, AND THE CLIENT GAVE ME THE
+   * SECOND ONE FIRST.
+   *
+   * He said "the color of secondary or accent is #3e0021, change in whole
+   * site", so that is what went in — and he then said the purple sections were
+   * still wrong. Both values are real and both are his reference's, but they
+   * do different jobs there:
+   *
+   *   --color-primary          #480027   the ONE background it paints dark
+   *   --color-on-primary-fixed #3E0021   a text colour used ON pale pink
+   *
+   * Their stylesheet has exactly one dark background class, .bg-primary, and
+   * it resolves to #480027. So the band above the footer, the footer's own
+   * band and every full-bleed panel take that, and his value is kept below for
+   * the job it actually does.
+   */
+  --oxblood-deep: #480027;   /* full-bleed panels, page backgrounds */
+  --oxblood-ink:  #3E0021;   /* type and marks ON pale rose surfaces */
   --oxblood:      #6B1834;   /* primary buttons, headings on cream */
   --rose:         #A64452;   /* secondary / ghost actions, error states */
   --brass:        #B99154;   /* logo, hairline borders, accents, active */
@@ -211,6 +229,16 @@
    * swatch and wrong in a gradient.
    */
   --brass-fade:    rgba(185, 145, 84, 0);
+
+  /*
+   * ⚠️ THE HERO'S WASH IS A COLOUR IN ITS OWN RIGHT, so it gets a name rather
+   * than being spelled --brass at every use. The reference washes its banner in
+   * pale ROSE (--color-primary-fixed); ours was brass, which is a gold glow,
+   * and gold glow over a warm ground is the third thing making the banner look
+   * beige beside theirs. Public overrides it; the member area keeps brass.
+   */
+  --bloom:        var(--brass);
+  --bloom-public: #FFD9E4;
 
   /* The modal and menu backdrop. Derived from --ink, which is where the
      literal it replaces came from. */
@@ -4566,7 +4594,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    */
   background:
     radial-gradient(90% 62% at 50% 30%,
-      color-mix(in oklab, var(--brass) 4%, var(--card)) 0%,
+      color-mix(in oklab, var(--bloom) 22%, var(--card)) 0%,
       var(--cream) 58%,
       var(--cream) 100%);
 }
@@ -5371,6 +5399,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   --cream: var(--ground-public);
   --card:  var(--surface-raised);
   --display: var(--display-public);
+  --bloom:         var(--bloom-public);
   --hairline:      var(--outline-ref);
   --hairline-soft: var(--outline-ref-soft);
   --ink:           var(--ink-ref);

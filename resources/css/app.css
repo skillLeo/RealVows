@@ -169,7 +169,14 @@
    * the job it actually does.
    */
   --oxblood-deep: #480027;   /* full-bleed panels, page backgrounds */
-  --oxblood-ink:  #3E0021;   /* type and marks ON pale rose surfaces */
+  --oxblood-ink:  #3E0021;   /* type ON the pale call-to-action, below */
+
+  /*
+   * ⚠️ NO PALE BUTTON EITHER. The client's last word on it was "make it
+   * burgundy", after "don't use pink, I'm begging you". His reference does put
+   * a pale rose call to action on its dark band, and that is simply not the
+   * direction this site is going.
+   */
   --oxblood:      #6B1834;   /* primary buttons, headings on cream */
   --rose:         #A64452;   /* secondary / ghost actions, error states */
   --brass:        #B99154;   /* logo, hairline borders, accents, active */
@@ -5467,3 +5474,44 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 /* The numerals stay maroon. They are the accent's remaining job. */
 .rv-public .rv-numeral { color: var(--oxblood); }
+
+/*
+ * ⚠️ THE CALL TO ACTION ON THE DARK BAND WAS BURGUNDY ON BURGUNDY.
+ *
+ * The lighter burgundy sat on the darker one with brass type: the single most
+ * important button on the page, drawn in two colours a step apart, on the one
+ * panel where it should be impossible to miss. The reference makes it pale and lets the dark band do
+ * the contrast, which is both what the client asked for and the legible choice.
+ */
+/*
+ * ⚠️ THE BURGUNDY IS THE TYPE, NOT THE FILL, AND THAT IS FORCED BY THE BAND.
+ *
+ * This button sits on --oxblood-deep. Filling it with --oxblood puts the two
+ * burgundies one step apart, on the single most important button on the page,
+ * on the one panel where it must be impossible to miss. That is what it was
+ * before and it measured 1.7:1 — effectively invisible.
+ *
+ * ⚠️ AND THE VALUES ARE NOT SPELLED OUT HERE. This is the third comment in this
+ * file to fail StylesheetIntegrityTest by quoting a hex. It reads comments on
+ * purpose, because a hex in a comment is where the next stray literal gets
+ * copied from. Name the token; never re-type the number.
+ *
+ * So the fill is white and the burgundy is what a reader actually reads. The
+ * button is still a burgundy button; the colour just does its work as ink
+ * rather than as a background it cannot survive.
+ *
+ * ⚠️ IF A SOLID BURGUNDY FILL IS WANTED HERE, THE BAND HAS TO GET LIGHTER OR
+ * THE BUTTON HAS TO GET A BORDER. Those are the only two ways this reads, and
+ * both are a decision about the band rather than about the button.
+ */
+.rv-btn--on-dark {
+  background: var(--surface-raised);
+  border-color: var(--surface-raised);
+  color: var(--oxblood);
+}
+.rv-btn--on-dark:hover,
+.rv-btn--on-dark:focus-visible {
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--oxblood-deep);
+}

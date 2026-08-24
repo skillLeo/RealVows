@@ -1014,7 +1014,23 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   border-color: var(--oxblood);
   color: var(--cream);
 }
-.rv-btn--primary:hover { background: var(--oxblood-deep); border-color: var(--brass); color: var(--cream); }
+/*
+ * ⚠️ THE BORDER USED TO TURN BRASS HERE, AND THAT WAS THE GOLD FLASH.
+ *
+ * At rest this button is burgundy on burgundy; on hover the fill deepened but
+ * the border jumped to gold. A one-pixel colour change into a different hue is
+ * exactly the "too much messy" the client described, and it was the last brass
+ * left on any control.
+ *
+ * The hover is now purely a deepening: same hue, one step darker, border and
+ * fill together.
+ */
+.rv-btn--primary:hover,
+.rv-btn--primary:focus-visible {
+  background: var(--oxblood-deep);
+  border-color: var(--oxblood-deep);
+  color: var(--cream);
+}
 
 .rv-btn--secondary {
   background: var(--card);

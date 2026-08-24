@@ -77,14 +77,21 @@ class ButtonsSurviveTheirSurroundingsTest extends TestCase
         $offences = [];
 
         foreach ($rules as [, $selector, $body]) {
-            preg_match('/background(?:-color)?\s*:\s*([^;]+)/', $body, $fill);
+            /*
+             * ⚠️ THE BORDER COUNTS, NOT JUST THE FILL. The first version of
+             * this guard read `background` only and passed a primary button
+             * whose border jumped from burgundy to gold on hover. A one-pixel
+             * hue change is still a hue change, and it was the last brass left
+             * on any control.
+             */
+            foreach (['background(?:-color)?', 'border(?:-color)?'] as $property) {
+                if (! preg_match('/(?<![a-z-])'.$property.'\s*:\s*([^;]+)/', $body, $value)) {
+                    continue;
+                }
 
-            if (($fill[1] ?? '') === '') {
-                continue;
-            }
-
-            if (preg_match('/--brass(?!-fade)/', $fill[1])) {
-                $offences[] = trim($selector).' -> '.trim($fill[1]);
+                if (preg_match('/--brass(?!-fade)/', $value[1])) {
+                    $offences[] = trim($selector).' -> '.trim($value[1]);
+                }
             }
         }
 

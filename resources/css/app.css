@@ -5057,3 +5057,67 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * above the microcopy, and --ink-soft is the token that already means that.
  */
 .rv-hero .rv-lead { color: var(--ink-soft); }
+
+/* ── R10 · The process rail ─────────────────────────────────────────────── */
+
+.rv-process {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 40px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rv-process__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  padding-inline: clamp(8px, 1.6vw, 20px);
+}
+.rv-process__step .rv-body { max-width: 30ch; }
+
+/* The track. Two half-segments so the line closes at the outer markers. */
+.rv-process__rail {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+.rv-process__rail::before,
+.rv-process__rail::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  height: 1px;
+  background: var(--hairline-soft);
+}
+.rv-process__rail::before { left: 0; right: 50%; }
+.rv-process__rail::after  { left: 50%; right: 0; }
+.rv-process__step:first-child .rv-process__rail::before,
+.rv-process__step:last-child  .rv-process__rail::after { content: none; }
+
+.rv-process__marker {
+  position: relative;   /* over the track */
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  font-size: 20px;
+  letter-spacing: .04em;
+}
+
+/*
+ * ⚠️ THE TRACK ONLY MEANS ANYTHING WHILE THE STEPS ARE IN A ROW. Once the grid
+ * wraps to one column the segments point at the step above and below, which is
+ * a line drawn between two things that are not beside each other.
+ */
+@media (max-width: 719px) {
+  .rv-process__rail::before,
+  .rv-process__rail::after { content: none; }
+}

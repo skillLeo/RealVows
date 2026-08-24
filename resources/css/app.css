@@ -5052,10 +5052,17 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    the same design with our content. Everything in this block exists because a
    named element of that reference had no equivalent here.
 
-   ⚠️ THE ONE THING THAT IS NOT COPIED IS THE ASTROLOGY. The reference sells a
-   12x12 zodiac matrix as forty percent of its score. A scholar was consulted
-   and that component was deleted from this product outright — matrix, scorer
-   and stored column. Nothing in this block reintroduces it under another name.
+   ⚠️ THE ONE THING THAT IS NOT COPIED IS THE BIRTH-DATE COMPONENT. The
+   reference sells a 12x12 matrix derived from dates of birth as forty percent
+   of its score. A scholar was consulted and that component was deleted from
+   this product outright: matrix, scorer and stored column. Nothing in this
+   block reintroduces it under another name.
+
+   ⚠️ AND THE VOCABULARY IS BANNED IN THIS FILE TOO, WHICH IS HOW CI CAUGHT
+   THESE TWO LINES AFTER THE LOCAL SUITE PASSED. The Tier 1 content rule greps
+   all of resources/, stylesheet comments included. The local reader was only
+   walking views and PHP, so the cheapest place to catch it was the slowest.
+   It walks the stylesheet now as well.
    ══════════════════════════════════════════════════════════════════════════ */
 
 /*

@@ -520,10 +520,23 @@ class PositiveControlsAreAliveTest extends TestCase
     {
         $files = [];
 
+        /*
+         * ⚠️ css IS ON THIS LIST BECAUSE CI CAUGHT WHAT THIS READER MISSED.
+         *
+         * Two lines of a stylesheet comment carried the banned vocabulary. The
+         * whole local suite passed, the commit went up, and the Tier 1 content
+         * rule failed the build — it greps all of resources/, comments and
+         * stylesheets included, and this reader was only walking views and PHP.
+         *
+         * A guard that finds it four minutes into CI instead of two seconds
+         * into a local run is the same guard doing the same job at ten times
+         * the cost, and the cost is paid by whoever is trying to ship.
+         */
         foreach ([
             app_path(),
             resource_path('js'),
             resource_path('views'),
+            resource_path('css'),
             lang_path(),
             config_path(),
         ] as $directory) {
@@ -532,12 +545,12 @@ class PositiveControlsAreAliveTest extends TestCase
             }
 
             foreach (File::allFiles($directory) as $file) {
-                if (in_array(strtolower($file->getExtension()), ['php', 'vue', 'js', 'json'], true)) {
+                if (in_array(strtolower($file->getExtension()), ['php', 'vue', 'js', 'json', 'css'], true)) {
                     $files[] = $file->getPathname();
                 }
             }
         }
 
-        return ScannedFiles::of($files, 'product source (app, resources, lang, config)', 60);
+        return ScannedFiles::of($files, 'product source (app, resources, lang, config, css)', 60);
     }
 }

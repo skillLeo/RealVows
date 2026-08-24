@@ -186,8 +186,15 @@
    * scoping it deliberately accepts.
    */
   --ground-public:  #FCF9F8;   /* public page paper, the reference's own surface */
-  --outline-ref:      #DAC0C7;   /* the reference's hairline: pale pink, not gold */
-  --outline-ref-soft: #EBDDE1;   /* the same hue, stepped back for quiet rules */
+  /*
+   * ⚠️ NEUTRAL, NOT PINK, AND NOT GOLD EITHER. Brass at 40% drew a gold line
+   * around everything, which read as beige. Replacing it with the reference's
+   * outline-variant swapped one tint for another and put a pink line around
+   * everything instead. A hairline's job is to separate two surfaces, and on a
+   * white page that is a grey.
+   */
+  --outline-ref:      #DDD8D8;   /* borders that need to be seen */
+  --outline-ref-soft: #EBE7E7;   /* quiet rules and dividers */
   --ink-ref:          #1C1B1B;   /* the reference's heading and body ink */
   --surface-raised: #FFFFFF;   /* raised surfaces on that paper */
   --card:         #F8F6F2;   /* raised surfaces on cream */
@@ -238,7 +245,11 @@
    * beige beside theirs. Public overrides it; the member area keeps brass.
    */
   --bloom:        var(--brass);
-  --bloom-public: #FFD9E4;
+  /* ⚠️ THE BANNER IS WHITE. It was brass, which was a gold glow, and then pale
+     rose, which was worse. The reference's hero is its plain surface colour
+     with the arches drawn on it and no wash at all, so this is the faintest
+     possible warm grey and it exists only to stop the arch band looking flat. */
+  --bloom-public: #F4F1F0;
 
   /* The modal and menu backdrop. Derived from --ink, which is where the
      literal it replaces came from. */
@@ -257,8 +268,33 @@
    * ⚠️ NO NEW HUE ENTERS, which is what the rule actually protects. Both are
    * pure alpha derivatives of --rose (166, 68, 82).
    */
-  --rose-wash:     rgba(166, 68, 82, .045);  /* card and panel fills */
-  --rose-veil:     rgba(166, 68, 82, .11);   /* icon discs, chips, markers */
+  /*
+   * ⚠️ THESE WERE ROSE AND THE CLIENT WAS RIGHT TO STOP IT.
+   *
+   * "I am not interested in any kind of pink. This is not a female-only site.
+   * The pink also makes the black wording very pale. The brother used white
+   * more than anything else."
+   *
+   * All three points are correct and the last one is checkable. His reference
+   * ships its surfaces as white and grey:
+   *
+   *   --color-surface-lowest     #FFFFFF
+   *   --color-surface            #FCF9F8
+   *   --color-surface-low        #F6F3F2
+   *   --color-surface-container  #F0EDED   <- neutral grey
+   *
+   * There is exactly one pink-ish token in that palette, --color-outline-variant,
+   * and it is an OUTLINE. I took it and spread it across every card fill, every
+   * icon disc, every hairline and the hero wash, which is a decision their
+   * designer never made. Dark ink on a tinted fill is also measurably lower
+   * contrast than the same ink on white, so "it makes the black words pale" is
+   * a description of a real effect and not a matter of taste.
+   *
+   * ⚠️ THE ACCENT IS BURGUNDY AND STAYS BURGUNDY. Colour on this site is
+   * carried by the oxblood, not by the surfaces.
+   */
+  --surface-low:   #F6F3F2;   /* card and panel fills */
+  --surface-tint:  #F0EDED;   /* icon discs, chips, markers */
 
   --hairline:      rgba(185, 145, 84, .4);
   --hairline-soft: rgba(185, 145, 84, .2);
@@ -894,7 +930,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * and a hairline, never a shadow.
  */
 .rv-card {
-  background: var(--rose-wash);
+  background: var(--surface-low);
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-lg);
   padding: clamp(28px, 3.4vw, 44px);
@@ -5078,7 +5114,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--rose-veil);
+  background: var(--surface-tint);
   color: var(--oxblood);
 }
 .rv-icon-disc svg { width: 28px; height: 28px; }
@@ -5245,7 +5281,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   list-style: none;
 }
 .rv-score__row {
-  background: var(--rose-wash);
+  background: var(--surface-low);
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-lg);
   padding: clamp(22px, 2.4vw, 30px);

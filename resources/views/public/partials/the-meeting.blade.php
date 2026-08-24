@@ -45,8 +45,8 @@
                  which is what gives the pale ground its warmth without becoming
                  a colour in its own right. --}}
             <radialGradient id="rv-meeting-bloom" cx=".5" cy=".40" r=".58">
-                <stop offset="0%" stop-color="var(--bloom)" stop-opacity=".55" />
-                <stop offset="55%" stop-color="var(--bloom)" stop-opacity=".22" />
+                <stop offset="0%" stop-color="var(--bloom)" stop-opacity=".85" />
+                <stop offset="55%" stop-color="var(--bloom)" stop-opacity=".40" />
                 <stop offset="100%" stop-color="var(--bloom)" stop-opacity="0" />
             </radialGradient>
 

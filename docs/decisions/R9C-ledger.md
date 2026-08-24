@@ -57,3 +57,20 @@ REVERSIBLE      Yes, one line. The visible difference is very small: both are
                 near-black at similar weight over the same panel.
 ```
 
+## 4 · Word boundary changed from \b to a letter-digit edge
+
+```
+WHAT I HIT      The celestial reader missed rv-horoscope__ring. An underscore
+                is a word character, so \b never fires between "horoscope" and
+                "__ring".
+WHAT I DID      Replaced \b with (?<![a-z0-9]) ... (?![a-z0-9]) on both the
+                term match and the allow-list scrubber.
+WHY             §2.5 requires the reader to cover class names, and a class name
+                is exactly where a term survives a redesign: not in prose,
+                where somebody would read it, but in markup nobody re-reads.
+                Caught by my own positive control before shipping.
+WHAT I WOULD    None. The control found it and the fix is unambiguous.
+HAVE ASKED
+REVERSIBLE      Yes, but reverting reopens the hole.
+```
+

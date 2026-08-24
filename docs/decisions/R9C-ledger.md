@@ -74,3 +74,20 @@ HAVE ASKED
 REVERSIBLE      Yes, but reverting reopens the hole.
 ```
 
+## 5 · The Questions page is exempt from the card-punctuation guard
+
+```
+WHAT I HIT      The terminal-punctuation guard listed all four public pages.
+                Questions is built from native <details> elements and has no
+                card descriptions, so the reader asserted against an empty set.
+WHAT I DID      Scoped the guard to the three pages that have cards, and added
+                a test asserting Questions is still details-based, so it fails
+                if that page ever gains cards.
+WHY             §4: a guard that claims coverage it does not have is worse than
+                a narrower honest one. My own extraction proof caught this
+                before it shipped, which is the whole point of that rule.
+WHAT I WOULD    Should Questions grow cards to match the other three?
+HAVE ASKED
+REVERSIBLE      Yes. One entry in a list.
+```
+

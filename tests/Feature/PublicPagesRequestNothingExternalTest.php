@@ -47,6 +47,18 @@ class PublicPagesRequestNothingExternalTest extends TestCase
             $found,
         );
 
+        /*
+         * ⚠️ PROVED AT THE POINT OF EXTRACTION. Every assertion built on this
+         * is an empty-array check, and a regex that stopped matching reports a
+         * page with no external requests in exactly the same words as a clean
+         * one.
+         */
+        $this->assertNotEmpty(
+            $found[0],
+            "Nothing with an href or src was found on {$page}, so this reader is looking at "
+                .'an empty document.',
+        );
+
         $urls = array_filter(array_merge($found[1], $found[2]));
         $external = [];
 

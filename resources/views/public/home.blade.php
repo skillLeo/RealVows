@@ -60,7 +60,18 @@
              apart from it. --}}
         <div class="rv-hero__copy">
           <div class="rv-hero__frame">
-            @include('public.partials.the-arch')
+            {{-- ⚠️ THE OLD CENTRED ARCH IS GONE, AND IT WAS THE ONE COMPETING.
+
+                 the-arch drew a second, separate arch directly behind the
+                 badge and the headline, with a keystone diamond at its crown.
+                 It made sense when the ground was a lattice and needed a frame.
+                 Against the new arch ground it is a duplicate: two different
+                 arch systems crossing each other behind the same words, which
+                 is what the client was pointing at.
+
+                 The partial is left in the repository rather than deleted, so
+                 the reasoning behind the keystone survives if anybody wants it
+                 back. Nothing includes it now. --}}
 
             <div class="rv-hero__frame-body">
               <div class="rv-hero__copy-inner rv-stack" style="gap: 20px">

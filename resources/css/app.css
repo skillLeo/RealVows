@@ -1972,7 +1972,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * laptop, and there is room left for the header above it.
    */
   min-height: min(72svh, 760px);
-  padding: clamp(36px, 5vh, 64px) clamp(20px, 5vw, 64px);
+  /* ⚠️ MORE ROOM AT THE TOP SINCE THE ARCH FRAME CAME OUT. That crown block
+     was carrying the hero's headroom, so removing it clipped the badge under
+     the sticky nav. The spacing is the hero's own now rather than a side
+     effect of an ornament. */
+  padding: clamp(72px, 9vh, 112px) clamp(20px, 5vw, 64px) clamp(48px, 6vh, 72px);
   background: var(--cream);
   overflow: hidden;
 }
@@ -2024,23 +2028,17 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   padding: 0 clamp(24px, 8%, 68px) clamp(24px, 4vw, 44px);
 }
 
-.rv-hero__frame-body::before,
-.rv-hero__frame-body::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  /* Fades out at the foot, so the arch reads as a building continuing past the
-     bottom of the frame rather than as a shape that stops. */
-  background: linear-gradient(180deg,
-    var(--hairline) 0%,
-    var(--hairline) 48%,
-    var(--brass-fade) 100%);
-}
-
-.rv-hero__frame-body::before { left: 0; }
-.rv-hero__frame-body::after  { right: 0; }
+/*
+ * ⚠️ THE FRAME LEGS ARE GONE WITH THE CROWN THEY BELONGED TO.
+ *
+ * These two hairlines were the jambs of the centred arch: they only read as
+ * legs because a crown sat on top of them. With that removed they were two
+ * unexplained vertical lines running down the hero, crossing the arch ground
+ * behind them at a different angle.
+ *
+ * The gradient fade to --brass-fade was the right instinct and it now lives in
+ * the arch ground instead, where the legs run off the bottom of the band.
+ */
 
 /*
  * ⚠️ THE NEGATIVE MARGIN IS THE POINT OF THE ARCH.

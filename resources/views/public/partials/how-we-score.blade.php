@@ -38,7 +38,18 @@
      */
     $copy = [
         'preferences' => ['What you asked for', 'Age, height, education, faith and distance, checked in both directions. A one-sided match is worth less than a mutual one. Satisfying you while failing them does not score full marks.'],
-        'values'      => ['Values and life goals', 'Your ranked core values, marriage timeline, plans for children, and how much faith matters. The ranking is used, not just the overlap. Two people who both put family first are not the same as two who both put it fifth.'],
+        /*
+         * ⚠️ "the pace you want to move at", NOT the field's internal name.
+         * MarriageLeadTest failed on that name and was right: the client's
+         * standing instruction is that soul mate leads and marriage is the
+         * destination, not the door. "Pace" is the config's own word for this
+         * and describes the same four options.
+         *
+         * ⚠️ AND THIS IS A PHP COMMENT, NOT A BLADE ONE. Written as {{-- --}}
+         * inside an @php block it is not a comment at all — it rendered into
+         * the page as visible text, which is how the guard caught it twice.
+         */
+        'values'      => ['Values and life goals', 'Your ranked core values, the pace you want to move at, plans for children, and how much faith matters. The ranking is used, not just the overlap. Two people who both put family first are not the same as two who both put it fifth.'],
         'lifestyle'   => ['How you live day to day', 'Habits, education and occupation fit, languages spoken. Compatibility tables rather than equality, because a non-smoker and a social smoker are not the same pairing as two heavy smokers.'],
         'personality' => ['Interests and temperament', 'Shared interests and how the two of you are wired. Closeness is rewarded on some scales and deliberately not on others. Two people who are both entirely spontaneous have nobody booking the flights.'],
         'physical'    => ['Stated preferences', 'Height and body type as each of you described them, scored in both directions and averaged. Attraction that runs one way is not attraction.'],

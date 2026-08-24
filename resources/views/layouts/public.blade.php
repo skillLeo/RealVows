@@ -32,7 +32,7 @@
          script. No Vue, no Inertia, no hydration cost. --}}
     @vite(['resources/css/app.css', 'resources/js/public.js'])
 </head>
-<body>
+<body class="rv-public">
     <a href="#rv-main" class="rv-skip">Skip to content</a>
 
     @if (config('realvows.is_demo'))

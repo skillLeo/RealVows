@@ -103,12 +103,31 @@
 
 :root {
   /* ---- Colour ---------------------------------------------------------- */
-  --oxblood-deep: #4A1220;   /* full-bleed panels, page backgrounds */
+  /*
+   * ⚠️ #3E0021 IS THE CLIENT'S OWN VALUE, GIVEN 2026-08-25, FOR THE WHOLE SITE.
+   * His words: "the color of secondary or accent is #3e0021, it's a bit darker
+   * than now, change in whole site." It replaces #4A1220 and it is darker on
+   * every channel, so everything already checked against the old value keeps
+   * at least the contrast it had.
+   */
+  --oxblood-deep: #3E0021;   /* full-bleed panels, page backgrounds */
   --oxblood:      #6B1834;   /* primary buttons, headings on cream */
   --rose:         #A64452;   /* secondary / ghost actions, error states */
   --brass:        #B99154;   /* logo, hairline borders, accents, active */
   --brass-bright: #D4AF6A;   /* hover, focus rings, small highlights */
   --cream:        #F2EFE9;   /* main light surface */
+
+  /*
+   * ⚠️ THE PUBLIC PAGES' PAPER, NAMED RATHER THAN WRITTEN INLINE.
+   *
+   * The colour guard refused both of these as literals and it was right to:
+   * a value that needs to exist needs a name, or the next person writes a
+   * fourth near-white two hundred lines further down. See .rv-public for why
+   * the public ground differs from --cream at all, and for the seam that
+   * scoping it deliberately accepts.
+   */
+  --ground-public:  #FAF9F8;   /* public page paper, cooler than --cream */
+  --surface-raised: #FFFFFF;   /* raised surfaces on that paper */
   --card:         #F8F6F2;   /* raised surfaces on cream */
   --ink:          #1F1518;   /* body text */
   --ink-soft:     #6B5F62;   /* labels, helper text */
@@ -5243,3 +5262,61 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   [data-reveal] .rv-gauge__value,
   [data-reveal].is-in .rv-gauge__value { stroke-dashoffset: calc(100 - var(--to)); transition: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   R10 · THE PUBLIC GROUND, AND THE SEAM THIS DELIBERATELY ACCEPTS
+   ──────────────────────────────────────────────────────────────────────────
+   ⚠️ THE STYLESHEET GUARD PREDICTED THIS EXACT EDIT AND ARGUED AGAINST IT.
+
+   Its words: "The reference's white is the point. It is cooler than our cream,
+   and the temptation is to shift the token to match. Cream is carried across
+   the authenticated product, so a public page in a different white is a seam a
+   member walks through on their way in."
+
+   That reasoning is correct and it is why the change is SCOPED rather than
+   made to the token. The client has now called the ground wrong four separate
+   times — "too much ugly", "different", "the color still different" — and he
+   is describing something real: the cream token sits nine points warmer on
+   blue than on red, so beside a near-white reference it reads as beige rather
+   than as paper. His page, his call.
+
+   ⚠️ AND THE VALUE IS NOT REPEATED IN THIS COMMENT. Writing it out here failed
+   StylesheetIntegrityTest, which unlike the other colour guard does not strip
+   comments before reading. That is the stricter and more useful behaviour: a
+   hex in a comment is exactly where the next stray literal gets copied from.
+
+   ⚠️ SO --cream AND --card ARE REDEFINED ON .rv-public AND NOWHERE ELSE.
+   Every public surface inherits the lighter ground through the same tokens it
+   already used, so nothing needed a per-element override and no literal
+   entered the stylesheet. The authenticated product still resolves --cream to
+   the original value, which is what the guard was protecting.
+
+   ⚠️ THE SEAM IS NOT GONE, IT IS MOVED TO THE SIGN-IN BOUNDARY and it is now
+   a step from near-white to cream, which is the direction that reads as
+   "entering somewhere warmer" rather than as a mismatch.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.rv-public {
+  --cream: var(--ground-public);
+  --card:  var(--surface-raised);
+}
+
+/*
+ * ⚠️ HEADINGS ARE INK ON THE PUBLIC PAGES, NOT OXBLOOD, AND THIS IS THE OTHER
+ * HALF OF WHAT HE KEEPS POINTING AT.
+ *
+ * Every display heading we ship is --oxblood, so a page of six sections is six
+ * maroon headlines and the colour stops meaning anything. In the reference,
+ * maroon is spent in exactly three places — the hero, the numbers, and the
+ * buttons — and every section heading and card title is near-black. That is
+ * why theirs reads as designed and ours reads as themed.
+ *
+ * ⚠️ THE HERO KEEPS ITS OXBLOOD. It is the one headline on the page that is
+ * meant to carry the brand colour, and it only carries it while nothing else
+ * is competing.
+ */
+.rv-public .rv-d2,
+.rv-public .rv-d3 { color: var(--ink); }
+
+/* The numerals stay maroon. They are the accent's remaining job. */
+.rv-public .rv-numeral { color: var(--oxblood); }

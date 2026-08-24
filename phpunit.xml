@@ -29,6 +29,15 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!--
+            ⚠️ THE WEB-ROOT CHECK ONLY MEANS ANYTHING AGAINST THE LIVE HOST.
+
+            It asks the real server whether .env, .git/HEAD and the seeders are
+            reachable over HTTP. Without a host it skipped two of its three
+            tests, which is the worst possible state for a security check: it
+            reported a number rather than an answer, and the number looked fine.
+        -->
+        <env name="DEPLOY_URL" value="https://realvows.com"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

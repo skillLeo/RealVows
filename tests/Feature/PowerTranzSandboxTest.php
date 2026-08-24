@@ -58,10 +58,11 @@ class PowerTranzSandboxTest extends TestCase
 
         if (! $this->hasSandboxCredentials()) {
             $this->markTestSkipped(
-                'PowerTranz sandbox credentials are not configured, so the real gateway has '
-                    .'never been exercised. Phase 2 payment acceptance is NOT complete until '
-                    .'this suite runs green. Set PT_SANDBOX_MERCHANT_ID, PT_SANDBOX_TERMINAL_ID '
-                    .'and PT_SANDBOX_API_KEY.'
+                'SKIP-REGISTERED: PowerTranz sandbox credentials are not configured. The client '
+                    .'holds them and has not supplied them yet, so the real gateway has never '
+                    .'been exercised. Phase 2 payment acceptance is NOT complete until this suite '
+                    .'runs green. Missing: PT_SANDBOX_MERCHANT_ID, PT_SANDBOX_TERMINAL_ID, '
+                    .'PT_SANDBOX_API_KEY.'
             );
         }
 

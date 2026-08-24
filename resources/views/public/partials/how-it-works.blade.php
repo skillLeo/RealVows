@@ -26,7 +26,7 @@
          word, and the contraction goes because the marketing pages do not use
          them. --}}
     <div class="rv-stack rv-section__head" data-reveal>
-        <p class="rv-eyebrow">Here is what we need from you</p>
+        <p class="rv-eyebrow rv-eyebrow--ruled">Here is what we need from you</p>
         <{{ $heading }} class="rv-d2">How it works</{{ $heading }}>
         <span class="rv-underline" style="max-width: 220px"></span>
     </div>

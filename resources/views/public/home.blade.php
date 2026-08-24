@@ -278,7 +278,7 @@
                     ['four', 'Chosen, not searched', 'Introductions are brought to you, a few at a time, and always for both of you.'],
                 ] as [$icon, $title, $body])
                     <article class="rv-card rv-offer__card rv-stack" style="gap: 20px" data-reveal>
-                        <span class="rv-icon-box">@include('public.partials.icon', ['name' => $icon])</span>
+                        <span class="rv-icon-disc">@include('public.partials.icon', ['name' => $icon])</span>
                         <h3 class="rv-d3">{{ $title }}</h3>
                         <p class="rv-body">{{ $body }}</p>
                     </article>

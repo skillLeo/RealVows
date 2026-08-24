@@ -153,6 +153,22 @@
      literal it replaces came from. */
   --scrim:         rgba(31, 21, 24, .55);
 
+  /*
+   * ⚠️ TWO ROSE DERIVATIVES — R10, AND THE CAP ABOVE MOVED ON PURPOSE.
+   *
+   * The note above caps the BRASS derivatives at three, and that cap stands:
+   * a fourth brass alpha would mean two jobs were being conflated. These are
+   * not brass. The client's reference builds its whole card system out of a
+   * pale rose fill and a rose icon disc, and we already bless --rose. Reaching
+   * for a grey, or for brass at a low alpha, would have produced the beige
+   * cast he has now twice called ugly.
+   *
+   * ⚠️ NO NEW HUE ENTERS, which is what the rule actually protects. Both are
+   * pure alpha derivatives of --rose (166, 68, 82).
+   */
+  --rose-wash:     rgba(166, 68, 82, .045);  /* card and panel fills */
+  --rose-veil:     rgba(166, 68, 82, .11);   /* icon discs, chips, markers */
+
   --hairline:      rgba(185, 145, 84, .4);
   --hairline-soft: rgba(185, 145, 84, .2);
 
@@ -218,11 +234,14 @@
   --gap-section: 96px;   /* marketing pages */
   --gap-app:     48px;   /* working screens: builder, dashboard */
   --pad-card:    32px;
-  --control:     56px;
+  --control:     60px;
   --tap-min:     44px;
 
   /* ---- Shape ----------------------------------------------------------- */
   --r: 8px;
+  /* ⚠️ CARDS ONLY. The reference's cards are noticeably softer than its
+     controls; using one radius for both is what made ours read as boxes. */
+  --r-lg: 16px;
 
   /* ---- Motion ----------------------------------------------------------
    *
@@ -394,7 +413,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * and the guard that enforces them.
  */
 .rv-d-hero {
-  font-family: var(--font-display);
+  font-family: var(--display);
   font-weight: 400;
   font-size: var(--fs-display-hero);
   line-height: 1.04;
@@ -417,7 +436,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   padding: 8px 16px;
   border: 1px solid var(--hairline);
   border-radius: 999px;
-  font-family: var(--font-ui);
+  font-family: var(--ui);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -477,6 +496,16 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* ⚠️ THE EYEBROW WITH FLANKING RULES. The reference uses short rules either
    side on its section labels and a bare label elsewhere. Same type either way:
    14px, +0.14em, weight 600, brass. */
+/*
+ * ⚠️ TRACKED CAPS, NOT ITALIC SERIF, AND ONLY ON THE RULED VARIANT.
+ *
+ * `.rv-eyebrow` is italic Fraunces and is used across the authenticated
+ * product, so it stays as it is. Every eyebrow in the client's reference is
+ * uppercase Inter at wide tracking in brass — a different device entirely,
+ * reading as a label above the section rather than as a phrase introducing it.
+ * The ruled variant is the public one, so the treatment lands here and the
+ * member area is untouched.
+ */
 .rv-eyebrow--ruled {
   display: flex;
   align-items: center;
@@ -586,7 +615,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 
 .rv-btn--outline {
-  background: var(--cream);
+  /* ⚠️ --card, NOT --cream. On a cream ground a cream button is invisible
+     until you hover it, which is exactly how ours read beside the reference's
+     white-on-white-with-a-real-border secondary. */
+  background: var(--card);
   border: 1px solid var(--hairline);
   color: var(--oxblood);
 }
@@ -598,7 +630,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-hero__micro {
   margin: 0;
-  font-family: var(--font-ui);
+  font-family: var(--ui);
   font-size: 14px;
   color: var(--ink-soft);
   text-align: center;
@@ -627,7 +659,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   /* ⚠️ One line each. A wrapped item makes the row uneven and the dividers
      stop lining up, which is the detail that reads as unfinished. */
   white-space: nowrap;
-  font-family: var(--font-ui);
+  font-family: var(--ui);
   font-size: 14px;
   color: var(--ink-soft);
   padding-inline: 12px;
@@ -658,7 +690,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    bright thing in the panel, which is what makes it the closing moment. */
 .rv-invitation__micro {
   margin: 0;
-  font-family: var(--font-ui);
+  font-family: var(--ui);
   font-size: 14px;
   color: color-mix(in oklab, var(--cream) 72%, transparent);
   text-align: center;
@@ -755,11 +787,20 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    Card — hairline brass border, never a drop shadow
    ========================================================================== */
 
+/*
+ * ⚠️ ROSE WASH ON A SOFT HAIRLINE, NOT CARD-ON-CREAM AT FULL HAIRLINE.
+ *
+ * At full --hairline every card was outlined like a table cell, and --card on
+ * --cream is a two-percent step nobody can see, so the border was doing all
+ * the work. The reference does the opposite: the FILL separates the card and
+ * the border is almost invisible. Same elevation rule as before — a tone step
+ * and a hairline, never a shadow.
+ */
 .rv-card {
-  background: var(--card);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r);
-  padding: var(--pad-card);
+  background: var(--rose-wash);
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-lg);
+  padding: clamp(28px, 3.4vw, 44px);
 }
 .rv-card--accent { border-color: var(--brass); }
 .rv-card--flush  { padding: 0; overflow: hidden; }
@@ -2839,7 +2880,21 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 .rv-vow { max-width: 720px; }
 .rv-promise__inner { align-items: center; text-align: center; gap: 32px; }
 
-.rv-section__head { gap: 12px; margin-bottom: 48px; }
+/*
+ * ⚠️ CENTRED, AND MEASURED. Every section in the reference centres its
+ * eyebrow, its heading and its lead over a measure of about 60 characters,
+ * and holds that pattern down the whole page. Ours alternated between centred
+ * and left-aligned heads, which is what makes a page read as assembled rather
+ * than designed.
+ */
+.rv-section__head {
+  gap: 16px;
+  margin-bottom: 64px;
+  align-items: center;
+  text-align: center;
+}
+.rv-section__head > * { margin-inline: auto; }
+.rv-section__head .rv-lead { max-width: 60ch; }
 
 .rv-hero__note {
   position: absolute;
@@ -4892,3 +4947,71 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 .rv-writer__col { display: flex; flex-direction: column; gap: 8px; }
 .rv-writer__col--suggested { border-left: 2px solid var(--brass); padding-left: 16px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   R10 · REFERENCE FIDELITY
+   ──────────────────────────────────────────────────────────────────────────
+   The client supplied six screenshots of realvows.luxoraarts.com and asked for
+   the same design with our content. Everything in this block exists because a
+   named element of that reference had no equivalent here.
+
+   ⚠️ THE ONE THING THAT IS NOT COPIED IS THE ASTROLOGY. The reference sells a
+   12x12 zodiac matrix as forty percent of its score. A scholar was consulted
+   and that component was deleted from this product outright — matrix, scorer
+   and stored column. Nothing in this block reintroduces it under another name.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * ⚠️ A DISC, NOT A BOX. `.rv-icon-box` is a 44px brass-outlined square used in
+ * the authenticated product beside form rows, and it stays exactly as it is.
+ * The public cards want the reference's device: a large soft rose disc with no
+ * border at all, which reads as an illustration rather than as a control.
+ */
+.rv-icon-disc {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--rose-veil);
+  color: var(--oxblood);
+}
+.rv-icon-disc svg { width: 28px; height: 28px; }
+
+/*
+ * ⚠️ THE EYEBROW TYPE LIVES DOWN HERE, AND THAT IS A CASCADE FACT, NOT A
+ * PREFERENCE.
+ *
+ * `.rv-eyebrow--ruled` is declared around line 500 and `.rv-eyebrow` around
+ * line 1460. They carry identical specificity, so the base wins on source
+ * order and every type declaration written up there — the font, the style, the
+ * tracking — was silently discarded. The modifier looked correct in the file
+ * and rendered as italic Fraunces on the page.
+ *
+ * ⚠️ DO NOT MOVE THESE BACK UP TO THE MODIFIER. Either they live after the
+ * base, or the base has to be split, and splitting a rule the member area
+ * shares is the more expensive of the two.
+ */
+.rv-eyebrow--ruled {
+  font-family: var(--ui);
+  font-style: normal;
+  font-size: var(--fs-body-3);
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+}
+
+/*
+ * ⚠️ THE READING SIZES CAME UP. The reference sets its card body at 16px on a
+ * 1.7 leading over a wide measure; ours was 16px on 1.6 in a column narrow
+ * enough to break "Everyone is / checked" across two lines in a heading. The
+ * cards are wider now (the grid minimum went up), so the type has room.
+ */
+.rv-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.rv-card .rv-body { font-size: var(--fs-body-2); line-height: 1.7; }
+.rv-card .rv-d3 { text-wrap: balance; }
+
+/* The lead under a section heading, at the reference's size and colour. */
+.rv-section__head .rv-lead { font-size: var(--fs-body-1); line-height: 1.7; }

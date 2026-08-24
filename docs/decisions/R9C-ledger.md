@@ -166,3 +166,29 @@ REVERSIBLE      Yes, one setting.
   queue worker means no email and no introduction processed for a day.
 - The twenty-five surface tints built from color-mix of two tokens could each
   become named tokens. Ledger entry 2 explains why they were not in this round.
+## 10 · The hero ground was rebuilt after the client called it heavy
+
+```
+WHAT I HIT      The client said our banner looked heavy and different beside a
+                reference that looks professional. Comparing screenshots
+                directly, four things caused it: a dark oxblood nav bar capping
+                a pale hero, a diagonal lattice screen at .42 with a turbulence
+                grain over it, one bold brass arch at 2px competing with the
+                faint ones behind it, and a left-ruled founding block in an
+                otherwise centred composition.
+WHAT I DID      Pale nav with a hairline underneath, lattice and grain removed
+                entirely and replaced with a row of five arch outlines at
+                hairline-soft, the keystone arch reduced to the same weight as
+                the ground, and the founding band centred between two rules.
+                Also filled the nav call to action, which was an outline nobody
+                could see.
+WHY             R9 §2 says take the reference's composition. Its ground is a
+                pale wash and faint architecture with no texture at all, and
+                every one of these was ours competing with our own type rather
+                than a token or copy decision.
+WHAT I WOULD    Is the dark nav wanted anywhere, or is pale correct throughout?
+HAVE ASKED
+REVERSIBLE      Yes. The lattice partial's reasoning is preserved in the
+                replacement file's comment rather than deleted.
+```
+

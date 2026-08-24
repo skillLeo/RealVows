@@ -48,7 +48,7 @@
             @endforeach
 
             <a href="{{ route('login') }}" class="rv-pubhead__link">Sign in</a>
-            <a href="{{ route('register') }}" class="rv-btn rv-btn--outline-brass">Join free</a>
+            <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Join free</a>
         </nav>
 
         {{-- Mobile: the three lines he asked for. `aria-expanded` is

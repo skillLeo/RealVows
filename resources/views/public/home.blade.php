@@ -147,18 +147,37 @@
                     </p>
                 @endif
 
-                <div>
+                {{-- ⚠️ TWO ACTIONS SIDE BY SIDE, WHICH R9 §6.2 ASKED FOR AND
+                     I BUILT AS ONE. The reference pairs a filled primary with
+                     an outlined secondary, both the same height, and the second
+                     is what somebody who is not ready to commit reaches for. A
+                     single button makes the page a demand rather than an
+                     invitation. --}}
+                <div class="rv-hero__actions">
                     <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
+                    <a href="{{ route('how-it-works') }}" class="rv-btn rv-btn--outline">See how it works</a>
                 </div>
+
+                {{-- One line, small, under the actions. --}}
+                <p class="rv-hero__micro">Free to join. Free to be checked. Nothing to pay to begin.</p>
 
                 {{-- ⚠️ THE THREE FACTS GO LAST AND STAY SMALL. Centred, they
                      read as the line at the foot of an invitation — where,
                      when, who it is for — rather than as feature bullets. --}}
-                <p class="rv-hero__eyebrow">
-                    <span>Soul mate first</span>
-                    <span>18+</span>
-                    <span>Verified members</span>
-                </p>
+                {{-- ⚠️ THE TRUST RAIL. A single row of short qualifiers
+                     divided by vertical hairlines, above a rule, exactly as the
+                     reference sets it. Four items, and every one describes an
+                     OUTCOME: none of them names a method, a photograph count or
+                     any mechanism.
+
+                     It collapses to two rows of two on a phone rather than
+                     becoming a strip that scrolls sideways. --}}
+                <ul class="rv-trustrail">
+                    <li>Free to join</li>
+                    <li>Everyone checked</li>
+                    <li>Soul mate first</li>
+                    <li>18 and over</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -378,8 +397,14 @@
             </p>
 
             <div>
-                <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
+                <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
             </div>
+
+            {{-- ⚠️ ONE LINE OF MICROCOPY, AS THE REFERENCE CLOSES. It states
+                 what is true and asks for nothing further. If a second call to
+                 action ever appears in this band, remove it rather than
+                 balancing it. --}}
+            <p class="rv-invitation__micro">Free to join · Everyone is checked · 18 and over</p>
         </div>
     </section>
 

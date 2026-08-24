@@ -573,6 +573,97 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--ink-faint, var(--ink-soft));
 }
 
+/* ── The hero, to the reference's proportions ───────────────────────────── */
+
+/* ⚠️ TWO ACTIONS, SAME HEIGHT, WRAPPING RATHER THAN SHRINKING. Side by side on
+   anything above a phone, stacked full width below it, because two half-width
+   buttons at 360 are two buttons nobody can hit. */
+.rv-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.rv-btn--outline {
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  color: var(--oxblood);
+}
+
+.rv-btn--outline:hover {
+  border-color: var(--brass-bright);
+  background: var(--brass-wash);
+}
+
+.rv-hero__micro {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/*
+ * ⚠️ THE TRUST RAIL. Vertical hairlines between items, one rule above, exactly
+ * as the reference sets it. Two rows of two on a phone rather than a strip that
+ * scrolls sideways, which is what the client would notice first on his own
+ * handset.
+ */
+.rv-trustrail {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 0;
+  margin: 8px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--hairline-soft);
+  list-style: none;
+  width: 100%;
+}
+
+.rv-trustrail li {
+  position: relative;
+  text-align: center;
+  /* ⚠️ One line each. A wrapped item makes the row uneven and the dividers
+     stop lining up, which is the detail that reads as unfinished. */
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--ink-soft);
+  padding-inline: 12px;
+}
+
+/* The divider is a pseudo-element so the last item in a row never carries one. */
+.rv-trustrail li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 16px;
+  background: var(--hairline);
+}
+
+@media (min-width: 720px) {
+  .rv-trustrail { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 719px) {
+  /* ⚠️ The third item opens the second row, so it must not carry a divider. */
+  .rv-trustrail li:nth-child(odd)::before { display: none; }
+}
+
+/* ⚠️ THE PALE BUTTON ON THE DARK BAND. Cream fill, oxblood label: the single
+   bright thing in the panel, which is what makes it the closing moment. */
+.rv-invitation__micro {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: color-mix(in oklab, var(--cream) 72%, transparent);
+  text-align: center;
+}
+
 .rv-d2 {
   font-size: clamp(30px, 5.4vw, var(--fs-display-2));
   line-height: 1.15;
@@ -1355,10 +1446,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    page to reach anything. `position: sticky` rather than `fixed` so it does
    not overlay content on a short viewport, and the demo bar above it — when
    present — scrolls away as it should. */
+/*
+ * ⚠️ THE PUBLIC NAV IS PALE, NOT OXBLOOD.
+ *
+ * It was a dark bar and the client said the banner read heavy beside a page
+ * that looks professional. A dark strip across the top of a pale hero is the
+ * single heaviest thing on the page, and the reference does the opposite: the
+ * ground runs unbroken from the top of the window into the hero, with the nav
+ * sitting on it rather than capping it.
+ *
+ * ⚠️ THE AUTHENTICATED SHELL IS UNTOUCHED. This class is public only.
+ */
 .rv-pubhead__bar {
   position: sticky;
   top: 0;
   z-index: 20;
+  background: color-mix(in oklab, var(--cream) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline-soft);
 }
 
 .rv-pubhead {
@@ -1435,14 +1540,19 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
    ⚠️ DO NOT "MATCH THE BRAND" BY LIGHTENING THIS AGAIN. The brass is an accent
    on a light ground and cannot carry body text at this size. */
+/* ⚠️ CENTRED, AND THE LEFT RULE IS GONE. Everything else in this hero is
+   centred, so a left-ruled block was the one element pulling the eye sideways
+   in an otherwise symmetrical composition. */
 .rv-founding {
-  margin: 0;
+  margin: 0 auto;
   padding: 16px 20px;
-  border-left: 2px solid var(--brass);
+  border-top: 1px solid var(--hairline-soft);
+  border-bottom: 1px solid var(--hairline-soft);
   font-size: var(--fs-body-2);
   line-height: 1.6;
   color: var(--ink);
-  max-width: 44ch;
+  max-width: 46ch;
+  text-align: center;
 }
 
 .rv-founding__mark {
@@ -1544,10 +1654,10 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   padding: 0 4px;
   font-size: var(--fs-body-2);
   font-weight: 500;
-  color: var(--brass-bright);
-  text-decoration-color: var(--hairline);
+  color: var(--ink);
+  text-decoration: none;
 }
-.rv-pubhead__link:hover { color: var(--cream); text-decoration-color: var(--brass-bright); }
+.rv-pubhead__link:hover { color: var(--oxblood); }
 
 .rv-pubfoot { padding-block: 56px; color: var(--on-dark); }
 
@@ -4361,18 +4471,23 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * property, not the tile's, so a media query can lighten the whole lattice
  * without touching the geometry.
  */
-.rv-meeting__lattice {
+/*
+ * ⚠️ THE ARCHES ARE THE GROUND, SO THEY MUST NOT BE READABLE AS OBJECTS.
+ *
+ * Outline only, one pixel, at hairline-soft. At full --hairline a row of five
+ * stops being a background and becomes a diagram behind the headline.
+ */
+.rv-meeting__arches path {
   fill: none;
-  stroke: var(--brass);
+  stroke: var(--hairline-soft);
   stroke-width: 1;
 }
 
 /* ⚠️ NO fill DECLARATION HERE, EVER. The rect is filled by the pattern through
    a fill="url(#rv-mashrabiya)" presentation attribute, and any CSS fill on this
    selector beats that attribute and erases the entire screen. */
-.rv-meeting__screen {
-  opacity: .42;
-}
+/* ⚠️ Retired with the lattice. Kept as a named absence so anybody following
+   an old selector finds this note rather than silence. */
 
 /* ── The arch ────────────────────────────────────────────────────────── */
 .rv-meeting__jamb {
@@ -4425,8 +4540,12 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   /* ⚠️ brass, NOT brass-bright. brass-bright is a highlight for dark panels; on
      ivory it is barely a tint. The line that draws the arch has to be the one
      you can actually watch. */
-  stroke: var(--brass);
-  stroke-width: 2;
+  /* ⚠️ WAS BRASS AT 2px, WHICH DREW A BOLD CURVE ACROSS THE HEADLINE.
+     The reference keeps every arch at one uniform whisper, so the ground reads
+     as architecture rather than as one prominent object with faint ones behind
+     it. Same shape, same animation, a quarter of the shout. */
+  stroke: var(--hairline);
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
   stroke-dasharray: 500;

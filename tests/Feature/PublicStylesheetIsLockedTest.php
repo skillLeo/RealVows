@@ -323,20 +323,43 @@ class PublicStylesheetIsLockedTest extends TestCase
 
     // ── Guard 2: typeface ────────────────────────────────────────────────
 
-    public function test_only_fraunces_and_inter_are_ever_requested(): void
+    /**
+     * ⚠️ THREE FACES NOW, AND THE THIRD WAS ADDED ON THE CLIENT'S INSTRUCTION
+     * ON 2026-08-25. THE LOCK ITSELF IS NOT WEAKENED.
+     *
+     * The rule was two faces. It is now exactly three, and the reason is
+     * specific rather than a loosening: his reference declares
+     * --font-display: "Playfair Display" and we were setting every display line
+     * in Fraunces. Both are high-contrast serifs, which is why he could see the
+     * difference for weeks without being able to name it, but Playfair is a
+     * Didone with flat unbracketed serifs and vertical stress and Fraunces is a
+     * soft old-style face with a wonk axis. They do not read as one design.
+     *
+     * ⚠️ FRAUNCES DID NOT LEAVE. The authenticated product still sets it, and
+     * only --display-public moves. Removing it would restyle every screen a
+     * member sees, which nobody asked for.
+     *
+     * ⚠️ A FOURTH IS STILL REFUSED, and that is the whole point of keeping this
+     * as a closed list rather than deleting it. "The palette is negotiable" is
+     * what a list like this exists to stop, so the next face needs its own
+     * conversation and its own line here.
+     */
+    public function test_only_the_three_system_faces_are_ever_requested(): void
     {
         $css = $this->declarations();
 
         preg_match_all('/@font-face\s*\{(.*?)\}/s', $css, $faces);
 
-        foreach ($faces[1] ?? [] as $face) {
+        $this->assertNotEmpty($faces[1] ?? [], 'No @font-face block was read, so this proves nothing.');
+
+        foreach ($faces[1] as $face) {
             preg_match('/font-family:\s*[\'"]?([^;\'"]+)/', $face, $name);
             $family = trim($name[1] ?? '');
 
             $this->assertContains(
                 $family,
-                ['Fraunces', 'Inter'],
-                "A third typeface is being loaded: {$family}. Two faces are the system.",
+                ['Fraunces', 'Inter', 'Playfair Display'],
+                "A fourth typeface is being loaded: {$family}. Three faces are the system.",
             );
         }
 

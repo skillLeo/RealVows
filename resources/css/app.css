@@ -29,6 +29,47 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/*
+ * Playfair Display — the client's reference face, self-hosted.
+ *
+ * ⚠️ THIS IS THE "FONT DIFFERENCE" HE NAMED FOUR TIMES AND IT WAS REAL. His
+ * reference declares --font-display: "Playfair Display" and we were setting
+ * every display line in Fraunces. Both are high-contrast serifs, which is why
+ * it was hard to point at, but Playfair is a Didone with flat unbracketed
+ * serifs and a vertical stress and Fraunces is a soft, wonky old-style face.
+ * Side by side they do not read as the same design.
+ *
+ * ⚠️ SELF-HOSTED, TWO SUBSETS, BECAUSE THE PUBLIC PAGES FETCH NOTHING. The
+ * reference links fonts.googleapis.com from its <head>; we cannot, and
+ * PublicPagesRequestNothingExternalTest fails the build if anybody tries.
+ *
+ * ⚠️ AND THE FIRST FILE I PULLED WAS THE CYRILLIC SUBSET. Google serves one
+ * @font-face per script and the Cyrillic block is listed first. It installs
+ * cleanly, reports the right size, and renders no English at all — every
+ * latin glyph silently falls through to the next family in the stack. The
+ * unicode-range on each face below is what makes that mistake visible.
+ */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/playfair-var-latin.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/playfair-var-latin-ext.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 /* Fraunces — one variable file carrying opsz, SOFT and WONK */
 @font-face {
   font-family: 'Fraunces';
@@ -126,7 +167,10 @@
    * the public ground differs from --cream at all, and for the seam that
    * scoping it deliberately accepts.
    */
-  --ground-public:  #FAF9F8;   /* public page paper, cooler than --cream */
+  --ground-public:  #FCF9F8;   /* public page paper, the reference's own surface */
+  --outline-ref:      #DAC0C7;   /* the reference's hairline: pale pink, not gold */
+  --outline-ref-soft: #EBDDE1;   /* the same hue, stepped back for quiet rules */
+  --ink-ref:          #1C1B1B;   /* the reference's heading and body ink */
   --surface-raised: #FFFFFF;   /* raised surfaces on that paper */
   --card:         #F8F6F2;   /* raised surfaces on cream */
   --ink:          #1F1518;   /* body text */
@@ -211,7 +255,13 @@
   --on-dark-soft: rgba(242, 239, 233, .60);
 
   /* ---- Type ------------------------------------------------------------ */
+  /*
+   * ⚠️ FRAUNCES IS STILL LOADED AND STILL USED BY THE AUTHENTICATED PRODUCT.
+   * Only the public token moves, in .rv-public, for the same reason --cream
+   * does: the member area is not being redesigned this round.
+   */
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --display-public: 'Playfair Display', 'Fraunces', Georgia, serif;
   --ui:      'Inter', system-ui, -apple-system, sans-serif;
 
   /*
@@ -5296,9 +5346,34 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    "entering somewhere warmer" rather than as a mismatch.
    ══════════════════════════════════════════════════════════════════════════ */
 
+/*
+ * ⚠️ THESE FIVE VALUES ARE READ OFF THE REFERENCE'S OWN STYLESHEET, not judged
+ * from a screenshot. It is a Vite build and its palette ships as custom
+ * properties, so the client's "1000% resemblance" is checkable rather than a
+ * matter of taste. Their names, mapped to ours:
+ *
+ *   --color-surface          ->  --ground-public      the page ground
+ *   --color-outline-variant  ->  --outline-ref        every hairline
+ *   --color-on-surface       ->  --ink-ref            headings and body
+ *   --color-primary          ->  --oxblood-deep       the maroon
+ *
+ * ⚠️ THE VALUES ARE IN :root AND ARE NOT REPEATED HERE. Writing them out cost
+ * a second StylesheetIntegrityTest failure: it reads comments too, deliberately,
+ * because a hex in a comment is exactly where the next stray literal is copied
+ * from. Look them up, do not re-type them.
+ *
+ * ⚠️ THE HAIRLINE IS THE ONE THAT WAS DOING THE MOST DAMAGE. Ours is brass at
+ * 40% — a gold line — and theirs is a pale PINK-GREY. Every card, rail, rule
+ * and pill on the page is drawn with it, so a warm ground plus gold borders
+ * everywhere is most of what he has been calling beige.
+ */
 .rv-public {
   --cream: var(--ground-public);
   --card:  var(--surface-raised);
+  --display: var(--display-public);
+  --hairline:      var(--outline-ref);
+  --hairline-soft: var(--outline-ref-soft);
+  --ink:           var(--ink-ref);
 }
 
 /*

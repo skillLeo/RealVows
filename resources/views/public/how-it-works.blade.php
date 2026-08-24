@@ -4,7 +4,7 @@
 @section('description', 'Build a profile, get verified, and receive introductions chosen for you.')
 
 @section('content')
-    <section class="rv-shell rv-section">
+    <section class="rv-shell rv-shell--measure rv-section">
         <div class="rv-stack" style="gap: 16px" data-reveal>
             <span class="rv-label rv-label--brass">RealVows</span>
             {{-- ⚠️ THE PARAGRAPH THE CLIENT POINTED AT AND CALLED CONFUSING.
@@ -37,9 +37,9 @@
     {{-- The three steps, shared with the home page. --}}
     @include('public.partials.how-it-works', ['heading' => 'h2'])
 
-    <section class="rv-shell rv-section rv-paper">
+    <section class="rv-shell rv-shell--measure rv-section rv-paper">
         <div class="rv-stack rv-section__head" data-reveal>
-            <p class="rv-eyebrow">The part people ask about</p>
+            <p class="rv-eyebrow rv-eyebrow--ruled">The part people ask about</p>
             <h2 class="rv-d2">How we choose</h2>
             <span class="rv-underline" style="max-width: 180px"></span>
         </div>

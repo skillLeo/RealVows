@@ -23,7 +23,7 @@
         one, because "no claims that could later conflict" is not something a
         test can check.
     --}}
-    <section class="rv-shell rv-section">
+    <section class="rv-shell rv-shell--measure rv-section">
         <div class="rv-stack" style="gap: 16px" data-reveal>
             <span class="rv-label rv-label--brass">RealVows</span>
             {{-- ⚠️ "Built for people who are serious" opened on a past
@@ -43,7 +43,7 @@
     </section>
 
     <section class="rv-panel rv-on-dark">
-        <div class="rv-shell rv-section rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
+        <div class="rv-shell rv-shell--measure rv-section rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
             <h2 class="rv-d2">Why it works this way</h2>
 
             <p class="rv-body">
@@ -61,9 +61,9 @@
         </div>
     </section>
 
-    <section class="rv-shell rv-section rv-paper">
+    <section class="rv-shell rv-shell--measure rv-section rv-paper">
         <div class="rv-stack rv-section__head" data-reveal>
-            <p class="rv-eyebrow">What we hold everyone to</p>
+            <p class="rv-eyebrow rv-eyebrow--ruled">What we hold everyone to</p>
             <h2 class="rv-d2">Our standards</h2>
             <span class="rv-underline" style="max-width: 180px"></span>
         </div>
@@ -83,7 +83,7 @@
         </div>
     </section>
 
-    <section class="rv-shell rv-section">
+    <section class="rv-shell rv-shell--measure rv-section">
         <div class="rv-stack" style="gap: 24px; max-width: 62ch" data-reveal>
             <h2 class="rv-d2">Who it is for</h2>
             <p class="rv-body">

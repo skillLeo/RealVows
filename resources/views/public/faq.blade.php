@@ -17,7 +17,7 @@
         message contains, no list of controls. A FAQ is exactly where somebody
         would try to be helpful and explain how the check works.
     --}}
-    <section class="rv-shell rv-section">
+    <section class="rv-shell rv-shell--measure rv-section">
         <div class="rv-stack" style="gap: 16px" data-reveal>
             <span class="rv-label rv-label--brass">RealVows</span>
             <h1 class="rv-d1" style="max-width: 18ch">Questions</h1>
@@ -27,7 +27,7 @@
         </div>
     </section>
 
-    <section class="rv-shell rv-section rv-paper">
+    <section class="rv-shell rv-shell--measure rv-section rv-paper">
         <div class="rv-faq" data-reveal>
             @foreach ([
                 ['What is RealVows for?',

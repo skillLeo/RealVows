@@ -228,7 +228,7 @@
          which is a mechanism, and the reference's panel beneath enumerating
          photograph types is deleted outright rather than reworded. --}}
     <section class="rv-section rv-paper">
-        <div class="rv-shell rv-stack" style="gap: 56px">
+        <div class="rv-shell rv-shell--measure rv-stack" style="gap: 56px">
             <div class="rv-stack rv-section__head" data-reveal>
                 <p class="rv-eyebrow rv-eyebrow--ruled">Why RealVows</p>
                 <h2 class="rv-d2">What you are joining</h2>
@@ -266,7 +266,7 @@
          percentage, no numbered breakdown. If a sentence in this section
          describes a mechanism it is in the wrong section. --}}
     <section class="rv-section rv-tinted">
-        <div class="rv-shell rv-purpose" data-reveal>
+        <div class="rv-shell rv-shell--measure rv-purpose" data-reveal>
             <div class="rv-stack" style="gap: 24px">
                 <p class="rv-eyebrow rv-eyebrow--ruled">Plainly</p>
 
@@ -322,7 +322,7 @@
          statement instead. --}}
     @unless (\App\Support\Payments::areLive())
         <section class="rv-section rv-paper">
-            <div class="rv-shell rv-stack" style="gap: 56px">
+            <div class="rv-shell rv-shell--measure rv-stack" style="gap: 56px">
                 <div class="rv-stack rv-section__head" data-reveal>
                     <p class="rv-eyebrow rv-eyebrow--ruled">What it costs</p>
                     <h2 class="rv-d2">Nothing, while we are getting started</h2>
@@ -354,8 +354,14 @@
         </section>
     @endunless
 
+    {{-- ── 7 · The closing invitation ────────────────────────────────────
+         ⚠️ ONE BAND, ONE BUTTON, ONE LINE, USED ONCE AT THE END.
+
+         This is the strongest thing in the reference and it suits us because
+         we already own the arch. If a second call to action ever appears here,
+         remove it rather than balancing it. --}}
     <section class="rv-panel rv-on-dark rv-invitation">
-        <div class="rv-shell rv-stack rv-invitation__inner" data-reveal>
+        <div class="rv-shell rv-shell--measure rv-stack rv-invitation__inner" data-reveal>
             @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
 
             <p class="rv-eyebrow">No card, no catch</p>

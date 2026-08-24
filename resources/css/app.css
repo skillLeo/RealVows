@@ -156,7 +156,15 @@
    * sits outside it deliberately rather than extending it. A second exception
    * is not an exception, it is a new scale.
    */
-  --fs-display-hero: clamp(44px, 6.2vw, 76px);
+  /*
+   * ⚠️ THE FLOOR IS 34, NOT 44, AND 360 IS WHY.
+   *
+   * At a 44px minimum "Find your true" is wider than a 360px screen can hold
+   * once the gutters are taken, so the line broke to "Find / your true / soul
+   * mate." and orphaned a single word — measured, not guessed. The ceiling and
+   * the meaning break are unchanged; only the small end scales properly now.
+   */
+  --fs-display-hero: clamp(34px, 8.5vw, 76px);
 
   --fs-display-1: 56px;
   --fs-display-2: 40px;
@@ -385,7 +393,28 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
  * 360 and 390 orphan "mate." onto a third line, which is the one thing the
  * client notices immediately on his own phone.
  */
-.rv-hero__break { display: block; }
+/*
+ * ⚠️ THE BREAK MOVES, BECAUSE A FIXED ONE IS AN ORPHAN WAITING FOR A WIDTH
+ * NOBODY TESTED.
+ *
+ * "Find your true / soul mate." is the meaning break and it is right from
+ * about 420 upward. Below that the line is narrow enough that forcing it
+ * strands "mate." alone on a third line, so the break is suppressed and the
+ * measure does the work instead.
+ */
+.rv-hero__break { display: none; }
+
+@media (min-width: 420px) {
+  .rv-hero__break { display: block; }
+}
+
+/* ⚠️ AND A MEASURE UNDERNEATH IT, so the wrap is bounded at every width
+   rather than depending on the break alone. */
+.rv-d-hero { max-width: 14ch; margin-inline: auto; }
+
+@media (max-width: 419px) {
+  .rv-d-hero { max-width: 15ch; }
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    R9 · PUBLIC PAGE COMPOSITION

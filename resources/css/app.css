@@ -1971,7 +1971,11 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * The floor is now low enough that the content decides the height on a
    * laptop, and there is room left for the header above it.
    */
-  min-height: min(72svh, 760px);
+  /* ⚠️ THE CAP EARNS ITS KEEP ON A BIG MONITOR. At 760 the hero finished
+     halfway down a 1440-tall window and left a bare stripe under the trust
+     rail before the next section began. The floor below still decides the
+     height on a laptop, which is what the 760 was protecting. */
+  min-height: min(78svh, 940px);
   /* ⚠️ MORE ROOM AT THE TOP SINCE THE ARCH FRAME CAME OUT. That crown block
      was carrying the hero's headroom, so removing it clipped the badge under
      the sticky nav. The spacing is the hero's own now rather than a side
@@ -4422,11 +4426,25 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    * tightening its reach gives the display type its glow and leaves everything
    * small sitting on all but pure cream.
    */
+  /*
+   * ⚠️ IT HAS TO END ON EXACTLY THE COLOUR OF THE SECTION BELOW IT.
+   *
+   * The last stop used to be brass mixed into cream at 4%, and the section
+   * under the hero is plain --cream. Four percent is invisible as a colour and
+   * perfectly visible as an EDGE: on a tall window, where the foot of the band
+   * is actually on screen, it drew a hard horizontal line right across the page
+   * at the seam. That line, and the row of severed arch legs that used to sit
+   * on it, are the two halves of what the client called cutting off.
+   *
+   * The warmth is now a pool in the upper middle that has fallen back to the
+   * page colour well before the band ends, so there is nothing to see at the
+   * join.
+   */
   background:
-    radial-gradient(95% 70% at 50% 34%,
+    radial-gradient(90% 62% at 50% 30%,
       color-mix(in oklab, var(--brass) 4%, var(--card)) 0%,
-      var(--cream) 60%,
-      color-mix(in oklab, var(--brass) 4%, var(--cream)) 100%);
+      var(--cream) 58%,
+      var(--cream) 100%);
 }
 
 .rv-meeting__svg {

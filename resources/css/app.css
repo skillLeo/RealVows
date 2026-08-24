@@ -113,6 +113,46 @@
   --ink:          #1F1518;   /* body text */
   --ink-soft:     #6B5F62;   /* labels, helper text */
 
+  /*
+   * ══════════════════════════════════════════════════════════════════════
+   * ⚠️ NAMED ALPHA DERIVATIVES — R9-C
+   *
+   * A token is named for the JOB IT DOES, not for the number it holds. Seven
+   * brass literals at seven alphas were passing the colour guard because it
+   * only checked hue, and the obvious correction — force them all into the two
+   * hairline tokens — would have been a real design-system error: a hover fill,
+   * a gradient endpoint and a modal scrim are not borders.
+   *
+   * ⚠️ NO NEW HUE ENTERS. Each of these is a pure alpha derivative of a colour
+   * the system already blesses, which is what the no-new-colour rule actually
+   * protects. Three is a cap. A fourth would mean two jobs are being conflated
+   * rather than that the system needs another token.
+   * ══════════════════════════════════════════════════════════════════════
+   */
+
+  /* Hover and active fills on brass-accented surfaces. Kept apart from the
+     hairlines because a fill and a border are different jobs and will drift
+     the first time one of them changes. */
+  --brass-wash:    rgba(185, 145, 84, .14);
+
+  /*
+   * ⚠️ THE ZERO-ALPHA ENDPOINT OF ANY GRADIENT THAT BEGINS AT BRASS, AND IT IS
+   * NOT BOOKKEEPING.
+   *
+   * `transparent` is defined as transparent BLACK. Several engines interpolate
+   * through it, so a gradient running from brass to `transparent` develops a
+   * grey cast across its middle. The endpoint has to carry the hue at zero
+   * alpha for the fade to stay brass the whole way.
+   *
+   * ⚠️ DO NOT "SIMPLIFY" THIS TO `transparent`. It looks identical in a
+   * swatch and wrong in a gradient.
+   */
+  --brass-fade:    rgba(185, 145, 84, 0);
+
+  /* The modal and menu backdrop. Derived from --ink, which is where the
+     literal it replaces came from. */
+  --scrim:         rgba(31, 21, 24, .55);
+
   --hairline:      rgba(185, 145, 84, .4);
   --hairline-soft: rgba(185, 145, 84, .2);
 
@@ -718,7 +758,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   color: var(--on-dark);
   padding: 0 24px;
 }
-.rv-btn--ghost-on-dark:hover { background: rgba(185, 145, 84, .14); color: var(--cream); }
+.rv-btn--ghost-on-dark:hover { background: var(--brass-wash); color: var(--cream); }
 
 .rv-btn[disabled],
 .rv-btn[aria-disabled='true'] {
@@ -1435,7 +1475,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* ⚠️ Was rgba(20, 6, 10, .55), a dark this palette does not contain. The
    mobile menu backdrop is now oxblood-deep at the same weight: one hue fewer,
    and it matches the panel it sits behind. */
-.rv-navsheet::backdrop { background: color-mix(in oklab, var(--oxblood-deep) 72%, transparent); }
+.rv-navsheet::backdrop { background: var(--scrim); }
 
 /* ⚠️ Reduced motion degrades to opacity under 200ms rather than merely
    slowing down. Nothing translates when this is set. */
@@ -1884,9 +1924,9 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   /* Fades out at the foot, so the arch reads as a building continuing past the
      bottom of the frame rather than as a shape that stops. */
   background: linear-gradient(180deg,
-    rgba(185, 145, 84, .42) 0%,
-    rgba(185, 145, 84, .42) 48%,
-    rgba(185, 145, 84, 0) 100%);
+    var(--hairline) 0%,
+    var(--hairline) 48%,
+    var(--brass-fade) 100%);
 }
 
 .rv-hero__frame-body::before { left: 0; }
@@ -1948,7 +1988,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   gap: 12px 28px;
   margin: 0;
   padding-top: 20px;
-  border-top: 1px solid rgba(185, 145, 84, .35);
+  border-top: 1px solid var(--hairline);
   font-size: var(--fs-body-3);
   font-weight: 500;
   letter-spacing: .14em;
@@ -2752,7 +2792,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
    ========================================================================== */
 
 .rv-appbar { position: sticky; top: 0; z-index: 20; background: var(--oxblood-deep); color: var(--cream); }
-.rv-progress { height: 2px; background: rgba(185, 145, 84, .2); }
+.rv-progress { height: 2px; background: var(--hairline-soft); }
 .rv-progress__fill { height: 100%; background: var(--brass); transition: width 300ms var(--ease); }
 
 .rv-actionbar {
@@ -3380,7 +3420,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   overscroll-behavior: contain;
 }
 
-.rv-sheet::backdrop { background: rgba(31, 21, 24, .55); }
+.rv-sheet::backdrop { background: var(--scrim); }
 
 .rv-sheet__grip {
   width: 40px;
@@ -4175,7 +4215,7 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    border: 1px solid rgba(185, 145, 84, .4);
+    border: 1px solid var(--hairline);
     border-radius: 8px;
     color: var(--rv-ink);
     text-decoration: none;

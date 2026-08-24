@@ -45,78 +45,203 @@ class PublicStylesheetIsLockedTest extends TestCase
     // ── Guard 1: colour ──────────────────────────────────────────────────
 
     /**
-     * ⚠️ A NEW HUE IS THE THING BEING GUARDED, NOT A NEW STRING.
+     * ⚠️ HUE WAS THE RIGHT CORRECTION AND IT LEFT THREE DOORS OPEN.
      *
-     * Three kinds of literal appear outside :root and only one of them is
-     * drift:
+     * Matching hues rather than strings stopped a cooler white arriving from
+     * the reference. It did not stop seven brass literals at seven different
+     * alphas, because every one of them is the blessed hue. It did not stop
+     * `color: #000` on body text, because a mask needs black and the exemption
+     * was granted everywhere. And it could not see `color-mix()` at all, which
+     * is a bypass that was sitting on the very line that repaired the guard.
      *
-     *  · `rgba(185, 145, 84, .2)` is --brass at another alpha. Same hue, and
-     *    refusing it would only push somebody to write a duplicate token.
-     *  · `rgb(0 0 0)` inside a mask is a LUMINANCE CHANNEL, not a colour. A
-     *    mask reads black as "hide" and white as "show", and neither is paint.
-     *  · Anything else is a colour this brand does not have, which is exactly
-     *    what happens when somebody is matching a screenshot.
-     *
-     * So the rule is the hue: every literal's RGB triplet must match a token,
-     * or be pure black or white.
+     * ⚠️ A TOKEN IS NAMED FOR THE JOB IT DOES, NOT THE NUMBER IT HOLDS. Forcing
+     * a hover fill, a gradient endpoint and a modal scrim into the two hairline
+     * tokens would conflate a border with a fill. Three named alpha
+     * derivatives exist for exactly that reason and the alpha axis is now
+     * closed to anything else.
      */
     public function test_no_colour_is_written_outside_the_token_set(): void
     {
         $css = $this->declarations();
 
         $allowed = $this->tokenTriplets();
+        $alphas = $this->tokenAlphas();
         $offences = [];
 
-        // Strip the :root blocks, which are where tokens are legitimately
-        // defined and therefore the one place a literal is not drift.
         $outside = preg_replace('/:root[^{]*\{.*?\}/s', '', $css) ?? $css;
 
-        preg_match_all('/#[0-9a-fA-F]{3,8}\b|\brgba?\([^)]*\)/', $outside, $found);
+        preg_match_all('/#[0-9a-fA-F]{3,8}\b|\brgba?\([^)]*\)/', $outside, $found, PREG_OFFSET_CAPTURE);
 
-        /*
-         * ⚠️ THE EXTRACTION IS PROVED BEFORE ITS RESULT IS BELIEVED.
-         *
-         * This whole check is an empty-array assertion. A regex that stopped
-         * matching, or a strip that removed the entire stylesheet rather than
-         * the :root blocks, reports a spotless palette forever — and reports it
-         * in exactly the same words as a genuinely clean one.
-         */
-        $this->assertNotEmpty(
-            $allowed,
-            'No tokens were extracted from :root, so every literal below is being compared '
-                .'against an empty palette.',
-        );
+        $this->assertNotEmpty($allowed, 'No tokens were extracted from :root.');
+        $this->assertGreaterThan(5, count($allowed), 'The palette extraction is reading the wrong thing.');
+        $this->assertNotEmpty($found[0], 'Not one colour literal was found outside :root.');
 
-        $this->assertGreaterThan(
-            5,
-            count($allowed),
-            'Only '.count($allowed).' tokens were found. The palette is larger than that, so '
-                .'the extraction is reading the wrong thing.',
-        );
-
-        $this->assertNotEmpty(
-            $found[0],
-            'Not one colour literal was found anywhere outside :root. A stylesheet this size '
-                .'uses colour, so the reader is looking at nothing.',
-        );
-
-        foreach (array_unique($found[0]) as $literal) {
+        foreach ($found[0] as [$literal, $at]) {
             $triplet = $this->triplet($literal);
 
-            if ($triplet === null || in_array($triplet, $allowed, true)) {
+            if ($triplet === null) {
                 continue;
             }
 
-            $offences[] = $literal;
+            $isMonochrome = $triplet === [0, 0, 0] || $triplet === [255, 255, 255];
+
+            /*
+             * ⚠️ BLACK AND WHITE ARE A MASK CHANNEL, NOT PAINT, AND ONLY THERE.
+             *
+             * A mask reads black as "hide" and white as "show". As a `color`
+             * they are a colour this brand does not have, and the previous
+             * exemption granted them everywhere.
+             */
+            if ($isMonochrome) {
+                if (! $this->insideMaskContext($outside, $at)) {
+                    $offences[] = "{$literal} (monochrome outside a mask)";
+                }
+
+                continue;
+            }
+
+            if (! in_array($triplet, $allowed, true)) {
+                $offences[] = "{$literal} (hue not in the palette)";
+
+                continue;
+            }
+
+            /*
+             * ⚠️ AND THE ALPHA MUST BE ONE A TOKEN NAMES. Blessing two hairline
+             * alphas is not blessing the axis.
+             */
+            $alpha = $this->alpha($literal);
+
+            if ($alpha !== null && ! in_array($alpha, $alphas, true)) {
+                $offences[] = "{$literal} (alpha {$alpha} is not named by any token)";
+            }
         }
 
         $this->assertSame(
             [],
             $offences,
-            "A colour outside the palette was written:\n  ".implode("\n  ", $offences)
-                ."\n\nEvery hue must be a token. An alpha variant of a token is fine. If the "
-                .'reference needs a colour we do not have, the answer is that we do not have it.',
+            "Colour written outside the named set:\n  ".implode("\n  ", $offences)
+                ."\n\nA token is named for the job it does. If a value needs a name, name it "
+                .'rather than leaving it as a literal.',
         );
+    }
+
+    /**
+     * ⚠️ color-mix() PRODUCES COLOUR AND CONTAINS NO LITERAL, SO THE READER
+     * ABOVE CANNOT SEE IT.
+     *
+     * Every input must be a token. That is the door being watched: a literal
+     * entering through a function the colour reader is blind to.
+     */
+    public function test_every_colour_mix_takes_only_tokens(): void
+    {
+        $outside = preg_replace('/:root[^{]*\{.*?\}/s', '', $this->declarations()) ?? '';
+
+        preg_match_all('/color-mix\((?:[^()]|\([^()]*\))*\)/', $outside, $mixes);
+
+        $this->assertNotEmpty(
+            $mixes[0],
+            'No color-mix call was found, so this check is reading nothing. It is used across '
+                .'the tint system and must be visible here.',
+        );
+
+        $offences = [];
+
+        foreach (array_unique($mixes[0]) as $mix) {
+            // Strip the interpolation space and the percentages, then anything
+            // left that is not a var() or `transparent` is a literal.
+            $args = preg_replace('/^color-mix\(\s*in\s+\w+\s*,?/', '', $mix) ?? $mix;
+            $args = preg_replace('/var\(--[a-z0-9-]+\)|\d+%|transparent|[,()\s]/', '', $args) ?? $args;
+
+            if (trim($args) !== '') {
+                $offences[] = $mix;
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offences,
+            "A color-mix call takes something that is not a token:\n  ".implode("\n  ", $offences)
+                ."\n\nThis is the one place a literal can enter without the colour reader "
+                .'seeing it.',
+        );
+    }
+
+    /** ⚠️ Controls for both new axes, in both directions. */
+    public function test_the_reader_distinguishes_a_mask_black_from_a_text_black(): void
+    {
+        $inMask = '.a { mask-image: linear-gradient(#000 0 0); }';
+        $inText = '.a { color: #000; }';
+
+        $this->assertTrue(
+            $this->insideMaskContext($inMask, strpos($inMask, '#000')),
+            'Black inside a mask was refused. Masks need it and it is not paint there.',
+        );
+
+        $this->assertFalse(
+            $this->insideMaskContext($inText, strpos($inText, '#000')),
+            'Black as a text colour was excused as a mask. That is the exemption granted '
+                .'everywhere, which is what this replaced.',
+        );
+    }
+
+    public function test_the_reader_catches_an_unnamed_alpha(): void
+    {
+        $named = $this->tokenAlphas();
+
+        $this->assertContains(0.4, $named, 'The hairline alpha is not named by any token.');
+        $this->assertContains(0.14, $named, 'The wash alpha is not named by any token.');
+        $this->assertNotContains(0.77, $named, 'An alpha nobody named is being treated as named.');
+    }
+
+    /**
+     * Is this offset inside a mask declaration or an SVG mask element?
+     *
+     * ⚠️ THE DECLARATION IT SITS IN, NOT THE WHOLE RULE. A rule can set both a
+     * mask and a colour, and asking about the rule would excuse the colour.
+     */
+    private function insideMaskContext(string $css, int $offset): bool
+    {
+        $from = strrpos(substr($css, 0, $offset), ';');
+        $from = $from === false ? strrpos(substr($css, 0, $offset), '{') : $from;
+        $declaration = substr($css, $from === false ? 0 : $from, $offset - ($from === false ? 0 : $from));
+
+        foreach (['mask', 'mask-image', '-webkit-mask', '-webkit-mask-image', 'clip-path'] as $property) {
+            if (str_contains($declaration, $property)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** The alphas the tokens actually name. @return list<float> */
+    private function tokenAlphas(): array
+    {
+        preg_match_all('/:root[^{]*\{(.*?)\}/s', $this->declarations(), $blocks);
+
+        $alphas = [1.0];
+
+        preg_match_all('/rgba?\([^)]*\)/', implode(' ', $blocks[1] ?? []), $found);
+
+        foreach ($found[0] as $literal) {
+            $a = $this->alpha($literal);
+
+            if ($a !== null && ! in_array($a, $alphas, true)) {
+                $alphas[] = $a;
+            }
+        }
+
+        return $alphas;
+    }
+
+    private function alpha(string $literal): ?float
+    {
+        if (! preg_match('/rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)/', $literal, $m)) {
+            return null;
+        }
+
+        return (float) $m[1];
     }
 
     /**

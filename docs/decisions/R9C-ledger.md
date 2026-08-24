@@ -121,3 +121,48 @@ HAVE ASKED
 REVERSIBLE      Yes.
 ```
 
+## 8 · The deploy failed once and was retried
+
+```
+WHAT I HIT      The deploy failed at "Trust the host": ssh-keyscan from the
+                GitHub runner could not reach port 22 after five attempts.
+WHAT I DID      Confirmed the host was healthy from here (site 200, SSH fine,
+                up 12 days), then retried once. The retry succeeded.
+WHY             §4: diagnose, fix, retry once. The failure was before any file
+                was touched — the job's own message says "Nothing was changed
+                on the server" — so production was never at risk. The same
+                transient failure happened in R7 and also cleared on a retry.
+WHAT I WOULD    Is the runner-to-VPS path worth hardening, given it has now
+HAVE ASKED      failed twice in three deploys?
+REVERSIBLE      Not applicable. Nothing was changed until the retry.
+```
+
+## 9 · The review-build banner is live on the client's own site
+
+```
+WHAT I HIT      Every public page on realvows.com carries a banner reading
+                "Review build. This is not the live platform. Every member
+                shown here is invented, and the sign-in buttons are open to
+                anyone."
+WHAT I DID      Left it exactly as it is.
+WHY             §7 puts anything outside the four public pages and the listed
+                guards out of scope, and this is driven by the demo-mode
+                setting rather than by the pages. It is also arguably correct
+                right now: the demo sign-in buttons ARE open, so removing the
+                banner without closing those would be the dangerous half of the
+                change. Reported rather than touched.
+WHAT I WOULD    Is the banner meant to be visible to the client while he is
+HAVE ASKED      reviewing, or should demo mode be closed first?
+REVERSIBLE      Yes, one setting.
+```
+
+## Worth doing later, not done here
+
+- The runner-to-VPS ssh-keyscan step has failed on two of the last three
+  deploys and cleared on retry both times. A longer backoff or a pinned known
+  host would remove the coin toss.
+- Eleven other scheduled commands still carry Laravel's 24-hour
+  withoutOverlapping default. The two every-minute ones matter most: a crashed
+  queue worker means no email and no introduction processed for a day.
+- The twenty-five surface tints built from color-mix of two tokens could each
+  become named tokens. Ledger entry 2 explains why they were not in this round.

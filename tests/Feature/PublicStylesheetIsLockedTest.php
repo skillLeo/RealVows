@@ -341,13 +341,15 @@ class PublicStylesheetIsLockedTest extends TestCase
         }
 
         /*
-         * ⚠️ AND NOTHING MAY BE FETCHED FROM A FONT HOST. A stylesheet link to
-         * a CDN is a third typeface that never appears in @font-face, and it is
-         * also a request to somebody else's server on every page load.
+         * ⚠️ INVERTED. ENUMERATING KNOWN FONT HOSTS FAILS ON THE FIFTH, AND THE
+         * FIFTH IS ALWAYS THE ONE THAT SHIPS.
+         *
+         * This listed four CDNs. Anything else — a new provider, a self-hosted
+         * mirror, a tracking pixel wearing a stylesheet — passed. See
+         * test_no_public_page_requests_anything_from_another_origin, which asks
+         * the opposite question.
          */
-        foreach (['fonts.googleapis.com', 'fonts.gstatic.com', 'use.typekit', 'fonts.bunny.net'] as $host) {
-            $this->assertStringNotContainsString($host, $this->css());
-        }
+        $this->assertStringNotContainsString('@import', $this->declarations());
     }
 
     public function test_the_typeface_reader_is_reading_something(): void

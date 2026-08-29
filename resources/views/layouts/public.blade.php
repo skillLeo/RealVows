@@ -24,8 +24,25 @@
 
     {{-- Self-hosted. The home page is the one that has to be fast on a
          mid-range phone over 4G, so it is the page that benefits most from
-         not opening a connection to a third party before it can show text. --}}
-    <link rel="preload" href="/fonts/fraunces-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+         not opening a connection to a third party before it can show text.
+
+         ⚠️ PLAYFAIR, NOT FRAUNCES, AND THIS LAYOUT WAS PRELOADING THE WRONG ONE.
+
+         `.rv-public` resolves --display to --display-public, which is
+         'Playfair Display' first. So every public page rendered its headlines
+         in Playfair while this tag preloaded Fraunces — 89KB fetched at highest
+         priority for a face used only as a fallback, and the face actually
+         being rendered left to load on its own.
+
+         The visible cost is exactly the client's complaint. With no preload,
+         Playfair arrives late and the headline paints in Georgia first, then
+         reflows into the real face. On a mid-range phone over 4G that swap is
+         plainly visible, and what a visitor sees in that window is a generic
+         system serif — which is not what his reference looks like.
+
+         Fraunces is still the display face on authenticated screens, which use
+         a different layout and preload it there. --}}
+    <link rel="preload" href="/fonts/playfair-var-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     {{-- Blade pages load only the stylesheet and the small vanilla motion

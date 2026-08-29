@@ -274,6 +274,7 @@ class NavigationCompletenessTest extends TestCase
             json_encode(Navigation::for($admin->fresh()), JSON_UNESCAPED_SLASHES),
             json_encode(Navigation::for($member->fresh()), JSON_UNESCAPED_SLASHES),
             json_encode(MemberHub::for($member->fresh()), JSON_UNESCAPED_SLASHES),
+
         ];
 
         /*
@@ -290,7 +291,21 @@ class NavigationCompletenessTest extends TestCase
          * nav on every marketing page. That mistake is the exact shape this
          * file exists to catch, made by this file.
          */
-        foreach ([resource_path('js'), resource_path('views')] as $directory) {
+        /*
+         * ⚠️ app/Support IS SCANNED TOO, AND IT HAS TO BE — R10-C §6.
+         *
+         * The header and the footer used to hold their own copies of the
+         * platform link list and they disagreed with each other on production.
+         * They now share PublicState::platformLinks(), which lives in app/Support.
+         *
+         * The moment that literal moved out of resources/, this guard reported
+         * /about as a page nothing links to — the same false-orphan failure the
+         * note above describes, produced a second time by the same cause. The
+         * extractor reads route('name') out of SOURCE, so the fix is to look
+         * where the navigation is now written rather than to hand it a resolved
+         * URL, which starts http:// and matches nothing.
+         */
+        foreach ([resource_path('js'), resource_path('views'), app_path('Support')] as $directory) {
             foreach (File::allFiles($directory) as $file) {
                 if (in_array($file->getExtension(), ['vue', 'php'], true)) {
                     $sources[] = File::get($file->getPathname());

@@ -102,41 +102,77 @@ class FooterLinksResolveTest extends TestCase
         return $walkable;
     }
 
-    public function test_every_footer_link_answers(): void
+    /**
+     * ⚠️ "ANSWERS" IS NOT THE QUESTION. "CAN A SIGNED-OUT VISITOR READ IT" IS.
+     *
+     * This asserted a 2xx or a redirect and passed the Packages entry, which
+     * 302s a signed-out visitor to /login. That shipped: a link in the footer of
+     * the client's home page that bounced anybody clicking it to a sign-in form
+     * with no explanation — worse than a 404, because it reads as though the
+     * visitor did something wrong rather than as though the page is not there.
+     *
+     * A footer link is a promise to a stranger. The only acceptable answer is
+     * the page itself.
+     */
+    public function test_every_footer_link_opens_for_a_signed_out_visitor(): void
     {
         $links = $this->footerLinks();
 
-        /*
-         * ⚠️ THE SET IS PROVED NON-EMPTY FIRST. Every assertion below is a
-         * loop, and a loop over nothing passes in exactly the same words as a
-         * footer where every link works.
-         */
         $this->assertGreaterThanOrEqual(
             8,
             count($this->footerEntries()),
             'Only '.count($this->footerEntries()).' links were found in the footer. The extraction is reading '
-                .'the wrong element.',
+                .'the wrong element.'
         );
+
+        $offences = [];
 
         foreach ($links as $href) {
             $path = parse_url($href, PHP_URL_PATH) ?: '/';
+            $response = $this->get($path);
+            $status = $response->getStatusCode();
 
-            $status = $this->get($path)->getStatusCode();
+            if ($status === 200) {
+                continue;
+            }
 
-            $this->assertContains(
-                $status,
-                [200, 302],
-                "The footer links to {$path}, which answers {$status}. A visitor who trusts a "
-                    .'link in the footer and lands on an error trusts the rest of the page less.',
-            );
+            $target = $status >= 300 && $status < 400
+                ? ' → '.($response->headers->get('Location') ?? '?')
+                : '';
+
+            $offences[] = "{$path} answers {$status}{$target}";
         }
+
+        $this->assertSame(
+            [],
+            $offences,
+            "A footer link does not open for a signed-out visitor. A redirect to /login counts as "
+                ."a failure: somebody who trusts a link in the footer and lands on a sign-in form "
+                ."trusts the rest of the page less.\n  ".implode("\n  ", $offences)
+        );
     }
 
     /**
-     * ⚠️ POSITIVE CONTROL. "Every link answered" is also what a checker that
-     * follows nothing reports, and what one pointed at the wrong element
-     * reports.
+     * ⚠️ CONTROL, BOTH DIRECTIONS. A route that 302s to login must fail this
+     * reader; one that 200s must pass it.
      */
+    public function test_the_reader_fails_a_login_redirect_and_passes_a_public_page(): void
+    {
+        $acceptable = fn (int $status) => $status === 200;
+
+        $public = $this->get('/about')->getStatusCode();
+        $this->assertSame(200, $public, 'Fixture route /about is not public any more.');
+        $this->assertTrue($acceptable($public), 'A readable public page was rejected.');
+
+        // /packages is the real thing this guard exists for: it redirects.
+        $gated = $this->get('/packages')->getStatusCode();
+        $this->assertGreaterThanOrEqual(300, $gated, 'Fixture route /packages no longer redirects.');
+        $this->assertFalse(
+            $acceptable($gated),
+            'A route that redirects a signed-out visitor to login was accepted as a valid footer link.'
+        );
+    }
+
     public function test_the_checker_would_catch_a_broken_link(): void
     {
         $this->assertSame(

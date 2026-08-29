@@ -58,7 +58,7 @@ Route::get('/questions', [PublicPageController::class, 'faq'])->name('faq');
  * anyone can walk through. Reverts to normal automatically when it goes live.
  */
 Route::get('/robots.txt', function () {
-    $body = config('realvows.is_demo')
+    $body = \App\Support\ReviewBuild::active()
         ? "User-agent: *\nDisallow: /\n"
         : "User-agent: *\nDisallow: /admin\nDisallow: /profile\nDisallow: /dashboard\nDisallow: /account\n";
 

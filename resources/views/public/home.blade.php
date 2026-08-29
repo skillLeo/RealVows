@@ -107,12 +107,19 @@
                     <span>Marriage-Ready Matchmaking &middot; 18+</span>
                 </p>
 
-                {{-- ⚠️ THE BREAK IS SET, NOT LEFT TO THE CONTAINER.
-                     "The Dignified Path to / a Lifelong Union" breaks where the
-                     meaning breaks. Left to wrap, 360 and 390 strand "Union" on
-                     a line of its own under a nearly empty second line. --}}
-                <h1 class="rv-d-hero" data-arrival-words>The Dignified Path to<br class="rv-hero__break">
-                    a Lifelong Union</h1>
+                {{-- ⚠️ THE BREAK IS SET, NOT LEFT TO THE CONTAINER, AND IT SITS
+                     AFTER "Path".
+
+                     It was after "to", which with a 14ch measure produced three
+                     lines on a wide desktop: "The Dignified / Path to a /
+                     Lifelong Union". The reference sets two, and two is most of
+                     why its hero reads as composed.
+
+                     "The Dignified Path" and "to a Lifelong Union" are 18 and 19
+                     characters, so each holds one line inside the 20ch measure
+                     and neither half orphans a word. --}}
+                <h1 class="rv-d-hero" data-arrival-words>The Dignified Path<br class="rv-hero__break">
+                    to a Lifelong Union</h1>
 
                 <span class="rv-hero__flourish rv-arrive-step"></span>
 

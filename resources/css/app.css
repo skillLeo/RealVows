@@ -677,12 +677,24 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-hero__break { display: block; }
 }
 
-/* ⚠️ AND A MEASURE UNDERNEATH IT, so the wrap is bounded at every width
-   rather than depending on the break alone. */
-.rv-d-hero { max-width: 14ch; margin-inline: auto; }
+/*
+ * ⚠️ 20ch, NOT 14ch, AND THE HEADING SET ON THREE LINES BECAUSE OF IT.
+ *
+ * On production it read "The Dignified / Path to a / Lifelong Union". The
+ * reference sets two lines, and two lines is a large part of why its hero looks
+ * composed rather than stacked.
+ *
+ * "The Dignified Path" is 18 characters and "to a Lifelong Union" is 19, so a
+ * 20ch measure holds both halves on one line each and nothing orphans. The
+ * explicit break below puts the fold between them; the measure is what stops a
+ * third line appearing if the break is ever suppressed.
+ */
+.rv-d-hero { max-width: 20ch; margin-inline: auto; }
 
 @media (max-width: 419px) {
-  .rv-d-hero { max-width: 15ch; }
+  /* Below 420 the explicit break is off and the heading wraps on its own, so
+     the measure narrows to keep it from running to five lines. */
+  .rv-d-hero { max-width: 16ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1727,6 +1739,27 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 }
 .rv-on-dark .rv-eyebrow { color: var(--brass); }
 
+/*
+ * ⚠️ THE CLOSING BAND'S EYEBROW WAS THE ONLY ITALIC ONE LEFT — R10-C §12.
+ *
+ * "Your next chapter" rendered as italic serif while every other eyebrow on the
+ * page — Why RealVows, The Process, Our Secret Sauce, Curated Match Packages —
+ * had already moved to tracked caps. One of six in a different device reads as
+ * an oversight rather than as emphasis.
+ *
+ * The rules are not added here: the reference's closing band has the label
+ * alone, and this band is centred on a dark panel where flanking hairlines
+ * would compete with the fleuron directly above it.
+ */
+.rv-invitation__inner .rv-eyebrow {
+  font-family: var(--ui);
+  font-style: normal;
+  font-size: var(--fs-body-3);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
 /* Optical tightening for the very large display sizes. At 56px the default
    word spacing reads loose; invitations set them tighter. */
 .rv-d1 { word-spacing: -0.02em; }
@@ -1812,6 +1845,212 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 
 @media (min-width: 768px) {
   .rv-navtoggle { display: none; }
+}
+
+/* ── Package cards — R10-C §3, §7, §9 ─────────────────────────────────────
+ *
+ * ⚠️ THE FEATURE LISTS WERE DRAWING A BULLET AND A TICK.
+ *
+ * Every line read "• ✓ 1 curated match". The <ul> kept its default marker while
+ * the tick was drawn as content beside it, so each feature carried two marks
+ * where the reference has one. It shipped that way to production.
+ */
+.rv-package__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.rv-package__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--fs-body-2);
+  color: var(--ink);
+}
+
+.rv-package__features svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--brass-ink);
+}
+
+/*
+ * ⚠️ THE PRICE IS A HIERARCHY, NOT A SENTENCE — §7.
+ *
+ * "$20 one-time" rendered at one display size, so the amount and its qualifier
+ * carried equal weight and the price stopped being the thing you see first.
+ * The reference sets the numeral large in the display face and the term small
+ * and grey beside it.
+ */
+.rv-package__price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.rv-package__price .rv-numeral {
+  font-family: var(--display);
+  font-size: var(--fs-display-2);
+  line-height: 1;
+  color: var(--oxblood);
+}
+
+.rv-package__term {
+  font-size: var(--fs-body-2);
+  color: var(--ink-soft);
+}
+
+/* Tight beneath the price, in brass, as the reference sets it. */
+.rv-package__maths {
+  margin: 8px 0 0;
+  color: var(--brass-ink);
+}
+
+.rv-package__blurb { color: var(--ink-soft); }
+
+.rv-package {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rv-package__free {
+  margin: auto 0 0;
+  padding-top: 12px;
+  font-size: var(--fs-body-2);
+  color: var(--ink-soft);
+}
+
+/*
+ * ⚠️ A BADGE ON THE BORDER, NOT A LINE OF TEXT — §9.
+ *
+ * "Best Value" printed as ordinary text above the title, so the card read as
+ * having a stray line rather than a badge, and the one card meant to stand out
+ * was the one that looked unfinished. The reference sits a filled pill astride
+ * the top border, which is what gives that card its prominence.
+ */
+.rv-package--featured {
+  border-color: var(--brass);
+}
+
+.rv-package__badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: var(--oxblood);
+  color: var(--cream);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The featured card needs headroom for the badge sitting on its edge. */
+.rv-packages .rv-package--featured { margin-top: 10px; }
+
+/* ── Elevation, applied — §8 ─────────────────────────────────────────────
+ *
+ * ⚠️ THE THREE LIFTS WERE DECLARED AND NEVER USED, SO THE GUARD PROTECTING
+ * THEM PASSED ON AN EMPTY SET.
+ *
+ * R10-B adopted the reference's elevations as tokens and stopped there, which
+ * satisfied "permit exactly those three" and missed the point: every card on
+ * our page was flat while every card on his is gently raised. Permission was
+ * not the goal, parity was.
+ *
+ * ⚠️ EVERY RULE HERE IS SCOPED UNDER .rv-public, AND THAT IS ENFORCED.
+ * StylesheetIntegrityTest fails any box-shadow whose selector does not carry
+ * that class, so the authenticated product keeps the hairline rule. Writing
+ * these unscoped is what I did first and the guard caught it.
+ */
+.rv-public .rv-offer__card,
+.rv-public .rv-package {
+  box-shadow: var(--lift-1);
+}
+
+/* The Best Value card sits above its neighbours, which is half of what makes
+   it read as chosen rather than merely bordered. */
+.rv-public .rv-package--featured {
+  box-shadow: var(--lift-2);
+}
+
+/* The heaviest value, on the one panel the reference lifts furthest off the
+   page: the scoring panel that carries the gauge. */
+.rv-public .rv-score__panel {
+  box-shadow: var(--lift-3);
+}
+
+/* ── The four photographs — §4 ────────────────────────────────────────────
+ *
+ * ⚠️ IT SHIPPED AS A BARE HEADING OVER A BULLETED LIST.
+ *
+ * No container, no tint, left aligned under a centred grid, in the largest
+ * serif on the section. Directly beneath three finished cards it read as
+ * broken rather than as different, and it was the least finished thing on the
+ * page.
+ *
+ * The reference draws a contained panel: tinted fill, hairline, a small
+ * letterspaced label in gold, and the items as pill chips with the numeral
+ * carried in gold ahead of the words.
+ */
+.rv-photopanel {
+  margin-top: 8px;
+  padding: clamp(24px, 4vw, 36px);
+  background: var(--card);
+  border: 1px solid var(--outline-ref-soft);
+  border-radius: var(--r-lg);
+}
+
+.rv-photopanel__head {
+  margin: 0 0 18px;
+  font-family: var(--ui);
+  font-size: var(--fs-body-3);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+}
+
+.rv-photopanel__chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rv-photopanel__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--outline-ref);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  font-size: var(--fs-body-2);
+  color: var(--ink);
+}
+
+.rv-photopanel__num {
+  font-family: var(--display);
+  font-size: var(--fs-body-1);
+  line-height: 1;
+  color: var(--brass-ink);
+}
+
+/* Two per row on a phone rather than four cramped ones. */
+@media (max-width: 600px) {
+  .rv-photopanel__chip { flex: 1 1 calc(50% - 10px); }
 }
 
 /* ==========================================================================

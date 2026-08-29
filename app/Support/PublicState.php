@@ -326,4 +326,51 @@ class PublicState
             'written_at' => (string) ($state['written_at'] ?? ''),
         ];
     }
+
+    /**
+     * ⚠️ THE PLATFORM LINKS, DECLARED ONCE, FOR THE HEADER AND THE FOOTER BOTH
+     * — R10-C §6.
+     *
+     * They disagreed on production. The header showed How it works, About,
+     * Questions; the footer showed How It Works, The Science, Packages, About,
+     * Questions. Neither matched the other and neither matched the brief, and
+     * the two lists were maintained in two files by whoever happened to be
+     * editing one of them.
+     *
+     * ⚠️ NOTHING HERE MAY POINT AT /packages WHILE PAYMENTS ARE OFF. That route
+     * does not 404 during the free period as the brief assumed — it redirects a
+     * signed-out visitor to /login, which is a worse dead end than a 404
+     * because it reads as though they did something wrong. The Packages entry
+     * is an in-page anchor until the route is genuinely public.
+     *
+     * @return list<array{href: string, label: string}>
+     */
+    public static function platformLinks(): array
+    {
+        /*
+         * ⚠️ THE PACKAGES ENTRY FOLLOWS THE PROJECTION, AND IT IS AN ANCHOR
+         * UNTIL THE ROUTE IS GENUINELY PUBLIC.
+         *
+         * While payments are off, /packages redirects a signed-out visitor to
+         * /login — not a 404 as the brief assumed, which is worse, because a
+         * sign-in form reads as though the visitor did something wrong. So the
+         * label stays and points at the section on the home page, which is real
+         * and readable, and only becomes the route when the route opens.
+         *
+         * Both directions are guarded: FooterLinksResolveTest fails anything a
+         * signed-out visitor cannot read, and the pricing-link guard fails if
+         * this never becomes the route at all.
+         */
+        $packages = self::pricingLinkVisible()
+            ? url('/packages')
+            : url('/').'#packages';
+
+        return [
+            ['href' => route('how-it-works'), 'label' => 'How it works'],
+            ['href' => route('how-it-works').'#how-we-score', 'label' => 'The Science'],
+            ['href' => $packages, 'label' => 'Packages'],
+            ['href' => route('about'), 'label' => 'About'],
+            ['href' => route('faq'), 'label' => 'Questions'],
+        ];
+    }
 }

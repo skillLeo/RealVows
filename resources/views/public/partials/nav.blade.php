@@ -22,16 +22,17 @@
     missing the link is hidden, which is the safe direction.
 --}}
 @php
-    $pricingVisible = \App\Support\PublicState::pricingLinkVisible();
+    /*
+     * ⚠️ ONE LIST, SHARED WITH THE FOOTER — R10-C §6.
+     *
+     * The header and the footer showed different sets on production and neither
+     * matched the brief. They are now the same array, and
+     * HeaderAndFooterAgreeTest fails if they ever diverge again.
+     */
+    $links = \App\Support\PublicState::platformLinks();
 
-    $links = array_values(array_filter([
-        ['href' => route('how-it-works'), 'label' => 'How it works'],
-        ['href' => route('about'), 'label' => 'About'],
-        ['href' => route('faq'), 'label' => 'Questions'],
-        $pricingVisible
-            ? ['href' => url('/packages'), 'label' => 'Pricing']
-            : null,
-    ]));
+    /* Still needed by the mobile sheet's free-period note below. */
+    $pricingVisible = \App\Support\PublicState::pricingLinkVisible();
 @endphp
 
 <header class="rv-panel rv-pubhead__bar">

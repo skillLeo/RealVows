@@ -79,7 +79,7 @@ class HandleInertiaRequests extends Middleware
              * file.
              */
             'freePeriod' => fn () => app(\App\Support\FreePeriod::class)->isActive(),
-            'isDemo' => (bool) config('realvows.is_demo'),
+            'isDemo' => \App\Support\ReviewBuild::active(),
 
             /*
              * ⚠️ WHICH GATEWAY IS ACTUALLY BOUND, for anybody who can reach

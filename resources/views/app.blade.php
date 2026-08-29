@@ -14,7 +14,7 @@
 
     {{-- The one-click sign-in is open on the review build, so it must not
          be indexed. Removed automatically when it goes live. --}}
-    @if (config('realvows.is_demo'))
+    @if (\App\Support\ReviewBuild::active())
         <meta name="robots" content="noindex, nofollow, noarchive">
     @endif
 

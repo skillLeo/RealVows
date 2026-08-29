@@ -79,3 +79,77 @@ repository are inside the guard word-lists that exist to ban them. Both were
 done in earlier rounds and re-checked rather than re-done.
 Changes it: payments going live, which flips the same flag.
 2026-08-29
+
+---
+
+# R10-B
+
+**8 · The gold change reached the emails as well as the app**
+Default applied: replaced #B99154 in all 16 files carrying it, including the
+nine standalone documents (emails, receipt, offline, unsubscribe) that hold
+their own inline palette because email clients cannot read custom properties.
+Why: §1 says globally, and its reasoning is that a different gold on one surface
+to another is a seam. An email is a surface. §5 excludes "the authenticated
+product" from this round, which I read as "do not rebuild authenticated
+features" rather than "do not let a token value reach them".
+Changes it: being told emails are out of scope, in which case nine files revert.
+2026-08-29
+
+**9 · --r moved 8px → 1rem, which is a visible change to every control**
+Default applied: adopted the reference's dominant radius.
+Why: §1 says re-lock to .25/1/1.5rem, and 8px exists nowhere in the reference.
+Which of its three to map --r onto was decided by counting applied classes in
+its shipped bundle — rounded-full 58, rounded-lg 46, rounded-xl 4, rounded-sm 1
+— rather than by picking the nearest number. Every control on the site is now
+noticeably rounder.
+Changes it: him saying it is too round, in which case --r-sm is the other
+defensible reading.
+2026-08-29
+
+**10 · The three shadows are declared but not yet applied to anything**
+Default applied: tokens and guards shipped; no element uses them.
+Why: §1 asked for them to be permitted, not placed, and §5 forbids anything
+beyond repointing the guards. The served CSS therefore contains no box-shadow
+declaration at all — which is why the scope guard passes trivially today. It
+will do real work the moment somebody reaches for elevation.
+Changes it: a round that asks for the cards to carry lift.
+2026-08-29
+
+**11 · About and Questions were kept in the footer against §2's column list**
+Default applied: his three Platform entries are all present, and ours sit beside
+them.
+Why: §2 lists the column as How It Works, The Science, Packages — which is what
+his reference has, because his reference has no About page and no FAQ. Building
+it to the letter dropped two pages that exist and resolve, and the footer link
+floor caught it at six against eight. Losing working navigation was not
+something the round asked for.
+Changes it: him saying he wants those two gone from the footer.
+2026-08-29
+
+**12 · A protected client line was retired by a later client instruction**
+Default applied: "The person you build a life with." is no longer on the page;
+the entry is kept in ClientSuppliedCopyTest as a comment with its provenance and
+the reason.
+Why: it was the hero paragraph and §2 replaces that paragraph with wording from
+the reference he supplied. The guard cannot arbitrate between two things the
+client said, and the later one stands. Recorded rather than deleted so the line
+is recoverable.
+Changes it: him asking for it back.
+2026-08-29
+
+**13 · /packages redirects to login rather than returning 404**
+Default applied: none — observed, not changed.
+Why: §2 says it "still 404s during the free period". On production it answers
+302 to /login. Nothing public links to it either way, so no visitor meets a dead
+end, but the brief's assumption about that route is not what the route does.
+Changes it: a decision about what that URL should do while payments are off.
+2026-08-29
+
+**14 · Idea, parked as §5 instructs**
+The reference's package cards are the only place on the site where a price is
+stated. When payments go live, the free-period statement is replaced by a Select
+button in the same frame — but nothing yet proves the price on the card matches
+the price the checkout charges. That is the same class of drift PageMatchesEngineTest
+was written for, and it deserves the same treatment in the round that turns
+payments on.
+2026-08-29

@@ -1814,6 +1814,64 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   .rv-navtoggle { display: none; }
 }
 
+/* ==========================================================================
+   The public header — R10-B §3
+   ==========================================================================
+ *
+ * ⚠️ THE CLIENT SAID THE LOGO AND THE THREE BARS LOOK PALE ON HIS PHONE. THEY
+ * MEASURE PALE.
+ *
+ * Against the public header's own ground (--ground-public):
+ *
+ *   hamburger   --brass-bright   1.98:1
+ *   logo word   --brass          2.35:1
+ *
+ * A non-text control needs 3:1 and neither reaches it. The hamburger is the
+ * only way to open navigation on a phone, and it was drawn at two to one in
+ * 1.5px strokes — legible in a bright room on a good screen, and not much else.
+ *
+ * ⚠️ AND THE GOLD CHANGE IN §1 MADE THIS WORSE, NOT BETTER. The reference's
+ * gold is lighter than the one it replaced, so the logo word fell from 2.53:1
+ * to 2.35:1 on the way past. Adopting his gold was right; leaving it doing a
+ * job it cannot do would not have been.
+ *
+ * The fix is his own colour rather than a compromise: --oxblood-deep carries
+ * the value his reference calls --color-primary, which is what it paints its
+ * own header marks in, and it reads 15.36:1 here. Gold stays on this header as
+ * the hairline and the pill border, which is what gold is for — a line, not a
+ * letter.
+ *
+ * ⚠️ SCOPED TO .rv-public. The same logo sits on oxblood panels and in the
+ * footer, where brass on the dark panel is correct and measures 6.55:1.
+ * Nothing below may leak onto those.
+ */
+.rv-public .rv-pubhead .rv-logo__mark {
+  border-color: color-mix(in oklab, var(--oxblood-deep) 45%, transparent);
+  color: var(--oxblood-deep);
+}
+
+.rv-public .rv-pubhead .rv-logo__word {
+  color: var(--oxblood-deep);
+}
+
+.rv-public .rv-navtoggle {
+  border-color: color-mix(in oklab, var(--oxblood-deep) 32%, transparent);
+  color: var(--oxblood-deep);
+}
+
+/* ⚠️ 2px, NOT 1.5px. A hairline bar is a hairline whatever colour it is, and
+   at 1.5px on a 3x phone screen it renders on a half-pixel boundary and
+   softens. 2px lands on the grid and is what the reference draws. */
+.rv-public .rv-navtoggle__lines span {
+  height: 2px;
+}
+
+/* The bar beneath. A header that floats free of the page reads as unfinished;
+   the reference closes its with a hairline and so does this. */
+.rv-public .rv-pubhead__bar {
+  border-bottom-color: color-mix(in oklab, var(--oxblood-deep) 14%, transparent);
+}
+
 @media (max-width: 767px) {
   .rv-pubhead__nav--wide { display: none; }
 }

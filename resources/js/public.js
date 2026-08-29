@@ -50,40 +50,78 @@ function init() {
 }
 
 /**
- * The compatibility score counts up from 0 over 800ms the first time it
- * appears. The one flourish worth having — it makes the number feel earned.
+ * ⚠️ THE COMPATIBILITY METER — R10-D §2.
+ *
+ * The arc builds to 100 across the five components as the panel scrolls into
+ * view, one at a time, with a chip landing beside each and its row highlighting
+ * in step. It replaced a gauge that counted to 70 and stopped, which was a
+ * different idea to the one the client asked for twice.
+ *
+ * ⚠️ THIS SCRIPT ONLY EVER ADDS MOTION. The completed state — all five segments
+ * at full length, the total, every chip — is what the CSS renders by default.
+ * If this never runs, the meter is still correct and still readable. That is
+ * deliberate: a meter whose default is empty shows nothing the day the script
+ * fails, and this one is the section the client cares about most.
  */
-function initScoreCount() {
-    const el = document.querySelector('[data-count-to]');
-    if (!el) return;
+function initCompatibilityMeter() {
+    const meter = document.querySelector('[data-meter]');
+    if (!meter) return;
 
-    const target = Number(el.dataset.countTo);
-    if (!Number.isFinite(target)) return;
+    const total = meter.querySelector('[data-meter-total]');
+    const chips = document.querySelector('[data-meter-chips]');
+    const segments = [...meter.querySelectorAll('.rv-gauge__seg')];
+    const rows = [...document.querySelectorAll('.rv-score__row[data-component]')];
 
-    if (REDUCED || !('IntersectionObserver' in window)) {
-        el.textContent = String(target);
+    /*
+     * Reduced motion, no observer, or nothing to build: leave the finished
+     * state exactly as the server rendered it. Nothing to undo, because
+     * nothing was hidden.
+     */
+    if (REDUCED || !('IntersectionObserver' in window) || segments.length === 0) {
+        rows.forEach((row) => row.classList.add('is-landed'));
         return;
     }
 
-    el.textContent = '0';
+    // The share each segment carries, read back from what the server wrote.
+    const shares = segments.map((seg) => {
+        const raw = Number.parseFloat(seg.style.getPropertyValue('--share'));
+        return Number.isFinite(raw) ? raw : 0;
+    });
+
+    const finalTotal = total ? total.textContent.trim() : '';
 
     const observer = new IntersectionObserver(
         (entries) => {
             if (!entries[0].isIntersecting) return;
             observer.disconnect();
 
-            const start = performance.now();
-            const step = (now) => {
-                const t = Math.min((now - start) / 800, 1);
-                el.textContent = String(Math.round(target * (1 - Math.pow(1 - t, 3))));
-                if (t < 1) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
+            meter.classList.add('is-building');
+            if (chips) chips.classList.add('is-building');
+
+            // The counter accumulates as each component lands, so the figure
+            // and the arc are always telling the same story.
+            let running = 0;
+
+            shares.forEach((share, index) => {
+                window.setTimeout(() => {
+                    running += share;
+
+                    if (total) {
+                        const last = index === shares.length - 1;
+                        // The last step prints the server's own figure rather
+                        // than the sum of the gapped shares, which is 0.8 short
+                        // per segment by design.
+                        total.textContent = last ? finalTotal : String(Math.round(running));
+                    }
+
+                    if (rows[index]) rows[index].classList.add('is-landed');
+                }, index * 260 + 620);
+            });
         },
-        { threshold: 0.4 }
+        { threshold: 0.35 }
     );
 
-    observer.observe(el);
+    observer.observe(meter);
 }
 
 /**
@@ -342,7 +380,7 @@ function initNav() {
 
 function boot() {
     init();
-    initScoreCount();
+    initCompatibilityMeter();
     initIntroDemo();
     initNav();
 }

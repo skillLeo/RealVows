@@ -1957,6 +1957,165 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
 /* The featured card needs headroom for the badge sitting on its edge. */
 .rv-packages .rv-package--featured { margin-top: 10px; }
 
+/* ── The process step headings — R10-D §3 ────────────────────────────────
+ *
+ * ⚠️ EVEN BY MEASUREMENT, NOT BY A BREAK PER HEADING.
+ *
+ * Three of the four wrapped to two lines and one sat on one, so the bodies
+ * beneath them started at four different heights and the row read as ragged.
+ *
+ * A <br> in each heading was the obvious fix and the wrong one: it fixes the
+ * wrap at the width it was authored for and breaks at every other, which is the
+ * same class of mistake as sizing a frame in viewport units.
+ *
+ * The grid does it instead. `grid-template-rows: auto auto 1fr` on the step and
+ * `align-content: start` on the heading gives all four headings the height of
+ * the tallest at whatever width the row happens to be, so the bodies always
+ * start on one line together — at 1440, at 360, and at every width between,
+ * with no number in the stylesheet that has to be right.
+ */
+.rv-process__step {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+}
+
+/* ⚠️ THE HEADING KEEPS ITS OWN ROW. Without this the heading and body share a
+   track and the equalisation lands on the pair rather than on the heading. */
+.rv-process__step > .rv-d3 {
+  align-self: start;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.rv-process__step > .rv-body {
+  align-self: start;
+  margin: 0;
+}
+
+/* ── The compatibility meter — R10-D §2 ──────────────────────────────────
+ *
+ * The arc builds to 100 out of the five components as the section scrolls into
+ * view, one at a time, each with a chip naming it and its share. It replaces a
+ * gauge that counted to 70 and stopped.
+ *
+ * ⚠️ THE COMPLETED STATE IS THE DEFAULT, AND THE ANIMATION IS THE OPT-IN.
+ *
+ * Every segment is drawn at full length here. The building sequence lives
+ * entirely inside `[data-arrival] .is-building` and a no-preference media
+ * query, so a visitor with JavaScript off, or reduced motion on, or an
+ * IntersectionObserver that never fires, sees all five components and the total
+ * — never an empty arc. A meter whose default state is blank is a meter that
+ * shows nothing the day the script fails.
+ *
+ * ⚠️ TRANSFORM, OPACITY AND stroke-dasharray ONLY. Dashoffset animation runs on
+ * the compositor and is the one SVG property cheap enough for this budget.
+ */
+.rv-gauge__seg {
+  fill: none;
+  stroke: var(--oxblood);
+  stroke-width: 9;
+  stroke-linecap: butt;
+  /* share and offset are written per segment from config('matching.weights'). */
+  stroke-dasharray: var(--share) 100;
+  stroke-dashoffset: calc(var(--offset) * -1);
+}
+
+/* Alternating tone so five adjacent arcs read as five things, not one bar. */
+.rv-gauge__seg:nth-child(even) { stroke: color-mix(in oklab, var(--oxblood) 82%, var(--brass)); }
+
+/* ⚠️ THE FLOOR, DRAWN ON THE ARC. A 1.2-unit tick at --at, which is the
+   configured threshold, so it cannot drift from the sentence beside it. */
+.rv-gauge__floor {
+  fill: none;
+  stroke: var(--cream);
+  stroke-width: 13;
+  stroke-dasharray: 1.2 100;
+  stroke-dashoffset: calc(var(--at) * -1);
+}
+
+.rv-gauge__floor-label {
+  margin: 10px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--fs-body-3);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.rv-gauge__floor-mark {
+  width: 2px;
+  height: 12px;
+  flex: 0 0 auto;
+  background: var(--oxblood);
+  border-radius: 1px;
+}
+
+.rv-gauge__chips {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rv-gauge__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid var(--outline-ref);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  font-size: var(--fs-body-3);
+  color: var(--ink);
+}
+
+.rv-gauge__chip-pct {
+  font-family: var(--display);
+  color: var(--oxblood);
+}
+
+/* The row highlights as its component lands. */
+.rv-score__row.is-landed {
+  border-color: color-mix(in oklab, var(--brass) 55%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /*
+   * Only once the script has taken charge. `.is-building` is added on
+   * intersection and removed nowhere — the sequence runs once and the finished
+   * state is what remains.
+   */
+  .rv-gauge.is-building .rv-gauge__seg {
+    stroke-dasharray: 0 100;
+    animation: rv-meter-seg 620ms var(--ease-entrance) forwards;
+    animation-delay: calc(var(--i) * 260ms);
+  }
+
+  .rv-gauge.is-building .rv-gauge__floor,
+  .rv-gauge.is-building .rv-gauge__floor-label {
+    opacity: 0;
+    animation: rv-arrive 500ms var(--ease) forwards;
+    /* After the last segment has landed: five components at 260ms apart. */
+    animation-delay: 1500ms;
+  }
+
+  [data-meter-chips].is-building .rv-gauge__chip {
+    --arrive-y: 8px;
+    opacity: 0;
+    animation: rv-arrive 480ms var(--ease) forwards;
+    animation-delay: calc(var(--i) * 260ms + 180ms);
+  }
+}
+
+@keyframes rv-meter-seg {
+  to { stroke-dasharray: var(--share) 100; }
+}
+
 /* ── Elevation, applied — §8 ─────────────────────────────────────────────
  *
  * ⚠️ THE THREE LIFTS WERE DECLARED AND NEVER USED, SO THE GUARD PROTECTING

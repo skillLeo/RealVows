@@ -56,6 +56,19 @@ class MotionCatalogueTest extends TestCase
          * every twenty seconds.
          */
         'rv-meet-left', 'rv-meet-right', 'rv-keystone-warm',
+        /*
+         * The compatibility meter's arc, R10-D §2. Marketing only and it does
+         * NOT loop — it runs once, on scroll, and the finished state is what
+         * remains.
+         *
+         * ⚠️ REGISTERED AS ITS OWN PRIMITIVE RATHER THAN FOLDED INTO #1 THE
+         * ARRIVAL, and the distinction is real. The Arrival moves a whole
+         * element into place; this draws one arc to a length that is different
+         * for every segment and comes out of config. It cannot be expressed as
+         * a transform, so reusing rv-arrive would have meant a second animation
+         * on the same element fighting the first.
+         */
+        'rv-meter-seg',
     ];
 
     /**

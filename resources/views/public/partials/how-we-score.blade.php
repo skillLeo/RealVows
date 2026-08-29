@@ -78,6 +78,19 @@
         ->values();
 
     $threshold = config('matching.threshold.default');
+
+    /*
+     * ⚠️ THE COMPLETED FIGURE IS THE SUM, NOT A TYPED 100.
+     *
+     * MatchingConfigTest already proves the weights total 100, so this is 100
+     * today. Summing rather than printing it means that if that guard is ever
+     * loosened, the meter shows what the components actually add up to instead
+     * of asserting a round number the engine no longer reaches.
+     *
+     * It is also the state rendered with no JavaScript and under reduced
+     * motion, so the honest value has to be here rather than in a script.
+     */
+    $total = array_sum($weights);
 @endphp
 
 <section class="rv-section rv-paper" id="how-we-score">
@@ -113,8 +126,8 @@
 
         <div class="rv-score">
             <ol class="rv-score__list" data-stagger>
-                @foreach ($rows as $row)
-                    <li class="rv-score__row" data-reveal>
+                @foreach ($rows as $i => $row)
+                    <li class="rv-score__row" data-reveal data-component="{{ $i }}">
                         <div class="rv-score__head">
                             <h3 class="rv-d3">{{ $row['title'] }}</h3>
                             @if ($row['primary'])
@@ -134,26 +147,76 @@
             </ol>
 
             <aside class="rv-score__panel" data-reveal>
-                <p class="rv-eyebrow rv-eyebrow--ruled rv-score__label">The floor</p>
+                <p class="rv-eyebrow rv-eyebrow--ruled rv-score__label">Compatibility score</p>
 
-                {{-- ⚠️ THE GAUGE SHOWS THE THRESHOLD, NOT A SAMPLE SCORE. The
-                     reference animates an invented 75, then 95, then 100, which
-                     is a number chosen to look good. Ours shows the one figure
-                     on this page a reader can hold us to: the minimum below
-                     which an introduction is never sent. --}}
-                <div class="rv-gauge" data-gauge>
-                    <svg viewBox="0 0 200 116" focusable="false" aria-hidden="true">
+                {{--
+                    ⚠️ THE ARC BUILDS TO 100 OUT OF THE FIVE COMPONENTS. IT USED
+                    TO COUNT UP TO 70 AND STOP.
+
+                    The client described this interaction himself, unprompted,
+                    twice: "when you're scrolling up you see twenty percent that,
+                    twenty percent that, twelve percent that, that's what I
+                    want." What shipped was a single number arriving. Those are
+                    different ideas — his is the score assembling itself out of
+                    its parts, and that is the one he asked for.
+
+                    ⚠️ EVERY SHARE COMES FROM config('matching.weights'), THE
+                    SAME ARRAY THE ENGINE SCORES WITH. PageMatchesEngineTest
+                    reads the segments out of this markup and fails if the arc
+                    ever shows a share the engine does not carry. A percentage
+                    drawn here that the engine cannot account for is a diagram of
+                    a product we do not sell.
+
+                    ⚠️ AND 70 STAYS MARKED ON THE ARC. 100 is how the model is
+                    composed; 70 is what an introduction has to clear. Without
+                    the floor drawn on it, a meter that fills to 100 reads as a
+                    promise that somebody will score 100, which is not a claim
+                    this product makes about anybody.
+                --}}
+                <div class="rv-gauge" data-meter aria-hidden="true">
+                    <svg viewBox="0 0 200 124" focusable="false">
                         <path class="rv-gauge__track" pathLength="100"
                               d="M14 106 A86 86 0 0 1 186 106" />
-                        <path class="rv-gauge__value" pathLength="100"
-                              style="--to: {{ $threshold }}"
+
+                        @php ($carried = 0)
+                        @foreach ($rows as $i => $row)
+                            {{-- One arc per component, offset by everything
+                                 already laid down. A 0.8 gap keeps the joins
+                                 legible without inventing a divider element. --}}
+                            <path class="rv-gauge__seg" pathLength="100"
+                                  style="--share: {{ max($row['weight'] - 0.8, 0.6) }}; --offset: {{ $carried }}; --i: {{ $i }}"
+                                  d="M14 106 A86 86 0 0 1 186 106" />
+                            @php ($carried += $row['weight'])
+                        @endforeach
+
+                        {{-- The floor, drawn ON the arc rather than beside it. --}}
+                        <path class="rv-gauge__floor" pathLength="100"
+                              style="--at: {{ $threshold }}"
                               d="M14 106 A86 86 0 0 1 186 106" />
                     </svg>
+
                     <p class="rv-gauge__figure">
-                        <span class="rv-numeral" data-count-to="{{ $threshold }}">{{ $threshold }}</span>
+                        <span class="rv-numeral" data-meter-total>{{ $total }}</span>
                         <span class="rv-gauge__unit">out of 100</span>
                     </p>
+
+                    <p class="rv-gauge__floor-label">
+                        <span class="rv-gauge__floor-mark" aria-hidden="true"></span>
+                        {{ $threshold }} is the floor an introduction must clear
+                    </p>
                 </div>
+
+                {{-- The chips. One lands with each component, naming it and its
+                     share, which is the half of his description that the arc
+                     alone cannot carry. --}}
+                <ul class="rv-gauge__chips" data-meter-chips>
+                    @foreach ($rows as $i => $row)
+                        <li class="rv-gauge__chip" style="--i: {{ $i }}">
+                            <span class="rv-gauge__chip-pct rv-numeral">{{ $row['weight'] }}%</span>
+                            <span>{{ $row['title'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
 
                 {{-- ⚠️ THE NUMBER IS INTERPOLATED, THE SENTENCE IS HIS.
                      PageMatchesEngineTest asserts this page states the threshold

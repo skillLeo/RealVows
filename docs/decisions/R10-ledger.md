@@ -209,3 +209,54 @@ row, and both are guesses without seeing it rendered at several widths. It is
 cosmetic and it is the smallest thing on the list.
 Changes it: a look at it on a real screen.
 2026-08-29
+
+---
+
+# R10-D
+
+**20 · The meter is registered as its own motion primitive**
+Default applied: added `rv-meter-seg` to the catalogue rather than expressing the
+arc with `rv-arrive`.
+Why: MotionCatalogueTest exists because this codebase once had nine names for
+one idea, so a new keyframe needs an argument. The Arrival moves a whole element
+into place with a transform; this draws one arc to a length that differs per
+segment and comes out of config. It cannot be a transform, and reusing rv-arrive
+would have put two animations on one element fighting each other. It runs once
+and does not loop.
+Changes it: nothing.
+2026-08-29
+
+**21 · The meter's completed state is server-rendered, not script-built**
+Default applied: every segment, chip and the total are drawn at full value in
+the HTML; the script only ever adds the building sequence.
+Why: §2 required reduced motion to show the completed state, and the cheapest
+way to guarantee that is to make it the default rather than a branch. It also
+covers JavaScript being off, an IntersectionObserver that never fires, and the
+script erroring — this is the section the client cares about most and a meter
+whose default is empty shows nothing the day the script fails.
+Changes it: nothing.
+2026-08-29
+
+**22 · Step headings evened by grid, not by a break per heading**
+Default applied: `grid-template-rows: auto auto 1fr` on the step, headings on
+their own track.
+Why: a `<br>` in each heading fixes the wrap at the width it was authored for
+and is wrong at every other — the same class of mistake as sizing a frame in
+viewport units. The grid gives all four the height of the tallest at whatever
+width the row happens to be, with no number in the stylesheet that has to be
+right.
+Changes it: nothing.
+2026-08-29
+
+**23 · Flipping APP_ENV to production is safe today, and one thing to watch**
+Default applied: audited rather than changed — the server is not reachable from
+here.
+Why: see the audit table in the report. Every consumer is safe or welcome under
+`production`. The one to know about is PaymentServiceProvider: under `demo` an
+unconfigured gateway falls back to a fake, and under `production` it will build
+the real PowerTranz gateway instead. That is unreachable today because checkout
+404s while the free period is active and is behind auth besides — but it becomes
+live the day the free period ends, so credentials must be in place before that
+switch, not after.
+Changes it: the free period ending.
+2026-08-29

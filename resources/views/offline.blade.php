@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#4A1220">
+    <meta name="theme-color" content="#480027">
     <title>Offline · RealVows</title>
     <style>
         /* Inlined deliberately: this page has to render when nothing else
            can be fetched, including the stylesheet. */
         :root {
-            --oxblood-deep: #4A1220; --oxblood: #6B1834; --brass: #C5A059;
+            --oxblood-deep: #480027; --oxblood: #6B1834; --brass: #C5A059;
             --cream: #F2EFE9; --ink-soft: #6B5F62;
         }
         * { box-sizing: border-box; }

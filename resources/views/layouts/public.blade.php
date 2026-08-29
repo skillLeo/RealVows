@@ -3,7 +3,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#4A1220">
+    {{-- ⚠️ THIS MUST TRACK --oxblood-deep, AND IT DID NOT.
+
+         It sat at #4A1220 on every public page — the oxblood from before R9 —
+         while the token moved to #3E0021 and then to #480027. On a phone this
+         is the browser chrome above the page, so the one strip of colour a
+         visitor sees outside the design was two revisions out of date.
+
+         ⚠️ IT IS A LITERAL BECAUSE IT HAS TO BE. <meta> cannot read a custom
+         property, so this is the one place the palette is duplicated by
+         necessity. Nothing warned when it drifted, and no search for strings I
+         had just placed would ever have found it — the discovery pass did. --}}
+    <meta name="theme-color" content="#480027">
 
     <title>@yield('title', 'RealVows') · RealVows</title>
     <meta name="description" content="@yield('description', 'Find your true soul mate. Free to join, every member verified, introductions brought to your email and WhatsApp.')">

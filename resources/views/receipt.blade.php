@@ -10,7 +10,7 @@
          client that will not fetch a stylesheet. --}}
     <style>
         :root {
-            --oxblood-deep: #4A1220; --oxblood: #6B1834; --brass: #C5A059;
+            --oxblood-deep: #480027; --oxblood: #6B1834; --brass: #C5A059;
             --brass-ink: #7F5F2E; --cream: #F2EFE9; --card: #F8F6F2;
             --ink: #1F1518; --ink-soft: #6B5F62; --hairline: rgba(197, 160, 89,.4);
         }

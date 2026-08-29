@@ -5,7 +5,7 @@
     </p>
 
     <p style="margin:0 0 28px;">
-        <a href="{{ $acceptUrl }}" style="display:inline-block;padding:14px 28px;background:#4A1220;color:#F8F6F2;border-radius:8px;text-decoration:none;">
+        <a href="{{ $acceptUrl }}" style="display:inline-block;padding:14px 28px;background:#480027;color:#F8F6F2;border-radius:8px;text-decoration:none;">
             Confirm you know her
         </a>
     </p>

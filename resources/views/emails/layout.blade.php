@@ -36,7 +36,7 @@
 
                     {{-- Header band --}}
                     <tr>
-                        <td style="background:#4A1220;padding:28px 32px;">
+                        <td style="background:#480027;padding:28px 32px;">
                             <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1;letter-spacing:.02em;color:#C5A059;">
                                 RealVows
                             </span>

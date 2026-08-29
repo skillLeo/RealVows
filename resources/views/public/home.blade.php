@@ -13,9 +13,22 @@
     the frame and the first thing anyone reads. MarriageLeadTest holds that line
     over rendered output and keeps the allow-list of legitimate uses current.
 --}}
-@section('title', 'Find your true soul mate')
+@section('title', 'The Dignified Path to a Lifelong Union')
 {{-- ⚠️ The channel named here must be one the platform can actually use. --}}
-@section('description', 'RealVows is for people 18 and over seeking to find their true soul mate. Free to join, every member verified, introductions brought to your email'.($whatsappDelivery ?? false ? ' and WhatsApp' : '').'.')
+{{-- ⚠️ THE REFERENCE'S DESCRIPTION NAMES TWO THINGS WE DO NOT DO: an AI
+     live-video identity check, and a compatibility weighting derived from the
+     component this product removed. The first is on hold under R10 §7.1 and the
+     second went on a scholar's ruling, so R10 §1 rule 3 applies — neither his
+     sentence nor ours ships unchanged. This is his hero paragraph, which he
+     approved, cut to length.
+
+     ⚠️ AND THE BANNED WORD IS NOT WRITTEN OUT, EVEN TO EXPLAIN ITS ABSENCE.
+     The forbidden-terms reader scans SOURCE, not rendered output, and it has
+     now failed this build three times over comments of mine describing what was
+     removed. The guard is right every time: a file a member can reach has no
+     business containing that vocabulary, and "I was only quoting it" is exactly
+     the argument that would let it back in. --}}
+@section('description', 'A premium matchmaking platform for people who have decided they want marriage, built on rigorous verification, values-based alignment and profile compatibility. Free to join, every member verified, introductions brought to your email'.($whatsappDelivery ?? false ? ' and WhatsApp' : '').'.')
 
 @section('content')
 
@@ -91,24 +104,26 @@
                          border round it. One brass dot at the head of it turns
                          the same words into a label, and it costs eight pixels. --}}
                     <span class="rv-hero__badge-dot" aria-hidden="true"></span>
-                    <span>For those who mean it</span>
+                    <span>Marriage-Ready Matchmaking &middot; 18+</span>
                 </p>
 
                 {{-- ⚠️ THE BREAK IS SET, NOT LEFT TO THE CONTAINER.
-                     "Find your true / soul mate." breaks where the meaning
-                     breaks. Left to wrap, 360 and 390 put "soul" alone on the
-                     second line and "mate." orphaned on a third. --}}
-                <h1 class="rv-d-hero" data-arrival-words>Find your true<br class="rv-hero__break">
-                    soul mate.</h1>
+                     "The Dignified Path to / a Lifelong Union" breaks where the
+                     meaning breaks. Left to wrap, 360 and 390 strand "Union" on
+                     a line of its own under a nearly empty second line. --}}
+                <h1 class="rv-d-hero" data-arrival-words>The Dignified Path to<br class="rv-hero__break">
+                    a Lifelong Union</h1>
 
                 <span class="rv-hero__flourish rv-arrive-step"></span>
 
-                {{-- The client's own line, corrected only for person so that it
-                     addresses the reader. He sent "The person to build a life
-                     with." --}}
-                <p class="rv-lead" style="max-width: 44ch">
-                    The person you build a life with. Joining is free, and everyone here has been
-                    checked.
+                {{-- ⚠️ HIS REFERENCE'S SENTENCE, WITH HIS OWN TWO-WORD EDIT.
+                     Its last two words named the component this product
+                     removed; he marked them "profile compatibility". Everything
+                     before that is verbatim, em dash included. --}}
+                <p class="rv-lead" style="max-width: 52ch">
+                    A premium matchmaking platform for people who have decided they want marriage
+                    &mdash; built on rigorous verification, values-based alignment, and profile
+                    compatibility.
                 </p>
 
                 {{--
@@ -172,12 +187,12 @@
                      single button makes the page a demand rather than an
                      invitation. --}}
                 <div class="rv-hero__actions">
-                    <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create your free account</a>
-                    <a href="{{ route('how-it-works') }}" class="rv-btn rv-btn--outline">See how it works</a>
+                    <a href="{{ route('register') }}" class="rv-btn rv-btn--primary">Create Your Free Profile</a>
+                    <a href="{{ route('how-it-works') }}" class="rv-btn rv-btn--outline">See How It Works</a>
                 </div>
 
                 {{-- One line, small, under the actions. --}}
-                <p class="rv-hero__micro">Free to join. Free to be checked. Nothing to pay to begin.</p>
+                <p class="rv-hero__micro">Free to join. Free to get verified. Pay only when you want a match.</p>
 
                 {{-- ⚠️ THE THREE FACTS GO LAST AND STAY SMALL. Centred, they
                      read as the line at the foot of an invitation — where,
@@ -197,11 +212,21 @@
                      same thing as its words, so a reader who skips the type
                      still gets the row. --}}
                 <ul class="rv-trustrail">
+                    {{-- ⚠️ HIS WORDS, WITH THE TWO HE MARKED. "AI Verified"
+                         became "Human Verified", and the item naming the
+                         removed component became "Compatibility Matching" —
+                         both because the reference describes a product this one
+                         is not. The other two are verbatim. --}}
                     @foreach ([
-                        ['gift', 'Free to join'],
-                        ['shield', 'Everyone checked'],
-                        ['rings', 'Soul mate first'],
-                        ['lock', '18 and over'],
+                        ['gift', '100% Free Sign-up'],
+                        ['shield', 'Human Verified'],
+                        ['rings', 'Compatibility Matching'],
+                        {{-- ⚠️ THE CHANNEL NAMED HERE MUST BE ONE THE PLATFORM
+                             CAN ACTUALLY USE. His reference says "Email &
+                             WhatsApp Delivery"; with delivery off that is a
+                             promise a visitor would sign up for and never
+                             receive. --}}
+                        ['envelope', ($whatsappDelivery ?? false) ? 'Email & WhatsApp Delivery' : 'Email Delivery'],
                     ] as [$icon, $label])
                         <li>
                             @include('public.partials.icon', ['name' => $icon, 'size' => 17])
@@ -281,21 +306,22 @@
         <div class="rv-shell rv-shell--measure rv-stack" style="gap: 56px">
             <div class="rv-stack rv-section__head" data-reveal>
                 <p class="rv-eyebrow rv-eyebrow--ruled">Why RealVows</p>
-                <h2 class="rv-d2">What you are joining</h2>
+                <h2 class="rv-d2">Uncompromising Standards</h2>
                 <p class="rv-lead rv-measure">
-                    A small platform for people who have decided what they are looking for, and
-                    would rather be introduced than go looking.
+                    A community built on trust, authenticity, and the shared intention of a
+                    lifelong commitment.
                 </p>
             </div>
 
-            {{-- ⚠️ EVERY DESCRIPTION ENDS THE SAME WAY. Four different endings
-                 on one row is the sort of thing a reader feels without being
-                 able to name it. --}}
+            {{-- ⚠️ HIS THREE CARDS, HIS WORDS. Card two is the wording he
+                 supplied himself rather than the reference's, because the
+                 reference describes an AI face scan and we do a human review.
+                 R10 §7.1 holds that until the video question is settled. --}}
             <div class="rv-grid rv-grid--3" data-stagger>
                 @foreach ([
-                    ['diamond', 'Free to join', 'Build your profile and be checked without paying anything.'],
-                    ['check', 'Everyone is checked', 'Nobody reaches you unchecked, and nobody reaches you by accident.'],
-                    ['four', 'Chosen, not searched', 'Introductions are brought to you, a few at a time, and always for both of you.'],
+                    ['four', 'Rigorous Profiles', 'Four distinct photo types and a full values, lifestyle and preference profile — so you understand someone before an introduction is ever made.'],
+                    ['check', 'Human Verification', 'A real person checks your photographs and sends you a guided instruction, in order to verify your identity. Only verified profiles can enter the matching pool.'],
+                    ['diamond', '100% Free Sign-up', 'Create your complete profile and get verified without paying anything. You only pay when you are ready to receive a match.'],
                 ] as [$icon, $title, $body])
                     <article class="rv-card rv-offer__card rv-stack" style="gap: 20px" data-reveal>
                         <span class="rv-icon-disc">@include('public.partials.icon', ['name' => $icon])</span>
@@ -303,6 +329,29 @@
                         <p class="rv-body">{{ $body }}</p>
                     </article>
                 @endforeach
+            </div>
+
+            {{-- ⚠️ THE PANEL IS BACK. An earlier round deleted it for naming a
+                 mechanism; the client has since asked for every part of his
+                 reference, and the four photograph types are the clearest
+                 statement on the page of what is actually being asked of a
+                 member before they start. --}}
+            <div class="rv-photopanel" data-reveal>
+                <h3 class="rv-d3 rv-photopanel__head">The four required photographs</h3>
+
+                <ul class="rv-photopanel__chips">
+                    @foreach ([
+                        'Front-facing close-up',
+                        'Full-body social',
+                        'Full-body casual wear',
+                        'Any photo type',
+                    ] as $i => $chip)
+                        <li class="rv-photopanel__chip">
+                            <span class="rv-photopanel__num" aria-hidden="true">{{ $i + 1 }}</span>
+                            <span>{{ $chip }}</span>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
     </section>
@@ -365,51 +414,142 @@
          where that component no longer exists. See the partial for why the numbers are not typed. --}}
     @include('public.partials.how-we-score')
 
-    {{-- ── 6 · What it costs ─────────────────────────────────────────────
-         ⚠️ THE PRICING GRID IS NOT REPRODUCED, AND THE REASON IS A RULE
-         RATHER THAN A PREFERENCE.
+    {{-- ── 6 · Curated Match Packages ────────────────────────────────────
 
-         Payments are not live: Payments::areLive() requires the free period to
-         be off, a gateway configured, an environment that is not sandbox and
-         merchant credentials present, and it currently answers no. A marketing
-         page must never make a promise the database contradicts, which is the
-         same rule that governs the founding count above.
+         ⚠️ THE FULL GRID SHIPS. THE THREE BUTTONS DO NOT.
 
-         So the reference's three-card composition carries the free-period
-         statement instead. --}}
-    @unless (\App\Support\Payments::areLive())
-        <section class="rv-section rv-paper">
-            <div class="rv-shell rv-shell--measure rv-stack" style="gap: 56px">
-                <div class="rv-stack rv-section__head" data-reveal>
-                    <p class="rv-eyebrow rv-eyebrow--ruled">What it costs</p>
-                    <h2 class="rv-d2">Nothing, while we are getting started</h2>
-                    <p class="rv-lead rv-measure">
-                        Creating an account, building your profile and being checked are free, and
-                        they stay free.
-                    </p>
-                </div>
+         An earlier round withheld the pricing entirely, on the rule that a
+         marketing page must never make a promise the database contradicts.
+         That rule is right and it is narrower than what was done: the prices
+         are true, the packages are real, and Payments::areLive() only governs
+         whether somebody can BUY one today.
 
-                <div class="rv-grid rv-grid--3" data-stagger>
-                    @foreach ([
-                        ['Joining', 'Free, and not for a trial period. Building a profile costs nothing at any point.'],
-                        ['Being checked', 'Free. A real person reviews every member before anybody is introduced to them.'],
-                        ['Introductions', 'Free while we are getting started. Anything you receive in that time stays open permanently.'],
-                    ] as [$title, $body])
-                        <article class="rv-card rv-offer__card rv-stack" style="gap: 16px" data-reveal>
-                            <h3 class="rv-d3">{{ $title }}</h3>
-                            <p class="rv-body">{{ $body }}</p>
-                        </article>
-                    @endforeach
-                </div>
+         So R10-B §2 restores his cards, his prices, his per-match arithmetic
+         and his feature lists, and replaces only the Select buttons with the
+         free-period statement in the same visual frame. He sees his layout, no
+         visitor is offered a decision the product cannot complete, and turning
+         it on later is one flag.
 
-                {{-- ⚠️ ONE QUIET LINE ABOUT LATER, AND NO PROVIDER NAMED. --}}
-                <p class="rv-small rv-centred" data-reveal>
-                    When introductions do carry a cost, it will be a single payment for a set
-                    number of them. There is no subscription and nothing renews on its own.
+         ⚠️ NO PROVIDER IS NAMED, on this or any public page. His reference
+         names Stripe three times in its bundle. The payment-provider guard is
+         one of the four R10 §8 kept enforced, and his footnote below is the
+         wording that replaces it. --}}
+    <section class="rv-section rv-paper" id="packages">
+        <div class="rv-shell rv-stack" style="gap: 56px">
+            <div class="rv-stack rv-section__head" data-reveal>
+                <p class="rv-eyebrow rv-eyebrow--ruled">Curated Match Packages</p>
+                <h2 class="rv-d2">Invest in Your Future, Not a Subscription</h2>
+                <p class="rv-lead rv-measure">
+                    Sign-up and verification are free. Match packages are a single one-time
+                    payment &mdash; there is no recurring charge and nothing renews automatically.
                 </p>
             </div>
-        </section>
-    @endunless
+
+            @php
+                /*
+                 * ⚠️ "Best Value", NOT "Most Popular" — R10 §7.4.
+                 *
+                 * His reference badges the middle card Most Popular. With no
+                 * completed sales that is a claim about behaviour that has not
+                 * happened. Best Value is arithmetically true at $16.67 against
+                 * $20 and needs no data behind it. It can become Most Popular
+                 * the day there are sales to support it.
+                 */
+                $packages = [
+                    [
+                        'name' => 'Single Match',
+                        'blurb' => 'Begin with one carefully chosen introduction.',
+                        'price' => '$20',
+                        'term' => 'one-time',
+                        'maths' => '1 curated match · $20.00 each',
+                        'badge' => null,
+                        'features' => [
+                            '1 curated match',
+                            'Full compatibility breakdown',
+                            ($whatsappDelivery ?? false) ? 'Email & WhatsApp delivery' : 'Email delivery',
+                        ],
+                    ],
+                    [
+                        'name' => 'Triple Match',
+                        'blurb' => 'The considered choice for a serious search.',
+                        'price' => '$50',
+                        'term' => 'one-time',
+                        'maths' => '3 curated matches · $16.67 each',
+                        'badge' => 'Best Value',
+                        'features' => [
+                            '3 curated matches',
+                            'Full compatibility breakdown',
+                            'Deep values analysis',
+                            'Priority match delivery',
+                        ],
+                    ],
+                    [
+                        'name' => 'Premium Match Pack',
+                        'blurb' => 'The fullest expression of our matchmaking.',
+                        'price' => '$100',
+                        'term' => 'one-time',
+                        'maths' => '8 curated matches · $12.50 each',
+                        'badge' => null,
+                        /* ⚠️ "Complete alignment report" — he struck the middle
+                           word out of his reference's version of this feature,
+                           which named the component this product removed. */
+                        'features' => [
+                            '8 curated matches',
+                            'Full compatibility breakdown',
+                            'Complete alignment report',
+                            'Priority match delivery',
+                        ],
+                    ],
+                ];
+            @endphp
+
+            <div class="rv-grid rv-grid--3 rv-packages" data-stagger>
+                @foreach ($packages as $pkg)
+                    <article @class(['rv-card', 'rv-package', 'rv-package--featured' => $pkg['badge']])
+                             data-reveal>
+                        @if ($pkg['badge'])
+                            <span class="rv-package__badge">{{ $pkg['badge'] }}</span>
+                        @endif
+
+                        <h3 class="rv-d3">{{ $pkg['name'] }}</h3>
+                        <p class="rv-body rv-package__blurb">{{ $pkg['blurb'] }}</p>
+
+                        <p class="rv-package__price">
+                            <span class="rv-numeral">{{ $pkg['price'] }}</span>
+                            <span class="rv-package__term">{{ $pkg['term'] }}</span>
+                        </p>
+
+                        <p class="rv-small rv-package__maths">{{ $pkg['maths'] }}</p>
+
+                        <ul class="rv-package__features">
+                            @foreach ($pkg['features'] as $feature)
+                                <li>
+                                    @include('public.partials.icon', ['name' => 'check', 'size' => 16])
+                                    <span>{{ $feature }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        @if (\App\Support\Payments::areLive())
+                            <a href="{{ route('checkout.show', ['package' => \Illuminate\Support\Str::slug($pkg['name'])]) }}"
+                               class="rv-btn rv-btn--primary rv-package__cta">Select</a>
+                        @else
+                            {{-- ⚠️ THE SAME FRAME, WITHOUT THE DECISION. A button
+                                 that takes a decision and then cannot complete it
+                                 is a broken promise on the busiest part of the
+                                 page. --}}
+                            <p class="rv-package__free">Free while we are getting started</p>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
+
+            <p class="rv-small rv-centred" data-reveal>
+                Secure payment. Matches are delivered privately by
+                email{{ ($whatsappDelivery ?? false) ? ' and WhatsApp' : '' }}.
+            </p>
+        </div>
+    </section>
 
     {{-- ── 7 · The closing invitation ────────────────────────────────────
          ⚠️ ONE BAND, ONE BUTTON, ONE LINE, USED ONCE AT THE END.
@@ -421,28 +561,28 @@
         <div class="rv-shell rv-shell--measure rv-stack rv-invitation__inner" data-reveal>
             @include('public.partials.ornament', ['tone' => 'dark', 'rules' => false])
 
-            <p class="rv-eyebrow">No card, no catch</p>
+            <p class="rv-eyebrow">Your next chapter</p>
 
-            <h2 class="rv-d1 rv-invitation__line">Joining is free.</h2>
+            <h2 class="rv-d1 rv-invitation__line">Begin Your Lifelong Journey Today</h2>
 
             {{-- ⚠️ TRUE IN BOTH STATES. This used to say "choose a match package
                  when you are ready", which is a sentence about a page that
                  returns 404 during the free period. It now describes what
                  actually happens now, and stays true when payments arrive. --}}
-            <p class="rv-lead" style="max-width: 46ch">
-                Build your profile without paying anything. Your introductions are free while
-                we are getting started, and anything you receive in that time stays yours.
+            <p class="rv-lead" style="max-width: 52ch">
+                Join an exclusive community of serious individuals seeking lifelong commitment
+                through values, alignment and profile compatibility.
             </p>
 
             <div>
-                <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create your free account</a>
+                <a href="{{ route('register') }}" class="rv-btn rv-btn--on-dark">Create Your Free Profile</a>
             </div>
 
             {{-- ⚠️ ONE LINE OF MICROCOPY, AS THE REFERENCE CLOSES. It states
                  what is true and asks for nothing further. If a second call to
                  action ever appears in this band, remove it rather than
                  balancing it. --}}
-            <p class="rv-invitation__micro">Free to join · Everyone is checked · 18 and over</p>
+            <p class="rv-invitation__micro">Free to join &middot; Verified members only &middot; Must be 18 or older</p>
         </div>
     </section>
 

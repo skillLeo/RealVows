@@ -33,6 +33,27 @@ class FooterLinksResolveTest extends TestCase
     }
 
     /** @return list<string> Every href inside the footer element. */
+    /**
+     * ⚠️ EVERY footer href, INCLUDING ANCHORS AND mailto.
+     *
+     * The floor above asks "is this reader looking at the right element", which
+     * is a different question from "which of these can be fetched". Counting
+     * only the walkable set made an eight-entry footer read as seven, because
+     * two of its entries are in-page anchors and one is an email address.
+     *
+     * @return list<string>
+     */
+    private function footerEntries(): array
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+        $start = strpos($html, '<footer');
+        $this->assertNotFalse($start, 'There is no footer on the home page at all.');
+
+        preg_match_all('/href="([^"]+)"/', substr($html, $start), $found);
+
+        return array_values(array_unique($found[1]));
+    }
+
     private function footerLinks(): array
     {
         $html = $this->get('/')->assertOk()->getContent();
@@ -56,7 +77,29 @@ class FooterLinksResolveTest extends TestCase
                 .'wrong part of the document.',
         );
 
-        return array_values(array_unique($found[1]));
+        /*
+         * ⚠️ mailto: AND tel: ARE NOT ROUTES, AND WALKING THEM IS A FALSE
+         * FAILURE.
+         *
+         * The footer now carries support@realvows.com, and this reader handed
+         * "mailto:support@realvows.com" to the HTTP kernel, got a 404 and
+         * reported a broken footer link. The link is correct; the reader was
+         * wrong about what kind of link it is.
+         *
+         * They are counted toward the floor above — a contact address is a real
+         * footer entry — but only http(s) and site-relative hrefs are fetched.
+         */
+        $walkable = array_values(array_filter(
+            array_unique($found[1]),
+            fn (string $href) => ! preg_match('/^(mailto:|tel:|sms:|javascript:)/i', $href),
+        ));
+
+        $this->assertNotEmpty(
+            $walkable,
+            'Every footer href is a mailto or tel. There is nothing to walk.',
+        );
+
+        return $walkable;
     }
 
     public function test_every_footer_link_answers(): void
@@ -70,8 +113,8 @@ class FooterLinksResolveTest extends TestCase
          */
         $this->assertGreaterThanOrEqual(
             8,
-            count($links),
-            'Only '.count($links).' links were found in the footer. The extraction is reading '
+            count($this->footerEntries()),
+            'Only '.count($this->footerEntries()).' links were found in the footer. The extraction is reading '
                 .'the wrong element.',
         );
 

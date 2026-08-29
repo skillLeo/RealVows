@@ -89,14 +89,45 @@
                 <div class="rv-stack" style="gap: 16px">
                     <span class="rv-logo__word rv-pubfoot__word">RealVows</span>
                     <p class="rv-small rv-pubfoot__blurb">
-                        A small matchmaking platform for people who have decided what they are
-                        looking for. Free to join, and everyone here has been checked.
+                        Committed to dignified unions. A marriage-ready matchmaking platform for
+                        verified adults seeking lifelong partnership.
                     </p>
                 </div>
 
-                <nav class="rv-pubfoot__col" aria-label="About RealVows">
-                    <p class="rv-eyebrow">RealVows</p>
-                    <a href="{{ route('how-it-works') }}">How it works</a>
+                {{-- ⚠️ NO BLOG COLUMN AND NO PACKAGES LINK — R10-B §2.
+
+                     The reference's footer carries both. We have no blog at
+                     all, and /packages returns 404 during the free period, so
+                     either entry would be a link to nothing. An absence is
+                     better than a dead link, and FooterLinksResolveTest walks
+                     every href here with a deliberately broken control.
+
+                     "The Science" points at the scoring section rather than at
+                     a page of its own, which is where that content actually
+                     lives. --}}
+                <nav class="rv-pubfoot__col" aria-label="Platform">
+                    <p class="rv-eyebrow">Platform</p>
+                    <a href="{{ route('how-it-works') }}">How It Works</a>
+                    <a href="{{ route('how-it-works') }}#how-we-score">The Science</a>
+                    @if (\App\Support\Payments::areLive())
+                        <a href="{{ url('/packages') }}">Packages</a>
+                    @else
+                        <a href="{{ url('/') }}#packages">Packages</a>
+                    @endif
+
+                    {{-- ⚠️ ABOUT AND QUESTIONS STAY, AND THE GUARD IS WHY.
+
+                         §2 lists this column as How It Works, The Science and
+                         Packages, which is what his reference has — because his
+                         reference has no About page and no FAQ. Building it to
+                         the letter dropped two pages that exist, resolve, and
+                         were reachable from every page on the site until now.
+
+                         FooterLinksResolveTest caught it: the footer fell to six
+                         links against a floor of eight, which that floor exists
+                         to catch. Losing working navigation was not something
+                         the brief asked for, so the three he named are all
+                         present and ours are kept beside them. --}}
                     <a href="{{ route('about') }}">About</a>
                     <a href="{{ route('faq') }}">Questions</a>
                 </nav>
@@ -111,13 +142,15 @@
 
                 <nav class="rv-pubfoot__col" aria-label="Getting in touch">
                     <p class="rv-eyebrow">Contact</p>
-                    <a href="{{ route('login') }}">Sign in</a>
-                    <a href="{{ route('register') }}">Create an account</a>
+                    <a href="mailto:support@realvows.com">support@realvows.com</a>
+                    @if ($whatsappDelivery ?? false)
+                        <a href="{{ route('faq') }}#whatsapp">WhatsApp support</a>
+                    @endif
                 </nav>
             </div>
 
             <div class="rv-pubfoot__legal">
-                <span>&copy; {{ date('Y') }} RealVows. All rights reserved.</span>
+                <span>&copy; {{ date('Y') }} RealVows Matchmaking. All rights reserved.</span>
                 {{-- ⚠️ THE AGE STATEMENT IS A REAL CONSTRAINT, NOT DECORATION. --}}
                 <span>Strictly for adults aged 18 and over.</span>
             </div>

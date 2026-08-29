@@ -50,9 +50,30 @@ class ClientSuppliedCopyTest extends TestCase
      *
      * @var array<string, string>
      */
+    /*
+     * ⚠️ ONE LINE WAS RETIRED IN R10-B, BY HIM, AND IT IS RECORDED RATHER THAN
+     * DELETED.
+     *
+     *   "The person you build a life with."
+     *   Provenance: his line, corrected only for person. Protected since R7.
+     *
+     * It was the hero paragraph. R10-B §2 replaces that paragraph with the
+     * wording from the reference he supplied — "A premium matchmaking platform
+     * for people who have decided they want marriage — built on rigorous
+     * verification, values-based alignment, and profile compatibility." — which
+     * is also his, and later.
+     *
+     * This guard exists to stop US quietly dropping his words in a redesign,
+     * and it did its job: it failed the build the moment the line went. But it
+     * cannot arbitrate between two things the client said, and when it does,
+     * the more recent instruction is the one that stands. His own words this
+     * round were "I do not want our words. I want the same words that they
+     * have. Every single thing."
+     *
+     * Left here as a comment so the line is recoverable and the supersession is
+     * legible, rather than vanishing from the file with the guard.
+     */
     private const PROTECTED = [
-        'The person you build a life with.' =>
-            'His line, corrected only for person.',
 
         'RealVows is for people looking to find their true soul mate.' =>
             'His line. It replaced "RealVows is for people ready to marry" at his direct '

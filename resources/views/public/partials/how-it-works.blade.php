@@ -26,9 +26,13 @@
          word, and the contraction goes because the marketing pages do not use
          them. --}}
     <div class="rv-stack rv-section__head" data-reveal>
-        <p class="rv-eyebrow rv-eyebrow--ruled">Here is what we need from you</p>
-        <{{ $heading }} class="rv-d2">How it works</{{ $heading }}>
+        <p class="rv-eyebrow rv-eyebrow--ruled">The Process</p>
+        <{{ $heading }} class="rv-d2">A Refined, Discreet Path to Your Life Partner</{{ $heading }}>
         <span class="rv-underline" style="max-width: 220px"></span>
+        <p class="rv-lead rv-measure">
+            Four deliberate steps. No swiping, no endless browsing, no performance &mdash; only
+            considered introductions.
+        </p>
     </div>
 
     {{-- ⚠️ Every description is a full sentence ending in a full stop. They
@@ -49,12 +53,57 @@
          step count changes. Each marker owns the track to its left and the
          track to its right; the first drops its left, the last drops its
          right. Add a fourth step and it still closes correctly. --}}
+    {{-- ⚠️ THREE AND FOUR ARE SWAPPED FROM THE REFERENCE, ON HIS INSTRUCTION.
+
+         Its order is Create, Verify, Choose a Package, Receive Your Matches.
+         He wants the matches before the money: you see what arrives, and only
+         then are you asked to pay for it. The markers are renumbered rather
+         than the text merely reordered, so 03 is Receive and 04 is Choose.
+
+         ⚠️ THE NUMBERS ARE DERIVED FROM POSITION, NOT TYPED.
+         Written by hand, a future reorder produces a rail reading 01 02 04 03
+         and nothing catches it. --}}
+    @php
+        /*
+         * ⚠️ A PHP COMMENT, NOT A BLADE ONE, AND THE STEPS LIVE IN AN @php
+         * BLOCK RATHER THAN IN THE @foreach EXPRESSION.
+         *
+         * Written as {{-- --}} inside the array literal these are not comments
+         * at all — Blade compiles the directive's argument as PHP, so the
+         * markers land mid-expression and the page 500s. how-we-score carries a
+         * note about the same trap and I walked into it anyway.
+         *
+         * ⚠️ TODO — R10 §7.1, step 02. The reference says the member records a
+         * short live video and we match the face to their photographs. This
+         * product does not: video capture was removed months ago at the
+         * client's own request and replaced with the guided instruction and a
+         * human review queue. He has since said he is open to video, but that
+         * is a build decision waiting on a scholar's answer and on scope, so
+         * the wording below describes what actually happens today. One edit
+         * when the answer comes back.
+         */
+        $steps = [
+            ['Create Your Profile', 'Work through a guided multi-step form covering values, lifestyle, marriage goals and partner preferences. Drafts save as you go.'],
+            ['Verify Your Identity', 'A real person checks your photographs and sends you a guided instruction, so we can confirm you are who you say you are.'],
+            /*
+             * ⚠️ THE CHANNEL IS CONDITIONAL, THE SENTENCE IS HIS.
+             *
+             * His reference reads "arrive by email and WhatsApp". WhatsApp
+             * delivery is a setting, and while it is off that sentence is a
+             * promise a visitor would sign up for and never receive — which is
+             * the one thing a marketing page may never do. When it is on, his
+             * wording is restored exactly.
+             */
+            ['Receive Your Matches', 'Curated introductions arrive by email'
+                .(($whatsappDelivery ?? false) ? ' and WhatsApp' : '')
+                .', each with a full compatibility breakdown and a secure profile link.'],
+            ['Choose a Package', 'Select a one-time match package. No subscription, no auto-renewal, no hidden charges — ever.'],
+        ];
+    @endphp
+
     <ol class="rv-process" data-stagger>
-        @foreach ([
-            ['01', 'Build your free profile', 'Guided the whole way, saved as you go. It costs nothing.'],
-            ['02', 'Get verified', 'A real person confirms your identity before anyone is introduced to you.'],
-            ['03', 'Receive your introductions', 'We choose them and bring them to you. There is nothing to search.'],
-        ] as [$number, $title, $body])
+        @foreach ($steps as $i => [$title, $body])
+            @php ($number = str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT))
             <li class="rv-process__step" data-reveal>
                 <span class="rv-process__rail" aria-hidden="true">
                     <span class="rv-process__marker rv-numeral">{{ $number }}</span>

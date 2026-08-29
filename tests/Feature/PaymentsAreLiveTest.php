@@ -117,11 +117,39 @@ class PaymentsAreLiveTest extends TestCase
 
     // ── What the public page actually renders ────────────────────────────
 
+    /**
+     * ⚠️ THE WORDING MOVED, THE RULE DID NOT — R10-B §2.
+     *
+     * The page used to withhold the pricing grid entirely and carry a section
+     * headed "Nothing, while we are getting started". The client asked for his
+     * reference's package cards, so the grid now ships in full — prices,
+     * per-match arithmetic and feature lists — and only the three Select
+     * buttons are replaced, by this statement, in the same visual frame.
+     *
+     * What is being guarded is unchanged: while payments are off, the page must
+     * say so, in the place where it would otherwise ask for money.
+     */
+    private const FREE_PERIOD_STATEMENT = 'Free while we are getting started';
+
     public function test_the_home_page_carries_the_free_period_wording_today(): void
     {
         $home = $this->get('/')->assertOk()->getContent();
 
-        $this->assertStringContainsString('Nothing, while we are getting started', $home);
+        $this->assertStringContainsString(self::FREE_PERIOD_STATEMENT, $home);
+    }
+
+    /** ⚠️ And no purchase button may exist while nothing can be purchased. */
+    public function test_no_purchase_button_ships_while_payments_are_off(): void
+    {
+        $home = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(
+            'rv-package__cta',
+            $home,
+            'A Select button is on the page while Payments::areLive() is false. A button that '
+                .'takes a decision and then cannot complete it is a broken promise on the busiest '
+                .'part of the page.',
+        );
     }
 
     /**
@@ -139,9 +167,9 @@ class PaymentsAreLiveTest extends TestCase
 
         $after = $this->get('/')->getContent();
 
-        $this->assertStringContainsString('Nothing, while we are getting started', $before);
+        $this->assertStringContainsString(self::FREE_PERIOD_STATEMENT, $before);
         $this->assertStringNotContainsString(
-            'Nothing, while we are getting started',
+            self::FREE_PERIOD_STATEMENT,
             $after,
             'The free-period wording is still on the page after payments went live. The section '
                 .'is ignoring the predicate.',

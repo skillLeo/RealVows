@@ -65,6 +65,27 @@ class MarriageLeadTest extends TestCase
      * @var array<string, array{reason: string, surfaces: list<string>}>
      */
     private const ALLOWED = [
+        /*
+         * ⚠️ HIS FOOTER BLURB, WHICH IS ON EVERY PAGE BECAUSE THE FOOTER IS.
+         *
+         * R10-B §2 gives this wording verbatim: "Committed to dignified unions.
+         * A marriage-ready matchmaking platform for verified adults seeking
+         * lifelong partnership."
+         *
+         * The four marketing pages are out of this guard's scope under R10 §8,
+         * but the footer is shared, so his sentence also lands on /terms,
+         * /privacy, /community-guidelines and /refunds — which are ours and
+         * still guarded. The alternative is a different footer on the legal
+         * pages, which is a seam invented to satisfy a test.
+         *
+         * It is marriage-forward and it is deliberate: he chose it, and the
+         * pages it leaks onto are the ones nobody arrives at first.
+         */
+        'marriage-ready matchmaking platform' => [
+            'reason' => 'His supplied footer blurb, R10-B §2. Shared footer, so it reaches the legal pages.',
+            'surfaces' => ['/terms', '/privacy', '/community-guidelines', '/refunds'],
+        ],
+
         'Their synergy will help them develop that bond' => [
             'reason' => "The client's own sentence, supplied verbatim and approved by him. "
                 .'Marriage is the last word of a paragraph that opens on soul mate — this is '

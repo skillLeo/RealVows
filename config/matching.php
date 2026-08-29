@@ -26,17 +26,36 @@ return [
     | describe something a member could be told in full without the product
     | being any worse for it: RealVows scores what you told us about yourself.
     |
-    | Values rises furthest because alignment on life goals, children and pace
-    | is what this product is actually for.
+    | ── ⚠️ THE CLIENT SET THESE FIVE NUMBERS HIMSELF — R10 §4.1, 2026-08-29 ──
+    |
+    | He sent "40% 25% 20% 10% 5%" in that order and confirmed separately that
+    | Preference Fulfilment is the primary at forty. They are assigned below in
+    | the reference page's own display order, which is the order he sent them
+    | in.
+    |
+    | What changed and why it matters: preferences rises 28 → 40 and becomes the
+    | largest weight in the product. The reasoning he gave for it is in the
+    | rewritten compatibility article — if the basics do not align, it throws
+    | most other things off. Personality falls 17 → 10 and physical 13 → 5,
+    | which is the product saying plainly that what you say you want counts for
+    | more than what you happen to like.
+    |
+    | ⚠️ THE PUBLIC PAGE READS THESE. It does not restate them.
+    |
+    | The Science of Harmony section renders its five percentages and its bar
+    | widths from this array, and MatchingConfigTest asserts the rendered page
+    | equals this file. A number typed into a Blade template would be a claim
+    | about the product that the product itself could contradict, silently, for
+    | as long as nobody checked.
     |
     */
 
     'weights' => [
-        'preferences' => 28,
+        'preferences' => 40,
         'values' => 25,
-        'lifestyle' => 17,
-        'personality' => 17,
-        'physical' => 13,
+        'lifestyle' => 20,
+        'personality' => 10,
+        'physical' => 5,
     ],
 
     /*
@@ -55,8 +74,13 @@ return [
     |
     */
 
+    /*
+    | ⚠️ 70, NOT 65 — R10 §4.2. The client's words were "seventy percent is
+    | good". The public page states this number, and MatchingConfigTest asserts
+    | the page and this file agree, so it cannot drift into being a lie.
+    */
     'threshold' => [
-        'default' => 65,
+        'default' => 70,
         'min' => 50,
         'max' => 85,
     ],

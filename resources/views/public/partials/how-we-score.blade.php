@@ -36,23 +36,26 @@
      * quietly omits a component is a page claiming a score is built from less
      * than it is.
      */
+    /*
+     * ⚠️ THESE ARE THE REFERENCE'S OWN WORDS, VERBATIM — R10 §1 AND §5.
+     *
+     * R9 said take the composition and none of the wording. The client has
+     * overruled that directly: "I do not want our words. I want the same words
+     * that they have. Every single thing." So the strings below are copied
+     * character for character from realvows.luxoraarts.com, ampersands and all,
+     * and our house style on dashes and vocabulary is suspended here by §8.
+     *
+     * The one thing that is NOT theirs is the weighting. Their page describes
+     * six dimensions, and its largest was the component this product removed.
+     * Ours has five and the numbers come from config. Copy is theirs,
+     * arithmetic is ours.
+     */
     $copy = [
-        'preferences' => ['What you asked for', 'Age, height, education, faith and distance, checked in both directions. A one-sided match is worth less than a mutual one. Satisfying you while failing them does not score full marks.'],
-        /*
-         * ⚠️ "the pace you want to move at", NOT the field's internal name.
-         * MarriageLeadTest failed on that name and was right: the client's
-         * standing instruction is that soul mate leads and marriage is the
-         * destination, not the door. "Pace" is the config's own word for this
-         * and describes the same four options.
-         *
-         * ⚠️ AND THIS IS A PHP COMMENT, NOT A BLADE ONE. Written as {{-- --}}
-         * inside an @php block it is not a comment at all — it rendered into
-         * the page as visible text, which is how the guard caught it twice.
-         */
-        'values'      => ['Values and life goals', 'Your ranked core values, the pace you want to move at, plans for children, and how much faith matters. The ranking is used, not just the overlap. Two people who both put family first are not the same as two who both put it fifth.'],
-        'lifestyle'   => ['How you live day to day', 'Habits, education and occupation fit, languages spoken. Compatibility tables rather than equality, because a non-smoker and a social smoker are not the same pairing as two heavy smokers.'],
-        'personality' => ['Interests and temperament', 'Shared interests and how the two of you are wired. Closeness is rewarded on some scales and deliberately not on others. Two people who are both entirely spontaneous have nobody booking the flights.'],
-        'physical'    => ['Stated preferences', 'Height and body type as each of you described them, scored in both directions and averaged. Attraction that runs one way is not attraction.'],
+        'preferences' => ['Preference Fulfilment', 'Your stated preferences — age, height, education, faith and more — checked for mutual reciprocity.'],
+        'values'      => ['Values & Life Goals', 'Core values overlap, marriage timeline, plans for children, and the importance of faith.'],
+        'lifestyle'   => ['Lifestyle Compatibility', 'Daily habits, education and occupation fit, pets, and languages spoken.'],
+        'personality' => ['Personality & Interests', 'Shared interests, proximity on personality scales, and signals drawn from your bio.'],
+        'physical'    => ['Physical Preference', 'Mutual satisfaction of stated height and body type preferences.'],
     ];
 
     $missing = array_diff(array_keys($weights), array_keys($copy));
@@ -63,6 +66,14 @@
             'weight' => $weight,
             'title' => $copy[$key][0] ?? $key,
             'body' => $copy[$key][1] ?? '',
+            /*
+             * ⚠️ DERIVED, NOT TYPED. The reference badges Preference Fulfilment
+             * PRIMARY. Hardcoding that to one key would leave the badge sitting
+             * on a component that is no longer the largest the moment anybody
+             * retunes the weights — the exact class of drift this whole section
+             * is built to prevent.
+             */
+            'primary' => $weight === max($weights),
         ])
         ->values();
 
@@ -72,19 +83,23 @@
 <section class="rv-section rv-paper" id="how-we-score">
     <div class="rv-shell rv-stack" style="gap: 0">
         <div class="rv-stack rv-section__head" data-reveal>
-            <p class="rv-eyebrow rv-eyebrow--ruled">How the score is built</p>
-            <h2 class="rv-d2">Every point comes from something you wrote</h2>
+            <p class="rv-eyebrow rv-eyebrow--ruled">Our Secret Sauce</p>
+            <h2 class="rv-d2">The Science of Harmony</h2>
+            {{-- ⚠️ SIX BECAME FIVE, AND THE ENERGETIC LANGUAGE WENT WITH IT.
+
+                 The reference reads "six dimensions" and describes its sixth in
+                 the register this product removed on a scholar's ruling. Ours has
+                 five, so this is one of the §5 marked changes rather than a
+                 verbatim copy. Everything else in the sentence is his.
+
+                 ⚠️ The forbidden-terms reader scans SOURCE, not just rendered
+                 output, so naming that register even inside a Blade comment
+                 fails the build. That is the guard working correctly: this file
+                 is one a member can reach and the word has no business in it. --}}
             <p class="rv-lead">
-                {{-- ⚠️ THE DENIAL WAS DELETED, NOT THE POINT. This sentence used to
-                     name the two things this product does not do, and the reader
-                     that guards this failed the build over it — correctly. Naming them to
-                     refuse them still puts them in front of a reader who had not
-                     thought of them, on the page of a client who had the component
-                     removed on a scholar's ruling. The positive claim is stronger
-                     and says the same thing: everything here came from you. --}}
-                Five components, weighted and added together. Nothing is read from your date
-                of birth, and nothing about you is inferred that you did not write down
-                yourself.
+                Our proprietary algorithm weighs five dimensions of compatibility, placing your
+                most important preferences alongside the practical realities of building a life
+                together.
             </p>
         </div>
 
@@ -102,6 +117,9 @@
                     <li class="rv-score__row" data-reveal>
                         <div class="rv-score__head">
                             <h3 class="rv-d3">{{ $row['title'] }}</h3>
+                            @if ($row['primary'])
+                                <span class="rv-score__badge">Primary</span>
+                            @endif
                             <span class="rv-score__pct rv-numeral">{{ $row['weight'] }}<span class="rv-score__sign">%</span></span>
                         </div>
                         {{-- ⚠️ THE BAR IS THE NUMBER DRAWN, so it is aria-hidden and
@@ -137,18 +155,23 @@
                     </p>
                 </div>
 
+                {{-- ⚠️ THE NUMBER IS INTERPOLATED, THE SENTENCE IS HIS.
+                     PageMatchesEngineTest asserts this page states the threshold
+                     the engine actually enforces, so the figure can never fall
+                     out of step with config. --}}
                 <p class="rv-body">
-                    Every introduction carries a score out of 100. Nothing below
-                    {{ $threshold }} is ever sent to you, and each one that is arrives with a
-                    written explanation of why the two of you align.
+                    Every introduction carries a transparent score from 0 to 100. We only deliver
+                    a match above a minimum threshold of {{ $threshold }} — and each one arrives
+                    with a written explanation of exactly why the two of you align.
                 </p>
 
                 <span class="rv-rule rv-rule--soft"></span>
 
+                {{-- Verbatim from the reference, §5 KEEP. --}}
                 <p class="rv-body">
-                    <strong>Nothing is guessed.</strong> The scoring is deterministic: the same
-                    two profiles always produce the same result, and every number above can be
-                    read back from your own answers. You are owed a reason, not a verdict.
+                    <strong>No black boxes.</strong> The scoring is deterministic and auditable.
+                    The same two profiles will always produce the same result — because you
+                    deserve a reason, not a guess.
                 </p>
             </aside>
         </div>

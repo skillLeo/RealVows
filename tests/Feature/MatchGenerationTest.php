@@ -319,7 +319,7 @@ class MatchGenerationTest extends TestCase
         app(MatchGenerator::class)->generateFor($seeker);
 
         foreach (MatchRecord::where('seeker_profile_id', $seeker->id)->get() as $match) {
-            $this->assertGreaterThanOrEqual(65, (float) $match->total_score);
+            $this->assertGreaterThanOrEqual(config('matching.threshold.default'), (float) $match->total_score);
         }
     }
 

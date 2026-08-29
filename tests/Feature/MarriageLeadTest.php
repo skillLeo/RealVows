@@ -136,11 +136,26 @@ class MarriageLeadTest extends TestCase
      * one — because "marriage appears early on this page" is the exact thing
      * the client objected to.
      */
+    /**
+     * ⚠️ SUSPENDED ON THE CLIENT-WORDED PAGES — R10 §8, 2026-08-29.
+     *
+     * This guard exists because the client told us marriage frightens people
+     * and soul mate should lead. He has now told us the opposite for these four
+     * pages: he wants his reference's words, and its hero badge reads
+     * "Marriage-Ready Matchmaking · 18+" above a heading about a lifelong
+     * union. Marriage leads there because he decided it should.
+     *
+     * Both instructions are his and the later one wins. The guard keeps running
+     * over the legal pages, every WhatsApp body, every email and the product's
+     * own option strings, which is where the original objection actually came
+     * from — a member being told about marriage inside the product, not a
+     * visitor reading a marketing page he wrote himself.
+     */
     public function test_no_public_page_leads_with_marriage(): void
     {
         $offences = [];
 
-        foreach (PublicSurfaces::paths() as $path) {
+        foreach (PublicSurfaces::houseStyledPaths() as $path) {
             $html = $this->get($path)->getContent();
 
             foreach ($this->leadingMatter($html) as $where => $text) {
@@ -317,7 +332,9 @@ class MarriageLeadTest extends TestCase
     {
         $surfaces = [];
 
-        foreach (PublicSurfaces::paths() as $path) {
+        // ⚠️ R10 §8: the four client-worded pages are out of scope. Everything
+        // else the product says to a member is still held to the register.
+        foreach (PublicSurfaces::houseStyledPaths() as $path) {
             $surfaces[$path] = Scanners::visibleText($this->get($path)->getContent());
         }
 

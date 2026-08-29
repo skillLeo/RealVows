@@ -72,11 +72,20 @@ class ProseStyleTest extends TestCase
         $this->seed(\Database\Seeders\SettingsSeeder::class);
     }
 
+    /**
+     * ⚠️ SCANS THE PAGES WE WROTE, NOT THE ONES HE DID — R10 §8.
+     *
+     * The marketing pages now carry the client's reference copy verbatim, and
+     * it is full of em dashes because that is how he writes. Failing the build
+     * over his punctuation would be this guard overruling the person it is
+     * built for. See PublicSurfaces::clientWordedPaths() for the full reasoning
+     * and for what stays enforced everywhere regardless.
+     */
     public function test_no_public_page_uses_a_dash_or_a_semicolon_as_punctuation(): void
     {
         $offences = [];
 
-        foreach (PublicSurfaces::paths() as $path) {
+        foreach (PublicSurfaces::houseStyledPaths() as $path) {
             $text = Scanners::visibleText($this->get($path)->getContent());
 
             foreach (Scanners::sentences($text) as $sentence) {
@@ -95,11 +104,12 @@ class ProseStyleTest extends TestCase
         );
     }
 
+    /** Also scoped to our own pages — R10 §8. See the note above. */
     public function test_no_public_page_uses_banned_vocabulary(): void
     {
         $offences = [];
 
-        foreach (PublicSurfaces::paths() as $path) {
+        foreach (PublicSurfaces::houseStyledPaths() as $path) {
             $text = Scanners::visibleText($this->get($path)->getContent());
 
             foreach (Scanners::bannedVocabulary($text) as $word) {
@@ -114,7 +124,10 @@ class ProseStyleTest extends TestCase
     {
         $offences = [];
 
-        foreach (self::FORMAL_SURFACES as $path) {
+        // ⚠️ R10 §8 suspends the contraction rule on the client-worded pages
+        // too. The legal pages remain, and they are the ones this guard was
+        // really written for.
+        foreach (array_intersect(self::FORMAL_SURFACES, PublicSurfaces::houseStyledPaths()) as $path) {
             $text = Scanners::visibleText($this->get($path)->getContent());
 
             foreach (Scanners::contractions($text) as $contraction) {

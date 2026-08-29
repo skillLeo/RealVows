@@ -64,7 +64,10 @@ class CompatibilityScorerTest extends TestCase
             ['date_of_birth' => '1992-08-05']
         );
 
-        $this->assertGreaterThan(65, $this->scorer->score($a, $b)['total']);
+        // ⚠️ READS THE DIAL, DOES NOT RESTATE IT. The threshold moved 65 → 70
+        // in R10 §4.2 and this assertion had to be found by grep. Reading it
+        // from config means the next move needs no edit here at all.
+        $this->assertGreaterThan(config('matching.threshold.default'), $this->scorer->score($a, $b)['total']);
     }
 
     /**
@@ -109,7 +112,7 @@ class CompatibilityScorerTest extends TestCase
         $total = $this->scorer->score($a, $b)['total'];
 
         $this->assertLessThan(
-            65,
+            config('matching.threshold.default'),
             $total,
             "Two people who disagree on everything, including what they each said they wanted, scored {$total}."
         );

@@ -5361,6 +5361,31 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   justify-content: space-between;
   gap: 16px;
 }
+/*
+ * ⚠️ THE PRIMARY BADGE — R10 §5.
+ *
+ * The reference marks its heaviest component PRIMARY. It is rendered from
+ * `$weight === max($weights)` rather than pinned to a component name, so it
+ * follows the arithmetic if the weights are ever retuned instead of sitting on
+ * a row that used to be the largest.
+ *
+ * Small caps on brass-ink, which is the token that clears AA on this paper —
+ * undarkened brass reaches only 2.69:1 and this is 11px text.
+ */
+.rv-score__badge {
+  align-self: center;
+  margin-inline-end: auto;
+  padding: 3px 8px;
+  border: 1px solid var(--outline-ref);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+  white-space: nowrap;
+}
+
 .rv-score__pct { font-size: 30px; color: var(--oxblood); }
 .rv-score__sign { font-size: .58em; vertical-align: super; }
 

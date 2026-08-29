@@ -273,7 +273,7 @@ class SettingsSeeder extends Seeder
 
         $defaults = [
             'general.site_name' => 'RealVows',
-            'matching.minimum_score_threshold' => '65',
+            'matching.minimum_score_threshold' => '70',
             'matching.matches_per_batch' => '8',
             'verification.auto_approve' => '0',
             'verification.code_length' => '6',

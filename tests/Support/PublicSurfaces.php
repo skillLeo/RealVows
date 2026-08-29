@@ -49,6 +49,48 @@ class PublicSurfaces
     }
 
     /**
+     * ⚠️ THE MARKETING PAGES THAT NOW CARRY THE CLIENT'S OWN WORDS — R10 §8,
+     * 2026-08-29.
+     *
+     * These four render copy taken verbatim from the reference the client
+     * supplied. His instruction was explicit: "I do not want our words. I want
+     * the same words that they have. Every single thing." Our house rules on
+     * dashes, semicolons, contractions, banned vocabulary and the soul-mate
+     * register were written for copy WE wrote, and they cannot be applied to
+     * copy he chose without silently overruling him.
+     *
+     * ⚠️ THIS IS A SUSPENSION, NOT A DELETION, AND THE DIFFERENCE MATTERS.
+     *
+     * Every one of those readers still runs, at full strength, over:
+     *   · the legal pages below, which are ours and stay in our register
+     *   · every authenticated surface
+     *   · every email
+     *   · the copy deck
+     *
+     * So the rules still hold everywhere the client did not overrule them, and
+     * the day this copy is replaced with ours again, deleting one entry from
+     * this list puts the guard straight back over it.
+     *
+     * ⚠️ WHAT IS NOT SUSPENDED, ON ANY SURFACE: the celestial forbidden-terms
+     * reader, the payment-provider guard, the no-browsing rule and the
+     * no-member-channel rule. Those exist because a sentence would be untrue or
+     * unsafe, not because it would be off-register, and the client overruling
+     * our style is not the client overruling arithmetic.
+     *
+     * @return list<string>
+     */
+    public static function clientWordedPaths(): array
+    {
+        return ['/', '/how-it-works', '/about', '/questions'];
+    }
+
+    /** Paths still held to the house style: our own writing. @return list<string> */
+    public static function houseStyledPaths(): array
+    {
+        return array_values(array_diff(self::paths(), self::clientWordedPaths()));
+    }
+
+    /**
      * Rendered HTML for every public page, keyed by path.
      *
      * @return array<string, string>

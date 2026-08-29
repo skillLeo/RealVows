@@ -5543,10 +5543,19 @@ a:hover { color: var(--rose); text-decoration-color: var(--brass-bright); }
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--surface-tint);
+  /*
+   * ⚠️ BLUSH, NOT GREY — R10-C §12.
+   *
+   * These read as grey circles on production while the reference fills its with
+   * a pale rose drawn from the primary. A neutral disc makes the icon look like
+   * a placeholder; a tinted one makes it look chosen. The mix is off
+   * --oxblood-deep, which is the value his stylesheet calls --color-primary, so
+   * the fill is his own colour at 8% rather than a new tint invented here.
+   */
+  background: color-mix(in oklab, var(--oxblood-deep) 8%, var(--surface-raised));
   color: var(--oxblood);
 }
-.rv-icon-disc svg { width: 28px; height: 28px; }
+.rv-icon-disc svg { width: 28px; height: 28px; stroke-width: 1.4; }
 
 /*
  * ⚠️ THE EYEBROW TYPE LIVES DOWN HERE, AND THAT IS A CASCADE FACT, NOT A

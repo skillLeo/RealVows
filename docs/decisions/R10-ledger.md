@@ -153,3 +153,59 @@ the price the checkout charges. That is the same class of drift PageMatchesEngin
 was written for, and it deserves the same treatment in the round that turns
 payments on.
 2026-08-29
+
+---
+
+# R10-C
+
+**15 · realvows.com was serving the review build, and I missed it**
+Default applied: made the review treatment impossible on a production hostname
+in code, rather than waiting on server access to correct APP_ENV.
+Why: the server's .env says APP_ENV=demo, which drove the banner, a noindex meta
+tag and a robots.txt of Disallow: /. I have no SSH to that box — the deploy runs
+on GitHub secrets — so a code fix was the only route I could take myself. It is
+also the better fix: a hand-edited environment variable on a box nobody checks
+is what caused this, and a hostname cannot be misconfigured into being wrong.
+⚠️ The server .env should still be corrected. Until it is, APP_ENV=demo remains
+true there and anything else keyed to it stays keyed to it.
+Changes it: nothing. The guard should stay even after the .env is fixed.
+2026-08-29
+
+**16 · I verified production by grepping for strings I expected, not by reading it**
+Default applied: none — recorded so the method changes.
+Why: last round I fetched the home page, checked twenty strings I had just
+written, and reported the deploy clean. The banner was in the bytes I had open.
+Grepping for what you expect confirms what you did; it cannot find what you did
+not think to look for. The page needed reading, and the screenshots the client
+sent found it in one glance.
+Changes it: nothing. This is a note about how to check, not a decision.
+2026-08-29
+
+**17 · The Packages entry is an anchor that becomes a route**
+Default applied: PublicState::platformLinks() points Packages at /#packages
+while payments are off and at /packages once the projection says they are live.
+Why: §2 said remove it; a pricing-link guard said it must appear when payments
+go live. Both are right and a conditional satisfies both. /packages does not 404
+during the free period as the brief assumed — it redirects to /login, which is
+worse, because a sign-in form reads as though the visitor did something wrong.
+Changes it: payments going live, which flips it automatically.
+2026-08-29
+
+**18 · The navigation guard reported a false orphan, for the second time**
+Default applied: added app/Support to the directories it scans.
+Why: moving the platform links into PublicState took the route('about') literal
+out of resources/, and the guard reads source rather than rendered output. Its
+own comment describes this exact failure happening once before. Handing it a
+resolved URL does not work — those start http:// and match nothing — so the fix
+is to look where the navigation is now written.
+Changes it: navigation moving again, which would need the same treatment.
+2026-08-29
+
+**19 · §12's third item is not done**
+Default applied: the icon discs and the closing eyebrow are fixed; the process
+step headings still wrap raggedly, three of four on two lines.
+Why: evening them needs either a set break per heading or a min-height on the
+row, and both are guesses without seeing it rendered at several widths. It is
+cosmetic and it is the smallest thing on the list.
+Changes it: a look at it on a real screen.
+2026-08-29

@@ -12,7 +12,7 @@
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="margin:0 0 24px;border:1px solid rgba(185,145,84,.4);border-radius:8px;background:#F2EFE9;">
+           style="margin:0 0 24px;border:1px solid rgba(197, 160, 89,.4);border-radius:8px;background:#F2EFE9;">
         <tr>
             <td style="padding:20px 24px;">
                 <p style="margin:0 0 8px;font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#6B5F62;">

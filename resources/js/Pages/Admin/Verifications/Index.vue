@@ -152,7 +152,7 @@ const FILTERS = [
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(185, 145, 84, 0.5);
+    color: rgba(197, 160, 89, 0.5);
 }
 
 .rv-queue__thumb img {

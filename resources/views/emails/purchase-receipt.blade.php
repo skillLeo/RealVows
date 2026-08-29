@@ -12,34 +12,34 @@
     </p>
 
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
-           style="margin:0 0 24px; border:1px solid rgba(185,145,84,.4); border-radius:8px;">
+           style="margin:0 0 24px; border:1px solid rgba(197, 160, 89,.4); border-radius:8px;">
         <tr>
-            <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2);
+            <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2);
                        font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
                 Reference
             </td>
-            <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2); text-align:right;
+            <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2); text-align:right;
                        font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#1F1518;">
                 {{ $reference }}
             </td>
         </tr>
         <tr>
-            <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2);
+            <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2);
                        font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
                 Introductions
             </td>
-            <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2); text-align:right;
+            <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2); text-align:right;
                        font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#1F1518;">
                 {{ $credits }}
             </td>
         </tr>
         @if ($paidOn)
             <tr>
-                <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2);
+                <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2);
                            font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#6B5F62;">
                     Paid on
                 </td>
-                <td style="padding:16px 20px; border-bottom:1px solid rgba(185,145,84,.2); text-align:right;
+                <td style="padding:16px 20px; border-bottom:1px solid rgba(197, 160, 89,.2); text-align:right;
                            font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px; color:#1F1518;">
                     {{ $paidOn }}
                 </td>

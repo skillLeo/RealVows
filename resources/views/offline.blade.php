@@ -9,7 +9,7 @@
         /* Inlined deliberately: this page has to render when nothing else
            can be fetched, including the stylesheet. */
         :root {
-            --oxblood-deep: #4A1220; --oxblood: #6B1834; --brass: #B99154;
+            --oxblood-deep: #4A1220; --oxblood: #6B1834; --brass: #C5A059;
             --cream: #F2EFE9; --ink-soft: #6B5F62;
         }
         * { box-sizing: border-box; }

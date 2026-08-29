@@ -43,7 +43,7 @@
         --}}
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;">
             <tr>
-                <td style="padding:16px 20px;background:#F2EFE9;border:1px solid rgba(185,145,84,.4);border-radius:8px;">
+                <td style="padding:16px 20px;background:#F2EFE9;border:1px solid rgba(197, 160, 89,.4);border-radius:8px;">
                     <span style="font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1;color:#6B1834;">{{ $score }}</span>
                     <span style="font-size:14px;color:#6B5F62;">&nbsp;out of 100</span>
                 </td>

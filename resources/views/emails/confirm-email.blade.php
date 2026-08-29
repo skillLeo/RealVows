@@ -16,6 +16,6 @@
 
     <p style="margin:24px 0 0;font-size:14px;line-height:1.55;color:#6B5F62;">
         If the button does not work, copy this into your browser:<br>
-        <span style="word-break:break-all;color:#B99154;">{{ $url }}</span>
+        <span style="word-break:break-all;color:#C5A059;">{{ $url }}</span>
     </p>
 @endcomponent

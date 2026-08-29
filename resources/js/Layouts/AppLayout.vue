@@ -184,7 +184,7 @@ const adminShell = useAdminShell();
 }
 
 .rv-app__nav-link:hover {
-    background: rgba(185, 145, 84, 0.14);
+    background: rgba(197, 160, 89, 0.14);
     color: var(--cream);
 }
 

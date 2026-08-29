@@ -18,9 +18,9 @@
                font-family:'Inter',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
                font-size:16px; line-height:1.6; }
         .rv-card { max-width:520px; margin:48px auto; background:#F8F6F2;
-                   border:1px solid rgba(185,145,84,.4); border-radius:8px; overflow:hidden; }
+                   border:1px solid rgba(197, 160, 89,.4); border-radius:8px; overflow:hidden; }
         .rv-band { background:#4A1220; padding:24px 32px;
-                   font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#B99154; }
+                   font-family:Georgia,'Times New Roman',serif; font-size:20px; color:#C5A059; }
         .rv-body { padding:32px; }
         h1 { margin:0 0 16px; font-family:Georgia,'Times New Roman',serif;
              font-size:26px; font-weight:400; color:#6B1834; }

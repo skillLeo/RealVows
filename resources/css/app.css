@@ -179,7 +179,29 @@
    */
   --oxblood:      #6B1834;   /* primary buttons, headings on cream */
   --rose:         #A64452;   /* secondary / ghost actions, error states */
-  --brass:        #B99154;   /* logo, hairline borders, accents, active */
+  /*
+   * ⚠️ #C5A059 IS THE REFERENCE'S OWN GOLD — R10-B §1, 2026-08-29.
+   *
+   * Read out of its stylesheet as --color-gold. It replaces #C5A059 everywhere,
+   * not only on public routes, because a different gold on the dashboard to the
+   * one on the home page is a seam a member would see crossing between them.
+   *
+   * ⚠️ IT IS LIGHTER THAN WHAT IT REPLACES, AND THAT CUTS BOTH WAYS.
+   *
+   *   on oxblood #480027   5.55:1 → 6.55:1   better
+   *   on cream   #F2EFE9   2.53:1 → 2.14:1   worse
+   *
+   * Neither figure is a regression, because --brass is not a text colour on
+   * light grounds and never was. Gold lettering on cream is --brass-ink
+   * (#7F5F2E, 5.11:1), which is deliberately NOT changed here: it is a
+   * darkened-until-it-passes value, not a hue, and re-deriving it from the new
+   * gold would have moved a token that already does its job.
+   *
+   * Every rgba() below carrying 197,160,89 is this same colour at an alpha.
+   * They are written out rather than colour-mixed because they predate the
+   * mixing and one of them is load-bearing — see --brass-fade.
+   */
+  --brass:        #C5A059;   /* logo, hairline borders, accents, active */
   --brass-bright: #D4AF6A;   /* hover, focus rings, small highlights */
   --cream:        #F2EFE9;   /* main light surface */
 
@@ -228,7 +250,7 @@
   /* Hover and active fills on brass-accented surfaces. Kept apart from the
      hairlines because a fill and a border are different jobs and will drift
      the first time one of them changes. */
-  --brass-wash:    rgba(185, 145, 84, .14);
+  --brass-wash:    rgba(197, 160, 89, .14);
 
   /*
    * ⚠️ THE ZERO-ALPHA ENDPOINT OF ANY GRADIENT THAT BEGINS AT BRASS, AND IT IS
@@ -242,7 +264,7 @@
    * ⚠️ DO NOT "SIMPLIFY" THIS TO `transparent`. It looks identical in a
    * swatch and wrong in a gradient.
    */
-  --brass-fade:    rgba(185, 145, 84, 0);
+  --brass-fade:    rgba(197, 160, 89, 0);
 
   /*
    * ⚠️ THE HERO'S WASH IS A COLOUR IN ITS OWN RIGHT, so it gets a name rather
@@ -307,8 +329,8 @@
   --surface-low:   #F6F3F2;   /* card and panel fills */
   --surface-tint:  #F0EDED;   /* icon discs, chips, markers */
 
-  --hairline:      rgba(185, 145, 84, .4);
-  --hairline-soft: rgba(185, 145, 84, .2);
+  --hairline:      rgba(197, 160, 89, .4);
+  --hairline-soft: rgba(197, 160, 89, .2);
 
   /*
    * Brass for TEXT AND ICONS ON LIGHT SURFACES ONLY.
@@ -381,11 +403,55 @@
   --control:     60px;
   --tap-min:     44px;
 
-  /* ---- Shape ----------------------------------------------------------- */
-  --r: 8px;
-  /* ⚠️ CARDS ONLY. The reference's cards are noticeably softer than its
-     controls; using one radius for both is what made ours read as boxes. */
-  --r-lg: 16px;
+  /* ---- Elevation -------------------------------------------------------
+   *
+   * ⚠️ THREE SHADOWS EXIST NOW, AND THE BAN THAT PRECEDED THEM WAS NOT WRONG.
+   *
+   * This design system forbade shadows outright, on the argument that a shadow
+   * is the easiest way to make a product look like every other web app and that
+   * elevation should be carried by a tone step and a hairline. That argument
+   * still holds and the guard still enforces it everywhere except here.
+   *
+   * The client has asked for his reference's look, and his reference has
+   * exactly three box-shadow values. They were read out of its stylesheet, not
+   * matched by eye:
+   *
+   *   --lift-1   0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a
+   *   --lift-2   0 4px 20px  #1a1a1a0a
+   *   --lift-3   0 10px 34px #1a1a1a12
+   *
+   * All three are near-neutral #1a1a1a at 4–10% — elevation hints, not drop
+   * shadows, which is why adopting them does not cost the restraint the ban was
+   * protecting.
+   *
+   * ⚠️ PUBLIC ROUTES ONLY, AND THE GUARD ENFORCES BOTH HALVES: a fourth value
+   * anywhere fails, and any shadow at all outside .rv-public fails. The
+   * authenticated product keeps the hairline rule, because none of this is
+   * about the dashboard.
+   */
+  --lift-1: 0 1px 3px 0 rgba(0, 0, 0, .102), 0 1px 2px -1px rgba(0, 0, 0, .102);
+  --lift-2: 0 4px 20px rgba(26, 26, 26, .039);
+  --lift-3: 0 10px 34px rgba(26, 26, 26, .071);
+
+  /* ---- Shape -----------------------------------------------------------
+   *
+   * ⚠️ RE-LOCKED TO THE REFERENCE'S OWN SCALE — R10-B §1, 2026-08-29.
+   *
+   * Extracted from its stylesheet as --radius-sm/-lg/-xl = .25 / 1 / 1.5rem.
+   * Ours was 8px and 16px, and 8px does not exist anywhere in the reference.
+   *
+   * ⚠️ 1rem IS THE DOMINANT RADIUS, AND THAT IS COUNTED, NOT GUESSED.
+   *
+   * Its stylesheet only proves the utilities exist, so the applied classes were
+   * counted in the shipped bundle: rounded-full 58, rounded-lg 46, rounded-xl 4,
+   * rounded-sm 1. So the reference rounds almost everything at 1rem and makes
+   * pills of the rest. --r moving 8px → 1rem is the single change that closes
+   * most of the shape gap, and it is why our controls read as boxes beside his.
+   */
+  --r-sm: .25rem;   /* 4px  — the reference's --radius-sm, used sparingly */
+  --r: 1rem;        /* 16px — its --radius-lg, and what it puts on almost everything */
+  --r-lg: 1rem;     /* kept as a name: cards and controls share one radius now */
+  --r-xl: 1.5rem;   /* 24px — its --radius-xl */
 
   /* ---- Motion ----------------------------------------------------------
    *

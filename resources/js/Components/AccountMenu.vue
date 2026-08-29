@@ -141,7 +141,7 @@ function logout() {
 .rv-menu__trigger:hover,
 .rv-menu__trigger[aria-expanded='true'] {
     border-color: var(--hairline);
-    background: rgba(185, 145, 84, 0.12);
+    background: rgba(197, 160, 89, 0.12);
 }
 
 .rv-menu__name {

@@ -398,31 +398,56 @@ class PublicStylesheetIsLockedTest extends TestCase
      * fill against a different fill and a border one step heavier than its
      * neighbours, which is quieter and does not date.
      */
-    public function test_no_shadow_of_any_kind_appears(): void
+    /**
+     * ⚠️ box-shadow IS PERMITTED HERE NOW, VIA TOKEN ONLY — R10-B §1.
+     *
+     * The public pages may carry the reference's three elevations as
+     * var(--lift-1|2|3). Everything else in the family stays banned outright:
+     * text-shadow and drop-shadow appear nowhere in the reference, and
+     * "elevation" as a property name is not a thing we write.
+     *
+     * StylesheetIntegrityTest holds the other half — that no fourth value
+     * exists and that no shadow appears outside the public scope.
+     */
+    public function test_no_shadow_appears_except_the_three_permitted_lifts(): void
     {
         $css = $this->declarations();
 
         $offences = [];
 
-        foreach (['box-shadow', 'text-shadow', 'drop-shadow', 'elevation'] as $banned) {
+        foreach (['text-shadow', 'drop-shadow', 'elevation'] as $banned) {
             if (str_contains($css, $banned)) {
                 $offences[] = $banned;
             }
         }
 
+        preg_match_all('/box-shadow:\s*([^;}]+)/', $css, $m);
+
+        foreach ($m[1] as $value) {
+            $v = trim($value);
+
+            if (str_contains($v, 'none') || preg_match('/^var\(--lift-[123]\)$/', $v)) {
+                continue;
+            }
+
+            $offences[] = "box-shadow: {$v}";
+        }
+
         $this->assertSame(
             [],
             $offences,
-            'A shadow property appeared: '.implode(', ', $offences)
-                .'. Prominence here is a tone step and a hairline weight, never a shadow.',
+            'Only var(--lift-1|2|3) may carry elevation here: '.implode(', ', $offences)
+                .'. Everything else is a tone step and a hairline weight.',
         );
     }
 
-    public function test_the_shadow_reader_catches_one(): void
+    /** ⚠️ CONTROL, BOTH DIRECTIONS. */
+    public function test_the_shadow_reader_accepts_a_lift_and_catches_a_literal(): void
     {
-        $fixture = '.rv-card { box-shadow: 0 1px 2px rgba(0,0,0,.1); }';
+        $ok = fn (string $v) => str_contains($v, 'none') || (bool) preg_match('/^var\(--lift-[123]\)$/', trim($v));
 
-        $this->assertStringContainsString('box-shadow', $fixture);
-        $this->assertStringNotContainsString('box-shadow', '.rv-card { border: 1px solid var(--hairline); }');
+        $this->assertTrue($ok('var(--lift-1)'), 'A permitted lift was rejected.');
+        $this->assertFalse($ok('0 1px 2px rgba(0,0,0,.1)'), 'A literal shadow was accepted.');
+        $this->assertFalse($ok('var(--lift-4)'), 'A fourth lift token was accepted.');
     }
 }

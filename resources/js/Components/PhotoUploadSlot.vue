@@ -140,7 +140,7 @@ function choose(event) {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(185, 145, 84, 0.42);
+    color: rgba(197, 160, 89, 0.42);
 }
 
 .rv-slot__flag {

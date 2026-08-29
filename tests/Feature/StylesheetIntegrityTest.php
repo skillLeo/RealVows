@@ -94,22 +94,119 @@ class StylesheetIntegrityTest extends TestCase
     }
 
     /**
-     * ⚠️ The design system bans shadows outright — elevation is carried by
-     * hairline weight. A shadow is the single easiest way to make this product
-     * look like every other web app.
+     * ⚠️ EXACTLY THREE SHADOWS ARE PERMITTED, AND ONLY AS TOKENS — R10-B §1.
+     *
+     * This system banned shadows outright, and that argument still stands
+     * everywhere but the public pages: a shadow is the easiest way to make a
+     * product look like every other web app, and elevation belongs to a tone
+     * step and a hairline.
+     *
+     * The client asked for his reference's look and his reference carries three
+     * box-shadow values, read out of its stylesheet. They are declared once as
+     * --lift-1/2/3 and may only be used through those names.
+     *
+     * So a declaration passes only if it is `none` or a bare var(--lift-N).
+     * A literal shadow fails even when its value is identical to a permitted
+     * one, because the fourth value arrives as a literal — nobody adds a fourth
+     * token, they paste a shadow.
      */
-    public function test_no_box_shadow_has_crept_in(): void
+    private const PERMITTED_LIFTS = ['var(--lift-1)', 'var(--lift-2)', 'var(--lift-3)'];
+
+    public function test_only_the_three_reference_shadows_are_used(): void
     {
         preg_match_all('/box-shadow:\s*([^;}]+)/', $this->css(), $m);
 
-        $real = array_filter($m[1], fn ($v) => ! str_contains($v, 'none'));
+        $offences = [];
+
+        foreach ($m[1] as $value) {
+            $v = trim($value);
+
+            if (str_contains($v, 'none') || in_array($v, self::PERMITTED_LIFTS, true)) {
+                continue;
+            }
+
+            $offences[] = $v;
+        }
 
         $this->assertSame(
             [],
-            array_values($real),
-            'box-shadow is banned in this design system. Elevation is hairline weight: '
-                .implode(' | ', $real)
+            $offences,
+            'Only the three reference shadows are permitted, and only as var(--lift-1|2|3). '
+                .'Elevation everywhere else is hairline weight. Found: '.implode(' | ', $offences)
         );
+    }
+
+    /**
+     * ⚠️ AND THEY MAY ONLY APPEAR ON PUBLIC ROUTES — R10-B §1.
+     *
+     * The reference's elevations were adopted for the marketing pages the
+     * client asked us to match. The authenticated product keeps the hairline
+     * rule, so a lift used on a dashboard card fails here even though the token
+     * itself is legitimate.
+     *
+     * Scope is proved from the selector: every rule carrying a box-shadow must
+     * be written under .rv-public, which is the class the public layout puts on
+     * <body> and nothing else does.
+     */
+    public function test_shadows_appear_only_under_the_public_scope(): void
+    {
+        $offences = [];
+
+        // Each rule as `selector { declarations }`, ignoring at-rule preludes.
+        preg_match_all('/([^{}]+)\{([^{}]*)\}/', $this->css(), $rules, PREG_SET_ORDER);
+
+        foreach ($rules as [, $selector, $body]) {
+            if (! preg_match('/box-shadow:\s*(?!none)/', $body)) {
+                continue;
+            }
+
+            if (! str_contains($selector, '.rv-public')) {
+                $offences[] = trim(preg_replace('/\s+/', ' ', $selector));
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offences,
+            'A shadow was declared outside the public scope. Only .rv-public may carry the '
+                .'reference\'s elevations; everywhere else elevation is hairline weight: '
+                .implode(' | ', $offences)
+        );
+    }
+
+    /** ⚠️ CONTROL for the scope rule, both directions. */
+    public function test_the_scope_reader_separates_public_from_the_rest(): void
+    {
+        $scoped = fn (string $sel) => str_contains($sel, '.rv-public');
+
+        $this->assertTrue($scoped('.rv-public .rv-package'), 'A public-scoped selector was rejected.');
+        $this->assertFalse($scoped('.rv-match-card'), 'An authenticated selector was accepted.');
+    }
+
+    /** ⚠️ The three tokens must actually exist, or the rule above passes vacuously. */
+    public function test_the_three_lift_tokens_are_declared(): void
+    {
+        foreach (['--lift-1', '--lift-2', '--lift-3'] as $token) {
+            $this->assertMatchesRegularExpression(
+                '/'.preg_quote($token, '/').':\s*[^;]+;/',
+                $this->css(),
+                "{$token} is used but never declared."
+            );
+        }
+    }
+
+    /**
+     * ⚠️ CONTROL, BOTH DIRECTIONS. A guard nobody has watched fail is a guard
+     * nobody knows is wired up.
+     */
+    public function test_the_shadow_reader_accepts_a_token_and_rejects_a_literal(): void
+    {
+        $accept = fn (string $v) => str_contains($v, 'none') || in_array(trim($v), self::PERMITTED_LIFTS, true);
+
+        $this->assertTrue($accept('var(--lift-2)'), 'A permitted token was rejected.');
+        $this->assertTrue($accept('none'), 'box-shadow: none was rejected.');
+        $this->assertFalse($accept('0 4px 20px rgba(26,26,26,.039)'), 'A literal copy of a permitted shadow was accepted.');
+        $this->assertFalse($accept('0 2px 9px rgba(0,0,0,.3)'), 'A fourth shadow value was accepted.');
     }
 
     /**

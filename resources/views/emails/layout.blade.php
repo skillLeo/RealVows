@@ -32,19 +32,19 @@
             <td align="center" style="padding:32px 16px;">
 
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-                       style="max-width:560px;background:#F8F6F2;border:1px solid rgba(185,145,84,.4);border-radius:8px;overflow:hidden;">
+                       style="max-width:560px;background:#F8F6F2;border:1px solid rgba(197, 160, 89,.4);border-radius:8px;overflow:hidden;">
 
                     {{-- Header band --}}
                     <tr>
                         <td style="background:#4A1220;padding:28px 32px;">
-                            <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1;letter-spacing:.02em;color:#B99154;">
+                            <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1;letter-spacing:.02em;color:#C5A059;">
                                 RealVows
                             </span>
                         </td>
                     </tr>
 
                     <tr>
-                        <td style="height:1px;background:#B99154;line-height:1px;font-size:0;">&nbsp;</td>
+                        <td style="height:1px;background:#C5A059;line-height:1px;font-size:0;">&nbsp;</td>
                     </tr>
 
                     <tr>
@@ -59,7 +59,7 @@
 
                     <tr>
                         <td style="padding:0 32px 32px;">
-                            <div style="height:1px;background:rgba(185,145,84,.2);font-size:0;line-height:1px;">&nbsp;</div>
+                            <div style="height:1px;background:rgba(197, 160, 89,.2);font-size:0;line-height:1px;">&nbsp;</div>
                             <p style="margin:24px 0 0;font-size:14px;line-height:1.55;color:#6B5F62;">
                                 RealVows · soul mate first · 18+<br>
                                 If you weren't expecting this, you can ignore it safely.

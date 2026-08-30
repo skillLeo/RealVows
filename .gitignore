@@ -31,3 +31,10 @@ Thumbs.db
 # Demo seed originals — large, regenerable, and not part of the product.
 # Re-download with the curl block documented in DEMO.md.
 /storage/app/seed
+
+# Local tooling configuration. Kept on the developer's machine, never shipped:
+# it is not part of the deliverable and has no meaning to anyone else.
+/CLAUDE.md
+/.claude/
+/.aider*
+/.windsurf/

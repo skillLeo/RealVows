@@ -240,6 +240,10 @@ jobs:
             --exclude '.git/' \
             --exclude 'node_modules/' \
             --exclude 'tests/' \
+            --exclude '*.md' \
+            --exclude 'docs/' \
+            --exclude '_backup/' \
+            --exclude '.githooks/' \
             ./ "$SSH_USER@$SSH_HOST:$APP_DIR/"
 
       - name: Migrate and warm the caches

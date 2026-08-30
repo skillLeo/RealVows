@@ -12,14 +12,20 @@
 #
 # Install once:  git config core.hooksPath .githooks
 
-if grep -qiE '^Co-authored-by:.*(claude|anthropic|copilot|gpt|openai)' "$1"; then
-    echo "Commit blocked: a Co-Authored-By trailer naming an AI tool is present." >&2
+# ⚠️ ANY co-author trailer, not a list of named tools.
+#
+# This used to enumerate specific tool names, which made the rule narrower than
+# its own intent AND turned the guard into a list of the things it was guarding
+# against. Rejecting the trailer outright is both stricter and quieter: this
+# repository has one author, so there is no legitimate Co-Authored-By line.
+if grep -qiE '^Co-authored-by:' "$1"; then
+    echo "Commit blocked: a Co-Authored-By trailer is present." >&2
     echo "This repository is authored by skillLeo alone. Remove the trailer." >&2
     exit 1
 fi
 
-if grep -qiE 'Generated with \[?(Claude|Copilot)' "$1"; then
-    echo "Commit blocked: a 'Generated with' line is present." >&2
+if grep -qiE '^[[:space:]]*(Generated with|Created with|Authored by) ' "$1"; then
+    echo "Commit blocked: an attribution line is present." >&2
     echo "This repository is authored by skillLeo alone. Remove the line." >&2
     exit 1
 fi

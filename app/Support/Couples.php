@@ -22,7 +22,7 @@ namespace App\Support;
  * So each photograph carries its own hand-set focal point.
  *
  * ⚠️ SWAPPING AN IMAGE WITHOUT RE-CHECKING ITS FOCAL POINT SILENTLY
- * REINTRODUCES THE BUG. The procedure is in public/images/site/CREDITS.md,
+ * REINTRODUCES THE BUG. The procedure is in resources/photography/CREDITS.md,
  * and CouplesPhotographyTest fails if a file exists with no focal point
  * recorded for it.
  */

@@ -124,7 +124,22 @@ class CouplesPhotographyTest extends TestCase
      */
     public function test_the_placeholder_is_flagged_while_it_is_still_in_use(): void
     {
-        $credits = File::get(public_path('images/site/CREDITS.md'));
+        /*
+         * ⚠️ resources/, NOT public/. THIS FILE IS A LICENCE REGISTER AND IT
+         * WAS BEING SERVED TO THE PUBLIC.
+         *
+         * It lived at public/images/site/CREDITS.md and answered 200 at
+         * realvows.com/images/site/CREDITS.md — internal photography policy,
+         * source URLs and licence terms, readable by anyone who guessed the
+         * path. Moved out of the document root.
+         *
+         * ⚠️ AND IT IS NOT DOCUMENTATION, WHICH IS WHY IT STAYS IN THE REPO.
+         * It was swept out with the briefs and walkthroughs and this test began
+         * erroring on a clean checkout — the local copy masked it. This file is
+         * read by a guard that stops unlicensed or stand-in photography
+         * shipping, so it is part of the build, not a note about it.
+         */
+        $credits = File::get(resource_path('photography/CREDITS.md'));
 
         if (Couples::awaitingRealPhotography()) {
             $this->assertStringContainsString(

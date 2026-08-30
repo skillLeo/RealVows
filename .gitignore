@@ -48,10 +48,15 @@ Thumbs.db
 # They remain on the developer's machine. Nothing here is deleted — it is
 # simply no longer carried by the repository or copied to the server.
 #
-# ⚠️ CREDITS.md IS A LICENCE RECORD AND THE LOCAL COPY MUST SURVIVE. It holds
-# the source URL and licence for every photograph shipped in public/images.
-# Without it nobody can answer "are we licensed to use this?" — keep it backed
-# up somewhere, even though it no longer ships.
+# ⚠️ resources/photography/CREDITS.md IS NOT IN THIS LIST, DELIBERATELY.
+#
+# It is a licence register, not documentation: it records the source and licence
+# of every photograph that ships, and CouplesPhotographyTest reads it to stop a
+# stand-in image being treated as final. It was swept out with the briefs and
+# the suite began erroring on a clean checkout — the local copy hid it.
+#
+# It stays in the repository and out of the document root. The deploy's *.md
+# exclude keeps it off the server, where nothing reads it.
 /DEMO.md
 /DEPLOY.md
 /DEVICE-WALK-LIST.md
@@ -62,4 +67,3 @@ Thumbs.db
 /SIGNAL-CONSUMERS.md
 /docs/
 /_backup/
-/public/images/site/CREDITS.md

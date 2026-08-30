@@ -254,6 +254,27 @@ jobs:
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" bash -s <<'REMOTE'
             set -e
             cd /var/www/realvows
+
+            # ⚠️ SWEEP DOCUMENTATION LEFT BEHIND BY AN EARLIER DEPLOY.
+            #
+            # rsync --exclude PROTECTS a path from --delete rather than removing
+            # it: excluding '*.md' stopped new markdown being sent and left every
+            # file already on the server exactly where it was. The first deploy
+            # after adding the exclude therefore looked correct and changed
+            # nothing — public/images/site/CREDITS.md was still answering 200.
+            #
+            # --delete-excluded would fix that and must NEVER be used here: the
+            # exclude list also carries .env and storage/, so it would delete the
+            # database credentials and every uploaded photograph.
+            #
+            # Scoped explicitly instead. vendor/ is left alone because package
+            # READMEs are not ours to churn, and storage/ is never touched.
+            find . -name '*.md' -type f \
+              -not -path './storage/*' \
+              -not -path './vendor/*' \
+              -not -path './node_modules/*' \
+              -delete 2>/dev/null || true
+
             /usr/bin/php8.4 artisan down --render="errors::503" || true
             /usr/bin/php8.4 artisan migrate --force
             /usr/bin/php8.4 artisan config:cache

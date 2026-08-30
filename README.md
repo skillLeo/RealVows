@@ -1,132 +1,80 @@
 # RealVows
 
-A premium, marriage-focused matchmaking platform. Not casual dating: every
-member is here to find the person they are going to marry.
+A marriage-focused matchmaking platform. Members build a verified profile and
+receive a small number of curated introductions; there is no browsing, no
+searching and no member directory.
 
-Built by **SkillLeo SMC Pvt Ltd** for RealVows under agreement SKL-2026-RV-001.
-
----
-
-## How it works for a member
-
-1. Signs up **free** — building a full profile never costs anything
-2. Completes a **seven-step guided profile** that saves as they type
-3. Uploads **exactly four photos** plus one verification photo of themselves
-   holding a handwritten code
-4. A **real person** reviews and approves or rejects that verification
-5. Once verified, the engine finds the people they are most compatible with
-6. Those matches appear **locked** — score visible, faces hidden *(Phase 2)*
-7. A **one-time package** unlocks them *(Phase 2)*
-8. Matches arrive by **email and WhatsApp** with a secure link *(Phase 3)*
-
-**There is no browsing.** Members never search, filter or scroll a directory.
-The engine chooses and delivers. No search, no filters, no member grid.
-
-**No subscriptions.** Every payment is one-time: US$20 / 1 match ·
-US$50 / 3 · US$100 / 8.
-
----
-
-## Delivery
-
-| Phase | Scope | Status |
-|---|---|---|
-| **1 — Foundation & Profiles** | Auth, seven-step builder, photo pipeline, manual verification, settings, admin | ✅ **Complete** |
-| **2 — Engine & Money** | Matching engine, locked teaser matches, PowerTranz (sandbox), credit ledger | Not started |
-| **3 — Delivery & Launch** | Email + WhatsApp delivery, match inbox, hardening, handover | Not started |
-
-Phase 2 begins only on written sign-off of the Phase 1 staging build.
-
----
+Built by **SkillLeo SMC Pvt Ltd** under agreement SKL-2026-RV-001.
 
 ## Stack
 
-Laravel 13 · Inertia · Vue 3 · MySQL · Vite
+| | |
+|---|---|
+| Framework | Laravel 12 · PHP 8.4 |
+| Front end | Blade for public pages, Vue 3 + Inertia for the member area |
+| Build | Vite |
+| Database | MySQL |
+| Queue | Database driver, drained by cron |
 
-Deployed to **Hostinger shared hosting**, which shapes the architecture: no
-Redis, no Supervisor, no persistent processes. Queues, cache and sessions all
-run on the database driver, and a one-minute cron drains the queue. Background
-work is therefore **batched, never instant** — UI copy says "shortly" or
-"usually within a day", never "instantly".
+PHP **8.4 or newer is required** — a dependency pulls in Symfony 8, which will
+not install on 8.3.
 
-**Rendering is deliberately split.** Public pages (home, legal) are plain
-Blade with almost no JavaScript, so they are fast on a mid-range phone and
-crawlable. The authenticated app is Inertia + Vue, where reactivity earns its
-weight.
-
-### Performance budget — enforced in CI
-
-| | Budget | Actual |
-|---|---|---|
-| Home page JS | 30 KB gzipped | **0.6 KB** |
-| App JS | 150 KB gzipped | **~93 KB** |
-
----
-
-## Running it locally
+## Running locally
 
 ```bash
 composer install
 npm install
-cp .env.example .env && php artisan key:generate
-
-# create the database, then:
+cp .env.example .env
+php artisan key:generate
 php artisan migrate --seed
-
-npm run build
-php artisan serve
+npm run dev
 ```
 
-For demonstration data — 30 members, real photos, matches, and one-click
-sign-in buttons — see **[DEMO.md](DEMO.md)**.
+## Configuration
 
----
+Operational settings are **not** in `.env`. They live in the `settings` table
+and are edited from `/admin/settings`, so they can be changed without a deploy:
 
-## Deployment
+- **Payments** — gateway, environment, credentials
+- **WhatsApp** — delivery toggle, Meta credentials, template name
+- **AI** — provider key, model, feature toggles, monthly spend cap
+- **Matching** — score threshold, matches per batch
 
-Manual, from the Actions tab: **Deploy → Run workflow → type `DEPLOY`**.
-Deliberately not automatic on push, because a commit landing on `main` is not
-the same event as a release — the client signs off each phase first.
+Only `APP_KEY`, `APP_ENV`, `APP_DEBUG`, `APP_URL` and the mail block stay in
+`.env`.
 
-Full server setup, the required GitHub secrets and the cron entry are in
-**[DEPLOY.md](DEPLOY.md)**.
+## Matching
 
----
+Five weighted components, defined once in `config/matching.php` and summed to
+100. They are read by both the engine and the public page that describes them —
+a test fails the build if the two ever disagree.
 
-## The rules this codebase enforces
+An introduction is delivered only above the configured score threshold.
 
-Some of these are contractual. CI fails the build if any is broken, so they
-survive changes made months from now by someone who was not in the room.
+## Deploying
 
-- **The matching mechanism is never named to a member.** It is the client's
-  commercial secret and a deliberate market decision. It exists server-side
-  only — see `app/Services/Sign/SignCalculator.php`. Members see a
-  compatibility score and a rationale written from their own answers.
-- **Exactly four photos**, in fixed named slots, plus one separate
-  verification photo that is never shown on a profile or to another member.
-- **Verification gates everything.** An unverified profile can never be
-  matched, matched to, or shown. Enforced at query level, not in the UI.
-- **Photos are private.** Stored off the public path, served only through a
-  short-lived signed URL behind both an auth check and an ownership check.
-  EXIF, including GPS, is stripped on upload.
-- **Credit balances are derived**, never stored. Summing an append-only ledger
-  with a unique constraint on the gateway transaction id makes a
-  double-credit structurally impossible rather than merely unlikely.
-- **The matching weights (40/20/15/10/10/5) are constants in code**, not
-  settings — they are contractually fixed.
-- **Every third-party credential lives in the database**, editable in the
-  browser at `/admin/settings`, because the client will never edit a file on
-  a server. Secrets are encrypted at rest and only ever leave masked.
+Deployment runs from GitHub Actions: **Actions → Deploy → Run workflow**, then
+type `DEPLOY`. It is manual on purpose, so a commit landing on `main` is not the
+same event as a release.
 
----
+The workflow refuses to deploy a commit that has not passed CI. It puts the site
+into maintenance, syncs, migrates, re-caches and brings it back, and fails if
+the home page does not answer 200. `.env` and `storage/` are never touched.
 
-## Testing
+**Cron is required.** Without it the queue never drains and no email is ever
+sent:
+
+```
+* * * * * cd /var/www/realvows && php artisan schedule:run >> /dev/null 2>&1
+```
+
+## Tests
 
 ```bash
-./vendor/bin/phpunit
+php artisan test
 ```
 
-46 feature tests, 207 assertions. They cover the things that would be silent
-if they broke: a member reaching `/admin` (must be 404, never 403), one member
-reading another's photo, a masked secret surviving a settings save, the
-server-side age check, and a profile draft surviving a refresh.
+The suite includes guards that hold the product to its own promises: no member
+may contact another directly, no page may promise a channel that is switched
+off, published percentages must equal the engine's configuration, and the
+public stylesheet is locked to its design tokens.

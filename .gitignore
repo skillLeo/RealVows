@@ -38,3 +38,28 @@ Thumbs.db
 /.claude/
 /.aider*
 /.windsurf/
+
+# ⚠️ INTERNAL WORKING DOCUMENTATION — LOCAL ONLY.
+#
+# Briefs, phase walkthroughs, round progress reports, decision ledgers and
+# checklists. They are the record of how the work was done, not part of what
+# was delivered, and they have no meaning to anyone who was not in the room.
+#
+# They remain on the developer's machine. Nothing here is deleted — it is
+# simply no longer carried by the repository or copied to the server.
+#
+# ⚠️ CREDITS.md IS A LICENCE RECORD AND THE LOCAL COPY MUST SURVIVE. It holds
+# the source URL and licence for every photograph shipped in public/images.
+# Without it nobody can answer "are we licensed to use this?" — keep it backed
+# up somewhere, even though it no longer ships.
+/DEMO.md
+/DEPLOY.md
+/DEVICE-WALK-LIST.md
+/LAUNCH-CHECKLIST.md
+/LOAD-BEARING-GUARANTEES.md
+/PHASE-*.md
+/R[0-9]*-*.md
+/SIGNAL-CONSUMERS.md
+/docs/
+/_backup/
+/public/images/site/CREDITS.md
